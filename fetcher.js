@@ -1,5 +1,10 @@
 const fetch = require('node-fetch');
 
+const SYNTHESIZE_COST_PER_LETTER = 16 / 1000000 // 16 dollar per 1 million letters. First 1 million is free.
+// TODO: Amazon is way cheaper: https://aws.amazon.com/polly/pricing/
+// https://medium.com/@housemd/google-wavenet-vs-amazon-polly-eace00c16035
+
+
 const getMediumPostById = (mediumPostId) => {
     return getMediumPost(`https://medium.com/p/${mediumPostId}`);
 }
@@ -22,15 +27,19 @@ const getMediumPost = (url) => {
             const wordCount = (json.value.virtuals.wordCount) ? json.value.virtuals.wordCount : null
             const detectedLanguage = (json.value.detectedLanguage) ? json.value.detectedLanguage : null
 
-            const contentParagraphs = (json.value.content.bodyModel.paragraphs.filter((paragraph, index) => paragraph.type === 1 && paragraph.text))
-            // paragraphy.type === 1 seems normal text
+            const contentParagraphs = (json.value.content.bodyModel.paragraphs.filter((paragraph, index) => [1, 3, 9].includes(paragraph.type) && paragraph.text))
+            // paragraphy.type 1, 3, 9 seems normal text
+            // TODO: make sure there's a period after each paragraph
 
             const content = contentParagraphs.map((paragraph) => paragraph.text).join(' ')
+            const contentLength = content.length
 
             const authorName = (firstAuthor.name) ? firstAuthor.name : null
             const authorUrl = (firstAuthor.username) ? `https://medium.com/@${firstAuthor.username}` : null  // TODO: is this always valid?
             const publicationName = (firstCollection.name) ? firstCollection.name : null  // TODO: is this always valid?
-            const publicationurl = (firstCollection.domain) ? `https://${firstCollection.domain}` : null  // TODO: is this always valid?
+            const publicationUrl = (firstCollection.domain) ? `https://${firstCollection.domain}` : null  // TODO: is this always valid?
+
+            const synthesizeSpeechCostInUSD = Number((content.length * SYNTHESIZE_COST_PER_LETTER).toFixed(2))
 
             return {
                 mediumId,
@@ -46,7 +55,9 @@ const getMediumPost = (url) => {
                 authorUrl,
                 publicationName,
                 publicationUrl,
-                content
+                content,
+                contentLength,
+                synthesizeSpeechCostInUSD
             }
         })
 }
