@@ -4,13 +4,23 @@ const fs = require('fs');
 const textToSpeech = require('@google-cloud/text-to-speech');
 const client = new textToSpeech.TextToSpeechClient();
 
-const toSpeech = (id, text, part) => {
+const ssmlPartsToSpeech = (id, ssmlParts) => {
+    let promises = []
+
+    ssmlParts.forEach((ssmlPart, index) => promises.push(ssmlToSpeech(id, ssmlPart, index)))
+
+    return Promise.all(promises);
+
+}
+const ssmlToSpeech = (id, ssmlPart, index) => {
     return new Promise((resolve, reject) => {
 
-        const path = `storage/audio/medium.com/${id}-${part}.mp3`
+        const path = `storage/audio/medium.com/${id}-${index}.mp3`
 
         const request = {
-            input: {text: text},
+            input: {
+                ssml: ssmlPart
+            },
             // Select the language and SSML Voice Gender (optional)
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
             // Select the type of audio encoding
@@ -32,7 +42,7 @@ const toSpeech = (id, text, part) => {
                     return reject(err);
                     // return;
                 }
-                console.log(`Audio content written to file: ${path}`);
+                console.log(`Created audio file for ${id}: ${path}`);
                 return resolve(path)
             });
         });
@@ -41,4 +51,4 @@ const toSpeech = (id, text, part) => {
 }
 
 
-module.exports = { toSpeech }
+module.exports = { ssmlPartsToSpeech }

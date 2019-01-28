@@ -1,3 +1,6 @@
+## Setup
+1. Install ffmpeg: `brew install ffmpeg`
+2. When using Heroku, use this buildpack: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
 
 ## Access to Medium
 Medium does not offer an API to retrieve the bookmarks. So we use a Webview to read the bookmarks for the user. The user is asked to login into the Medium.com website. When loggedin, we can read retrieve the Medium post URL's from that user. Completely safe and secure.
