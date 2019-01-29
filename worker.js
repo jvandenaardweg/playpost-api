@@ -3,6 +3,9 @@ const { ssmlPartsToSpeech }  = require('./synthesize');
 const { splitSSML } = require('./utils/split');
 const { concatAudioFiles } = require('./utils/concat-audio-files');
 const { removeFiles } = require('./utils/cleanup');
+const { getAudioFileDurationInSeconds } = require('./audiofiles');
+const path = require('path');
+global.appRoot = path.resolve(__dirname); // TODO: try not to use global vars
 
 (async () => {
     try {
@@ -34,9 +37,13 @@ const { removeFiles } = require('./utils/cleanup');
 
         // 4. Combine audio files
         console.log(`7. Combining ${fileNames.length} audio files to one audio file...`);
-        const audioFile = await concatAudioFiles(mediumPostId, fileNames);
+        const audioFilePath = await concatAudioFiles(mediumPostId, fileNames);
 
-        console.log(`8. Should upload ${audioFile} to external storage.`);
+        const audioFileDurationInSeconds = await getAudioFileDurationInSeconds(audioFilePath)
+        console.log(`8. Calculated the duration of the audiofile in seconds: ${audioFileDurationInSeconds}`)
+
+
+        console.log(`9. Should upload ${audioFilePath} to external storage and save the duration "${audioFileDurationInSeconds}" in the database.`);
 
         // 5. Upload to external storage
 

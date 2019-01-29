@@ -6,16 +6,21 @@ const SYNTHESIZE_COST_PER_LETTER = 16 / 1000000 // 16 dollar per 1 million lette
 
 const getMediumPostIdFromUrl = (url) => {
     // Possibilities:
-     // https://medium.freecodecamp.org/learn-typescript-in-5-minutes-13eda868daeb
+    // https://medium.freecodecamp.org/learn-typescript-in-5-minutes-13eda868daeb
     // https://medium.com/p/13eda868daeb
-
+    let possibleId
     if (url.includes('https://medium.com/p/')) {
-        return url.split('https://medium.com/p/')[1];
+        possibleId = url.split('https://medium.com/p/')[1];
     } else {
         const urlItems = url.split('-');
-        return urlItems[urlItems.length - 1]
+        possibleId = urlItems[urlItems.length -1];
     }
 
+    if (possibleId.length !== 12) {
+        return new Error(`Could not get the correct Medium Post ID from "${url}", got "${possibleId}".`);
+    }
+
+    return possibleId;
 }
 
 const getMediumPostById = (mediumPostId) => {
@@ -104,4 +109,4 @@ process.on('unhandledRejection', (err) => {
     process.exit(1)
 })
 
-module.exports = { getMediumPost, getMediumPostById }
+module.exports = { getMediumPost, getMediumPostById, getMediumPostIdFromUrl }

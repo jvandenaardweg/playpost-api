@@ -15,7 +15,7 @@ const ssmlPartsToSpeech = (id, ssmlParts) => {
 const ssmlToSpeech = (id, ssmlPart, index) => {
     return new Promise((resolve, reject) => {
 
-        const path = `storage/audio/medium.com/${id}-${index}.mp3`
+        const audioFilePath = global.appRoot + `/storage/audio/medium.com/${id}-${index}.mp3`
 
         const request = {
             input: {
@@ -36,14 +36,14 @@ const ssmlToSpeech = (id, ssmlPart, index) => {
             }
 
             // Write the binary audio content to a local file
-            fs.writeFile(path, response.audioContent, 'binary', err => {
+            fs.writeFile(audioFilePath, response.audioContent, 'binary', err => {
                 if (err) {
                     // console.error('ERROR:', err);
                     return reject(err);
                     // return;
                 }
-                console.log(`Created audio file for ${id}: ${path}`);
-                return resolve(path)
+                console.log(`Created audio file for ${id}: ${audioFilePath}`);
+                return resolve(audioFilePath)
             });
         });
     })

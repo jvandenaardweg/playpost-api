@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const concatAudioFiles = (id, audioFiles) => {
   return new Promise((resolve, reject) => {
     if (audioFiles.length > 1) {
-      const outputPath = `storage/audio/medium.com/${id}.mp3`;
+      const outputPath = global.appRoot + `/storage/audio/medium.com/${id}.mp3`;
       return audioconcat(audioFiles)
         .concat(outputPath)
         // .on('start', function (command) {
