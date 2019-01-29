@@ -4,6 +4,7 @@ const { splitSSML } = require('./utils/split');
 const { concatAudioFiles } = require('./utils/concat-audio-files');
 const { removeFiles } = require('./utils/cleanup');
 const { getAudioFileDurationInSeconds } = require('./audiofiles');
+const { uploadFile } = require('./storage');
 const path = require('path');
 global.appRoot = path.resolve(__dirname); // TODO: try not to use global vars
 
@@ -46,6 +47,9 @@ global.appRoot = path.resolve(__dirname); // TODO: try not to use global vars
         console.log(`9. Should upload ${audioFilePath} to external storage and save the duration "${audioFileDurationInSeconds}" in the database.`);
 
         // 5. Upload to external storage
+        const uploadedFile = await uploadFile(audioFilePath);
+
+        console.log('uploadedFile', uploadedFile)
 
         // 6. Delete audio files
         // const filesToRemove = [...fileNames, audioFile];
