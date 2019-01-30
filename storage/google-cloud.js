@@ -1,26 +1,41 @@
 const { Storage } = require('@google-cloud/storage');
-const BUCKET_NAME = "synthesized-audio-files";
+const path = require('path');
+const BUCKET_NAME = 'synthesized-audio-files';
+const DIRECTORY_NAME = 'medium.com';
 const storage = new Storage();
 
-const uploadFile = async (filename) => {
-    // const bucketName = 'Name of a bucket, e.g. my-bucket';
-    // const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
+const getPublicFileUrl = (uploadedFileObject) => {
+  // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
+  const { bucket, name } = uploadedFileObject[1];
+  return `https://storage.googleapis.com/${bucket}/${name}`;
+}
+
+const uploadFile = async (filePath) => {
+  console.log(`Uploading file "${filePath}" to Google Cloud Storage bucket "${BUCKET_NAME}" in directory "${DIRECTORY_NAME}"...`);
+
+  try {
+    const filename = path.basename(filePath);
+    const destination = `${DIRECTORY_NAME}/${filename}`;
 
     // Uploads a local file to the bucket
-    const uploadedFile = await storage.bucket(BUCKET_NAME).upload(filename, {
-      // Support for HTTP requests made with `Accept-Encoding: gzip`
+    // https://www.googleapis.com/storage/v1/b/synthesized-audio-files/o/13eda868daeb.mp3
+    const uploadedFile = await storage.bucket(BUCKET_NAME).upload(filePath, {
+      destination,
       gzip: true,
       metadata: {
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
         // (If the contents will change, use cacheControl: 'no-cache')
         cacheControl: 'public, max-age=31536000',
-      },
+      }
     });
 
-    console.log(`${filename} uploaded to ${BUCKET_NAME}.`);
-
-    return uploadedFile;
+    const publicFileUrl = getPublicFileUrl(uploadedFile);
+    console.log(`Uploaded file: ${publicFileUrl}`);
+    return publicFileUrl;
+  } catch (err) {
+    return new Error(err)
+  }
 }
 
 const listFiles = async () => {
@@ -74,4 +89,4 @@ const listFilesByPrefix = async (prefix, delimiter) => {
   });
 }
 
-module.exports = { uploadFile, listFiles, listFilesByPrefix }
+module.exports = { uploadFile, listFiles, listFilesByPrefix, getPublicFileUrl }

@@ -37,19 +37,13 @@ global.appRoot = path.resolve(__dirname); // TODO: try not to use global vars
         console.log(`6. Got ${fileNames.length} audio files.`);
 
         // 4. Combine audio files
-        console.log(`7. Combining ${fileNames.length} audio files to one audio file...`);
         const audioFilePath = await concatAudioFiles(mediumPostId, fileNames);
 
-        const audioFileDurationInSeconds = await getAudioFileDurationInSeconds(audioFilePath)
-        console.log(`8. Calculated the duration of the audiofile in seconds: ${audioFileDurationInSeconds}`)
-
-
-        console.log(`9. Should upload ${audioFilePath} to external storage and save the duration "${audioFileDurationInSeconds}" in the database.`);
+        // 5. Get audio duration of concatinated audio files
+        const audioFileDurationInSeconds = await getAudioFileDurationInSeconds(audioFilePath);
 
         // 5. Upload to external storage
         const uploadedFile = await uploadFile(audioFilePath);
-
-        console.log('uploadedFile', uploadedFile)
 
         // 6. Delete audio files
         // const filesToRemove = [...fileNames, audioFile];

@@ -4,30 +4,39 @@ const SYNTHESIZE_COST_PER_LETTER = 16 / 1000000 // 16 dollar per 1 million lette
 // TODO: Amazon is way cheaper: https://aws.amazon.com/polly/pricing/
 // https://medium.com/@housemd/google-wavenet-vs-amazon-polly-eace00c16035
 
-const getMediumPostIdFromUrl = (url) => {
-    // Possibilities:
-    // https://medium.freecodecamp.org/learn-typescript-in-5-minutes-13eda868daeb
-    // https://medium.com/p/13eda868daeb
-    let possibleId
-    if (url.includes('https://medium.com/p/')) {
-        possibleId = url.split('https://medium.com/p/')[1];
-    } else {
-        const urlItems = url.split('-');
-        possibleId = urlItems[urlItems.length -1];
-    }
+const getArticleIdFromUrl = (url) => {
+    return new Promise((resolve, reject) => {
+        console.log(`Getting Medium Post ID from url: ${url}...`);
 
-    if (possibleId.length !== 12) {
-        return new Error(`Could not get the correct Medium Post ID from "${url}", got "${possibleId}".`);
-    }
+        // Possibilities:
+        // https://medium.freecodecamp.org/learn-typescript-in-5-minutes-13eda868daeb
+        // https://medium.com/p/13eda868daeb
+        let possibleId
+        if (url.includes('https://medium.com/p/')) {
+            possibleId = url.split('https://medium.com/p/')[1];
+        } else {
+            const urlItems = url.split('-');
+            possibleId = urlItems[urlItems.length -1];
+        }
 
-    return possibleId;
+        if (possibleId.length !== 12) {
+            return reject(new Error(`Could not get the correct Medium Post ID from URL '${url}'.`));
+        }
+
+        console.log(`Got Medium Post ID: ${possibleId}...`)
+
+        return resolve(possibleId);
+    })
+
 }
 
-const getMediumPostById = (mediumPostId) => {
-    return getMediumPost(`https://medium.com/p/${mediumPostId}`);
+const getArticleById = (mediumPostId) => {
+    console.log(`Getting Medium Post by ID: ${mediumPostId}...`);
+    return getArticle(`https://medium.com/p/${mediumPostId}`);
 }
 
-const getMediumPost = (url) => {
+const getArticle = (url) => {
+    console.log(`Getting Medium Post data from URL: ${url}...`);
     return fetch(url + '?format=json')
         .then((response) => response.text())
         .then((text) => JSON.parse(text.split('</x>')[1]).payload)
@@ -44,6 +53,10 @@ const getMediumPost = (url) => {
             const readingTime = (json.value.virtuals.readingTime) ? json.value.virtuals.readingTime : null
             const wordCount = (json.value.virtuals.wordCount) ? json.value.virtuals.wordCount : null
             const detectedLanguage = (json.value.detectedLanguage) ? json.value.detectedLanguage : null
+            const authorName = (firstAuthor.name) ? firstAuthor.name : null
+            const authorUrl = (firstAuthor.username) ? `https://medium.com/@${firstAuthor.username}` : null  // TODO: is this always valid?
+            const publicationName = (firstCollection.name) ? firstCollection.name : null  // TODO: is this always valid?
+            const publicationUrl = (firstCollection.domain) ? `https://${firstCollection.domain}` : null  // TODO: is this always valid?
 
             const paragraphs = json.value.content.bodyModel.paragraphs
                 .filter((paragraph) => {
@@ -71,15 +84,13 @@ const getMediumPost = (url) => {
                     return `<p>${paragraph.text}</p>`
                 })
 
+            // Manually add an intro to the paragraphs
+            const intro = `<emphasis level="moderate">${title}, written by ${authorName} in publication ${publicationName}</emphasis><break time="250ms" />`;
+            ssmlParagraphs.unshift(intro);
 
-            const ssml = `<speak>${ssmlParagraphs.join('')}</speak>`
+            const ssml = `<speak>${ssmlParagraphs.join('')}</speak>`;
 
             const contentLength = paragraphs.join('').length
-
-            const authorName = (firstAuthor.name) ? firstAuthor.name : null
-            const authorUrl = (firstAuthor.username) ? `https://medium.com/@${firstAuthor.username}` : null  // TODO: is this always valid?
-            const publicationName = (firstCollection.name) ? firstCollection.name : null  // TODO: is this always valid?
-            const publicationUrl = (firstCollection.domain) ? `https://${firstCollection.domain}` : null  // TODO: is this always valid?
 
             const synthesizeSpeechCostInUSD = Number((contentLength * SYNTHESIZE_COST_PER_LETTER).toFixed(2))
 
@@ -109,4 +120,4 @@ process.on('unhandledRejection', (err) => {
     process.exit(1)
 })
 
-module.exports = { getMediumPost, getMediumPostById, getMediumPostIdFromUrl }
+module.exports = { getArticle, getArticleById, getArticleIdFromUrl }

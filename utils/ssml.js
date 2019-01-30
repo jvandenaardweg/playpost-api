@@ -13,15 +13,20 @@ const options = {
 // Apply configuration
 pollySSMLSplit.configure(options)
 
-const splitSSML = (ssml) => {
+const getSSMLParts = (ssml) => {
     return new Promise((resolve, reject) => {
-        const ssmlParts = pollySSMLSplit.split(ssml)
+        console.log(`Splitting SSML content into different parts...`);
+
+        const ssmlParts = pollySSMLSplit.split(ssml);
+
         if (ssmlParts && ssmlParts.length) {
-            resolve(ssmlParts)
+            console.log(`Got ${ssmlParts.length} SSML parts.`);
+            resolve(ssmlParts);
         } else {
-            reject(ssmlParts)
+            console.log('Got NO SSML parts. Error?');
+            reject(ssmlParts);
         }
     })
 }
 
-module.exports = { splitSSML }
+module.exports = { getSSMLParts }

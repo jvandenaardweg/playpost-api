@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 
+
 function removeFiles (fileNames) {
     let promises = [];
     fileNames.forEach((fileName) => promises.push(removeFile(fileName)));
@@ -8,7 +9,7 @@ function removeFiles (fileNames) {
 
 async function removeFile (fileName) {
     try {
-      const removedFile = await fs.remove(fileName);
+      await fs.remove(fileName);
       return fileName;
     } catch (err) {
       console.error(err);
@@ -16,4 +17,4 @@ async function removeFile (fileName) {
   }
 
 
-module.exports = { removeFiles }
+module.exports = { removeFiles, removeFile }
