@@ -1,6 +1,15 @@
+## Requirements:
+- ffmpeg: https://evermeet.cx/ffmpeg/
+- When using Heroku, use this buildpack: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
+
 ## Setup
 1. Install ffmpeg: `brew install ffmpeg`
-2. When using Heroku, use this buildpack: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
+2. Install npm modules: `npm install`
+3. Create a `.env` file in the root of this project
+4. Add `GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID` > Ask the repository owner for the contents of this environment variable.
+5. Add `GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL` > Ask the repository owner for the contents of this environment variable.
+6. Add `GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY` > Ask the repository owner for the contents of this environment variable.
+7. Start development server: `npm run dev`
 
 ## Access to Medium
 Medium does not offer an API to retrieve the bookmarks. So we use a Webview to read the bookmarks for the user. The user is asked to login into the Medium.com website. When loggedin, we can read retrieve the Medium post URL's from that user. Completely safe and secure.
