@@ -1,8 +1,12 @@
-const { Storage } = require('@google-cloud/storage');
+require('dotenv').config();
 const path = require('path');
+
+const { getGoogleCloudCredentials } = require('../utils/credentials');
+const { Storage } = require('@google-cloud/storage');
+const storage = new Storage(getGoogleCloudCredentials());
+
 const BUCKET_NAME = 'synthesized-audio-files';
 const DIRECTORY_NAME = 'medium.com';
-const storage = new Storage();
 
 const getPublicFileUrl = (uploadedFileObject) => {
   // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3

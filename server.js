@@ -19,7 +19,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // If the URL is incorrect, we error
     const articleId = await dataSource.getArticleIdFromUrl(url);
 
-    // TODO: get article from a database
+    // TODO: get article and audiofile URL from a database
 
     // Get the SSML data for speech processing
     const { ssml, ...article } = await dataSource.getArticleById(articleId);

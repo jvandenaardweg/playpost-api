@@ -1,8 +1,9 @@
 require('dotenv').config()
-
 const fs = require('fs-extra');
+
+const { getGoogleCloudCredentials } = require('../utils/credentials');
 const textToSpeech = require('@google-cloud/text-to-speech');
-const client = new textToSpeech.TextToSpeechClient();
+const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 const AVAILABLE_VOICES = {
     'en': {
@@ -11,6 +12,12 @@ const AVAILABLE_VOICES = {
         // name: 'en-US-Wavenet-F' // Good sounding female voice
     }
 };
+
+exports.ssmlToAudio = async (req, res) => {
+    const { mediumPostId, ssml, index } = req.query;
+    const audioFilePath = await ssmlToSpeech(mediumPostId, ssml, index);
+    res.json();
+}
 
 const ssmlPartsToSpeech = (id, ssmlParts) => {
     let promises = []

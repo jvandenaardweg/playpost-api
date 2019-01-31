@@ -66,27 +66,22 @@ const getArticle = (url) => {
                 })
 
             const ssmlParagraphs = paragraphs
-                .map((paragraph) => {
-                    const hasTrailingPeriod = paragraph.text.endsWith('.')
-                    const isHeading = [3, 13].includes(paragraph.type)
+                .map((paragraph, index) => {
+                    const hasTrailingPeriod = paragraph.text.endsWith('.');
+                    const isHeading = [3, 13].includes(paragraph.type);
 
-                    // Make sure each paragraph ends with a dot
-                    // So the text to speech service pauses correctly
-                    if (!hasTrailingPeriod && !isHeading) {
-                        return `<p>${paragraph.text + '.'}</p>`
+                    // First heading is the article title
+                    if (isHeading && index === 0) {
+                        return `<emphasis level="moderate">${title}, written by: ${authorName}, in publication: ${publicationName}</emphasis><break time="500ms" />`
                     }
 
                     // Give emphasis to headings
                     if (isHeading) {
-                        return `<emphasis level="moderate">${paragraph.text}</emphasis><break time="250ms" />`
+                        return `<emphasis level="moderate">${paragraph.text}</emphasis><break time="500ms" />`
                     }
 
                     return `<p>${paragraph.text}</p>`
                 })
-
-            // Manually add an intro to the paragraphs
-            const intro = `<emphasis level="moderate">${title}, written by ${authorName} in publication ${publicationName}</emphasis><break time="250ms" />`;
-            ssmlParagraphs.unshift(intro);
 
             const ssml = `<speak>${ssmlParagraphs.join('')}</speak>`;
 
