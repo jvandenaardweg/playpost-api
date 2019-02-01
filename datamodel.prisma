@@ -1,0 +1,69 @@
+enum Language {
+  EN,
+  DE,
+  NL
+}
+
+enum Synthesizer {
+  GOOGLE,
+  AWS
+}
+
+type User {
+  id: ID! @unique
+  name: String!
+  # email: String! @unique
+  # password: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Audiofile {
+  id: ID! @unique
+  url: String! @unique
+  article: Article! @relation(name: "Audiofiles", onDelete: SET_NULL) # When an audiofile is deleted, we don't delete the article
+  length: Float!
+  language: Language!
+  voice: String!
+  synthesizer: Synthesizer!
+  listens: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Article {
+  id: ID! @unique
+  title: String!
+  subtitle: String
+  description: String
+  url: String! @unique
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  publicationName: String
+  publicationUrl: String
+  sourceArticleId: String!
+  html: String! # The raw article HTML we took as a base to generate the SSML
+  ssml: String!
+  source: Source! @relation(name: "Sources", onDelete: SET_NULL) # When we delete an article, we don't delete the source
+  audiofiles: [Audiofile]! @relation(name: "Audiofiles", onDelete: CASCADE) # When we delete an article, we delete all audiofiles
+  tags: [Tag]! @relation(name: "Tags", onDelete: SET_NULL) # When we delete an article, we don't delete tags
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Tag {
+  slug: String! @unique
+  name: String! @unique
+}
+
+type Source {
+  id: ID! @unique
+  name: String! @unique
+  description: String
+  url: String! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
