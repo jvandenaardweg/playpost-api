@@ -60,9 +60,9 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
 
     // Uncomment for local dev testing purposes
     // const localAudiofilePaths = [
-    //     '/Users/jordy/Projects/medium-audio/audio/medium.com/13eda868daeb/13eda868daeb-0.mp3',
-    //     '/Users/jordy/Projects/medium-audio/audio/medium.com/13eda868daeb/13eda868daeb-1.mp3',
-    //     '/Users/jordy/Projects/medium-audio/audio/medium.com/13eda868daeb/13eda868daeb-2.mp3',
+    //     '/Users/jordy/Projects/medium-audio/temp/medium-com/13eda868daeb/13eda868daeb-0.mp3',
+    //     '/Users/jordy/Projects/medium-audio/temp/medium-com/13eda868daeb/13eda868daeb-1.mp3',
+    //     '/Users/jordy/Projects/medium-audio/temp/medium-com/13eda868daeb/13eda868daeb-2.mp3',
     // ]
 
     // Concatinate the different files into one .mp3 file
@@ -76,7 +76,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // TODO: Store all this data in a database
 
     // Cleanup the local audiofiles, we don't need that anymore
-    const removedFile = await utils.local.removeFile(global.appRoot + `/audio/${synthesizerOptions.source}/${articleId}`)
+    const removedFile = await utils.local.removeFile(global.appRoot + `/temp/${synthesizerOptions.source}/${articleId}`)
 
     console.log('Done!');
 

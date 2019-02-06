@@ -22,7 +22,7 @@ const concatAudioFiles = (mediumPostId, audioFiles, synthesizerOptions) => {
 
       console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
-      const outputPath = global.appRoot + `/audio/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
+      const outputPath = global.appRoot + `/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
       return audioconcat(audioFiles)
         .concat(outputPath)
         // .on('start', function (command) {

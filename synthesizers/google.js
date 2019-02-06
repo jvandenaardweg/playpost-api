@@ -30,7 +30,7 @@ const ssmlPartsToSpeech = (id, ssmlParts, synthesizerOptions) => {
 const ssmlToSpeech = (mediumPostId, ssmlPart, index, synthesizerOptions) => {
     return new Promise((resolve, reject) => {
 
-        const audioFilePath = global.appRoot + `/audio/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+        const audioFilePath = global.appRoot + `/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
         const request = {
             voice: {
