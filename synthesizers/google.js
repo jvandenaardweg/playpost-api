@@ -45,7 +45,7 @@ const ssmlToSpeech = (mediumPostId, ssmlPart, index, synthesizerOptions) => {
             }
         };
 
-        console.log(`Synthesizing Medium Post ID '${mediumPostId}' SSML part ${index} to '${voice.languageCode}' speech using '${voice.name}' at: ${audioFilePath}`);
+        console.log(`Synthesizing Medium Post ID '${mediumPostId}' SSML part ${index} to '${synthesizerOptions.languageCode}' speech using '${synthesizerOptions.name}' at: ${audioFilePath}`);
 
         // Make sure the path exists, if not, we create it
         fs.ensureFileSync(audioFilePath);
