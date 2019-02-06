@@ -8,13 +8,25 @@ const storage = new Storage(getGoogleCloudCredentials());
 const BUCKET_NAME = 'synthesized-audio-files';
 
 const getPublicFileUrl = (uploadedFileObject) => {
+  let bucket
+  let name
+
+  if (Array.isArray(uploadedFileObject)) {
+    bucket = uploadedFileObject[1].bucket;
+    name = uploadedFileObject[1].name;
+  } else {
+    bucket = uploadedFileObject.bucket;
+    name = uploadedFileObject.name;
+  }
   // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
-  const { bucket, name } = uploadedFileObject[1];
+
   return `https://storage.googleapis.com/${bucket}/${name}`;
 }
 
 const uploadFile = async (filePath, uploadPath) => {
   console.log(`Uploading file "${filePath}" to Google Cloud Storage bucket "${BUCKET_NAME}" in directory "${uploadPath}"...`);
+
+  // TODO: Make sure the "uploadPath" exists in the cloud
 
   try {
     const filename = path.basename(filePath);
@@ -86,10 +98,8 @@ const listFilesByPrefix = async (prefix, delimiter) => {
   // Lists files in the bucket, filtered by a prefix
   const [files] = await storage.bucket(BUCKET_NAME).getFiles(options);
 
-  console.log('Files:');
-  files.forEach(file => {
-    console.log(file.name);
-  });
+  // console.log('Files:');
+  return files
 }
 
 module.exports = { uploadFile, listFiles, listFilesByPrefix, getPublicFileUrl }

@@ -31,7 +31,15 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
 
     const uploadPath = Object.values(synthesizerOptions).map((value) => value.toLowerCase()).join('/');
 
-    // TODO: get article and audiofile URL from a database
+    const existingFiles = await storage.listFilesByPrefix(uploadPath + '/');
+
+    const foundFile = (existingFiles && existingFiles.length) ? existingFiles.find((file) => file.name.includes(articleId)) : null
+
+    // If we already have a file in storage, we just return that (for now)
+    // TODO: we should not use the cloud storage API for this? use a database? so we an also return information about the article?
+    if (foundFile) return res.json({ publicFileUrl: storage.getPublicFileUrl(foundFile.metadata), article: {} });
+
+    // If we don't have an audiofile, we go into here
 
     // Get the SSML data for speech processing
     const { ssml, ...article } = await dataSource.getArticleById(articleId);
