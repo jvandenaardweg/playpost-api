@@ -1,17 +1,17 @@
 require('dotenv').config()
 const fs = require('fs-extra');
+const textToSpeech = require('@google-cloud/text-to-speech');
 
 const { getGoogleCloudCredentials } = require('../utils/credentials');
-const textToSpeech = require('@google-cloud/text-to-speech');
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
-const AVAILABLE_VOICES = {
-    'en': {
-        languageCode: 'en-US',
-        name: 'en-US-Wavenet-D' // Good sounding male voice
-        // name: 'en-US-Wavenet-F' // Good sounding female voice
-    }
-};
+// const AVAILABLE_VOICES = {
+//     'en': {
+//         languageCode: 'en-US',
+//         name: 'en-US-Wavenet-D' // Good sounding male voice
+//         // name: 'en-US-Wavenet-F' // Good sounding female voice
+//     }
+// };
 
 exports.ssmlToAudio = async (req, res) => {
     const { mediumPostId, ssml, index } = req.query;
@@ -19,23 +19,24 @@ exports.ssmlToAudio = async (req, res) => {
     res.json();
 }
 
-const ssmlPartsToSpeech = (id, ssmlParts) => {
+const ssmlPartsToSpeech = (id, ssmlParts, synthesizerOptions) => {
     let promises = []
 
-    ssmlParts.forEach((ssmlPart, index) => promises.push(ssmlToSpeech(id, ssmlPart, index)))
+    ssmlParts.forEach((ssmlPart, index) => promises.push(ssmlToSpeech(id, ssmlPart, index, synthesizerOptions)))
 
     return Promise.all(promises);
 
 }
-const ssmlToSpeech = (mediumPostId, ssmlPart, index) => {
+const ssmlToSpeech = (mediumPostId, ssmlPart, index, synthesizerOptions) => {
     return new Promise((resolve, reject) => {
-
-        const voice = AVAILABLE_VOICES['en']; // TODO: make based on post language
 
         const audioFilePath = global.appRoot + `/audio/medium.com/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
         const request = {
-            voice,
+            voice: {
+                languageCode: synthesizerOptions.languageCode, // TODO: make based on post language
+                name: synthesizerOptions.name
+            },
             input: {
                 ssml: ssmlPart
             },

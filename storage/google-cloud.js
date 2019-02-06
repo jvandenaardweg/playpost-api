@@ -14,12 +14,12 @@ const getPublicFileUrl = (uploadedFileObject) => {
   return `https://storage.googleapis.com/${bucket}/${name}`;
 }
 
-const uploadFile = async (filePath) => {
-  console.log(`Uploading file "${filePath}" to Google Cloud Storage bucket "${BUCKET_NAME}" in directory "${DIRECTORY_NAME}"...`);
+const uploadFile = async (filePath, uploadPath) => {
+  console.log(`Uploading file "${filePath}" to Google Cloud Storage bucket "${BUCKET_NAME}" in directory "${uploadPath}"...`);
 
   try {
     const filename = path.basename(filePath);
-    const destination = `${DIRECTORY_NAME}/${filename}`;
+    const destination = `${uploadPath}/${filename}`;
 
     // Uploads a local file to the bucket
     // https://www.googleapis.com/storage/v1/b/synthesized-audio-files/o/13eda868daeb.mp3

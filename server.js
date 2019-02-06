@@ -19,6 +19,18 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // If the URL is incorrect, we error
     const articleId = await dataSource.getArticleIdFromUrl(url);
 
+    // So in the future we can determine what voice a user wants to use
+    // For example: "free" user maybe should use Amazon, because it's cheaper
+    // For example: "premium" user maybe should use Google, because it's more expensive
+    const synthesizerOptions = {
+        synthesizer: 'Google', // or Amazon
+        languageCode: 'en-US', // or en-GB, en-AU
+        name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A
+        source: 'medium-com' // or cnn-com
+    };
+
+    const uploadPath = Object.values(synthesizerOptions).map((value) => value.toLowerCase()).join('/');
+
     // TODO: get article and audiofile URL from a database
 
     // Get the SSML data for speech processing
@@ -28,7 +40,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     const ssmlParts = await utils.ssml.getSSMLParts(ssml);
 
     // Send the SSML parts to Google's Text to Speech API and download the audio files
-    const localAudiofilePaths = await synthesize.ssmlPartsToSpeech(articleId, ssmlParts);
+    const localAudiofilePaths = await synthesize.ssmlPartsToSpeech(articleId, ssmlParts, synthesizerOptions);
 
     // Uncomment for local dev testing purposes
     // const localAudiofilePaths = [
@@ -43,7 +55,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // const audioFileDurationInSeconds = await utils.audio.getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
     // Upload the one mp3 file to Google Cloud Storage
-    const publicFileUrl = await storage.uploadFile(concatinatedLocalAudiofilePath);
+    const publicFileUrl = await storage.uploadFile(concatinatedLocalAudiofilePath, uploadPath);
 
     // TODO: Store all this data in a database
 

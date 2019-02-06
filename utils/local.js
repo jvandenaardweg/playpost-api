@@ -10,6 +10,7 @@ function removeFiles (fileNames) {
 async function removeFile (fileName) {
     try {
       await fs.remove(fileName);
+      console.log(`Removed file/folder: ${fileName}`);
       return fileName;
     } catch (err) {
       console.error(err);

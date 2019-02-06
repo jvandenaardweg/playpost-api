@@ -16,6 +16,10 @@ const getAudioFileDurationInSeconds = async (audioFilePath) => {
 const concatAudioFiles = (mediumPostId, audioFiles) => {
   return new Promise((resolve, reject) => {
     if (audioFiles.length > 1) {
+      const sortedAudioFiles = audioFiles.sort()
+
+      audioFiles.forEach((audioFile) => console.log(`Sorted audiofiles, order: ${audioFile}`))
+
       console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
       const outputPath = global.appRoot + `/audio/medium.com/${mediumPostId}/${mediumPostId}.mp3`;
