@@ -13,11 +13,17 @@ const storage = require('./storage/google-cloud');
 global.appRoot = path.resolve(__dirname);
 
 app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
-    const { url } = req.query;
+    const { url } = req.query
+
+    if (!url || url === '') throw new Error('Please give a URL param.')
+
+    const normalizedUrl = url.toLowerCase()
+
+    if (!normalizedUrl.includes('medium.com')) throw new Error('We only allow Medium URLs for now.')
 
     // Get the Medium Post ID from the URL
     // If the URL is incorrect, we error
-    const articleId = await dataSource.getArticleIdFromUrl(url);
+    const articleId = await dataSource.getArticleIdFromUrl(normalizedUrl)
 
     // So in the future we can determine what voice a user wants to use
     // For example: "free" user maybe should use Amazon, because it's cheaper
@@ -27,12 +33,14 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
         languageCode: 'en-US', // or en-GB, en-AU
         name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A
         source: 'medium-com' // or cnn-com
-    };
+    }
 
+    // Create an upload path based on the synthesizer options
+    // We end up with something like this: google/en-us/en-us-wavenet-d/medium-com
     const uploadPath = Object.values(synthesizerOptions).map((value) => value.toLowerCase()).join('/');
 
+    // Find an existing file in our cloud storage
     const existingFiles = await storage.listFilesByPrefix(uploadPath + '/');
-
     const foundFile = (existingFiles && existingFiles.length) ? existingFiles.find((file) => file.name.includes(articleId)) : null
 
     // If we already have a file in storage, we just return that (for now)
