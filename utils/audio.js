@@ -13,7 +13,7 @@ const getAudioFileDurationInSeconds = async (audioFilePath) => {
   });
 }
 
-const concatAudioFiles = (mediumPostId, audioFiles) => {
+const concatAudioFiles = (mediumPostId, audioFiles, synthesizerOptions) => {
   return new Promise((resolve, reject) => {
     if (audioFiles.length > 1) {
       const sortedAudioFiles = audioFiles.sort()
@@ -22,7 +22,7 @@ const concatAudioFiles = (mediumPostId, audioFiles) => {
 
       console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
-      const outputPath = global.appRoot + `/audio/medium.com/${mediumPostId}/${mediumPostId}.mp3`;
+      const outputPath = global.appRoot + `/audio/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
       return audioconcat(audioFiles)
         .concat(outputPath)
         // .on('start', function (command) {

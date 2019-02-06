@@ -50,7 +50,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // ]
 
     // Concatinate the different files into one .mp3 file
-    const concatinatedLocalAudiofilePath = await utils.audio.concatAudioFiles(articleId, localAudiofilePaths);
+    const concatinatedLocalAudiofilePath = await utils.audio.concatAudioFiles(articleId, localAudiofilePaths, synthesizerOptions);
 
     // const audioFileDurationInSeconds = await utils.audio.getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
@@ -60,7 +60,7 @@ app.get('/audiofile', asyncMiddleware(async (req, res, next) => {
     // TODO: Store all this data in a database
 
     // Cleanup the local audiofiles, we don't need that anymore
-    const removedFile = await utils.local.removeFile(global.appRoot + `/audio/medium.com/${articleId}`)
+    const removedFile = await utils.local.removeFile(global.appRoot + `/audio/${synthesizerOptions.source}/${articleId}`)
 
     console.log('Done!');
 
