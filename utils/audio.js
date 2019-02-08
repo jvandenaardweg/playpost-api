@@ -16,7 +16,7 @@ const getAudioFileDurationInSeconds = async (audioFilePath) => {
 const concatAudioFiles = (mediumPostId, audioFiles, synthesizerOptions) => {
   return new Promise((resolve, reject) => {
     if (audioFiles.length > 1) {
-      const sortedAudioFiles = audioFiles.sort()
+      const sortedAudioFiles = audioFiles.sort((a, b) => b - a) // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
 
       audioFiles.forEach((audioFile) => console.log(`Sorted audiofiles, order: ${audioFile}`))
 
