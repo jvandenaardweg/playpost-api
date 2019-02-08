@@ -3,9 +3,9 @@ const pollySSMLSplit = require('polly-ssml-split')
 // Configuration example with default values
 const options = {
     // MIN length of a single batch of split text
-    softLimit: 2000,
+    softLimit: 4000,
     // MAX length of a single batch of split text
-    hardLimit: 3000,
+    hardLimit: 5000,
     // Set of extra split characters (Optional property)
     // extraSplitChars: ',;',
 }
