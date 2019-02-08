@@ -41,8 +41,8 @@ const getArticle = (url) => {
         .then((response) => response.text())
         .then((text) => JSON.parse(text.split('</x>')[1]).payload)
         .then((json) => {
-            const firstAuthor = Object.values(json.references.User)[0]
-            const firstCollection = Object.values(json.references.Collection)[0]
+            const firstAuthor = (json.references.User) ? Object.values(json.references.User)[0] : {}
+            const firstCollection = (json.references.Collection) ? Object.values(json.references.Collection)[0] : {}
 
             const mediumId = json.value.id
             const title = json.value.title
