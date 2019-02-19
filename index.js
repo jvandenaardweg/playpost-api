@@ -18,6 +18,28 @@ const { asyncMiddleware } = require('./utils/async-middleware');
 
 global.appRoot = path.resolve(__dirname);
 
+app.route('/v1/articles/:id')
+  .get(asyncMiddleware(async (req, res, next) => {
+    const { id } = req.params
+
+    // TODO: get auth user id
+
+    // Get the FULL article content, generate an audiofile when it's the first request
+    res.json({ message: `get single article using ID: ${id}` })
+  }))
+
+app.route('/v1/articles')
+  .post(asyncMiddleware(async (req, res, next) => {
+    const { url } = req.body
+
+    if (!url) throw new Error('URL payload is required.')
+
+    // TODO: get auth user id
+
+    // Create an article with preview data: url, title, description, language and sourceName
+    res.json({ message: `create an article using url: ${url}` })
+  }))
+
 app.route('/v1/users')
   .post(asyncMiddleware(async (req, res, next) => {
     const { email, password } = req.body
@@ -55,7 +77,7 @@ app.route('/v1/users')
       email
     })
 
-    res.json({message: 'deleted!'})
+    res.json({ message: `User with e-mail address "${email}" is deleted! This cannot be undone.` })
   }))
 
 app.route('/v1/auth')
