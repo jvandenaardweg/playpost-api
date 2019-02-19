@@ -1,0 +1,6 @@
+# Function dependencies, for example:
+# package>=version
+newspaper3k>=0.2.8
+flask==1.0.2
+beautifulsoup4==4.4.0
+lxml==4.3.0
