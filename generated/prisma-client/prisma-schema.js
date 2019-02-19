@@ -1,5 +1,9 @@
 module.exports = {
-        typeDefs: /* GraphQL */ `type AggregateArticle {
+        typeDefs: /* GraphQL */ `type AggregateArchive {
+  count: Int!
+}
+
+type AggregateArticle {
   count: Int!
 }
 
@@ -7,11 +11,11 @@ type AggregateAudiofile {
   count: Int!
 }
 
-type AggregateSource {
+type AggregateFavorite {
   count: Int!
 }
 
-type AggregateTag {
+type AggregatePlaylist {
   count: Int!
 }
 
@@ -19,360 +23,60 @@ type AggregateUser {
   count: Int!
 }
 
-type Article {
-  id: ID!
-  title: String!
-  subtitle: String
-  description: String
-  url: String!
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  source: Source!
-  sourceArticleId: String!
-  html: String!
-  ssml: String!
-  audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile!]
-  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
+type Archive {
+  user: User!
+  article: Article!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type ArticleConnection {
+type ArchiveConnection {
   pageInfo: PageInfo!
-  edges: [ArticleEdge]!
-  aggregate: AggregateArticle!
+  edges: [ArchiveEdge]!
+  aggregate: AggregateArchive!
 }
 
-input ArticleCreateInput {
-  title: String!
-  subtitle: String
-  description: String
-  url: String!
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  source: SourceCreateOneWithoutArticlesInput!
-  sourceArticleId: String!
-  html: String!
-  ssml: String!
-  audiofiles: AudiofileCreateManyWithoutArticleInput
-  tags: TagCreateManyInput
+input ArchiveCreateInput {
+  user: UserCreateOneWithoutArchiveInput!
+  article: ArticleCreateOneWithoutArchivesInput!
 }
 
-input ArticleCreateManyWithoutSourceInput {
-  create: [ArticleCreateWithoutSourceInput!]
-  connect: [ArticleWhereUniqueInput!]
+input ArchiveCreateManyWithoutArticleInput {
+  create: [ArchiveCreateWithoutArticleInput!]
 }
 
-input ArticleCreateOneWithoutAudiofilesInput {
-  create: ArticleCreateWithoutAudiofilesInput
-  connect: ArticleWhereUniqueInput
+input ArchiveCreateManyWithoutUserInput {
+  create: [ArchiveCreateWithoutUserInput!]
 }
 
-input ArticleCreateWithoutAudiofilesInput {
-  title: String!
-  subtitle: String
-  description: String
-  url: String!
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  source: SourceCreateOneWithoutArticlesInput!
-  sourceArticleId: String!
-  html: String!
-  ssml: String!
-  tags: TagCreateManyInput
+input ArchiveCreateWithoutArticleInput {
+  user: UserCreateOneWithoutArchiveInput!
 }
 
-input ArticleCreateWithoutSourceInput {
-  title: String!
-  subtitle: String
-  description: String
-  url: String!
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String!
-  html: String!
-  ssml: String!
-  audiofiles: AudiofileCreateManyWithoutArticleInput
-  tags: TagCreateManyInput
+input ArchiveCreateWithoutUserInput {
+  article: ArticleCreateOneWithoutArchivesInput!
 }
 
-type ArticleEdge {
-  node: Article!
+type ArchiveEdge {
+  node: Archive!
   cursor: String!
 }
 
-enum ArticleOrderByInput {
-  id_ASC
-  id_DESC
-  title_ASC
-  title_DESC
-  subtitle_ASC
-  subtitle_DESC
-  description_ASC
-  description_DESC
-  url_ASC
-  url_DESC
-  imageUrl_ASC
-  imageUrl_DESC
-  readingTime_ASC
-  readingTime_DESC
-  language_ASC
-  language_DESC
-  authorName_ASC
-  authorName_DESC
-  authorUrl_ASC
-  authorUrl_DESC
-  publicationName_ASC
-  publicationName_DESC
-  publicationUrl_ASC
-  publicationUrl_DESC
-  sourceArticleId_ASC
-  sourceArticleId_DESC
-  html_ASC
-  html_DESC
-  ssml_ASC
-  ssml_DESC
+enum ArchiveOrderByInput {
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
+  id_ASC
+  id_DESC
 }
 
-type ArticlePreviousValues {
-  id: ID!
-  title: String!
-  subtitle: String
-  description: String
-  url: String!
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String!
-  html: String!
-  ssml: String!
+type ArchivePreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-input ArticleScalarWhereInput {
-  id: ID
-  id_not: ID
-  id_in: [ID!]
-  id_not_in: [ID!]
-  id_lt: ID
-  id_lte: ID
-  id_gt: ID
-  id_gte: ID
-  id_contains: ID
-  id_not_contains: ID
-  id_starts_with: ID
-  id_not_starts_with: ID
-  id_ends_with: ID
-  id_not_ends_with: ID
-  title: String
-  title_not: String
-  title_in: [String!]
-  title_not_in: [String!]
-  title_lt: String
-  title_lte: String
-  title_gt: String
-  title_gte: String
-  title_contains: String
-  title_not_contains: String
-  title_starts_with: String
-  title_not_starts_with: String
-  title_ends_with: String
-  title_not_ends_with: String
-  subtitle: String
-  subtitle_not: String
-  subtitle_in: [String!]
-  subtitle_not_in: [String!]
-  subtitle_lt: String
-  subtitle_lte: String
-  subtitle_gt: String
-  subtitle_gte: String
-  subtitle_contains: String
-  subtitle_not_contains: String
-  subtitle_starts_with: String
-  subtitle_not_starts_with: String
-  subtitle_ends_with: String
-  subtitle_not_ends_with: String
-  description: String
-  description_not: String
-  description_in: [String!]
-  description_not_in: [String!]
-  description_lt: String
-  description_lte: String
-  description_gt: String
-  description_gte: String
-  description_contains: String
-  description_not_contains: String
-  description_starts_with: String
-  description_not_starts_with: String
-  description_ends_with: String
-  description_not_ends_with: String
-  url: String
-  url_not: String
-  url_in: [String!]
-  url_not_in: [String!]
-  url_lt: String
-  url_lte: String
-  url_gt: String
-  url_gte: String
-  url_contains: String
-  url_not_contains: String
-  url_starts_with: String
-  url_not_starts_with: String
-  url_ends_with: String
-  url_not_ends_with: String
-  imageUrl: String
-  imageUrl_not: String
-  imageUrl_in: [String!]
-  imageUrl_not_in: [String!]
-  imageUrl_lt: String
-  imageUrl_lte: String
-  imageUrl_gt: String
-  imageUrl_gte: String
-  imageUrl_contains: String
-  imageUrl_not_contains: String
-  imageUrl_starts_with: String
-  imageUrl_not_starts_with: String
-  imageUrl_ends_with: String
-  imageUrl_not_ends_with: String
-  readingTime: Float
-  readingTime_not: Float
-  readingTime_in: [Float!]
-  readingTime_not_in: [Float!]
-  readingTime_lt: Float
-  readingTime_lte: Float
-  readingTime_gt: Float
-  readingTime_gte: Float
-  language: Language
-  language_not: Language
-  language_in: [Language!]
-  language_not_in: [Language!]
-  authorName: String
-  authorName_not: String
-  authorName_in: [String!]
-  authorName_not_in: [String!]
-  authorName_lt: String
-  authorName_lte: String
-  authorName_gt: String
-  authorName_gte: String
-  authorName_contains: String
-  authorName_not_contains: String
-  authorName_starts_with: String
-  authorName_not_starts_with: String
-  authorName_ends_with: String
-  authorName_not_ends_with: String
-  authorUrl: String
-  authorUrl_not: String
-  authorUrl_in: [String!]
-  authorUrl_not_in: [String!]
-  authorUrl_lt: String
-  authorUrl_lte: String
-  authorUrl_gt: String
-  authorUrl_gte: String
-  authorUrl_contains: String
-  authorUrl_not_contains: String
-  authorUrl_starts_with: String
-  authorUrl_not_starts_with: String
-  authorUrl_ends_with: String
-  authorUrl_not_ends_with: String
-  publicationName: String
-  publicationName_not: String
-  publicationName_in: [String!]
-  publicationName_not_in: [String!]
-  publicationName_lt: String
-  publicationName_lte: String
-  publicationName_gt: String
-  publicationName_gte: String
-  publicationName_contains: String
-  publicationName_not_contains: String
-  publicationName_starts_with: String
-  publicationName_not_starts_with: String
-  publicationName_ends_with: String
-  publicationName_not_ends_with: String
-  publicationUrl: String
-  publicationUrl_not: String
-  publicationUrl_in: [String!]
-  publicationUrl_not_in: [String!]
-  publicationUrl_lt: String
-  publicationUrl_lte: String
-  publicationUrl_gt: String
-  publicationUrl_gte: String
-  publicationUrl_contains: String
-  publicationUrl_not_contains: String
-  publicationUrl_starts_with: String
-  publicationUrl_not_starts_with: String
-  publicationUrl_ends_with: String
-  publicationUrl_not_ends_with: String
-  sourceArticleId: String
-  sourceArticleId_not: String
-  sourceArticleId_in: [String!]
-  sourceArticleId_not_in: [String!]
-  sourceArticleId_lt: String
-  sourceArticleId_lte: String
-  sourceArticleId_gt: String
-  sourceArticleId_gte: String
-  sourceArticleId_contains: String
-  sourceArticleId_not_contains: String
-  sourceArticleId_starts_with: String
-  sourceArticleId_not_starts_with: String
-  sourceArticleId_ends_with: String
-  sourceArticleId_not_ends_with: String
-  html: String
-  html_not: String
-  html_in: [String!]
-  html_not_in: [String!]
-  html_lt: String
-  html_lte: String
-  html_gt: String
-  html_gte: String
-  html_contains: String
-  html_not_contains: String
-  html_starts_with: String
-  html_not_starts_with: String
-  html_ends_with: String
-  html_not_ends_with: String
-  ssml: String
-  ssml_not: String
-  ssml_in: [String!]
-  ssml_not_in: [String!]
-  ssml_lt: String
-  ssml_lte: String
-  ssml_gt: String
-  ssml_gte: String
-  ssml_contains: String
-  ssml_not_contains: String
-  ssml_starts_with: String
-  ssml_not_starts_with: String
-  ssml_ends_with: String
-  ssml_not_ends_with: String
+input ArchiveScalarWhereInput {
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -389,9 +93,271 @@ input ArticleScalarWhereInput {
   updatedAt_lte: DateTime
   updatedAt_gt: DateTime
   updatedAt_gte: DateTime
-  AND: [ArticleScalarWhereInput!]
-  OR: [ArticleScalarWhereInput!]
-  NOT: [ArticleScalarWhereInput!]
+  AND: [ArchiveScalarWhereInput!]
+  OR: [ArchiveScalarWhereInput!]
+  NOT: [ArchiveScalarWhereInput!]
+}
+
+type ArchiveSubscriptionPayload {
+  mutation: MutationType!
+  node: Archive
+  updatedFields: [String!]
+  previousValues: ArchivePreviousValues
+}
+
+input ArchiveSubscriptionWhereInput {
+  mutation_in: [MutationType!]
+  updatedFields_contains: String
+  updatedFields_contains_every: [String!]
+  updatedFields_contains_some: [String!]
+  node: ArchiveWhereInput
+  AND: [ArchiveSubscriptionWhereInput!]
+  OR: [ArchiveSubscriptionWhereInput!]
+  NOT: [ArchiveSubscriptionWhereInput!]
+}
+
+input ArchiveUpdateManyWithoutArticleInput {
+  create: [ArchiveCreateWithoutArticleInput!]
+  deleteMany: [ArchiveScalarWhereInput!]
+}
+
+input ArchiveUpdateManyWithoutUserInput {
+  create: [ArchiveCreateWithoutUserInput!]
+  deleteMany: [ArchiveScalarWhereInput!]
+}
+
+input ArchiveWhereInput {
+  user: UserWhereInput
+  article: ArticleWhereInput
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  AND: [ArchiveWhereInput!]
+  OR: [ArchiveWhereInput!]
+  NOT: [ArchiveWhereInput!]
+}
+
+type Article {
+  id: ID!
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: User!
+  audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile!]
+  playlists(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist!]
+  archives(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive!]
+  favorites(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Favorite!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ArticleConnection {
+  pageInfo: PageInfo!
+  edges: [ArticleEdge]!
+  aggregate: AggregateArticle!
+}
+
+input ArticleCreateInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: UserCreateOneInput!
+  audiofiles: AudiofileCreateManyWithoutArticleInput
+  playlists: PlaylistCreateManyWithoutArticleInput
+  archives: ArchiveCreateManyWithoutArticleInput
+  favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+input ArticleCreateOneWithoutArchivesInput {
+  create: ArticleCreateWithoutArchivesInput
+  connect: ArticleWhereUniqueInput
+}
+
+input ArticleCreateOneWithoutAudiofilesInput {
+  create: ArticleCreateWithoutAudiofilesInput
+  connect: ArticleWhereUniqueInput
+}
+
+input ArticleCreateOneWithoutFavoritesInput {
+  create: ArticleCreateWithoutFavoritesInput
+  connect: ArticleWhereUniqueInput
+}
+
+input ArticleCreateOneWithoutPlaylistsInput {
+  create: ArticleCreateWithoutPlaylistsInput
+  connect: ArticleWhereUniqueInput
+}
+
+input ArticleCreateWithoutArchivesInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: UserCreateOneInput!
+  audiofiles: AudiofileCreateManyWithoutArticleInput
+  playlists: PlaylistCreateManyWithoutArticleInput
+  favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+input ArticleCreateWithoutAudiofilesInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: UserCreateOneInput!
+  playlists: PlaylistCreateManyWithoutArticleInput
+  archives: ArchiveCreateManyWithoutArticleInput
+  favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+input ArticleCreateWithoutFavoritesInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: UserCreateOneInput!
+  audiofiles: AudiofileCreateManyWithoutArticleInput
+  playlists: PlaylistCreateManyWithoutArticleInput
+  archives: ArchiveCreateManyWithoutArticleInput
+}
+
+input ArticleCreateWithoutPlaylistsInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  user: UserCreateOneInput!
+  audiofiles: AudiofileCreateManyWithoutArticleInput
+  archives: ArchiveCreateManyWithoutArticleInput
+  favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+type ArticleEdge {
+  node: Article!
+  cursor: String!
+}
+
+enum ArticleOrderByInput {
+  id_ASC
+  id_DESC
+  title_ASC
+  title_DESC
+  description_ASC
+  description_DESC
+  url_ASC
+  url_DESC
+  imageUrl_ASC
+  imageUrl_DESC
+  readingTime_ASC
+  readingTime_DESC
+  language_ASC
+  language_DESC
+  authorName_ASC
+  authorName_DESC
+  authorUrl_ASC
+  authorUrl_DESC
+  categoryName_ASC
+  categoryName_DESC
+  html_ASC
+  html_DESC
+  ssml_ASC
+  ssml_DESC
+  text_ASC
+  text_DESC
+  sourceName_ASC
+  sourceName_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type ArticlePreviousValues {
+  id: ID!
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ArticleSubscriptionPayload {
@@ -414,7 +380,6 @@ input ArticleSubscriptionWhereInput {
 
 input ArticleUpdateInput {
   title: String
-  subtitle: String
   description: String
   url: String
   imageUrl: String
@@ -422,36 +387,20 @@ input ArticleUpdateInput {
   language: Language
   authorName: String
   authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  source: SourceUpdateOneRequiredWithoutArticlesInput
-  sourceArticleId: String
+  categoryName: String
   html: String
   ssml: String
+  text: String
+  sourceName: String
+  user: UserUpdateOneRequiredInput
   audiofiles: AudiofileUpdateManyWithoutArticleInput
-  tags: TagUpdateManyInput
-}
-
-input ArticleUpdateManyDataInput {
-  title: String
-  subtitle: String
-  description: String
-  url: String
-  imageUrl: String
-  readingTime: Float
-  language: Language
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String
-  html: String
-  ssml: String
+  playlists: PlaylistUpdateManyWithoutArticleInput
+  archives: ArchiveUpdateManyWithoutArticleInput
+  favorites: FavoriteUpdateManyWithoutArticleInput
 }
 
 input ArticleUpdateManyMutationInput {
   title: String
-  subtitle: String
   description: String
   url: String
   imageUrl: String
@@ -459,27 +408,11 @@ input ArticleUpdateManyMutationInput {
   language: Language
   authorName: String
   authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String
+  categoryName: String
   html: String
   ssml: String
-}
-
-input ArticleUpdateManyWithoutSourceInput {
-  create: [ArticleCreateWithoutSourceInput!]
-  delete: [ArticleWhereUniqueInput!]
-  connect: [ArticleWhereUniqueInput!]
-  disconnect: [ArticleWhereUniqueInput!]
-  update: [ArticleUpdateWithWhereUniqueWithoutSourceInput!]
-  upsert: [ArticleUpsertWithWhereUniqueWithoutSourceInput!]
-  deleteMany: [ArticleScalarWhereInput!]
-  updateMany: [ArticleUpdateManyWithWhereNestedInput!]
-}
-
-input ArticleUpdateManyWithWhereNestedInput {
-  where: ArticleScalarWhereInput!
-  data: ArticleUpdateManyDataInput!
+  text: String
+  sourceName: String
 }
 
 input ArticleUpdateOneRequiredWithoutAudiofilesInput {
@@ -491,7 +424,6 @@ input ArticleUpdateOneRequiredWithoutAudiofilesInput {
 
 input ArticleUpdateWithoutAudiofilesDataInput {
   title: String
-  subtitle: String
   description: String
   url: String
   imageUrl: String
@@ -499,48 +431,20 @@ input ArticleUpdateWithoutAudiofilesDataInput {
   language: Language
   authorName: String
   authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  source: SourceUpdateOneRequiredWithoutArticlesInput
-  sourceArticleId: String
+  categoryName: String
   html: String
   ssml: String
-  tags: TagUpdateManyInput
-}
-
-input ArticleUpdateWithoutSourceDataInput {
-  title: String
-  subtitle: String
-  description: String
-  url: String
-  imageUrl: String
-  readingTime: Float
-  language: Language
-  authorName: String
-  authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String
-  html: String
-  ssml: String
-  audiofiles: AudiofileUpdateManyWithoutArticleInput
-  tags: TagUpdateManyInput
-}
-
-input ArticleUpdateWithWhereUniqueWithoutSourceInput {
-  where: ArticleWhereUniqueInput!
-  data: ArticleUpdateWithoutSourceDataInput!
+  text: String
+  sourceName: String
+  user: UserUpdateOneRequiredInput
+  playlists: PlaylistUpdateManyWithoutArticleInput
+  archives: ArchiveUpdateManyWithoutArticleInput
+  favorites: FavoriteUpdateManyWithoutArticleInput
 }
 
 input ArticleUpsertWithoutAudiofilesInput {
   update: ArticleUpdateWithoutAudiofilesDataInput!
   create: ArticleCreateWithoutAudiofilesInput!
-}
-
-input ArticleUpsertWithWhereUniqueWithoutSourceInput {
-  where: ArticleWhereUniqueInput!
-  update: ArticleUpdateWithoutSourceDataInput!
-  create: ArticleCreateWithoutSourceInput!
 }
 
 input ArticleWhereInput {
@@ -572,20 +476,6 @@ input ArticleWhereInput {
   title_not_starts_with: String
   title_ends_with: String
   title_not_ends_with: String
-  subtitle: String
-  subtitle_not: String
-  subtitle_in: [String!]
-  subtitle_not_in: [String!]
-  subtitle_lt: String
-  subtitle_lte: String
-  subtitle_gt: String
-  subtitle_gte: String
-  subtitle_contains: String
-  subtitle_not_contains: String
-  subtitle_starts_with: String
-  subtitle_not_starts_with: String
-  subtitle_ends_with: String
-  subtitle_not_ends_with: String
   description: String
   description_not: String
   description_in: [String!]
@@ -668,49 +558,20 @@ input ArticleWhereInput {
   authorUrl_not_starts_with: String
   authorUrl_ends_with: String
   authorUrl_not_ends_with: String
-  publicationName: String
-  publicationName_not: String
-  publicationName_in: [String!]
-  publicationName_not_in: [String!]
-  publicationName_lt: String
-  publicationName_lte: String
-  publicationName_gt: String
-  publicationName_gte: String
-  publicationName_contains: String
-  publicationName_not_contains: String
-  publicationName_starts_with: String
-  publicationName_not_starts_with: String
-  publicationName_ends_with: String
-  publicationName_not_ends_with: String
-  publicationUrl: String
-  publicationUrl_not: String
-  publicationUrl_in: [String!]
-  publicationUrl_not_in: [String!]
-  publicationUrl_lt: String
-  publicationUrl_lte: String
-  publicationUrl_gt: String
-  publicationUrl_gte: String
-  publicationUrl_contains: String
-  publicationUrl_not_contains: String
-  publicationUrl_starts_with: String
-  publicationUrl_not_starts_with: String
-  publicationUrl_ends_with: String
-  publicationUrl_not_ends_with: String
-  source: SourceWhereInput
-  sourceArticleId: String
-  sourceArticleId_not: String
-  sourceArticleId_in: [String!]
-  sourceArticleId_not_in: [String!]
-  sourceArticleId_lt: String
-  sourceArticleId_lte: String
-  sourceArticleId_gt: String
-  sourceArticleId_gte: String
-  sourceArticleId_contains: String
-  sourceArticleId_not_contains: String
-  sourceArticleId_starts_with: String
-  sourceArticleId_not_starts_with: String
-  sourceArticleId_ends_with: String
-  sourceArticleId_not_ends_with: String
+  categoryName: String
+  categoryName_not: String
+  categoryName_in: [String!]
+  categoryName_not_in: [String!]
+  categoryName_lt: String
+  categoryName_lte: String
+  categoryName_gt: String
+  categoryName_gte: String
+  categoryName_contains: String
+  categoryName_not_contains: String
+  categoryName_starts_with: String
+  categoryName_not_starts_with: String
+  categoryName_ends_with: String
+  categoryName_not_ends_with: String
   html: String
   html_not: String
   html_in: [String!]
@@ -739,12 +600,47 @@ input ArticleWhereInput {
   ssml_not_starts_with: String
   ssml_ends_with: String
   ssml_not_ends_with: String
+  text: String
+  text_not: String
+  text_in: [String!]
+  text_not_in: [String!]
+  text_lt: String
+  text_lte: String
+  text_gt: String
+  text_gte: String
+  text_contains: String
+  text_not_contains: String
+  text_starts_with: String
+  text_not_starts_with: String
+  text_ends_with: String
+  text_not_ends_with: String
+  sourceName: String
+  sourceName_not: String
+  sourceName_in: [String!]
+  sourceName_not_in: [String!]
+  sourceName_lt: String
+  sourceName_lte: String
+  sourceName_gt: String
+  sourceName_gte: String
+  sourceName_contains: String
+  sourceName_not_contains: String
+  sourceName_starts_with: String
+  sourceName_not_starts_with: String
+  sourceName_ends_with: String
+  sourceName_not_ends_with: String
+  user: UserWhereInput
   audiofiles_every: AudiofileWhereInput
   audiofiles_some: AudiofileWhereInput
   audiofiles_none: AudiofileWhereInput
-  tags_every: TagWhereInput
-  tags_some: TagWhereInput
-  tags_none: TagWhereInput
+  playlists_every: PlaylistWhereInput
+  playlists_some: PlaylistWhereInput
+  playlists_none: PlaylistWhereInput
+  archives_every: ArchiveWhereInput
+  archives_some: ArchiveWhereInput
+  archives_none: ArchiveWhereInput
+  favorites_every: FavoriteWhereInput
+  favorites_some: FavoriteWhereInput
+  favorites_none: FavoriteWhereInput
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -777,6 +673,7 @@ type Audiofile {
   article: Article!
   length: Float!
   language: Language!
+  encoding: Encoding!
   voice: String!
   synthesizer: Synthesizer!
   listens: Int
@@ -795,6 +692,7 @@ input AudiofileCreateInput {
   article: ArticleCreateOneWithoutAudiofilesInput!
   length: Float!
   language: Language!
+  encoding: Encoding!
   voice: String!
   synthesizer: Synthesizer!
   listens: Int
@@ -809,6 +707,7 @@ input AudiofileCreateWithoutArticleInput {
   url: String!
   length: Float!
   language: Language!
+  encoding: Encoding!
   voice: String!
   synthesizer: Synthesizer!
   listens: Int
@@ -828,6 +727,8 @@ enum AudiofileOrderByInput {
   length_DESC
   language_ASC
   language_DESC
+  encoding_ASC
+  encoding_DESC
   voice_ASC
   voice_DESC
   synthesizer_ASC
@@ -845,6 +746,7 @@ type AudiofilePreviousValues {
   url: String!
   length: Float!
   language: Language!
+  encoding: Encoding!
   voice: String!
   synthesizer: Synthesizer!
   listens: Int
@@ -893,6 +795,10 @@ input AudiofileScalarWhereInput {
   language_not: Language
   language_in: [Language!]
   language_not_in: [Language!]
+  encoding: Encoding
+  encoding_not: Encoding
+  encoding_in: [Encoding!]
+  encoding_not_in: [Encoding!]
   voice: String
   voice_not: String
   voice_in: [String!]
@@ -963,6 +869,7 @@ input AudiofileUpdateInput {
   article: ArticleUpdateOneRequiredWithoutAudiofilesInput
   length: Float
   language: Language
+  encoding: Encoding
   voice: String
   synthesizer: Synthesizer
   listens: Int
@@ -972,6 +879,7 @@ input AudiofileUpdateManyDataInput {
   url: String
   length: Float
   language: Language
+  encoding: Encoding
   voice: String
   synthesizer: Synthesizer
   listens: Int
@@ -981,6 +889,7 @@ input AudiofileUpdateManyMutationInput {
   url: String
   length: Float
   language: Language
+  encoding: Encoding
   voice: String
   synthesizer: Synthesizer
   listens: Int
@@ -990,6 +899,7 @@ input AudiofileUpdateManyWithoutArticleInput {
   create: [AudiofileCreateWithoutArticleInput!]
   delete: [AudiofileWhereUniqueInput!]
   connect: [AudiofileWhereUniqueInput!]
+  set: [AudiofileWhereUniqueInput!]
   disconnect: [AudiofileWhereUniqueInput!]
   update: [AudiofileUpdateWithWhereUniqueWithoutArticleInput!]
   upsert: [AudiofileUpsertWithWhereUniqueWithoutArticleInput!]
@@ -1006,6 +916,7 @@ input AudiofileUpdateWithoutArticleDataInput {
   url: String
   length: Float
   language: Language
+  encoding: Encoding
   voice: String
   synthesizer: Synthesizer
   listens: Int
@@ -1064,6 +975,10 @@ input AudiofileWhereInput {
   language_not: Language
   language_in: [Language!]
   language_not_in: [Language!]
+  encoding: Encoding
+  encoding_not: Encoding
+  encoding_in: [Encoding!]
+  encoding_not_in: [Encoding!]
   voice: String
   voice_not: String
   voice_in: [String!]
@@ -1122,15 +1037,148 @@ type BatchPayload {
 
 scalar DateTime
 
+enum Encoding {
+  MP3
+  OGG
+  PCM
+}
+
+type Favorite {
+  user: User!
+  article: Article!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type FavoriteConnection {
+  pageInfo: PageInfo!
+  edges: [FavoriteEdge]!
+  aggregate: AggregateFavorite!
+}
+
+input FavoriteCreateInput {
+  user: UserCreateOneWithoutFavoritesInput!
+  article: ArticleCreateOneWithoutFavoritesInput!
+}
+
+input FavoriteCreateManyWithoutArticleInput {
+  create: [FavoriteCreateWithoutArticleInput!]
+}
+
+input FavoriteCreateManyWithoutUserInput {
+  create: [FavoriteCreateWithoutUserInput!]
+}
+
+input FavoriteCreateWithoutArticleInput {
+  user: UserCreateOneWithoutFavoritesInput!
+}
+
+input FavoriteCreateWithoutUserInput {
+  article: ArticleCreateOneWithoutFavoritesInput!
+}
+
+type FavoriteEdge {
+  node: Favorite!
+  cursor: String!
+}
+
+enum FavoriteOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  id_ASC
+  id_DESC
+}
+
+type FavoritePreviousValues {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input FavoriteScalarWhereInput {
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  AND: [FavoriteScalarWhereInput!]
+  OR: [FavoriteScalarWhereInput!]
+  NOT: [FavoriteScalarWhereInput!]
+}
+
+type FavoriteSubscriptionPayload {
+  mutation: MutationType!
+  node: Favorite
+  updatedFields: [String!]
+  previousValues: FavoritePreviousValues
+}
+
+input FavoriteSubscriptionWhereInput {
+  mutation_in: [MutationType!]
+  updatedFields_contains: String
+  updatedFields_contains_every: [String!]
+  updatedFields_contains_some: [String!]
+  node: FavoriteWhereInput
+  AND: [FavoriteSubscriptionWhereInput!]
+  OR: [FavoriteSubscriptionWhereInput!]
+  NOT: [FavoriteSubscriptionWhereInput!]
+}
+
+input FavoriteUpdateManyWithoutArticleInput {
+  create: [FavoriteCreateWithoutArticleInput!]
+  deleteMany: [FavoriteScalarWhereInput!]
+}
+
+input FavoriteUpdateManyWithoutUserInput {
+  create: [FavoriteCreateWithoutUserInput!]
+  deleteMany: [FavoriteScalarWhereInput!]
+}
+
+input FavoriteWhereInput {
+  user: UserWhereInput
+  article: ArticleWhereInput
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  AND: [FavoriteWhereInput!]
+  OR: [FavoriteWhereInput!]
+  NOT: [FavoriteWhereInput!]
+}
+
 enum Language {
   EN
-  DE
-  NL
 }
 
 scalar Long
 
 type Mutation {
+  createArchive(data: ArchiveCreateInput!): Archive!
+  deleteManyArchives(where: ArchiveWhereInput): BatchPayload!
   createArticle(data: ArticleCreateInput!): Article!
   updateArticle(data: ArticleUpdateInput!, where: ArticleWhereUniqueInput!): Article
   updateManyArticles(data: ArticleUpdateManyMutationInput!, where: ArticleWhereInput): BatchPayload!
@@ -1143,18 +1191,11 @@ type Mutation {
   upsertAudiofile(where: AudiofileWhereUniqueInput!, create: AudiofileCreateInput!, update: AudiofileUpdateInput!): Audiofile!
   deleteAudiofile(where: AudiofileWhereUniqueInput!): Audiofile
   deleteManyAudiofiles(where: AudiofileWhereInput): BatchPayload!
-  createSource(data: SourceCreateInput!): Source!
-  updateSource(data: SourceUpdateInput!, where: SourceWhereUniqueInput!): Source
-  updateManySources(data: SourceUpdateManyMutationInput!, where: SourceWhereInput): BatchPayload!
-  upsertSource(where: SourceWhereUniqueInput!, create: SourceCreateInput!, update: SourceUpdateInput!): Source!
-  deleteSource(where: SourceWhereUniqueInput!): Source
-  deleteManySources(where: SourceWhereInput): BatchPayload!
-  createTag(data: TagCreateInput!): Tag!
-  updateTag(data: TagUpdateInput!, where: TagWhereUniqueInput!): Tag
-  updateManyTags(data: TagUpdateManyMutationInput!, where: TagWhereInput): BatchPayload!
-  upsertTag(where: TagWhereUniqueInput!, create: TagCreateInput!, update: TagUpdateInput!): Tag!
-  deleteTag(where: TagWhereUniqueInput!): Tag
-  deleteManyTags(where: TagWhereInput): BatchPayload!
+  createFavorite(data: FavoriteCreateInput!): Favorite!
+  deleteManyFavorites(where: FavoriteWhereInput): BatchPayload!
+  createPlaylist(data: PlaylistCreateInput!): Playlist!
+  updateManyPlaylists(data: PlaylistUpdateManyMutationInput!, where: PlaylistWhereInput): BatchPayload!
+  deleteManyPlaylists(where: PlaylistWhereInput): BatchPayload!
   createUser(data: UserCreateInput!): User!
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
@@ -1180,197 +1221,75 @@ type PageInfo {
   endCursor: String
 }
 
-type Query {
-  article(where: ArticleWhereUniqueInput!): Article
-  articles(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Article]!
-  articlesConnection(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ArticleConnection!
-  audiofile(where: AudiofileWhereUniqueInput!): Audiofile
-  audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile]!
-  audiofilesConnection(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): AudiofileConnection!
-  source(where: SourceWhereUniqueInput!): Source
-  sources(where: SourceWhereInput, orderBy: SourceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Source]!
-  sourcesConnection(where: SourceWhereInput, orderBy: SourceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): SourceConnection!
-  tag(where: TagWhereUniqueInput!): Tag
-  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag]!
-  tagsConnection(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TagConnection!
-  user(where: UserWhereUniqueInput!): User
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
-  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
-  node(id: ID!): Node
-}
-
-type Source {
-  id: ID!
-  name: String!
-  description: String
-  url: String!
-  articles(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Article!]
+type Playlist {
+  user: User!
+  article: Article!
+  order: Int!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type SourceConnection {
+type PlaylistConnection {
   pageInfo: PageInfo!
-  edges: [SourceEdge]!
-  aggregate: AggregateSource!
+  edges: [PlaylistEdge]!
+  aggregate: AggregatePlaylist!
 }
 
-input SourceCreateInput {
-  name: String!
-  description: String
-  url: String!
-  articles: ArticleCreateManyWithoutSourceInput
+input PlaylistCreateInput {
+  user: UserCreateOneWithoutPlaylistInput!
+  article: ArticleCreateOneWithoutPlaylistsInput!
+  order: Int!
 }
 
-input SourceCreateOneWithoutArticlesInput {
-  create: SourceCreateWithoutArticlesInput
-  connect: SourceWhereUniqueInput
+input PlaylistCreateManyWithoutArticleInput {
+  create: [PlaylistCreateWithoutArticleInput!]
 }
 
-input SourceCreateWithoutArticlesInput {
-  name: String!
-  description: String
-  url: String!
+input PlaylistCreateManyWithoutUserInput {
+  create: [PlaylistCreateWithoutUserInput!]
 }
 
-type SourceEdge {
-  node: Source!
+input PlaylistCreateWithoutArticleInput {
+  user: UserCreateOneWithoutPlaylistInput!
+  order: Int!
+}
+
+input PlaylistCreateWithoutUserInput {
+  article: ArticleCreateOneWithoutPlaylistsInput!
+  order: Int!
+}
+
+type PlaylistEdge {
+  node: Playlist!
   cursor: String!
 }
 
-enum SourceOrderByInput {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  description_ASC
-  description_DESC
-  url_ASC
-  url_DESC
+enum PlaylistOrderByInput {
+  order_ASC
+  order_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
   updatedAt_DESC
+  id_ASC
+  id_DESC
 }
 
-type SourcePreviousValues {
-  id: ID!
-  name: String!
-  description: String
-  url: String!
+type PlaylistPreviousValues {
+  order: Int!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type SourceSubscriptionPayload {
-  mutation: MutationType!
-  node: Source
-  updatedFields: [String!]
-  previousValues: SourcePreviousValues
-}
-
-input SourceSubscriptionWhereInput {
-  mutation_in: [MutationType!]
-  updatedFields_contains: String
-  updatedFields_contains_every: [String!]
-  updatedFields_contains_some: [String!]
-  node: SourceWhereInput
-  AND: [SourceSubscriptionWhereInput!]
-  OR: [SourceSubscriptionWhereInput!]
-  NOT: [SourceSubscriptionWhereInput!]
-}
-
-input SourceUpdateInput {
-  name: String
-  description: String
-  url: String
-  articles: ArticleUpdateManyWithoutSourceInput
-}
-
-input SourceUpdateManyMutationInput {
-  name: String
-  description: String
-  url: String
-}
-
-input SourceUpdateOneRequiredWithoutArticlesInput {
-  create: SourceCreateWithoutArticlesInput
-  update: SourceUpdateWithoutArticlesDataInput
-  upsert: SourceUpsertWithoutArticlesInput
-  connect: SourceWhereUniqueInput
-}
-
-input SourceUpdateWithoutArticlesDataInput {
-  name: String
-  description: String
-  url: String
-}
-
-input SourceUpsertWithoutArticlesInput {
-  update: SourceUpdateWithoutArticlesDataInput!
-  create: SourceCreateWithoutArticlesInput!
-}
-
-input SourceWhereInput {
-  id: ID
-  id_not: ID
-  id_in: [ID!]
-  id_not_in: [ID!]
-  id_lt: ID
-  id_lte: ID
-  id_gt: ID
-  id_gte: ID
-  id_contains: ID
-  id_not_contains: ID
-  id_starts_with: ID
-  id_not_starts_with: ID
-  id_ends_with: ID
-  id_not_ends_with: ID
-  name: String
-  name_not: String
-  name_in: [String!]
-  name_not_in: [String!]
-  name_lt: String
-  name_lte: String
-  name_gt: String
-  name_gte: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  description: String
-  description_not: String
-  description_in: [String!]
-  description_not_in: [String!]
-  description_lt: String
-  description_lte: String
-  description_gt: String
-  description_gte: String
-  description_contains: String
-  description_not_contains: String
-  description_starts_with: String
-  description_not_starts_with: String
-  description_ends_with: String
-  description_not_ends_with: String
-  url: String
-  url_not: String
-  url_in: [String!]
-  url_not_in: [String!]
-  url_lt: String
-  url_lte: String
-  url_gt: String
-  url_gte: String
-  url_contains: String
-  url_not_contains: String
-  url_starts_with: String
-  url_not_starts_with: String
-  url_ends_with: String
-  url_not_ends_with: String
-  articles_every: ArticleWhereInput
-  articles_some: ArticleWhereInput
-  articles_none: ArticleWhereInput
+input PlaylistScalarWhereInput {
+  order: Int
+  order_not: Int
+  order_in: [Int!]
+  order_not_in: [Int!]
+  order_lt: Int
+  order_lte: Int
+  order_gt: Int
+  order_gte: Int
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -1387,22 +1306,111 @@ input SourceWhereInput {
   updatedAt_lte: DateTime
   updatedAt_gt: DateTime
   updatedAt_gte: DateTime
-  AND: [SourceWhereInput!]
-  OR: [SourceWhereInput!]
-  NOT: [SourceWhereInput!]
+  AND: [PlaylistScalarWhereInput!]
+  OR: [PlaylistScalarWhereInput!]
+  NOT: [PlaylistScalarWhereInput!]
 }
 
-input SourceWhereUniqueInput {
-  id: ID
-  name: String
-  url: String
+type PlaylistSubscriptionPayload {
+  mutation: MutationType!
+  node: Playlist
+  updatedFields: [String!]
+  previousValues: PlaylistPreviousValues
+}
+
+input PlaylistSubscriptionWhereInput {
+  mutation_in: [MutationType!]
+  updatedFields_contains: String
+  updatedFields_contains_every: [String!]
+  updatedFields_contains_some: [String!]
+  node: PlaylistWhereInput
+  AND: [PlaylistSubscriptionWhereInput!]
+  OR: [PlaylistSubscriptionWhereInput!]
+  NOT: [PlaylistSubscriptionWhereInput!]
+}
+
+input PlaylistUpdateManyDataInput {
+  order: Int
+}
+
+input PlaylistUpdateManyMutationInput {
+  order: Int
+}
+
+input PlaylistUpdateManyWithoutArticleInput {
+  create: [PlaylistCreateWithoutArticleInput!]
+  deleteMany: [PlaylistScalarWhereInput!]
+  updateMany: [PlaylistUpdateManyWithWhereNestedInput!]
+}
+
+input PlaylistUpdateManyWithoutUserInput {
+  create: [PlaylistCreateWithoutUserInput!]
+  deleteMany: [PlaylistScalarWhereInput!]
+  updateMany: [PlaylistUpdateManyWithWhereNestedInput!]
+}
+
+input PlaylistUpdateManyWithWhereNestedInput {
+  where: PlaylistScalarWhereInput!
+  data: PlaylistUpdateManyDataInput!
+}
+
+input PlaylistWhereInput {
+  user: UserWhereInput
+  article: ArticleWhereInput
+  order: Int
+  order_not: Int
+  order_in: [Int!]
+  order_not_in: [Int!]
+  order_lt: Int
+  order_lte: Int
+  order_gt: Int
+  order_gte: Int
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  AND: [PlaylistWhereInput!]
+  OR: [PlaylistWhereInput!]
+  NOT: [PlaylistWhereInput!]
+}
+
+type Query {
+  archives(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive]!
+  archivesConnection(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ArchiveConnection!
+  article(where: ArticleWhereUniqueInput!): Article
+  articles(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Article]!
+  articlesConnection(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ArticleConnection!
+  audiofile(where: AudiofileWhereUniqueInput!): Audiofile
+  audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile]!
+  audiofilesConnection(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): AudiofileConnection!
+  favorites(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Favorite]!
+  favoritesConnection(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): FavoriteConnection!
+  playlists(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist]!
+  playlistsConnection(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PlaylistConnection!
+  user(where: UserWhereUniqueInput!): User
+  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  node(id: ID!): Node
 }
 
 type Subscription {
+  archive(where: ArchiveSubscriptionWhereInput): ArchiveSubscriptionPayload
   article(where: ArticleSubscriptionWhereInput): ArticleSubscriptionPayload
   audiofile(where: AudiofileSubscriptionWhereInput): AudiofileSubscriptionPayload
-  source(where: SourceSubscriptionWhereInput): SourceSubscriptionPayload
-  tag(where: TagSubscriptionWhereInput): TagSubscriptionPayload
+  favorite(where: FavoriteSubscriptionWhereInput): FavoriteSubscriptionPayload
+  playlist(where: PlaylistSubscriptionWhereInput): PlaylistSubscriptionPayload
   user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
 }
 
@@ -1411,191 +1419,16 @@ enum Synthesizer {
   AWS
 }
 
-type Tag {
-  slug: String!
-  name: String!
-}
-
-type TagConnection {
-  pageInfo: PageInfo!
-  edges: [TagEdge]!
-  aggregate: AggregateTag!
-}
-
-input TagCreateInput {
-  slug: String!
-  name: String!
-}
-
-input TagCreateManyInput {
-  create: [TagCreateInput!]
-  connect: [TagWhereUniqueInput!]
-}
-
-type TagEdge {
-  node: Tag!
-  cursor: String!
-}
-
-enum TagOrderByInput {
-  slug_ASC
-  slug_DESC
-  name_ASC
-  name_DESC
-  id_ASC
-  id_DESC
-  createdAt_ASC
-  createdAt_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-}
-
-type TagPreviousValues {
-  slug: String!
-  name: String!
-}
-
-input TagScalarWhereInput {
-  slug: String
-  slug_not: String
-  slug_in: [String!]
-  slug_not_in: [String!]
-  slug_lt: String
-  slug_lte: String
-  slug_gt: String
-  slug_gte: String
-  slug_contains: String
-  slug_not_contains: String
-  slug_starts_with: String
-  slug_not_starts_with: String
-  slug_ends_with: String
-  slug_not_ends_with: String
-  name: String
-  name_not: String
-  name_in: [String!]
-  name_not_in: [String!]
-  name_lt: String
-  name_lte: String
-  name_gt: String
-  name_gte: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  AND: [TagScalarWhereInput!]
-  OR: [TagScalarWhereInput!]
-  NOT: [TagScalarWhereInput!]
-}
-
-type TagSubscriptionPayload {
-  mutation: MutationType!
-  node: Tag
-  updatedFields: [String!]
-  previousValues: TagPreviousValues
-}
-
-input TagSubscriptionWhereInput {
-  mutation_in: [MutationType!]
-  updatedFields_contains: String
-  updatedFields_contains_every: [String!]
-  updatedFields_contains_some: [String!]
-  node: TagWhereInput
-  AND: [TagSubscriptionWhereInput!]
-  OR: [TagSubscriptionWhereInput!]
-  NOT: [TagSubscriptionWhereInput!]
-}
-
-input TagUpdateDataInput {
-  slug: String
-  name: String
-}
-
-input TagUpdateInput {
-  slug: String
-  name: String
-}
-
-input TagUpdateManyDataInput {
-  slug: String
-  name: String
-}
-
-input TagUpdateManyInput {
-  create: [TagCreateInput!]
-  update: [TagUpdateWithWhereUniqueNestedInput!]
-  upsert: [TagUpsertWithWhereUniqueNestedInput!]
-  delete: [TagWhereUniqueInput!]
-  connect: [TagWhereUniqueInput!]
-  disconnect: [TagWhereUniqueInput!]
-  deleteMany: [TagScalarWhereInput!]
-  updateMany: [TagUpdateManyWithWhereNestedInput!]
-}
-
-input TagUpdateManyMutationInput {
-  slug: String
-  name: String
-}
-
-input TagUpdateManyWithWhereNestedInput {
-  where: TagScalarWhereInput!
-  data: TagUpdateManyDataInput!
-}
-
-input TagUpdateWithWhereUniqueNestedInput {
-  where: TagWhereUniqueInput!
-  data: TagUpdateDataInput!
-}
-
-input TagUpsertWithWhereUniqueNestedInput {
-  where: TagWhereUniqueInput!
-  update: TagUpdateDataInput!
-  create: TagCreateInput!
-}
-
-input TagWhereInput {
-  slug: String
-  slug_not: String
-  slug_in: [String!]
-  slug_not_in: [String!]
-  slug_lt: String
-  slug_lte: String
-  slug_gt: String
-  slug_gte: String
-  slug_contains: String
-  slug_not_contains: String
-  slug_starts_with: String
-  slug_not_starts_with: String
-  slug_ends_with: String
-  slug_not_ends_with: String
-  name: String
-  name_not: String
-  name_in: [String!]
-  name_not_in: [String!]
-  name_lt: String
-  name_lte: String
-  name_gt: String
-  name_gte: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  AND: [TagWhereInput!]
-  OR: [TagWhereInput!]
-  NOT: [TagWhereInput!]
-}
-
-input TagWhereUniqueInput {
-  slug: String
-  name: String
-}
-
 type User {
   id: ID!
-  name: String!
+  email: String!
+  password: String!
+  playlist(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist!]
+  archive(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive!]
+  favorites(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Favorite!]
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1607,7 +1440,64 @@ type UserConnection {
 }
 
 input UserCreateInput {
-  name: String!
+  email: String!
+  password: String!
+  playlist: PlaylistCreateManyWithoutUserInput
+  archive: ArchiveCreateManyWithoutUserInput
+  favorites: FavoriteCreateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+}
+
+input UserCreateOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutArchiveInput {
+  create: UserCreateWithoutArchiveInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutFavoritesInput {
+  create: UserCreateWithoutFavoritesInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutPlaylistInput {
+  create: UserCreateWithoutPlaylistInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateWithoutArchiveInput {
+  email: String!
+  password: String!
+  playlist: PlaylistCreateManyWithoutUserInput
+  favorites: FavoriteCreateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+}
+
+input UserCreateWithoutFavoritesInput {
+  email: String!
+  password: String!
+  playlist: PlaylistCreateManyWithoutUserInput
+  archive: ArchiveCreateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+}
+
+input UserCreateWithoutPlaylistInput {
+  email: String!
+  password: String!
+  archive: ArchiveCreateManyWithoutUserInput
+  favorites: FavoriteCreateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type UserEdge {
@@ -1618,8 +1508,16 @@ type UserEdge {
 enum UserOrderByInput {
   id_ASC
   id_DESC
-  name_ASC
-  name_DESC
+  email_ASC
+  email_DESC
+  password_ASC
+  password_DESC
+  authenticatedAt_ASC
+  authenticatedAt_DESC
+  activatedAt_ASC
+  activatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -1628,7 +1526,11 @@ enum UserOrderByInput {
 
 type UserPreviousValues {
   id: ID!
-  name: String!
+  email: String!
+  password: String!
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1651,12 +1553,46 @@ input UserSubscriptionWhereInput {
   NOT: [UserSubscriptionWhereInput!]
 }
 
+input UserUpdateDataInput {
+  email: String
+  password: String
+  playlist: PlaylistUpdateManyWithoutUserInput
+  archive: ArchiveUpdateManyWithoutUserInput
+  favorites: FavoriteUpdateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+}
+
 input UserUpdateInput {
-  name: String
+  email: String
+  password: String
+  playlist: PlaylistUpdateManyWithoutUserInput
+  archive: ArchiveUpdateManyWithoutUserInput
+  favorites: FavoriteUpdateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
 }
 
 input UserUpdateManyMutationInput {
-  name: String
+  email: String
+  password: String
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+}
+
+input UserUpdateOneRequiredInput {
+  create: UserCreateInput
+  update: UserUpdateDataInput
+  upsert: UserUpsertNestedInput
+  connect: UserWhereUniqueInput
+}
+
+input UserUpsertNestedInput {
+  update: UserUpdateDataInput!
+  create: UserCreateInput!
 }
 
 input UserWhereInput {
@@ -1674,20 +1610,67 @@ input UserWhereInput {
   id_not_starts_with: ID
   id_ends_with: ID
   id_not_ends_with: ID
-  name: String
-  name_not: String
-  name_in: [String!]
-  name_not_in: [String!]
-  name_lt: String
-  name_lte: String
-  name_gt: String
-  name_gte: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
+  email: String
+  email_not: String
+  email_in: [String!]
+  email_not_in: [String!]
+  email_lt: String
+  email_lte: String
+  email_gt: String
+  email_gte: String
+  email_contains: String
+  email_not_contains: String
+  email_starts_with: String
+  email_not_starts_with: String
+  email_ends_with: String
+  email_not_ends_with: String
+  password: String
+  password_not: String
+  password_in: [String!]
+  password_not_in: [String!]
+  password_lt: String
+  password_lte: String
+  password_gt: String
+  password_gte: String
+  password_contains: String
+  password_not_contains: String
+  password_starts_with: String
+  password_not_starts_with: String
+  password_ends_with: String
+  password_not_ends_with: String
+  playlist_every: PlaylistWhereInput
+  playlist_some: PlaylistWhereInput
+  playlist_none: PlaylistWhereInput
+  archive_every: ArchiveWhereInput
+  archive_some: ArchiveWhereInput
+  archive_none: ArchiveWhereInput
+  favorites_every: FavoriteWhereInput
+  favorites_some: FavoriteWhereInput
+  favorites_none: FavoriteWhereInput
+  authenticatedAt: DateTime
+  authenticatedAt_not: DateTime
+  authenticatedAt_in: [DateTime!]
+  authenticatedAt_not_in: [DateTime!]
+  authenticatedAt_lt: DateTime
+  authenticatedAt_lte: DateTime
+  authenticatedAt_gt: DateTime
+  authenticatedAt_gte: DateTime
+  activatedAt: DateTime
+  activatedAt_not: DateTime
+  activatedAt_in: [DateTime!]
+  activatedAt_not_in: [DateTime!]
+  activatedAt_lt: DateTime
+  activatedAt_lte: DateTime
+  activatedAt_gt: DateTime
+  activatedAt_gte: DateTime
+  deletedAt: DateTime
+  deletedAt_not: DateTime
+  deletedAt_in: [DateTime!]
+  deletedAt_not_in: [DateTime!]
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -1711,6 +1694,7 @@ input UserWhereInput {
 
 input UserWhereUniqueInput {
   id: ID
+  email: String
 }
 `
       }

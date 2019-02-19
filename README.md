@@ -2,6 +2,10 @@
 - ffmpeg: https://evermeet.cx/ffmpeg/
 - When using Heroku, use this buildpack: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
 
+## Local GraphQL playground
+http://localhost:4466/management
+
+
 ## Setup
 1. Install ffmpeg: `brew install ffmpeg`
 2. Install npm modules: `npm install`

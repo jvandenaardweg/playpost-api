@@ -1,7 +1,5 @@
 enum Language {
-  EN,
-  DE,
-  NL
+  EN
 }
 
 enum Synthesizer {
@@ -9,11 +7,47 @@ enum Synthesizer {
   AWS
 }
 
+enum Encoding {
+  MP3,
+  OGG,
+  PCM # Wav
+}
+
 type User {
   id: ID! @unique
-  name: String!
-  # email: String! @unique
-  # password: String!
+  email: String! @unique
+  password: String!
+  playlist: [Playlist!]! @relation(name: "UserToPlaylist", onDelete: CASCADE) # When a user is deleted, delete it's playlist
+  archive: [Archive!]! @relation(name: "UserToArchive", onDelete: CASCADE) # When a user is deleted, delete it's archive
+  favorites: [Favorite!]! @relation(name: "UserToFavorite", onDelete: CASCADE) # When a user is deleted, delete it's favorites
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+  deletedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# A user has one playlist with multiple articles, which he can change the order of
+type Playlist {
+  user: User! @relation(name: "UserToPlaylist")
+  article: Article! @relation(name: "ArticleToPlaylist")
+  order: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# A user can favorite multiple articles
+type Favorite {
+  user: User! @relation(name: "UserToFavorite")
+  article: Article! @relation(name: "ArticleToFavorite")
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# A user can archive multiple articles
+type Archive {
+  user: User! @relation(name: "UserToArchive")
+  article: Article! @relation(name: "ArticleToArchive")
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -21,9 +55,10 @@ type User {
 type Audiofile {
   id: ID! @unique
   url: String! @unique
-  article: Article! @relation(name: "Audiofiles", onDelete: SET_NULL) # When an audiofile is deleted, we don't delete the article
-  length: Float!
+  article: Article! @relation(name: "ArticleAudiofiles", onDelete: SET_NULL) # When an audiofile is deleted, we don't delete the article
+  length: Float! # The listentime of the audio file
   language: Language!
+  encoding: Encoding!
   voice: String!
   synthesizer: Synthesizer!
   listens: Int
@@ -34,7 +69,6 @@ type Audiofile {
 type Article {
   id: ID! @unique
   title: String!
-  subtitle: String
   description: String
   url: String! @unique
   imageUrl: String
@@ -42,28 +76,16 @@ type Article {
   language: Language!
   authorName: String
   authorUrl: String
-  publicationName: String
-  publicationUrl: String
-  sourceArticleId: String!
-  html: String! # The raw article HTML we took as a base to generate the SSML
-  ssml: String!
-  source: Source! @relation(name: "Sources", onDelete: SET_NULL) # When we delete an article, we don't delete the source
-  audiofiles: [Audiofile]! @relation(name: "Audiofiles", onDelete: CASCADE) # When we delete an article, we delete all audiofiles
-  tags: [Tag]! @relation(name: "Tags", onDelete: SET_NULL) # When we delete an article, we don't delete tags
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Tag {
-  slug: String! @unique
-  name: String! @unique
-}
-
-type Source {
-  id: ID! @unique
-  name: String! @unique
-  description: String
-  url: String! @unique
+  categoryName: String
+  html: String # The raw article HTML we took as a base to generate the SSML
+  ssml: String # The generated SSML using <speak> <p> etc...
+  text: String # Plain text of the article, using `\n` for new lines
+  sourceName: String
+  user: User! # A reference to which user created this article, we generally don't return this to other users
+  audiofiles: [Audiofile]! @relation(name: "ArticleAudiofiles", onDelete: CASCADE) # When we delete an article, we delete all audiofiles
+  playlists: [Playlist!]! @relation(name: "ArticleToPlaylist")
+  archives: [Archive!]! @relation(name: "ArticleToArchive")
+  favorites: [Favorite!]! @relation(name: "ArticleToFavorite")
   createdAt: DateTime!
   updatedAt: DateTime!
 }

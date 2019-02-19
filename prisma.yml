@@ -1,6 +1,6 @@
-#endpoint: http://localhost:4466
+endpoint: http://localhost:4466
 #endpoint: https://medium-audio-c1bc647e69.herokuapp.com/medium-audio/dev
-endpoint: https://medium-audio-c1bc647e69.herokuapp.com/medium-audio/prod
+#endpoint: https://medium-audio-c1bc647e69.herokuapp.com/medium-audio/prod
 datamodel: datamodel.prisma
 generate:
   - generator: javascript-client
