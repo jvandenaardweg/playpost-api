@@ -4,7 +4,7 @@ const asyncMiddleware = fn =>
       .catch((err) => {
         console.log('Error', err.message);
         return res.status(500).json({
-          error: 500,
+          status: 500,
           message: err.message
         });
       });
