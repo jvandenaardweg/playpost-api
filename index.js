@@ -19,6 +19,10 @@ const { asyncMiddleware } = require('./utils/async-middleware');
 global.appRoot = path.resolve(__dirname);
 
 app.route('/v1/me')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     // TODO: get auth user id
     const exampleUserId = 'cjscxpj8q004x07541doytko6';
@@ -80,6 +84,10 @@ app.route('/v1/me')
   }))
 
 app.route('/v1/archives')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     // TODO: get auth user id
     res.json({ message: `get the archive from user ID: X` })
@@ -95,6 +103,10 @@ app.route('/v1/archives')
   }))
 
 app.route('/v1/playlists')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     // TODO: get auth user id
     res.json({ message: `get the playlist from user ID: X` })
@@ -119,6 +131,10 @@ app.route('/v1/playlists')
   }))
 
 app.route('/v1/favorites')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     // TODO: get auth user id
     res.json({ message: `get the favorites from user ID: X` })
@@ -133,6 +149,10 @@ app.route('/v1/favorites')
   }))
 
 app.route('/v1/articles/:articleId/playlist')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .post(asyncMiddleware(async (req, res, next) => {
     const { articleId } = req.params
     // TODO: get auth user id
@@ -145,6 +165,10 @@ app.route('/v1/articles/:articleId/playlist')
   }))
 
 app.route('/v1/articles/:articleId/archive')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .post(asyncMiddleware(async (req, res, next) => {
     const { articleId } = req.params
     // TODO: get auth user id
@@ -157,6 +181,10 @@ app.route('/v1/articles/:articleId/archive')
   }))
 
 app.route('/v1/articles/:articleId/favorite')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .post(asyncMiddleware(async (req, res, next) => {
     const { articleId } = req.params
     // TODO: get auth user id
@@ -169,6 +197,10 @@ app.route('/v1/articles/:articleId/favorite')
   }))
 
 app.route('/v1/articles/:articleId/audiofile')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     const { articleId } = req.params
 
@@ -192,6 +224,10 @@ app.route('/v1/articles/:articleId/audiofile')
   }))
 
 app.route('/v1/articles/:articleId')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .get(asyncMiddleware(async (req, res, next) => {
     const { articleId } = req.params
 
@@ -206,6 +242,10 @@ app.route('/v1/articles/:articleId')
   }))
 
 app.route('/v1/articles')
+  .all((req, res, next) => {
+    // TODO : check if logged in
+    next();
+  })
   .post(asyncMiddleware(async (req, res, next) => {
     const { url } = req.body
 
