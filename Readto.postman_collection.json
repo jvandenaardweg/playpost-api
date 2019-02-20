@@ -1,0 +1,703 @@
+{
+	"info": {
+		"_postman_id": "bb3cdce1-ac5e-4e30-99fb-9430d1bca04d",
+		"name": "Readto",
+		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Me",
+			"item": [
+				{
+					"name": "Get profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Articles",
+			"item": [
+				{
+					"name": "Get a article",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a article",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"url\": \"https://medium.com/thrive-global/one-behavior-separates-the-successful-from-the-average-adc8e6edd3e3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles"
+							]
+						},
+						"description": "Creates a basic article in the database. This article does not include an audiofile, yet. Audiofiles are generated on demand."
+					},
+					"response": [
+						{
+							"name": "Create a article",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"url\": \"https://medium.com/thrive-global/one-behavior-separates-the-successful-from-the-average-adc8e6edd3e3\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:3000/v1/articles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"v1",
+										"articles"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n\t\"title\": \"One Behavior Separates The Successful From The Average\",\n\t\"description\": \"A certain farmer had become old and ready to pass his farm down to one of his two sons. When he brought his sons together to speak about it, he told them: The farm will go to the younger son.\",\n\t\"language\": \"en\",\n\t\"sourceName\": \"Medium\",\n\t\"url\": \"https://medium.com/thrive-global/one-behavior-separates-the-successful-from-the-average-adc8e6edd3e3\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create audio for article",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/audiofile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"audiofile"
+							]
+						},
+						"description": "Crawls the article URL to extract all the content, generate a readable format of the article and use that to create a voice recording"
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to favorites",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"favorite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to playlist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"favorites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to archive",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"archive"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article from favorites",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/favorite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"favorite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article from playlist",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/playlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"playlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article from archive",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"archive"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create a user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a user",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Authenticate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b3969486-82e1-4a52-bcc7-72974164f2db",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/auth",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Playlists",
+			"item": [
+				{
+					"name": "Change order in playlist",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"1231231\",\n\t\"order\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user playlist",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "81756a43-a09f-4aee-a7ce-78a0276fa7f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ae40a147-cd5d-4bda-89dc-fc545137b4a6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Favorites",
+			"item": [
+				{
+					"name": "Get user favorites",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"favorites"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Archives",
+			"item": [
+				{
+					"name": "Get user archive",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/archives",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"archives"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "64cdac61-8f22-483d-aee2-3673790cd7bd",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "527c09f2-b2fc-4f57-a6ec-dfd4f69f9fc1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
