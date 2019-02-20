@@ -21,10 +21,10 @@ global.appRoot = path.resolve(__dirname);
 app.route('/v1/me')
   .get(asyncMiddleware(async (req, res, next) => {
     // TODO: get auth user id
-    const exampleUserId = 'cjsce289r002m0754ooyp8mab';
+    const exampleUserId = 'cjscxpj8q004x07541doytko6';
 
     const fragment = `
-      fragment UserWithoutPassword on User {
+      fragment GetUserWithoutPassword on User {
         id
         email
         createdAt
@@ -35,6 +35,8 @@ app.route('/v1/me')
     `
 
     const user = await prisma.user({ id: exampleUserId }).$fragment(fragment)
+
+    console.log(user)
 
     // throw new Error('You have no access to this page. You should login to view your data.')
 
@@ -48,10 +50,10 @@ app.route('/v1/me')
     if (!email) throw new Error('Email address not given.')
 
     // TODO: get auth user id
-    const exampleUserId = 'cjsce289r002m0754ooyp8mab';
+    const exampleUserId = 'cjscxpj8q004x07541doytko6';
 
     const fragment = `
-      fragment UserWithoutPassword on User {
+      fragment PutUserWithoutPassword on User {
         id
         email
         updatedAt
@@ -251,7 +253,7 @@ app.route('/v1/users')
 
     const user = await prisma.user({ email })
 
-    if (!user) return req.status(404).json({ status: 404, message: 'No user found' })
+    if (!user) return res.status(404).json({ status: 404, message: 'No user found' })
 
     const isValidPassword = await bcrypt.compare(password, user.password)
 
