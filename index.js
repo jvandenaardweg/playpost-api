@@ -3,7 +3,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Sentry = require('@sentry/node');
 const { prisma } = require('./generated/prisma-client');
 const { crawl } = require('./extractors/mercury');
 const { detectLanguage } = require('./utils/detect-language');
@@ -16,14 +15,19 @@ const JWT_SECRET = 'JustASimpleSecretForDevelopmentDoNotUseThisForProduction';
 
 const app = express();
 
-Sentry.init({
-  dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
-  environment: (process.env.NODE_ENV === 'production') ? 'production' : 'development'
-});
+if (process.env.NODE_ENV === 'production') {
+  const Sentry = require('@sentry/node');
 
-// The request handler must be the first middleware on the app
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.errorHandler());
+  Sentry.init({
+    dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
+    environment: 'production'
+  });
+
+  // The request handler must be the first middleware on the app
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(
   bodyParser.urlencoded({
