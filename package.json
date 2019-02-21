@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev:database && nodemon -L ./node_modules/dotenv/config index.js",
+    "dev": "npm run dev:database && npm run dev:nodemon",
+    "dev:nodemon": "nodemon -L ./node_modules/dotenv/config index.js",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
     "start": "node index.js",
