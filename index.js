@@ -16,7 +16,10 @@ const JWT_SECRET = 'JustASimpleSecretForDevelopmentDoNotUseThisForProduction';
 
 const app = express();
 
-Sentry.init({ dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178' });
+Sentry.init({
+  dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
+  environment: (process.env.NODE_ENV === 'production') ? 'production' : 'development'
+});
 
 // The request handler must be the first middleware on the app
 app.use(Sentry.Handlers.requestHandler());
