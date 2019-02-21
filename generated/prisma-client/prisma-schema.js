@@ -165,7 +165,6 @@ type Article {
   ssml: String
   text: String
   sourceName: String
-  user: User!
   audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile!]
   playlists(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist!]
   archives(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive!]
@@ -194,7 +193,6 @@ input ArticleCreateInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserCreateOneInput!
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
@@ -235,7 +233,6 @@ input ArticleCreateWithoutArchivesInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserCreateOneInput!
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
@@ -255,7 +252,6 @@ input ArticleCreateWithoutAudiofilesInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserCreateOneInput!
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
@@ -275,7 +271,6 @@ input ArticleCreateWithoutFavoritesInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserCreateOneInput!
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
@@ -295,7 +290,6 @@ input ArticleCreateWithoutPlaylistsInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserCreateOneInput!
   audiofiles: AudiofileCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
@@ -392,7 +386,6 @@ input ArticleUpdateInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserUpdateOneRequiredInput
   audiofiles: AudiofileUpdateManyWithoutArticleInput
   playlists: PlaylistUpdateManyWithoutArticleInput
   archives: ArchiveUpdateManyWithoutArticleInput
@@ -436,7 +429,6 @@ input ArticleUpdateWithoutAudiofilesDataInput {
   ssml: String
   text: String
   sourceName: String
-  user: UserUpdateOneRequiredInput
   playlists: PlaylistUpdateManyWithoutArticleInput
   archives: ArchiveUpdateManyWithoutArticleInput
   favorites: FavoriteUpdateManyWithoutArticleInput
@@ -628,7 +620,6 @@ input ArticleWhereInput {
   sourceName_not_starts_with: String
   sourceName_ends_with: String
   sourceName_not_ends_with: String
-  user: UserWhereInput
   audiofiles_every: AudiofileWhereInput
   audiofiles_some: AudiofileWhereInput
   audiofiles_none: AudiofileWhereInput
@@ -1428,7 +1419,6 @@ type User {
   favorites(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Favorite!]
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1447,12 +1437,6 @@ input UserCreateInput {
   favorites: FavoriteCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
-}
-
-input UserCreateOneInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
 }
 
 input UserCreateOneWithoutArchiveInput {
@@ -1477,7 +1461,6 @@ input UserCreateWithoutArchiveInput {
   favorites: FavoriteCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
 }
 
 input UserCreateWithoutFavoritesInput {
@@ -1487,7 +1470,6 @@ input UserCreateWithoutFavoritesInput {
   archive: ArchiveCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
 }
 
 input UserCreateWithoutPlaylistInput {
@@ -1497,7 +1479,6 @@ input UserCreateWithoutPlaylistInput {
   favorites: FavoriteCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
 }
 
 type UserEdge {
@@ -1516,8 +1497,6 @@ enum UserOrderByInput {
   authenticatedAt_DESC
   activatedAt_ASC
   activatedAt_DESC
-  deletedAt_ASC
-  deletedAt_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -1530,7 +1509,6 @@ type UserPreviousValues {
   password: String!
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -1553,17 +1531,6 @@ input UserSubscriptionWhereInput {
   NOT: [UserSubscriptionWhereInput!]
 }
 
-input UserUpdateDataInput {
-  email: String
-  password: String
-  playlist: PlaylistUpdateManyWithoutUserInput
-  archive: ArchiveUpdateManyWithoutUserInput
-  favorites: FavoriteUpdateManyWithoutUserInput
-  authenticatedAt: DateTime
-  activatedAt: DateTime
-  deletedAt: DateTime
-}
-
 input UserUpdateInput {
   email: String
   password: String
@@ -1572,7 +1539,6 @@ input UserUpdateInput {
   favorites: FavoriteUpdateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
 }
 
 input UserUpdateManyMutationInput {
@@ -1580,19 +1546,6 @@ input UserUpdateManyMutationInput {
   password: String
   authenticatedAt: DateTime
   activatedAt: DateTime
-  deletedAt: DateTime
-}
-
-input UserUpdateOneRequiredInput {
-  create: UserCreateInput
-  update: UserUpdateDataInput
-  upsert: UserUpsertNestedInput
-  connect: UserWhereUniqueInput
-}
-
-input UserUpsertNestedInput {
-  update: UserUpdateDataInput!
-  create: UserCreateInput!
 }
 
 input UserWhereInput {
@@ -1663,14 +1616,6 @@ input UserWhereInput {
   activatedAt_lte: DateTime
   activatedAt_gt: DateTime
   activatedAt_gte: DateTime
-  deletedAt: DateTime
-  deletedAt_not: DateTime
-  deletedAt_in: [DateTime!]
-  deletedAt_not_in: [DateTime!]
-  deletedAt_lt: DateTime
-  deletedAt_lte: DateTime
-  deletedAt_gt: DateTime
-  deletedAt_gte: DateTime
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
