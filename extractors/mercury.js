@@ -5,14 +5,18 @@ const JSSoup = require('jssoup').default;
 // const url="https://www.nytimes.com/2019/02/05/magazine/denis-voronenkov-assassination-russia-ukraine.html";
 // const url="https://www.nu.nl/dieren/5656238/mediterraanse-sprinkhaansoort-ontdekt-in-nederland.html";
 // const url="https://edition.cnn.com/2019/02/06/politics/donald-trump-state-of-the-union-address/index.html";
-const url="https://thenextweb.com/hardfork/2019/02/06/this-startup-is-putting-degrees-on-the-blockchain-to-beat-fake-diplomas/";
-Mercury.parse(url).then(result => {
-    var soup = new JSSoup(result.content)
-    var newSoup = removeAllAttributes(soup)
-    newSoup = removeSpecificEnclosedTags(newSoup, ['header', 'figure', 'pre', 'h1'])
-    newSoup = removeAllEmptyTags(newSoup)
-    console.log(newSoup.toString())
-});
+// const url="https://thenextweb.com/hardfork/2019/02/06/this-startup-is-putting-degrees-on-the-blockchain-to-beat-fake-diplomas/";
+// Mercury.parse(url).then(result => {
+//     var soup = new JSSoup(result.content)
+//     var newSoup = removeAllAttributes(soup)
+//     newSoup = removeSpecificEnclosedTags(newSoup, ['header', 'figure', 'pre', 'h1'])
+//     newSoup = removeAllEmptyTags(newSoup)
+//     console.log(newSoup.toString())
+// });
+
+function crawl(url) {
+    return Mercury.parse(url)
+}
 
 function removeAllAttributes(soup) {
     soup.findAll().forEach((tag) => tag.attrs = {})
@@ -36,3 +40,5 @@ function removeSpecificEnclosedTags(soup, removeTags) {
     })
 	return soup
 }
+
+module.exports = { crawl }
