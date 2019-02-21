@@ -9,14 +9,14 @@ const { crawl } = require('./extractors/mercury');
 const { detectLanguage } = require('./utils/detect-language');
 const { asyncMiddleware } = require('./utils/async-middleware');
 
+const { getAudiofile } = require('./src/controllers/audiofile.js')
+
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = 'JustASimpleSecretForDevelopmentDoNotUseThisForProduction';
 
 const app = express();
 
-Sentry.init({
-  dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
-});
+Sentry.init({ dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178' });
 
 // The request handler must be the first middleware on the app
 app.use(Sentry.Handlers.requestHandler());
@@ -29,6 +29,8 @@ app.use(
 );
 
 global.appRoot = path.resolve(__dirname);
+
+app.get('/audiofile', getAudiofile);
 
 app
   .route('/v1/me')
@@ -61,7 +63,6 @@ app
 
     if (!user) {
       return res.status(404).json({
-        status: 404,
         message: 'No user found. This could happen when your account is deleted.',
       });
     }
@@ -355,7 +356,6 @@ app
 
       if (!article) {
         return res.status(404).json({
-          status: 404,
           message: `Could not get an audiofile, because article with ID ${articleId} is not found.`,
         });
       }
@@ -381,7 +381,6 @@ app
 
       if (!article) {
         return res.status(404).json({
-          status: 404,
           message: `Could not create an audiofile, because article with ID ${articleId} is not found.`,
         });
       }
@@ -411,7 +410,6 @@ app
 
       if (!article) {
         return res.status(404).json({
-          status: 404,
           message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
         });
       }
@@ -431,115 +429,108 @@ app
     // TODO : check if logged in
     next();
   })
-  .post(
-    asyncMiddleware(async (req, res, next) => {
-      // TODO: get auth user id
-      const exampleUserId = 'cjse81h67005t0754uiuiwb12';
+  .post(asyncMiddleware(async (req, res) => {
+    // TODO: get auth user id
+    const exampleUserId = 'cjse81h67005t0754uiuiwb12';
 
-      const {
-        url,
-      } = req.body;
+    const { url } = req.body;
 
-      if (!url) {
-        return res.status(400).json({
-          message: 'URL payload is required.',
-        });
-      }
-
-      const user = await prisma.user({
-        id: exampleUserId,
+    if (!url) {
+      return res.status(400).json({
+        message: 'URL payload is required.',
       });
+    }
 
-      if (!user) {
-        return res.status(400).json({
-          message: 'User not found. You are not logged in, or your account is deleted.',
-        });
-      }
+    const user = await prisma.user({
+      id: exampleUserId,
+    });
 
-      const article = await prisma.article({
-        url,
+    if (!user) {
+      return res.status(400).json({
+        message: 'User not found. You are not logged in, or your account is deleted.',
       });
+    }
 
-      if (article) {
-        return res.status(400).json({
-          message: 'Article already exists.',
-          article,
-        });
-      }
+    const article = await prisma.article({
+      url,
+    });
 
-      // if (article) {
-      //   // Connect article to the playlist of the current user, so it becomes available in his playlist
-      //   const updatedPlaylist = await prisma.updateArticle({
-      //     data: {
-      //       playlists: {
-      //         create: {
-      //           user,
-      //           article
-      //         }
-      //       }
-      //     },
-      //     where: {
-      //       id: article.id
-      //     }
-      //   })
-      //   return res.json({ message: `Article already exists in database, we just add it to the users playlist.` })
-      // }
+    if (article) {
+      return res.status(400).json({
+        message: 'Article already exists.',
+        article,
+      });
+    }
 
-      const {
-        title,
-        excerpt,
-        author,
-        domain,
-      } = await crawl(url);
+    // if (article) {
+    //   // Connect article to the playlist of the current user, so it becomes available in his playlist
+    //   const updatedPlaylist = await prisma.updateArticle({
+    //     data: {
+    //       playlists: {
+    //         create: {
+    //           user,
+    //           article
+    //         }
+    //       }
+    //     },
+    //     where: {
+    //       id: article.id
+    //     }
+    //   })
+    //   return res.json({ message: `Article already exists in database, we just add it to the users playlist.` })
+    // }
 
-      const language = detectLanguage(excerpt);
+    const {
+      title,
+      excerpt,
+      author,
+      domain,
+    } = await crawl(url);
 
-      if (language !== 'eng') {
-        return res.status(400).json({
-          status: 400,
-          message: `The language of the Article '${language}' is currently not supported. Please only add English articles.`,
-        });
-      }
+    const language = detectLanguage(excerpt);
 
-      // TODO: Crawl the URL, and get these basic data:
-      /*
-      const title = null
-      const description = null
-      const language = null
-      const sourceName = null
-      const url = null
-    */
+    if (language !== 'eng') {
+      return res.status(400).json({
+        message: `The language of the Article '${language}' is currently not supported. Please only add English articles.`,
+      });
+    }
 
-      console.log('user', user);
+    // TODO: Crawl the URL, and get these basic data:
+    /*
+    const title = null
+    const description = null
+    const language = null
+    const sourceName = null
+    const url = null
+  */
 
-      const createdArticle = await prisma.createArticle({
-        title,
-        description: excerpt,
-        authorName: author,
-        sourceName: domain,
-        url,
-        language: 'EN',
-        user: {
-          connect: {
+    console.log('user', user);
+
+    const createdArticle = await prisma.createArticle({
+      title,
+      description: excerpt,
+      authorName: author,
+      sourceName: domain,
+      url,
+      language: 'EN',
+      user: {
+        connect: {
+          id: exampleUserId,
+        },
+      },
+      playlists: {
+        connect: {
+          user: {
             id: exampleUserId,
           },
+          order: 0,
         },
-        playlists: {
-          connect: {
-            user: {
-              id: exampleUserId,
-            },
-            order: 0,
-          },
-        },
-      });
+      },
+    });
 
-      // Create an article with preview data: url, title, description, language and sourceName
-      res.json({
-        ...createdArticle,
-      });
-    }),
-  );
+    // Create an article with preview data: url, title, description, language and sourceName
+    return res.json({ ...createdArticle });
+  }));
 
 app.route('/v1/users')
   .post(asyncMiddleware(async (req, res) => {
@@ -563,48 +554,32 @@ app.route('/v1/users')
 
     return res.json({ token });
   }))
-  .delete(
-    asyncMiddleware(async (req, res, next) => {
-      const {
-        email,
-        password,
-      } = req.body;
+  .delete(asyncMiddleware(async (req, res) => {
+    const { email, password } = req.body;
 
-      const user = await prisma.user({
-        email,
-      });
+    const user = await prisma.user({ email });
 
-      if (!user) {
-        return res.status(404).json({
-          status: 404,
-          message: 'No user found',
-        });
-      }
+    if (!user) return res.status(404).json({ message: 'No user found' });
 
-      const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password);
 
-      if (!isValidPassword) throw new Error('Password incorrect.');
+    if (!isValidPassword) return res.status(400).json({ message: 'Password or e-mail address is incorrect.' });
 
-      const deletedUser = await prisma.deleteUser({
-        email,
-      });
+    await prisma.deleteUser({ email });
 
-      return res.json({
-        message: `User with e-mail address "${email}" is deleted! This cannot be undone.`,
-      });
-    }),
-  );
+    return res.json({ message: `User with e-mail address "${email}" is deleted! This cannot be undone.` });
+  }));
 
 app.route('/v1/auth')
   .post(asyncMiddleware(async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email && !password) return req.status(404).json({ status: 404, message: 'No e-mail and or password given. });
+    if (!email && !password) return res.status(404).json({ message: 'No e-mail and or password given.' });
 
     // Find the user with the given e-mail
     const user = await prisma.user({ email });
 
-    if (!user) return req.status(404).json({ status: 404, message: 'No user found or password is incorrect.' });
+    if (!user) return res.status(404).json({ message: 'No user found or password is incorrect.' });
 
     const isValidPassword = await bcrypt.compare(password, user.password);
 

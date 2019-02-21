@@ -1,27 +1,27 @@
 {
-  "name": "medium-audio",
+  "name": "readto-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev:database && nodemon index.js",
+    "dev": "npm run dev:database && nodemon -L ./node_modules/dotenv/config index.js",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
-    "start": "node server.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore",
     "eslint:fix": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jvandenaardweg/medium-audio.git"
+    "url": "git+https://github.com/jvandenaardweg/readto-api.git"
   },
   "author": "Jordy van den Aardweg",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jvandenaardweg/medium-audio/issues"
+    "url": "https://github.com/jvandenaardweg/readto-api/issues"
   },
-  "homepage": "https://github.com/jvandenaardweg/medium-audio#readme",
+  "homepage": "https://github.com/jvandenaardweg/readto-api#readme",
   "dependencies": {
     "@google-cloud/storage": "^2.4.0",
     "@google-cloud/text-to-speech": "^0.4.0",

@@ -1,28 +1,19 @@
-const path = require('path');
-const express = require('express');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const { asyncMiddleware } = require('../../utils/async-middleware');
 
-const { asyncMiddleware } = require('./utils/async-middleware');
+const synthesize = require('../../synthesizers/google');
+const dataSource = require('../../data-sources/medium');
+const utils = require('../../utils');
+const storage = require('../../storage/google-cloud');
 
-const synthesize = require('./synthesizers/google');
-const dataSource = require('./data-sources/medium');
-const utils = require('./utils');
-const storage = require('./storage/google-cloud');
-
-global.appRoot = path.resolve(__dirname);
-
-app.get(
-  '/audiofile',
-  asyncMiddleware(async (req, res, next) => {
+const getAudiofile = asyncMiddleware(async (req, res, next) => {
     const { url } = req.query;
 
-    if (!url || url === '') throw new Error('Please give a URL param.');
+    if (!url || url === '') return res.status(400).json({ message: 'Please give a URL param.' });
 
     const normalizedUrl = url.toLowerCase();
 
-    if (!normalizedUrl.includes('medium.com')) throw new Error('We only allow Medium URLs for now.');
+    if (!normalizedUrl.includes('medium.com')) return res.status(400).json({ message: 'We only allow Medium URLs for now.' });
 
     // Get the Medium Post ID from the URL
     // If the URL is incorrect, we error
@@ -53,10 +44,7 @@ app.get(
     // If we already have a file in storage, we just return that (for now)
     // TODO: we should not use the cloud storage API for this? use a database? so we an also return information about the article?
     if (foundFile) {
-      return res.json({
-        publicFileUrl: storage.getPublicFileUrl(foundFile.metadata),
-        article: {},
-      });
+      return res.json({ publicFileUrl: storage.getPublicFileUrl(foundFile.metadata), article: {}});
     }
 
     // If we don't have an audiofile, we go into here
@@ -105,8 +93,10 @@ app.get(
 
     console.log('Done!');
 
-    res.json({ publicFileUrl, article });
-  }),
-);
+    return res.json({ publicFileUrl, article });
+  }
+)
 
-app.listen(PORT, () => console.log(`App listening on port ${PORT}!`));
+module.exports = {
+  getAudiofile
+}
