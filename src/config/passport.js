@@ -13,8 +13,10 @@ module.exports = (passport) => {
   return passport.use(
     new Strategy(opts, (payload, done) => {
 
-      const user = payload;
-      if (payload.id) return done(null, user);
+      const { id, email } = payload;
+
+      // Send make the id and email available using "req.user.id" and "req.user.email"
+      if (id && email) return done(null, { id, email });
 
       return done(null, false);
       // Get the user from the database

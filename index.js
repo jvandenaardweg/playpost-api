@@ -87,7 +87,6 @@ app.all('*', async (req, res) => res.json({ message: `No route found for ${req.m
 app.use((err, req, res, next) => {
   if (err) {
     if (process.env.NODE_ENV === 'production') {
-
       // Grab the user so we can give some context to our errors
       if (req.user) {
         const { id, email } = req.user;
