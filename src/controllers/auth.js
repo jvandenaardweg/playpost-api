@@ -24,7 +24,9 @@ const postAuth = async (req, res) => {
   // TODO: Log tries for security
   if (!isValidPassword) return res.status(403).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
 
-  const token = jwt.sign({ id: user.id }, JWT_SECRET);
+  // We use the e-mail in the token as an extra way to get some easy context during debugging
+  // For example, we can use the email in Sentry to maybe contact the user
+  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
 
   return res.json({ token });
 };

@@ -3,6 +3,7 @@ const express = require('express');
 require('express-async-errors');
 const bodyParser = require('body-parser');
 const Sentry = require('@sentry/node');
+const passport = require('passport');
 
 const audiofileController = require('./src/controllers/audiofile.js');
 const meController = require('./src/controllers/me.js');
@@ -14,8 +15,11 @@ const authController = require('./src/controllers/auth.js');
 const articlesController = require('./src/controllers/articles.js');
 
 const PORT = process.env.PORT || 3000;
+const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
 const app = express();
+
+global.appRoot = path.resolve(__dirname);
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
@@ -28,66 +32,82 @@ if (process.env.NODE_ENV === 'production') {
   app.use(Sentry.Handlers.errorHandler());
 }
 
-app.use(bodyParser.json()); // to support JSON-encoded bodies
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+// Use passport authentication
+app.use(passport.initialize());
+require('./src/config/passport')(passport);
 
-global.appRoot = path.resolve(__dirname);
+// Make express allow JSON payload bodies
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/audiofile', audiofileController.getAudiofile);
+// API Endpoints
+app.get('/audiofile', audiofileController.getAudiofile); // Legacy, now in use by our iOS App
 
-app.get('/v1/me', meController.getMe);
-app.put('/v1/me', meController.putMe);
-app.delete('/v1/me', meController.deleteMe);
+app.get('/v1/me', IS_PROTECTED, meController.getMe);
+app.patch('/v1/me/email', IS_PROTECTED, meController.patchMeEmail);
+app.patch('/v1/me/password', IS_PROTECTED, meController.patchMePassword);
+app.delete('/v1/me', IS_PROTECTED, meController.deleteMe);
 
-app.get('/v1/archives', archivesController.getArchives);
-app.post('/v1/archives', archivesController.postArchives);
-app.delete('/v1/archives', archivesController.deleteArchives);
+app.get('/v1/archives', IS_PROTECTED, archivesController.getArchives);
+app.post('/v1/archives', IS_PROTECTED, archivesController.postArchives);
+app.delete('/v1/archives', IS_PROTECTED, archivesController.deleteArchives);
 
-app.get('/v1/playlists', playlistsController.getPlaylists);
-app.post('/v1/playlists', playlistsController.postPlaylists);
-app.put('/v1/playlists', playlistsController.putPlaylists);
-app.delete('/v1/playlists', playlistsController.deletePlaylists);
+app.get('/v1/playlists', IS_PROTECTED, playlistsController.getPlaylists);
+app.post('/v1/playlists', IS_PROTECTED, playlistsController.postPlaylists);
+app.put('/v1/playlists', IS_PROTECTED, playlistsController.putPlaylists);
+app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylists);
 
-app.get('/v1/favorites', favoritesController.getFavorites);
-app.post('/v1/favorites', favoritesController.postFavorites);
-app.delete('/v1/favorites', favoritesController.deleteFavorites);
+app.get('/v1/favorites', IS_PROTECTED, favoritesController.getFavorites);
+app.post('/v1/favorites', IS_PROTECTED, favoritesController.postFavorites);
+app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorites);
 
-app.post('/v1/users', usersController.postUsers);
-app.delete('/v1/users', usersController.deleteUsers);
+app.post('/v1/users', usersController.postUsers); // Creating of users is not protected by a login ofcourse
+app.delete('/v1/users', IS_PROTECTED, usersController.deleteUsers);
 
 app.post('/v1/auth', authController.postAuth);
 
-app.post('/v1/articles', articlesController.postArticles);
-app.get('/v1/articles/:articleId', articlesController.getArticlesById);
+app.post('/v1/articles', IS_PROTECTED, articlesController.postArticles);
+app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.getArticlesById);
 
-app.get('/v1/articles/:articleId/audiofile', articlesController.getAudiofileByArticleId);
-app.post('/v1/articles/:articleId/audiofile', articlesController.postAudiofileByArticleId);
+app.get('/v1/articles/:articleId/audiofile', IS_PROTECTED, articlesController.getAudiofileByArticleId);
+app.post('/v1/articles/:articleId/audiofile', IS_PROTECTED, articlesController.postAudiofileByArticleId);
 
-app.post('/v1/articles/:articleId/favorite', articlesController.postFavoriteByArticleId);
-app.delete('/v1/articles/:articleId/favorite', articlesController.deleteFavoriteByArticleId);
+app.post('/v1/articles/:articleId/favorite', IS_PROTECTED, articlesController.postFavoriteByArticleId);
+app.delete('/v1/articles/:articleId/favorite', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
 
-app.post('/v1/articles/:articleId/archive', articlesController.postArchiveByArticleId);
-app.delete('/v1/articles/:articleId/archive', articlesController.deleteArchiveByArticleId);
+app.post('/v1/articles/:articleId/archive', IS_PROTECTED, articlesController.postArchiveByArticleId);
+app.delete('/v1/articles/:articleId/archive', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
 
-app.post('/v1/articles/:articleId/playlist', articlesController.postPlaylistByArticleId);
-app.delete('/v1/articles/:articleId/playlist', articlesController.deletePlaylistByArticleId);
+app.post('/v1/articles/:articleId/playlist', IS_PROTECTED, articlesController.postPlaylistByArticleId);
+app.delete('/v1/articles/:articleId/playlist', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
+app.all('*', async (req, res) => res.json({ message: `No route found for ${req.method} ${req.url}` }));
+
+// Handle error exceptions
 app.use((err, req, res, next) => {
   if (err) {
     if (process.env.NODE_ENV === 'production') {
-      // Sentry.configureScope((scope) => {
-      //   scope.setUser({
-      //     id: '13123123',
-      //     email: 'john.doe@example.com'
-      //   });
-      // });
+
+      // Grab the user so we can give some context to our errors
+      if (req.user) {
+        const { id, email } = req.user;
+
+        Sentry.configureScope((scope) => {
+          scope.setUser({ id, email });
+        });
+      }
 
       // Capture the error for us to see in Sentry
       Sentry.captureException(err);
+    }
+
+    /* eslint-disable no-console */
+    console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
+
+    if (err.message === 'Unauthorized') {
+      return res.status(401).json({
+        message: 'Unauthorized. You don\'t have access to this endpoint. If you are not loggedin, try again by logging in.'
+      });
     }
 
     // Return a general error to the user

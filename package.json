@@ -41,6 +41,8 @@
     "jssoup": "0.0.10",
     "mp3-duration": "^1.1.0",
     "node-fetch": "^2.3.0",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
     "polly-ssml-split": "^0.1.0",
     "prisma-client-lib": "^1.25.4",
     "readability": "https://github.com/mozilla/readability#master",
