@@ -5,6 +5,7 @@ require('express-async-errors');
 const bodyParser = require('body-parser');
 const Sentry = require('@sentry/node');
 const passport = require('passport');
+const helmet = require('helmet');
 
 const audiofileController = require('./src/controllers/audiofile.js');
 const meController = require('./src/controllers/me.js');
@@ -18,9 +19,10 @@ const articlesController = require('./src/controllers/articles.js');
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
-const app = express();
-
 global.appRoot = path.resolve(__dirname);
+
+const app = express();
+app.use(helmet());
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
@@ -60,8 +62,6 @@ app.get('/v1/me', IS_PROTECTED, meController.getMe);
 app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
 app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
 app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
-
-
 
 // app.get('/v1/me/playlist', IS_PROTECTED, meController.findAllPlaylist);
 // app.post('/v1/me/playlist', IS_PROTECTED, meController.createPlaylist);
