@@ -435,6 +435,9 @@ export interface UserWhereInput {
   favorites_every?: FavoriteWhereInput;
   favorites_some?: FavoriteWhereInput;
   favorites_none?: FavoriteWhereInput;
+  articles_every?: ArticleWhereInput;
+  articles_some?: ArticleWhereInput;
+  articles_none?: ArticleWhereInput;
   authenticatedAt?: DateTimeInput;
   authenticatedAt_not?: DateTimeInput;
   authenticatedAt_in?: DateTimeInput[] | DateTimeInput;
@@ -685,6 +688,7 @@ export interface ArticleWhereInput {
   sourceName_not_starts_with?: String;
   sourceName_ends_with?: String;
   sourceName_not_ends_with?: String;
+  user?: UserWhereInput;
   audiofiles_every?: AudiofileWhereInput;
   audiofiles_some?: AudiofileWhereInput;
   audiofiles_none?: AudiofileWhereInput;
@@ -865,6 +869,7 @@ export interface UserCreateWithoutArchiveInput {
   password: String;
   playlist?: PlaylistCreateManyWithoutUserInput;
   favorites?: FavoriteCreateManyWithoutUserInput;
+  articles?: ArticleCreateManyWithoutUserInput;
   authenticatedAt?: DateTimeInput;
   activatedAt?: DateTimeInput;
 }
@@ -897,58 +902,23 @@ export interface ArticleCreateWithoutPlaylistsInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserCreateOneWithoutArticlesInput;
   audiofiles?: AudiofileCreateManyWithoutArticleInput;
   archives?: ArchiveCreateManyWithoutArticleInput;
   favorites?: FavoriteCreateManyWithoutArticleInput;
 }
 
-export interface AudiofileCreateManyWithoutArticleInput {
-  create?:
-    | AudiofileCreateWithoutArticleInput[]
-    | AudiofileCreateWithoutArticleInput;
-  connect?: AudiofileWhereUniqueInput[] | AudiofileWhereUniqueInput;
-}
-
-export interface AudiofileCreateWithoutArticleInput {
-  url: String;
-  length: Float;
-  language: Language;
-  encoding: Encoding;
-  voice: String;
-  synthesizer: Synthesizer;
-  listens?: Int;
-}
-
-export interface ArchiveCreateManyWithoutArticleInput {
-  create?:
-    | ArchiveCreateWithoutArticleInput[]
-    | ArchiveCreateWithoutArticleInput;
-}
-
-export interface ArchiveCreateWithoutArticleInput {
-  user: UserCreateOneWithoutArchiveInput;
-}
-
-export interface FavoriteCreateManyWithoutArticleInput {
-  create?:
-    | FavoriteCreateWithoutArticleInput[]
-    | FavoriteCreateWithoutArticleInput;
-}
-
-export interface FavoriteCreateWithoutArticleInput {
-  user: UserCreateOneWithoutFavoritesInput;
-}
-
-export interface UserCreateOneWithoutFavoritesInput {
-  create?: UserCreateWithoutFavoritesInput;
+export interface UserCreateOneWithoutArticlesInput {
+  create?: UserCreateWithoutArticlesInput;
   connect?: UserWhereUniqueInput;
 }
 
-export interface UserCreateWithoutFavoritesInput {
+export interface UserCreateWithoutArticlesInput {
   email: String;
   password: String;
   playlist?: PlaylistCreateManyWithoutUserInput;
   archive?: ArchiveCreateManyWithoutUserInput;
+  favorites?: FavoriteCreateManyWithoutUserInput;
   authenticatedAt?: DateTimeInput;
   activatedAt?: DateTimeInput;
 }
@@ -980,9 +950,27 @@ export interface ArticleCreateWithoutArchivesInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserCreateOneWithoutArticlesInput;
   audiofiles?: AudiofileCreateManyWithoutArticleInput;
   playlists?: PlaylistCreateManyWithoutArticleInput;
   favorites?: FavoriteCreateManyWithoutArticleInput;
+}
+
+export interface AudiofileCreateManyWithoutArticleInput {
+  create?:
+    | AudiofileCreateWithoutArticleInput[]
+    | AudiofileCreateWithoutArticleInput;
+  connect?: AudiofileWhereUniqueInput[] | AudiofileWhereUniqueInput;
+}
+
+export interface AudiofileCreateWithoutArticleInput {
+  url: String;
+  length: Float;
+  language: Language;
+  encoding: Encoding;
+  voice: String;
+  synthesizer: Synthesizer;
+  listens?: Int;
 }
 
 export interface PlaylistCreateManyWithoutArticleInput {
@@ -1006,6 +994,7 @@ export interface UserCreateWithoutPlaylistInput {
   password: String;
   archive?: ArchiveCreateManyWithoutUserInput;
   favorites?: FavoriteCreateManyWithoutUserInput;
+  articles?: ArticleCreateManyWithoutUserInput;
   authenticatedAt?: DateTimeInput;
   activatedAt?: DateTimeInput;
 }
@@ -1037,9 +1026,70 @@ export interface ArticleCreateWithoutFavoritesInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserCreateOneWithoutArticlesInput;
   audiofiles?: AudiofileCreateManyWithoutArticleInput;
   playlists?: PlaylistCreateManyWithoutArticleInput;
   archives?: ArchiveCreateManyWithoutArticleInput;
+}
+
+export interface ArchiveCreateManyWithoutArticleInput {
+  create?:
+    | ArchiveCreateWithoutArticleInput[]
+    | ArchiveCreateWithoutArticleInput;
+}
+
+export interface ArchiveCreateWithoutArticleInput {
+  user: UserCreateOneWithoutArchiveInput;
+}
+
+export interface ArticleCreateManyWithoutUserInput {
+  create?: ArticleCreateWithoutUserInput[] | ArticleCreateWithoutUserInput;
+  connect?: ArticleWhereUniqueInput[] | ArticleWhereUniqueInput;
+}
+
+export interface ArticleCreateWithoutUserInput {
+  title: String;
+  description?: String;
+  url: String;
+  imageUrl?: String;
+  readingTime?: Float;
+  language: Language;
+  authorName?: String;
+  authorUrl?: String;
+  categoryName?: String;
+  html?: String;
+  ssml?: String;
+  text?: String;
+  sourceName?: String;
+  audiofiles?: AudiofileCreateManyWithoutArticleInput;
+  playlists?: PlaylistCreateManyWithoutArticleInput;
+  archives?: ArchiveCreateManyWithoutArticleInput;
+  favorites?: FavoriteCreateManyWithoutArticleInput;
+}
+
+export interface FavoriteCreateManyWithoutArticleInput {
+  create?:
+    | FavoriteCreateWithoutArticleInput[]
+    | FavoriteCreateWithoutArticleInput;
+}
+
+export interface FavoriteCreateWithoutArticleInput {
+  user: UserCreateOneWithoutFavoritesInput;
+}
+
+export interface UserCreateOneWithoutFavoritesInput {
+  create?: UserCreateWithoutFavoritesInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface UserCreateWithoutFavoritesInput {
+  email: String;
+  password: String;
+  playlist?: PlaylistCreateManyWithoutUserInput;
+  archive?: ArchiveCreateManyWithoutUserInput;
+  articles?: ArticleCreateManyWithoutUserInput;
+  authenticatedAt?: DateTimeInput;
+  activatedAt?: DateTimeInput;
 }
 
 export interface ArticleCreateInput {
@@ -1056,6 +1106,7 @@ export interface ArticleCreateInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserCreateOneWithoutArticlesInput;
   audiofiles?: AudiofileCreateManyWithoutArticleInput;
   playlists?: PlaylistCreateManyWithoutArticleInput;
   archives?: ArchiveCreateManyWithoutArticleInput;
@@ -1076,10 +1127,136 @@ export interface ArticleUpdateInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserUpdateOneWithoutArticlesInput;
   audiofiles?: AudiofileUpdateManyWithoutArticleInput;
   playlists?: PlaylistUpdateManyWithoutArticleInput;
   archives?: ArchiveUpdateManyWithoutArticleInput;
   favorites?: FavoriteUpdateManyWithoutArticleInput;
+}
+
+export interface UserUpdateOneWithoutArticlesInput {
+  create?: UserCreateWithoutArticlesInput;
+  update?: UserUpdateWithoutArticlesDataInput;
+  upsert?: UserUpsertWithoutArticlesInput;
+  delete?: Boolean;
+  disconnect?: Boolean;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface UserUpdateWithoutArticlesDataInput {
+  email?: String;
+  password?: String;
+  playlist?: PlaylistUpdateManyWithoutUserInput;
+  archive?: ArchiveUpdateManyWithoutUserInput;
+  favorites?: FavoriteUpdateManyWithoutUserInput;
+  authenticatedAt?: DateTimeInput;
+  activatedAt?: DateTimeInput;
+}
+
+export interface PlaylistUpdateManyWithoutUserInput {
+  create?: PlaylistCreateWithoutUserInput[] | PlaylistCreateWithoutUserInput;
+  deleteMany?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
+  updateMany?:
+    | PlaylistUpdateManyWithWhereNestedInput[]
+    | PlaylistUpdateManyWithWhereNestedInput;
+}
+
+export interface PlaylistScalarWhereInput {
+  order?: Int;
+  order_not?: Int;
+  order_in?: Int[] | Int;
+  order_not_in?: Int[] | Int;
+  order_lt?: Int;
+  order_lte?: Int;
+  order_gt?: Int;
+  order_gte?: Int;
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  AND?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
+  OR?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
+  NOT?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
+}
+
+export interface PlaylistUpdateManyWithWhereNestedInput {
+  where: PlaylistScalarWhereInput;
+  data: PlaylistUpdateManyDataInput;
+}
+
+export interface PlaylistUpdateManyDataInput {
+  order?: Int;
+}
+
+export interface ArchiveUpdateManyWithoutUserInput {
+  create?: ArchiveCreateWithoutUserInput[] | ArchiveCreateWithoutUserInput;
+  deleteMany?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
+}
+
+export interface ArchiveScalarWhereInput {
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  AND?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
+  OR?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
+  NOT?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
+}
+
+export interface FavoriteUpdateManyWithoutUserInput {
+  create?: FavoriteCreateWithoutUserInput[] | FavoriteCreateWithoutUserInput;
+  deleteMany?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
+}
+
+export interface FavoriteScalarWhereInput {
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  AND?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
+  OR?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
+  NOT?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
+}
+
+export interface UserUpsertWithoutArticlesInput {
+  update: UserUpdateWithoutArticlesDataInput;
+  create: UserCreateWithoutArticlesInput;
 }
 
 export interface AudiofileUpdateManyWithoutArticleInput {
@@ -1240,45 +1417,6 @@ export interface PlaylistUpdateManyWithoutArticleInput {
     | PlaylistUpdateManyWithWhereNestedInput;
 }
 
-export interface PlaylistScalarWhereInput {
-  order?: Int;
-  order_not?: Int;
-  order_in?: Int[] | Int;
-  order_not_in?: Int[] | Int;
-  order_lt?: Int;
-  order_lte?: Int;
-  order_gt?: Int;
-  order_gte?: Int;
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  updatedAt?: DateTimeInput;
-  updatedAt_not?: DateTimeInput;
-  updatedAt_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_lt?: DateTimeInput;
-  updatedAt_lte?: DateTimeInput;
-  updatedAt_gt?: DateTimeInput;
-  updatedAt_gte?: DateTimeInput;
-  AND?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
-  OR?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
-  NOT?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
-}
-
-export interface PlaylistUpdateManyWithWhereNestedInput {
-  where: PlaylistScalarWhereInput;
-  data: PlaylistUpdateManyDataInput;
-}
-
-export interface PlaylistUpdateManyDataInput {
-  order?: Int;
-}
-
 export interface ArchiveUpdateManyWithoutArticleInput {
   create?:
     | ArchiveCreateWithoutArticleInput[]
@@ -1286,55 +1424,11 @@ export interface ArchiveUpdateManyWithoutArticleInput {
   deleteMany?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
 }
 
-export interface ArchiveScalarWhereInput {
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  updatedAt?: DateTimeInput;
-  updatedAt_not?: DateTimeInput;
-  updatedAt_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_lt?: DateTimeInput;
-  updatedAt_lte?: DateTimeInput;
-  updatedAt_gt?: DateTimeInput;
-  updatedAt_gte?: DateTimeInput;
-  AND?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
-  OR?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
-  NOT?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
-}
-
 export interface FavoriteUpdateManyWithoutArticleInput {
   create?:
     | FavoriteCreateWithoutArticleInput[]
     | FavoriteCreateWithoutArticleInput;
   deleteMany?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
-}
-
-export interface FavoriteScalarWhereInput {
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  updatedAt?: DateTimeInput;
-  updatedAt_not?: DateTimeInput;
-  updatedAt_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_lt?: DateTimeInput;
-  updatedAt_lte?: DateTimeInput;
-  updatedAt_gt?: DateTimeInput;
-  updatedAt_gte?: DateTimeInput;
-  AND?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
-  OR?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
-  NOT?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
 }
 
 export interface ArticleUpdateManyMutationInput {
@@ -1383,6 +1477,7 @@ export interface ArticleCreateWithoutAudiofilesInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserCreateOneWithoutArticlesInput;
   playlists?: PlaylistCreateManyWithoutArticleInput;
   archives?: ArchiveCreateManyWithoutArticleInput;
   favorites?: FavoriteCreateManyWithoutArticleInput;
@@ -1420,6 +1515,7 @@ export interface ArticleUpdateWithoutAudiofilesDataInput {
   ssml?: String;
   text?: String;
   sourceName?: String;
+  user?: UserUpdateOneWithoutArticlesInput;
   playlists?: PlaylistUpdateManyWithoutArticleInput;
   archives?: ArchiveUpdateManyWithoutArticleInput;
   favorites?: FavoriteUpdateManyWithoutArticleInput;
@@ -1461,6 +1557,7 @@ export interface UserCreateInput {
   playlist?: PlaylistCreateManyWithoutUserInput;
   archive?: ArchiveCreateManyWithoutUserInput;
   favorites?: FavoriteCreateManyWithoutUserInput;
+  articles?: ArticleCreateManyWithoutUserInput;
   authenticatedAt?: DateTimeInput;
   activatedAt?: DateTimeInput;
 }
@@ -1471,26 +1568,281 @@ export interface UserUpdateInput {
   playlist?: PlaylistUpdateManyWithoutUserInput;
   archive?: ArchiveUpdateManyWithoutUserInput;
   favorites?: FavoriteUpdateManyWithoutUserInput;
+  articles?: ArticleUpdateManyWithoutUserInput;
   authenticatedAt?: DateTimeInput;
   activatedAt?: DateTimeInput;
 }
 
-export interface PlaylistUpdateManyWithoutUserInput {
-  create?: PlaylistCreateWithoutUserInput[] | PlaylistCreateWithoutUserInput;
-  deleteMany?: PlaylistScalarWhereInput[] | PlaylistScalarWhereInput;
+export interface ArticleUpdateManyWithoutUserInput {
+  create?: ArticleCreateWithoutUserInput[] | ArticleCreateWithoutUserInput;
+  delete?: ArticleWhereUniqueInput[] | ArticleWhereUniqueInput;
+  connect?: ArticleWhereUniqueInput[] | ArticleWhereUniqueInput;
+  set?: ArticleWhereUniqueInput[] | ArticleWhereUniqueInput;
+  disconnect?: ArticleWhereUniqueInput[] | ArticleWhereUniqueInput;
+  update?:
+    | ArticleUpdateWithWhereUniqueWithoutUserInput[]
+    | ArticleUpdateWithWhereUniqueWithoutUserInput;
+  upsert?:
+    | ArticleUpsertWithWhereUniqueWithoutUserInput[]
+    | ArticleUpsertWithWhereUniqueWithoutUserInput;
+  deleteMany?: ArticleScalarWhereInput[] | ArticleScalarWhereInput;
   updateMany?:
-    | PlaylistUpdateManyWithWhereNestedInput[]
-    | PlaylistUpdateManyWithWhereNestedInput;
+    | ArticleUpdateManyWithWhereNestedInput[]
+    | ArticleUpdateManyWithWhereNestedInput;
 }
 
-export interface ArchiveUpdateManyWithoutUserInput {
-  create?: ArchiveCreateWithoutUserInput[] | ArchiveCreateWithoutUserInput;
-  deleteMany?: ArchiveScalarWhereInput[] | ArchiveScalarWhereInput;
+export interface ArticleUpdateWithWhereUniqueWithoutUserInput {
+  where: ArticleWhereUniqueInput;
+  data: ArticleUpdateWithoutUserDataInput;
 }
 
-export interface FavoriteUpdateManyWithoutUserInput {
-  create?: FavoriteCreateWithoutUserInput[] | FavoriteCreateWithoutUserInput;
-  deleteMany?: FavoriteScalarWhereInput[] | FavoriteScalarWhereInput;
+export interface ArticleUpdateWithoutUserDataInput {
+  title?: String;
+  description?: String;
+  url?: String;
+  imageUrl?: String;
+  readingTime?: Float;
+  language?: Language;
+  authorName?: String;
+  authorUrl?: String;
+  categoryName?: String;
+  html?: String;
+  ssml?: String;
+  text?: String;
+  sourceName?: String;
+  audiofiles?: AudiofileUpdateManyWithoutArticleInput;
+  playlists?: PlaylistUpdateManyWithoutArticleInput;
+  archives?: ArchiveUpdateManyWithoutArticleInput;
+  favorites?: FavoriteUpdateManyWithoutArticleInput;
+}
+
+export interface ArticleUpsertWithWhereUniqueWithoutUserInput {
+  where: ArticleWhereUniqueInput;
+  update: ArticleUpdateWithoutUserDataInput;
+  create: ArticleCreateWithoutUserInput;
+}
+
+export interface ArticleScalarWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  title?: String;
+  title_not?: String;
+  title_in?: String[] | String;
+  title_not_in?: String[] | String;
+  title_lt?: String;
+  title_lte?: String;
+  title_gt?: String;
+  title_gte?: String;
+  title_contains?: String;
+  title_not_contains?: String;
+  title_starts_with?: String;
+  title_not_starts_with?: String;
+  title_ends_with?: String;
+  title_not_ends_with?: String;
+  description?: String;
+  description_not?: String;
+  description_in?: String[] | String;
+  description_not_in?: String[] | String;
+  description_lt?: String;
+  description_lte?: String;
+  description_gt?: String;
+  description_gte?: String;
+  description_contains?: String;
+  description_not_contains?: String;
+  description_starts_with?: String;
+  description_not_starts_with?: String;
+  description_ends_with?: String;
+  description_not_ends_with?: String;
+  url?: String;
+  url_not?: String;
+  url_in?: String[] | String;
+  url_not_in?: String[] | String;
+  url_lt?: String;
+  url_lte?: String;
+  url_gt?: String;
+  url_gte?: String;
+  url_contains?: String;
+  url_not_contains?: String;
+  url_starts_with?: String;
+  url_not_starts_with?: String;
+  url_ends_with?: String;
+  url_not_ends_with?: String;
+  imageUrl?: String;
+  imageUrl_not?: String;
+  imageUrl_in?: String[] | String;
+  imageUrl_not_in?: String[] | String;
+  imageUrl_lt?: String;
+  imageUrl_lte?: String;
+  imageUrl_gt?: String;
+  imageUrl_gte?: String;
+  imageUrl_contains?: String;
+  imageUrl_not_contains?: String;
+  imageUrl_starts_with?: String;
+  imageUrl_not_starts_with?: String;
+  imageUrl_ends_with?: String;
+  imageUrl_not_ends_with?: String;
+  readingTime?: Float;
+  readingTime_not?: Float;
+  readingTime_in?: Float[] | Float;
+  readingTime_not_in?: Float[] | Float;
+  readingTime_lt?: Float;
+  readingTime_lte?: Float;
+  readingTime_gt?: Float;
+  readingTime_gte?: Float;
+  language?: Language;
+  language_not?: Language;
+  language_in?: Language[] | Language;
+  language_not_in?: Language[] | Language;
+  authorName?: String;
+  authorName_not?: String;
+  authorName_in?: String[] | String;
+  authorName_not_in?: String[] | String;
+  authorName_lt?: String;
+  authorName_lte?: String;
+  authorName_gt?: String;
+  authorName_gte?: String;
+  authorName_contains?: String;
+  authorName_not_contains?: String;
+  authorName_starts_with?: String;
+  authorName_not_starts_with?: String;
+  authorName_ends_with?: String;
+  authorName_not_ends_with?: String;
+  authorUrl?: String;
+  authorUrl_not?: String;
+  authorUrl_in?: String[] | String;
+  authorUrl_not_in?: String[] | String;
+  authorUrl_lt?: String;
+  authorUrl_lte?: String;
+  authorUrl_gt?: String;
+  authorUrl_gte?: String;
+  authorUrl_contains?: String;
+  authorUrl_not_contains?: String;
+  authorUrl_starts_with?: String;
+  authorUrl_not_starts_with?: String;
+  authorUrl_ends_with?: String;
+  authorUrl_not_ends_with?: String;
+  categoryName?: String;
+  categoryName_not?: String;
+  categoryName_in?: String[] | String;
+  categoryName_not_in?: String[] | String;
+  categoryName_lt?: String;
+  categoryName_lte?: String;
+  categoryName_gt?: String;
+  categoryName_gte?: String;
+  categoryName_contains?: String;
+  categoryName_not_contains?: String;
+  categoryName_starts_with?: String;
+  categoryName_not_starts_with?: String;
+  categoryName_ends_with?: String;
+  categoryName_not_ends_with?: String;
+  html?: String;
+  html_not?: String;
+  html_in?: String[] | String;
+  html_not_in?: String[] | String;
+  html_lt?: String;
+  html_lte?: String;
+  html_gt?: String;
+  html_gte?: String;
+  html_contains?: String;
+  html_not_contains?: String;
+  html_starts_with?: String;
+  html_not_starts_with?: String;
+  html_ends_with?: String;
+  html_not_ends_with?: String;
+  ssml?: String;
+  ssml_not?: String;
+  ssml_in?: String[] | String;
+  ssml_not_in?: String[] | String;
+  ssml_lt?: String;
+  ssml_lte?: String;
+  ssml_gt?: String;
+  ssml_gte?: String;
+  ssml_contains?: String;
+  ssml_not_contains?: String;
+  ssml_starts_with?: String;
+  ssml_not_starts_with?: String;
+  ssml_ends_with?: String;
+  ssml_not_ends_with?: String;
+  text?: String;
+  text_not?: String;
+  text_in?: String[] | String;
+  text_not_in?: String[] | String;
+  text_lt?: String;
+  text_lte?: String;
+  text_gt?: String;
+  text_gte?: String;
+  text_contains?: String;
+  text_not_contains?: String;
+  text_starts_with?: String;
+  text_not_starts_with?: String;
+  text_ends_with?: String;
+  text_not_ends_with?: String;
+  sourceName?: String;
+  sourceName_not?: String;
+  sourceName_in?: String[] | String;
+  sourceName_not_in?: String[] | String;
+  sourceName_lt?: String;
+  sourceName_lte?: String;
+  sourceName_gt?: String;
+  sourceName_gte?: String;
+  sourceName_contains?: String;
+  sourceName_not_contains?: String;
+  sourceName_starts_with?: String;
+  sourceName_not_starts_with?: String;
+  sourceName_ends_with?: String;
+  sourceName_not_ends_with?: String;
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  AND?: ArticleScalarWhereInput[] | ArticleScalarWhereInput;
+  OR?: ArticleScalarWhereInput[] | ArticleScalarWhereInput;
+  NOT?: ArticleScalarWhereInput[] | ArticleScalarWhereInput;
+}
+
+export interface ArticleUpdateManyWithWhereNestedInput {
+  where: ArticleScalarWhereInput;
+  data: ArticleUpdateManyDataInput;
+}
+
+export interface ArticleUpdateManyDataInput {
+  title?: String;
+  description?: String;
+  url?: String;
+  imageUrl?: String;
+  readingTime?: Float;
+  language?: Language;
+  authorName?: String;
+  authorUrl?: String;
+  categoryName?: String;
+  html?: String;
+  ssml?: String;
+  text?: String;
+  sourceName?: String;
 }
 
 export interface UserUpdateManyMutationInput {
@@ -1632,6 +1984,15 @@ export interface UserPromise extends Promise<User>, Fragmentable {
     first?: Int;
     last?: Int;
   }) => T;
+  articles: <T = FragmentableArray<Article>>(args?: {
+    where?: ArticleWhereInput;
+    orderBy?: ArticleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
   authenticatedAt: () => Promise<DateTimeOutput>;
   activatedAt: () => Promise<DateTimeOutput>;
   createdAt: () => Promise<DateTimeOutput>;
@@ -1665,6 +2026,15 @@ export interface UserSubscription
   favorites: <T = Promise<AsyncIterator<FavoriteSubscription>>>(args?: {
     where?: FavoriteWhereInput;
     orderBy?: FavoriteOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
+  articles: <T = Promise<AsyncIterator<ArticleSubscription>>>(args?: {
+    where?: ArticleWhereInput;
+    orderBy?: ArticleOrderByInput;
     skip?: Int;
     after?: String;
     before?: String;
@@ -1735,6 +2105,7 @@ export interface ArticlePromise extends Promise<Article>, Fragmentable {
   ssml: () => Promise<String>;
   text: () => Promise<String>;
   sourceName: () => Promise<String>;
+  user: <T = UserPromise>() => T;
   audiofiles: <T = FragmentableArray<Audiofile>>(args?: {
     where?: AudiofileWhereInput;
     orderBy?: AudiofileOrderByInput;
@@ -1792,6 +2163,7 @@ export interface ArticleSubscription
   ssml: () => Promise<AsyncIterator<String>>;
   text: () => Promise<AsyncIterator<String>>;
   sourceName: () => Promise<AsyncIterator<String>>;
+  user: <T = UserSubscription>() => T;
   audiofiles: <T = Promise<AsyncIterator<AudiofileSubscription>>>(args?: {
     where?: AudiofileWhereInput;
     orderBy?: AudiofileOrderByInput;

@@ -7,6 +7,9 @@ const MESSAGE_ME_EMAIL_REQUIRED = 'E-mail address is required.';
 const MESSAGE_ME_PASSWORD_REQUIRED = 'Password is required.';
 const MESSAGE_ME_NOT_DELETED = 'Your account is not deleted. Probably because it is already deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
+const MESSAGE_ME_ARTICLE_ID_REQUIRED = 'ArticleId needs to be present.';
+const MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND = 'The Article you want to favorite is not found.';
+const MESSAGE_ME_FAVORITE_ARTICLE_EXISTS = 'This article is already in your favorites, you cannot favorite it again.';
 
 const getMe = async (req, res) => {
   const { id } = req.user;
@@ -96,14 +99,97 @@ const deleteMe = async (req, res) => {
 
   const deletedUser = await prisma.deleteUser({ id });
 
-  if (!deletedUser) return res.status(403).json({ message: MESSAGE_ME_NOT_DELETED });
+  if (!deletedUser) return res.status(400).json({ message: MESSAGE_ME_NOT_DELETED });
 
   return res.json({ message: MESSAGE_ME_DELETED });
+};
+
+const createFavoriteArticle = async (req, res) => {
+  const userId = req.user.id;
+  const { articleId } = req.body;
+
+  if (!articleId) return res.status(400).json({ message: MESSAGE_ME_ARTICLE_ID_REQUIRED });
+
+  const article = await prisma.article({ id: articleId });
+
+  if (!article) return res.status(400).json({ message: MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND });
+
+  const hasFavorite = await prisma.$exists.favorite({
+    article: {
+      id: articleId
+    },
+    user: {
+      id: userId
+    }
+  });
+
+  if (hasFavorite) return res.status(400).json({ message: MESSAGE_ME_FAVORITE_ARTICLE_EXISTS });
+
+  const favoriteArticle = await prisma.createFavorite({
+    article: {
+      connect: {
+        id: articleId
+      }
+    },
+    user: {
+      connect: {
+        id: userId
+      }
+    }
+  }).article();
+
+  return res.json(favoriteArticle);
+};
+
+const findAllFavoriteArticles = async (req, res) => {
+  const userId = req.user.id;
+
+  const fragment = `
+    fragment BasicArticle on Article {
+      article {
+        id
+        title
+        description
+        url
+        sourceName
+        authorName
+        language
+      }
+    }
+  `;
+
+  const favorites = await prisma
+    .user({ id: userId })
+    .favorites({ orderBy: 'createdAt_DESC' })
+    .$fragment(fragment);
+
+  if (!favorites.length) return res.json([]);
+
+  const articles = favorites.length && favorites.map(favorite => favorite.article);
+
+  return res.json(articles);
+};
+
+const findAllCreatedArticles = async (req, res) => {
+  const userId = req.user.id;
+
+  const articles = await prisma.articles({
+    where: {
+      user: {
+        id: userId
+      }
+    }
+  });
+
+  return res.json(articles);
 };
 
 module.exports = {
   getMe,
   patchMeEmail,
   patchMePassword,
-  deleteMe
+  deleteMe,
+  findAllFavoriteArticles,
+  createFavoriteArticle,
+  findAllCreatedArticles
 };

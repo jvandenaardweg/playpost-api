@@ -17,12 +17,22 @@ const postAuth = async (req, res) => {
 
   const user = await prisma.user({ email });
 
-  if (!user) return res.status(403).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
+  if (!user) return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
 
   const isValidPassword = await bcrypt.compare(password, user.password);
 
   // TODO: Log tries for security
-  if (!isValidPassword) return res.status(403).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
+  if (!isValidPassword) return res.status(400).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
+
+  // Set a date to remember when the user last logged in
+  await prisma.updateUser({
+    data: {
+      authenticatedAt: new Date()
+    },
+    where: {
+      id: user.id
+    }
+  });
 
   // We use the e-mail in the token as an extra way to get some easy context during debugging
   // For example, we can use the email in Sentry to maybe contact the user

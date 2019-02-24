@@ -19,7 +19,8 @@ type User {
   password: String!
   playlist: [Playlist!]! @relation(name: "UserToPlaylist", onDelete: CASCADE) # When a user is deleted, delete it's playlist
   archive: [Archive!]! @relation(name: "UserToArchive", onDelete: CASCADE) # When a user is deleted, delete it's archive
-  favorites: [Favorite!]! @relation(name: "UserToFavorite", onDelete: CASCADE) # When a user is deleted, delete it's favorites
+  favorites: [Favorite]! @relation(name: "UserToFavorite", onDelete: CASCADE) # When a user is deleted, delete it's favorites
+  articles: [Article!]! @relation(name: "ArticleCreator", onDelete: SET_NULL) # When a user is deleted, set user to null on article
   authenticatedAt: DateTime
   activatedAt: DateTime
   createdAt: DateTime!
@@ -80,7 +81,7 @@ type Article {
   ssml: String # The generated SSML using <speak> <p> etc...
   text: String # Plain text of the article, using `\n` for new lines
   sourceName: String
-  # user: User # A reference to which user created this article, we generally don't return this to other users , TODO: what happens when we delete a user?
+  user: User @relation(name: "ArticleCreator") # A reference to which user created this article, we generally don't return this to other users , TODO: what happens when we delete a user?
   audiofiles: [Audiofile]! @relation(name: "ArticleAudiofiles", onDelete: CASCADE) # When we delete an article, we delete all audiofiles
   playlists: [Playlist!]! @relation(name: "ArticleToPlaylist")
   archives: [Archive!]! @relation(name: "ArticleToArchive")

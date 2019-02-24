@@ -165,6 +165,7 @@ type Article {
   ssml: String
   text: String
   sourceName: String
+  user: User
   audiofiles(where: AudiofileWhereInput, orderBy: AudiofileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Audiofile!]
   playlists(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist!]
   archives(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive!]
@@ -193,10 +194,16 @@ input ArticleCreateInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserCreateOneWithoutArticlesInput
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+input ArticleCreateManyWithoutUserInput {
+  create: [ArticleCreateWithoutUserInput!]
+  connect: [ArticleWhereUniqueInput!]
 }
 
 input ArticleCreateOneWithoutArchivesInput {
@@ -233,6 +240,7 @@ input ArticleCreateWithoutArchivesInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserCreateOneWithoutArticlesInput
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
@@ -252,6 +260,7 @@ input ArticleCreateWithoutAudiofilesInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserCreateOneWithoutArticlesInput
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
@@ -271,6 +280,7 @@ input ArticleCreateWithoutFavoritesInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserCreateOneWithoutArticlesInput
   audiofiles: AudiofileCreateManyWithoutArticleInput
   playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
@@ -290,7 +300,28 @@ input ArticleCreateWithoutPlaylistsInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserCreateOneWithoutArticlesInput
   audiofiles: AudiofileCreateManyWithoutArticleInput
+  archives: ArchiveCreateManyWithoutArticleInput
+  favorites: FavoriteCreateManyWithoutArticleInput
+}
+
+input ArticleCreateWithoutUserInput {
+  title: String!
+  description: String
+  url: String!
+  imageUrl: String
+  readingTime: Float
+  language: Language!
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  audiofiles: AudiofileCreateManyWithoutArticleInput
+  playlists: PlaylistCreateManyWithoutArticleInput
   archives: ArchiveCreateManyWithoutArticleInput
   favorites: FavoriteCreateManyWithoutArticleInput
 }
@@ -354,6 +385,208 @@ type ArticlePreviousValues {
   updatedAt: DateTime!
 }
 
+input ArticleScalarWhereInput {
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
+  title: String
+  title_not: String
+  title_in: [String!]
+  title_not_in: [String!]
+  title_lt: String
+  title_lte: String
+  title_gt: String
+  title_gte: String
+  title_contains: String
+  title_not_contains: String
+  title_starts_with: String
+  title_not_starts_with: String
+  title_ends_with: String
+  title_not_ends_with: String
+  description: String
+  description_not: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_lt: String
+  description_lte: String
+  description_gt: String
+  description_gte: String
+  description_contains: String
+  description_not_contains: String
+  description_starts_with: String
+  description_not_starts_with: String
+  description_ends_with: String
+  description_not_ends_with: String
+  url: String
+  url_not: String
+  url_in: [String!]
+  url_not_in: [String!]
+  url_lt: String
+  url_lte: String
+  url_gt: String
+  url_gte: String
+  url_contains: String
+  url_not_contains: String
+  url_starts_with: String
+  url_not_starts_with: String
+  url_ends_with: String
+  url_not_ends_with: String
+  imageUrl: String
+  imageUrl_not: String
+  imageUrl_in: [String!]
+  imageUrl_not_in: [String!]
+  imageUrl_lt: String
+  imageUrl_lte: String
+  imageUrl_gt: String
+  imageUrl_gte: String
+  imageUrl_contains: String
+  imageUrl_not_contains: String
+  imageUrl_starts_with: String
+  imageUrl_not_starts_with: String
+  imageUrl_ends_with: String
+  imageUrl_not_ends_with: String
+  readingTime: Float
+  readingTime_not: Float
+  readingTime_in: [Float!]
+  readingTime_not_in: [Float!]
+  readingTime_lt: Float
+  readingTime_lte: Float
+  readingTime_gt: Float
+  readingTime_gte: Float
+  language: Language
+  language_not: Language
+  language_in: [Language!]
+  language_not_in: [Language!]
+  authorName: String
+  authorName_not: String
+  authorName_in: [String!]
+  authorName_not_in: [String!]
+  authorName_lt: String
+  authorName_lte: String
+  authorName_gt: String
+  authorName_gte: String
+  authorName_contains: String
+  authorName_not_contains: String
+  authorName_starts_with: String
+  authorName_not_starts_with: String
+  authorName_ends_with: String
+  authorName_not_ends_with: String
+  authorUrl: String
+  authorUrl_not: String
+  authorUrl_in: [String!]
+  authorUrl_not_in: [String!]
+  authorUrl_lt: String
+  authorUrl_lte: String
+  authorUrl_gt: String
+  authorUrl_gte: String
+  authorUrl_contains: String
+  authorUrl_not_contains: String
+  authorUrl_starts_with: String
+  authorUrl_not_starts_with: String
+  authorUrl_ends_with: String
+  authorUrl_not_ends_with: String
+  categoryName: String
+  categoryName_not: String
+  categoryName_in: [String!]
+  categoryName_not_in: [String!]
+  categoryName_lt: String
+  categoryName_lte: String
+  categoryName_gt: String
+  categoryName_gte: String
+  categoryName_contains: String
+  categoryName_not_contains: String
+  categoryName_starts_with: String
+  categoryName_not_starts_with: String
+  categoryName_ends_with: String
+  categoryName_not_ends_with: String
+  html: String
+  html_not: String
+  html_in: [String!]
+  html_not_in: [String!]
+  html_lt: String
+  html_lte: String
+  html_gt: String
+  html_gte: String
+  html_contains: String
+  html_not_contains: String
+  html_starts_with: String
+  html_not_starts_with: String
+  html_ends_with: String
+  html_not_ends_with: String
+  ssml: String
+  ssml_not: String
+  ssml_in: [String!]
+  ssml_not_in: [String!]
+  ssml_lt: String
+  ssml_lte: String
+  ssml_gt: String
+  ssml_gte: String
+  ssml_contains: String
+  ssml_not_contains: String
+  ssml_starts_with: String
+  ssml_not_starts_with: String
+  ssml_ends_with: String
+  ssml_not_ends_with: String
+  text: String
+  text_not: String
+  text_in: [String!]
+  text_not_in: [String!]
+  text_lt: String
+  text_lte: String
+  text_gt: String
+  text_gte: String
+  text_contains: String
+  text_not_contains: String
+  text_starts_with: String
+  text_not_starts_with: String
+  text_ends_with: String
+  text_not_ends_with: String
+  sourceName: String
+  sourceName_not: String
+  sourceName_in: [String!]
+  sourceName_not_in: [String!]
+  sourceName_lt: String
+  sourceName_lte: String
+  sourceName_gt: String
+  sourceName_gte: String
+  sourceName_contains: String
+  sourceName_not_contains: String
+  sourceName_starts_with: String
+  sourceName_not_starts_with: String
+  sourceName_ends_with: String
+  sourceName_not_ends_with: String
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  AND: [ArticleScalarWhereInput!]
+  OR: [ArticleScalarWhereInput!]
+  NOT: [ArticleScalarWhereInput!]
+}
+
 type ArticleSubscriptionPayload {
   mutation: MutationType!
   node: Article
@@ -386,10 +619,27 @@ input ArticleUpdateInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserUpdateOneWithoutArticlesInput
   audiofiles: AudiofileUpdateManyWithoutArticleInput
   playlists: PlaylistUpdateManyWithoutArticleInput
   archives: ArchiveUpdateManyWithoutArticleInput
   favorites: FavoriteUpdateManyWithoutArticleInput
+}
+
+input ArticleUpdateManyDataInput {
+  title: String
+  description: String
+  url: String
+  imageUrl: String
+  readingTime: Float
+  language: Language
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
 }
 
 input ArticleUpdateManyMutationInput {
@@ -406,6 +656,23 @@ input ArticleUpdateManyMutationInput {
   ssml: String
   text: String
   sourceName: String
+}
+
+input ArticleUpdateManyWithoutUserInput {
+  create: [ArticleCreateWithoutUserInput!]
+  delete: [ArticleWhereUniqueInput!]
+  connect: [ArticleWhereUniqueInput!]
+  set: [ArticleWhereUniqueInput!]
+  disconnect: [ArticleWhereUniqueInput!]
+  update: [ArticleUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [ArticleUpsertWithWhereUniqueWithoutUserInput!]
+  deleteMany: [ArticleScalarWhereInput!]
+  updateMany: [ArticleUpdateManyWithWhereNestedInput!]
+}
+
+input ArticleUpdateManyWithWhereNestedInput {
+  where: ArticleScalarWhereInput!
+  data: ArticleUpdateManyDataInput!
 }
 
 input ArticleUpdateOneRequiredWithoutAudiofilesInput {
@@ -429,14 +696,46 @@ input ArticleUpdateWithoutAudiofilesDataInput {
   ssml: String
   text: String
   sourceName: String
+  user: UserUpdateOneWithoutArticlesInput
   playlists: PlaylistUpdateManyWithoutArticleInput
   archives: ArchiveUpdateManyWithoutArticleInput
   favorites: FavoriteUpdateManyWithoutArticleInput
 }
 
+input ArticleUpdateWithoutUserDataInput {
+  title: String
+  description: String
+  url: String
+  imageUrl: String
+  readingTime: Float
+  language: Language
+  authorName: String
+  authorUrl: String
+  categoryName: String
+  html: String
+  ssml: String
+  text: String
+  sourceName: String
+  audiofiles: AudiofileUpdateManyWithoutArticleInput
+  playlists: PlaylistUpdateManyWithoutArticleInput
+  archives: ArchiveUpdateManyWithoutArticleInput
+  favorites: FavoriteUpdateManyWithoutArticleInput
+}
+
+input ArticleUpdateWithWhereUniqueWithoutUserInput {
+  where: ArticleWhereUniqueInput!
+  data: ArticleUpdateWithoutUserDataInput!
+}
+
 input ArticleUpsertWithoutAudiofilesInput {
   update: ArticleUpdateWithoutAudiofilesDataInput!
   create: ArticleCreateWithoutAudiofilesInput!
+}
+
+input ArticleUpsertWithWhereUniqueWithoutUserInput {
+  where: ArticleWhereUniqueInput!
+  update: ArticleUpdateWithoutUserDataInput!
+  create: ArticleCreateWithoutUserInput!
 }
 
 input ArticleWhereInput {
@@ -620,6 +919,7 @@ input ArticleWhereInput {
   sourceName_not_starts_with: String
   sourceName_ends_with: String
   sourceName_not_ends_with: String
+  user: UserWhereInput
   audiofiles_every: AudiofileWhereInput
   audiofiles_some: AudiofileWhereInput
   audiofiles_none: AudiofileWhereInput
@@ -1417,6 +1717,7 @@ type User {
   playlist(where: PlaylistWhereInput, orderBy: PlaylistOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Playlist!]
   archive(where: ArchiveWhereInput, orderBy: ArchiveOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Archive!]
   favorites(where: FavoriteWhereInput, orderBy: FavoriteOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Favorite!]
+  articles(where: ArticleWhereInput, orderBy: ArticleOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Article!]
   authenticatedAt: DateTime
   activatedAt: DateTime
   createdAt: DateTime!
@@ -1435,12 +1736,18 @@ input UserCreateInput {
   playlist: PlaylistCreateManyWithoutUserInput
   archive: ArchiveCreateManyWithoutUserInput
   favorites: FavoriteCreateManyWithoutUserInput
+  articles: ArticleCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
 }
 
 input UserCreateOneWithoutArchiveInput {
   create: UserCreateWithoutArchiveInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutArticlesInput {
+  create: UserCreateWithoutArticlesInput
   connect: UserWhereUniqueInput
 }
 
@@ -1459,6 +1766,17 @@ input UserCreateWithoutArchiveInput {
   password: String!
   playlist: PlaylistCreateManyWithoutUserInput
   favorites: FavoriteCreateManyWithoutUserInput
+  articles: ArticleCreateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+}
+
+input UserCreateWithoutArticlesInput {
+  email: String!
+  password: String!
+  playlist: PlaylistCreateManyWithoutUserInput
+  archive: ArchiveCreateManyWithoutUserInput
+  favorites: FavoriteCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
 }
@@ -1468,6 +1786,7 @@ input UserCreateWithoutFavoritesInput {
   password: String!
   playlist: PlaylistCreateManyWithoutUserInput
   archive: ArchiveCreateManyWithoutUserInput
+  articles: ArticleCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
 }
@@ -1477,6 +1796,7 @@ input UserCreateWithoutPlaylistInput {
   password: String!
   archive: ArchiveCreateManyWithoutUserInput
   favorites: FavoriteCreateManyWithoutUserInput
+  articles: ArticleCreateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
 }
@@ -1537,6 +1857,7 @@ input UserUpdateInput {
   playlist: PlaylistUpdateManyWithoutUserInput
   archive: ArchiveUpdateManyWithoutUserInput
   favorites: FavoriteUpdateManyWithoutUserInput
+  articles: ArticleUpdateManyWithoutUserInput
   authenticatedAt: DateTime
   activatedAt: DateTime
 }
@@ -1546,6 +1867,30 @@ input UserUpdateManyMutationInput {
   password: String
   authenticatedAt: DateTime
   activatedAt: DateTime
+}
+
+input UserUpdateOneWithoutArticlesInput {
+  create: UserCreateWithoutArticlesInput
+  update: UserUpdateWithoutArticlesDataInput
+  upsert: UserUpsertWithoutArticlesInput
+  delete: Boolean
+  disconnect: Boolean
+  connect: UserWhereUniqueInput
+}
+
+input UserUpdateWithoutArticlesDataInput {
+  email: String
+  password: String
+  playlist: PlaylistUpdateManyWithoutUserInput
+  archive: ArchiveUpdateManyWithoutUserInput
+  favorites: FavoriteUpdateManyWithoutUserInput
+  authenticatedAt: DateTime
+  activatedAt: DateTime
+}
+
+input UserUpsertWithoutArticlesInput {
+  update: UserUpdateWithoutArticlesDataInput!
+  create: UserCreateWithoutArticlesInput!
 }
 
 input UserWhereInput {
@@ -1600,6 +1945,9 @@ input UserWhereInput {
   favorites_every: FavoriteWhereInput
   favorites_some: FavoriteWhereInput
   favorites_none: FavoriteWhereInput
+  articles_every: ArticleWhereInput
+  articles_some: ArticleWhereInput
+  articles_none: ArticleWhereInput
   authenticatedAt: DateTime
   authenticatedAt_not: DateTime
   authenticatedAt_in: [DateTime!]

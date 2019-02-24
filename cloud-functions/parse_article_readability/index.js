@@ -1,5 +1,5 @@
-const extractors = require('./extractors/readability');
 const fetch = require('node-fetch');
+const extractors = require('../../src/extractors/readability');
 
 exports.getArticle = (req, res) => {
     fetch(req.query.url)

@@ -1,8 +1,8 @@
 
-const synthesize = require('../../synthesizers/google');
-const dataSource = require('../../data-sources/medium');
-const utils = require('../../utils');
-const storage = require('../../storage/google-cloud');
+const synthesize = require('../synthesizers/google');
+const dataSource = require('../data-sources/medium');
+const utils = require('../utils');
+const storage = require('../storage/google-cloud');
 
 const getAudiofile = async (req, res) => {
   const { url } = req.query;
@@ -11,7 +11,7 @@ const getAudiofile = async (req, res) => {
 
   const normalizedUrl = url.toLowerCase();
 
-  if (!normalizedUrl.includes('medium.com')) return res.status(400).json({ message: 'We only allow Medium URLs for now.' });
+  // if (!normalizedUrl.includes('medium.com')) return res.status(400).json({ message: 'We only allow Medium URLs for now.' });
 
   // Get the Medium Post ID from the URL
   // If the URL is incorrect, we error
@@ -24,7 +24,7 @@ const getAudiofile = async (req, res) => {
     synthesizer: 'Google', // or Amazon
     languageCode: 'en-US', // or en-GB, en-AU
     name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A
-    source: 'medium-com', // or cnn-com
+    source: 'medium-com' // or cnn-com
   };
 
   // Create an upload path based on the synthesizer options
@@ -81,16 +81,15 @@ const getAudiofile = async (req, res) => {
   const publicFileUrl = await storage.uploadFile(
     concatinatedLocalAudiofilePath,
     uploadPath,
+    synthesizerOptions
   );
 
   // TODO: Store all this data in a database
 
   // Cleanup the local audiofiles, we don't need that anymore
-  const removedFile = await utils.local.removeFile(
+  await utils.local.removeFile(
     `${global.appRoot}/temp/${synthesizerOptions.source}/${articleId}`,
   );
-
-  console.log('Removed temp file', removedFile);
 
   console.log('Done!');
 

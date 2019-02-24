@@ -29,7 +29,7 @@ const postUsers = async (req, res) => {
   });
 
   // Send a token within a successful signup, so we can log the user in right away
-  const token = jwt.sign({ id: createdUser.id }, JWT_SECRET);
+  const token = jwt.sign({ id: createdUser.id, email: createdUser.email }, JWT_SECRET);
 
   return res.json({ token });
 };

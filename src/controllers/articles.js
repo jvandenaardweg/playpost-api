@@ -1,48 +1,24 @@
 const { prisma } = require('../../generated/prisma-client');
-const { crawl } = require('../../extractors/mercury');
-const { detectLanguage } = require('../../utils/detect-language');
+const { crawl } = require('../extractors/mercury');
+const { detectLanguage } = require('../utils/detect-language');
 
 const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
 const MESSAGE_ARTICLE_USER_NOT_FOUND = 'User not found. You are not logged in, or your account is deleted.';
 const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
 
 const postArticles = async (req, res) => {
-  const exampleUserId = 'cjse81h67005t0754uiuiwb12';
-
+  const userId = req.user.id;
   const { url } = req.body;
 
   if (!url) return res.status(400).json({ message: MESSAGE_ARTICLE_URL_REQUIRED });
 
-  const user = await prisma.user({ id: exampleUserId });
+  const user = await prisma.user({ id: userId });
 
   if (!user) return res.status(400).json({ message: MESSAGE_ARTICLE_USER_NOT_FOUND });
 
   const article = await prisma.article({ url });
 
-  if (article) {
-    return res.status(400).json({ message: MESSAGE_ARTICLE_EXISTS, article });
-  }
-
-  // if (article) {
-  //   // Connect article to the playlist of the current user,
-  //   // so it becomes available in his playlist
-  //   const updatedPlaylist = await prisma.updateArticle({
-  //     data: {
-  //       playlists: {
-  //         create: {
-  //           user,
-  //           article
-  //         }
-  //       }
-  //     },
-  //     where: {
-  //       id: article.id
-  //     }
-  //   })
-  // return res.json({
-  //   message: `Article already exists in database, we just add it to the users playlist.`
-  // })
-  // }
+  if (article) return res.status(400).json({ message: MESSAGE_ARTICLE_EXISTS, article });
 
   const {
     title,
@@ -69,7 +45,7 @@ const postArticles = async (req, res) => {
 */
 
   /* eslint-disable no-console */
-  console.log('user', user);
+  // console.log('user', user);
 
   const createdArticle = await prisma.createArticle({
     title,
@@ -80,17 +56,9 @@ const postArticles = async (req, res) => {
     language: 'EN',
     user: {
       connect: {
-        id: exampleUserId,
+        id: userId,
       },
-    },
-    playlists: {
-      connect: {
-        user: {
-          id: exampleUserId,
-        },
-        order: 0,
-      },
-    },
+    }
   });
 
   // Create an article with preview data: url, title, description, language and sourceName

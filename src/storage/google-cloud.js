@@ -1,29 +1,21 @@
 require('dotenv').config();
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
 
 const { getGoogleCloudCredentials } = require('../utils/credentials');
-const { Storage } = require('@google-cloud/storage');
+
 const storage = new Storage(getGoogleCloudCredentials());
 
 const BUCKET_NAME = 'synthesized-audio-files';
 
+/* eslint-disable no-console */
 const getPublicFileUrl = (uploadedFileObject) => {
-  let bucket
-  let name
-
-  if (Array.isArray(uploadedFileObject)) {
-    bucket = uploadedFileObject[1].bucket;
-    name = uploadedFileObject[1].name;
-  } else {
-    bucket = uploadedFileObject.bucket;
-    name = uploadedFileObject.name;
-  }
+  const { bucket, name } = (Array.isArray(uploadedFileObject)) ? uploadedFileObject[1] : uploadedFileObject;
   // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
-
   return `https://storage.googleapis.com/${bucket}/${name}`;
-}
+};
 
-const uploadFile = async (filePath, uploadPath) => {
+const uploadFile = async (filePath, uploadPath, synthesizerOptions) => {
   console.log(`Uploading file "${filePath}" to Google Cloud Storage bucket "${BUCKET_NAME}" in directory "${uploadPath}"...`);
 
   // TODO: Make sure the "uploadPath" exists in the cloud
@@ -32,12 +24,25 @@ const uploadFile = async (filePath, uploadPath) => {
     const filename = path.basename(filePath);
     const destination = `${uploadPath}/${filename}`;
 
+    const {
+      synthesizer,
+      languageCode,
+      name,
+      source
+    } = synthesizerOptions;
+
     // Uploads a local file to the bucket
     // https://www.googleapis.com/storage/v1/b/synthesized-audio-files/o/13eda868daeb.mp3
     const uploadedFile = await storage.bucket(BUCKET_NAME).upload(filePath, {
       destination,
       gzip: true,
       metadata: {
+        metadata: {
+          synthesizer,
+          languageCode,
+          name,
+          source,
+        },
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
         // (If the contents will change, use cacheControl: 'no-cache')
@@ -49,19 +54,17 @@ const uploadFile = async (filePath, uploadPath) => {
     console.log(`Uploaded file: ${publicFileUrl}`);
     return publicFileUrl;
   } catch (err) {
-    return new Error(err)
+    return new Error(err);
   }
-}
+};
 
 const listFiles = async () => {
   // Lists files in the bucket
   const [files] = await storage.bucket(BUCKET_NAME).getFiles();
 
   console.log('Files:');
-  files.forEach(file => {
-    console.log(file.name);
-  });
-}
+  files.forEach(file => console.log(file.name));
+};
 
 const listFilesByPrefix = async (prefix, delimiter) => {
   // const bucketName = 'Name of a bucket, e.g. my-bucket';
@@ -88,7 +91,7 @@ const listFilesByPrefix = async (prefix, delimiter) => {
    *   /a/1.txt
    */
   const options = {
-    prefix: prefix,
+    prefix
   };
 
   if (delimiter) {
@@ -99,7 +102,12 @@ const listFilesByPrefix = async (prefix, delimiter) => {
   const [files] = await storage.bucket(BUCKET_NAME).getFiles(options);
 
   // console.log('Files:');
-  return files
-}
+  return files;
+};
 
-module.exports = { uploadFile, listFiles, listFilesByPrefix, getPublicFileUrl }
+module.exports = {
+  uploadFile,
+  listFiles,
+  listFilesByPrefix,
+  getPublicFileUrl
+};

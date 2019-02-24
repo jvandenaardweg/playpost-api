@@ -5,3 +5,4 @@ datamodel: datamodel.prisma
 generate:
   - generator: javascript-client
     output: ./generated/prisma-client/
+secret: MQ1gswkegQ793ZMO0zveHLnx46VVOHSz

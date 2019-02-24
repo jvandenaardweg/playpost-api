@@ -1,3 +1,4 @@
+// @ts-check
 const path = require('path');
 const express = require('express');
 require('express-async-errors');
@@ -43,7 +44,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // API Endpoints
 app.get('/audiofile', audiofileController.getAudiofile); // Legacy, now in use by our iOS App
 
+app.get('/v1/audiofile', audiofileController.getAudiofile); // Legacy, now in use by our iOS App
+
+
+app.post('/v1/users', usersController.postUsers); // Creating of users is not protected by a login ofcourse
+app.get('/v1/users/:userId', IS_PROTECTED, meController.getMe);
+app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUsers);
+// app.patch('/v1/users/:userId/email', IS_PROTECTED, usersController.deleteUsers);
+// app.patch('/v1/users/:userId/password', IS_PROTECTED, usersController.deleteUsers);
+// app.get('/v1/users/:userId/playlists', IS_PROTECTED, meController.getMe);
+// app.get('/v1/users/:userId/favorites', IS_PROTECTED, meController.getMe);
+// app.get('/v1/users/:userId/archives', IS_PROTECTED, meController.getMe);
+
 app.get('/v1/me', IS_PROTECTED, meController.getMe);
+app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
+app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
+app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
+
+
+
+// app.get('/v1/me/playlist', IS_PROTECTED, meController.findAllPlaylist);
+// app.post('/v1/me/playlist', IS_PROTECTED, meController.createPlaylist);
+// app.get('/v1/me/archive', IS_PROTECTED, meController.findAllArchive);
+// app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavorites);
+// app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavorite);
 app.patch('/v1/me/email', IS_PROTECTED, meController.patchMeEmail);
 app.patch('/v1/me/password', IS_PROTECTED, meController.patchMePassword);
 app.delete('/v1/me', IS_PROTECTED, meController.deleteMe);
@@ -61,27 +85,24 @@ app.get('/v1/favorites', IS_PROTECTED, favoritesController.getFavorites);
 app.post('/v1/favorites', IS_PROTECTED, favoritesController.postFavorites);
 app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorites);
 
-app.post('/v1/users', usersController.postUsers); // Creating of users is not protected by a login ofcourse
-app.delete('/v1/users', IS_PROTECTED, usersController.deleteUsers);
-
 app.post('/v1/auth', authController.postAuth);
 
 app.post('/v1/articles', IS_PROTECTED, articlesController.postArticles);
 app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.getArticlesById);
 
-app.get('/v1/articles/:articleId/audiofile', IS_PROTECTED, articlesController.getAudiofileByArticleId);
-app.post('/v1/articles/:articleId/audiofile', IS_PROTECTED, articlesController.postAudiofileByArticleId);
+app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.getAudiofileByArticleId);
+app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.postAudiofileByArticleId);
 
-app.post('/v1/articles/:articleId/favorite', IS_PROTECTED, articlesController.postFavoriteByArticleId);
-app.delete('/v1/articles/:articleId/favorite', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
+app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
+app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
 
-app.post('/v1/articles/:articleId/archive', IS_PROTECTED, articlesController.postArchiveByArticleId);
-app.delete('/v1/articles/:articleId/archive', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
+app.post('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.postArchiveByArticleId);
+app.delete('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
 
-app.post('/v1/articles/:articleId/playlist', IS_PROTECTED, articlesController.postPlaylistByArticleId);
-app.delete('/v1/articles/:articleId/playlist', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
+app.post('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.postPlaylistByArticleId);
+app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
-app.all('*', async (req, res) => res.json({ message: `No route found for ${req.method} ${req.url}` }));
+app.all('*', async (req, res) => res.status(404).json({ message: `No route found for ${req.method} ${req.url}` }));
 
 // Handle error exceptions
 app.use((err, req, res, next) => {
