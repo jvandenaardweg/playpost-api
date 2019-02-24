@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const Sentry = require('@sentry/node');
 const passport = require('passport');
 const helmet = require('helmet');
+const compression = require('compression');
 
 const audiofileController = require('./src/controllers/audiofile.js');
 const meController = require('./src/controllers/me.js');
@@ -23,6 +24,7 @@ global.appRoot = path.resolve(__dirname);
 
 const app = express();
 app.use(helmet());
+app.use(compression());
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
