@@ -1,5 +1,5 @@
 
-const synthesize = require('../synthesizers/google');
+const synthesizers = require('../synthesizers');
 const dataSource = require('../data-sources/medium');
 const utils = require('../utils');
 const storage = require('../storage/google-cloud');
@@ -55,7 +55,7 @@ const getAudiofile = async (req, res) => {
   const ssmlParts = await utils.ssml.getSSMLParts(ssml);
 
   // Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await synthesize.ssmlPartsToSpeech(
+  const localAudiofilePaths = await synthesizers.ssmlPartsToSpeech(
     articleId,
     ssmlParts,
     synthesizerOptions,
