@@ -108,6 +108,8 @@ app.all('*', async (req, res) => res.status(404).json({ message: `No route found
 
 // Handle error exceptions
 app.use((err, req, res, next) => {
+  /* eslint-disable no-console */
+
   if (err) {
     if (process.env.NODE_ENV === 'production') {
       // Grab the user so we can give some context to our errors
@@ -117,13 +119,14 @@ app.use((err, req, res, next) => {
         Sentry.configureScope((scope) => {
           scope.setUser({ id, email });
         });
+
+        console.log(`Error for user ID "${id}", email: "${email}"`);
       }
 
       // Capture the error for us to see in Sentry
       Sentry.captureException(err);
     }
 
-    /* eslint-disable no-console */
     console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
 
     if (err.message === 'Unauthorized') {

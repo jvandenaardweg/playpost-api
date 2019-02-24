@@ -42,11 +42,13 @@ const ssmlToSpeech = (mediumPostId, ssmlPart, index, synthesizerOptions) => {
     client.synthesizeSpeech(request, (synthesizeSpeechError, response) => {
       if (synthesizeSpeechError) return reject(new Error(synthesizeSpeechError));
 
+      if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
+
       // Write the binary audio content to a local file
       return fs.writeFile(audioFilePath, response.audioContent, 'binary', (writeFileError) => {
         if (writeFileError) return reject(new Error(writeFileError));
 
-        console.log(`Received synthesized audio file for Medium Post ID '${mediumPostId}' SSML part ${index}: ${audioFilePath}`);
+        console.log(`Google Text To Speech: Received synthesized audio file for Medium Post ID '${mediumPostId}' SSML part ${index}: ${audioFilePath}`);
         return resolve(audioFilePath);
       });
     });
@@ -63,4 +65,4 @@ const ssmlPartsToSpeech = (id, ssmlParts, synthesizerOptions) => {
   return Promise.all(promises);
 };
 
-module.exports = { ssmlPartsToSpeech }
+module.exports = { ssmlPartsToSpeech };
