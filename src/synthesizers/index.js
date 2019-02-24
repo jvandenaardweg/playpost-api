@@ -5,7 +5,7 @@ const aws = require('./aws');
 
 const ssmlPartsToSpeech = (id, ssmlParts, synthesizerOptions) => {
   const { synthesizer } = synthesizerOptions;
-  const availableSynthesizers = ['google', 'aws'];
+  const availableSynthesizers = ['Google', 'AWS'];
 
   if (!availableSynthesizers.includes(synthesizer)) {
     return new Error(`Synthesizer option ${synthesizer} is not available. Please use: ${availableSynthesizers.join(' or ')}`);
@@ -13,7 +13,7 @@ const ssmlPartsToSpeech = (id, ssmlParts, synthesizerOptions) => {
 
   console.log(`Using synthesizer "${synthesizer}".`);
 
-  if (synthesizer === 'google') {
+  if (synthesizer === 'Google') {
     return google.ssmlPartsToSpeech(id, ssmlParts, synthesizerOptions);
   }
 
