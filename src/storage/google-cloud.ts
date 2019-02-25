@@ -1,4 +1,3 @@
-// require('dotenv').config();
 import path from 'path';
 import { Storage, UploadResponse, GetFilesOptions, File } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';

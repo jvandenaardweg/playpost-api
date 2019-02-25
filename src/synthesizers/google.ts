@@ -1,4 +1,3 @@
-// require('dotenv').config();
 import fs from 'fs-extra';
 import textToSpeech from '@google-cloud/text-to-speech';
 import appRoot from 'app-root-path';
