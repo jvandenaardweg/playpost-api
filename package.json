@@ -20,7 +20,7 @@
     "eslint": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore",
     "eslint:fix": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore --fix",
     "prisma": "prisma",
-    "postinstall": "npm run build"
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",
