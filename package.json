@@ -36,6 +36,7 @@
     "@google-cloud/storage": "^2.4.0",
     "@google-cloud/text-to-speech": "^0.4.0",
     "@postlight/mercury-parser": "^1.1.0",
+    "@sentry/cli": "^1.40.0",
     "@sentry/node": "^4.6.3",
     "app-root-path": "^2.1.0",
     "audioconcat": "^0.1.3",
