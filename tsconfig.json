@@ -70,7 +70,6 @@
   "exclude": [
     "generated",
     "node_modules",
-    "typings",
     "dist"
   ],
 }
