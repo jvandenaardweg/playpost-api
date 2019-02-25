@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import 'express-async-errors';
 import bodyParser from 'body-parser';
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import passport from 'passport';
 import helmet from 'helmet';
 import compression from 'compression';
