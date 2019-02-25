@@ -1,6 +1,7 @@
 require('dotenv').config();
 import { Request, Response, NextFunction } from 'express';
 import express from 'express';
+import appRoot from 'app-root-path';
 import 'express-async-errors';
 import bodyParser from 'body-parser';
 import * as Sentry from '@sentry/node';
@@ -17,6 +18,16 @@ import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 
+declare global {
+  namespace NodeJS {
+    interface Global {
+      __rootdir__: string;
+    }
+  }
+}
+
+global.__rootdir__ = __dirname || process.cwd();
+
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
@@ -27,7 +38,12 @@ app.use(compression());
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
-    environment: 'production'
+    environment: 'production',
+    integrations: [
+      new Sentry.Integrations.RewriteFrames({
+        root: global.__rootdir__
+      })
+    ]
   });
 
   // The request handler must be the first middleware on the app
