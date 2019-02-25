@@ -1,7 +1,6 @@
 require('dotenv').config();
 import { Request, Response, NextFunction } from 'express';
 import express from 'express';
-import appRoot from 'app-root-path';
 import 'express-async-errors';
 import bodyParser from 'body-parser';
 import * as Sentry from '@sentry/node';
