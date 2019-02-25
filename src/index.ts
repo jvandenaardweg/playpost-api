@@ -38,11 +38,11 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
     environment: 'production',
-    integrations: [
-      new Sentry.Integrations.RewriteFrames({
-        root: global.__rootdir__
-      })
-    ]
+    // integrations: [
+    //   new Sentry.Integrations.RewriteFrames({
+    //     root: global.__rootdir__
+    //   })
+    // ]
   });
 
   // The request handler must be the first middleware on the app
