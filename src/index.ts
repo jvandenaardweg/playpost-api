@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import path from 'path';
 import express from 'express';
 import 'express-async-errors';
 import bodyParser from 'body-parser';
@@ -19,8 +18,6 @@ import * as articlesController from './controllers/articles';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
-
-global.appRoot = path.resolve(__dirname);
 
 const app = express();
 app.use(helmet());

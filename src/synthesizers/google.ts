@@ -1,6 +1,8 @@
 require('dotenv').config();
 import fs from 'fs-extra';
 import textToSpeech from '@google-cloud/text-to-speech';
+import appRoot from 'app-root-path';
+import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
@@ -17,7 +19,7 @@ const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 export const GooglessmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions) => {
   return new Promise((resolve, reject) => {
-    const audioFilePath = `${global.appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+    const audioFilePath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
     const request = {
       voice: {

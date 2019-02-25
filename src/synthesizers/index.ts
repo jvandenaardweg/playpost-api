@@ -1,6 +1,13 @@
 import { GooglessmlPartsToSpeech } from './google';
 import { AWSssmlPartsToSpeech } from './aws';
 
+export type SynthesizerOptions = {
+  synthesizer: string,
+  languageCode: string,
+  name: string,
+  source: string
+}
+
 /* eslint-disable no-console */
 
 export const ssmlPartsToSpeech = (id: string, ssmlParts: Array<string>, synthesizerOptions: SynthesizerOptions) => {

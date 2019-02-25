@@ -1,6 +1,8 @@
 require('dotenv').config();
 import AWS from 'aws-sdk';
 import fs from 'fs-extra';
+import appRoot from 'app-root-path';
+import { SynthesizerOptions } from '../synthesizers';
 
 // Create an Polly client
 const Polly = new AWS.Polly({
@@ -14,7 +16,7 @@ const Polly = new AWS.Polly({
 
 export const AWSssmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions) => {
   return new Promise((resolve, reject) => {
-    const audioFilePath = `${global.appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+    const audioFilePath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
     // TODO: use SSML
     // TODO: use voice from synthesizerOptions

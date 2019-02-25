@@ -1,5 +1,5 @@
-const Mercury = require("@postlight/mercury-parser");
-const JSSoup = require('jssoup').default;
+import Mercury from '@postlight/mercury-parser';
+// const JSSoup = require('jssoup').default;
 
 // const url="https://hackernoon.com/15-html-element-methods-youve-potentially-never-heard-of-fc6863e41b2a";
 // const url="https://www.nytimes.com/2019/02/05/magazine/denis-voronenkov-assassination-russia-ukraine.html";
@@ -14,31 +14,29 @@ const JSSoup = require('jssoup').default;
 //     console.log(newSoup.toString())
 // });
 
-function crawl(url) {
+export function crawl(url: string) {
     return Mercury.parse(url)
 }
 
-function removeAllAttributes(soup) {
-    soup.findAll().forEach((tag) => tag.attrs = {})
-    return soup
-}
+// function removeAllAttributes(soup) {
+//     soup.findAll().forEach((tag) => tag.attrs = {})
+//     return soup
+// }
 
-function removeAllEmptyTags(soup) {
-    soup.findAll().forEach((tag) => {
-        if (!tag.text.length) {
-            tag.extract()
-        }
-    })
-    return soup
-}
+// function removeAllEmptyTags(soup) {
+//     soup.findAll().forEach((tag) => {
+//         if (!tag.text.length) {
+//             tag.extract()
+//         }
+//     })
+//     return soup
+// }
 
-function removeSpecificEnclosedTags(soup, removeTags) {
-    removeTags.forEach((removeTag) => {
-        soup.findAll(removeTag).forEach((tag) => {
-            tag.extract()
-        })
-    })
-	return soup
-}
-
-module.exports = { crawl }
+// function removeSpecificEnclosedTags(soup, removeTags) {
+//     removeTags.forEach((removeTag) => {
+//         soup.findAll(removeTag).forEach((tag) => {
+//             tag.extract()
+//         })
+//     })
+// 	return soup
+// }

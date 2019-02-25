@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { File } from '@google-cloud/storage';
+import appRoot from 'app-root-path';
 import { ssmlPartsToSpeech } from '../synthesizers';
 import * as dataSource from '../data-sources/medium';
 import * as utils from '../utils';
@@ -89,7 +90,7 @@ export const getAudiofile = async (req: Request, res: Response) => {
 
   // Cleanup the local audiofiles, we don't need that anymore
   await utils.local.removeFile(
-    `${global.appRoot}/temp/${synthesizerOptions.source}/${articleId}`,
+    `${appRoot}/temp/${synthesizerOptions.source}/${articleId}`,
   );
 
   console.log('Done!');

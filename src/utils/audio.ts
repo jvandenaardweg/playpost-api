@@ -1,6 +1,8 @@
 import * as audioconcat from 'audioconcat';
 import fs from 'fs-extra';
 import * as mp3Duration from 'mp3-duration';
+import { SynthesizerOptions} from '../synthesizers';
+import appRoot from 'app-root-path';
 
 /* eslint-disable no-console */
 
@@ -39,7 +41,7 @@ export const concatAudioFiles = (mediumPostId: string, audioFiles: Array<string>
 
   console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
-  const outputPath = `${global.appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
+  const outputPath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
 
   return audioconcat(audioFiles)
     .concat(outputPath)
