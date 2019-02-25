@@ -29,6 +29,7 @@ declare global {
 global.__rootdir__ = __dirname || process.cwd();
 
 console.log('global rootdir', global.__rootdir__);
+console.log('root', path.resolve(global.__rootdir__ + '../'))
 console.log('HEROKU_SLUG_COMMIT', process.env.HEROKU_SLUG_COMMIT);
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
@@ -44,7 +45,7 @@ if (process.env.NODE_ENV === 'production') {
     release: (process.env.HEROKU_SLUG_COMMIT) ? process.env.HEROKU_SLUG_COMMIT : '',
     integrations: [
       new Sentry.Integrations.RewriteFrames({
-        root: path.resolve(global.__rootdir__ + '../')
+        root: global.__rootdir__
       })
     ]
   });
