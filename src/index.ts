@@ -28,7 +28,7 @@ declare global {
 
 // const rootDir = path.resolve(__dirname || process.cwd(), '..');
 
-console.log('App init', 'rootDir', rootDir);
+// console.log('App init', 'rootDir', rootDir);
 console.log('App init', 'HEROKU_SLUG_COMMIT', process.env.HEROKU_SLUG_COMMIT);
 
 const PORT = process.env.PORT || 3000;
