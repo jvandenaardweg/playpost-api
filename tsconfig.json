@@ -38,14 +38,14 @@
 
     /* Module Resolution Options */
     "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    "baseUrl": ".",                       /* Base directory to resolve non-absolute module names. */
+    "baseUrl": "./src",                       /* Base directory to resolve non-absolute module names. */
     "paths": {
-      "@google-cloud/text-to-speech": ["./src/typings/@google-cloud/text-to-speech"],
-      "audioconcat": ["./src/typings/audioconcat"],
-      "mp3-duration": ["./src/typings/mp3-duration"],
-      "polly-ssml-split": ["./src/typings/polly-ssml-split"],
-      "express-async-errors": ["./src/typings/express-async-errors"],
-      "@postlight/mercury-parser": ["./src/typings/@postlight/mercury-parser"],
+      "@google-cloud/text-to-speech": ["typings/@google-cloud/text-to-speech"],
+      "audioconcat": ["typings/audioconcat"],
+      "mp3-duration": ["typings/mp3-duration"],
+      "polly-ssml-split": ["typings/polly-ssml-split"],
+      "express-async-errors": ["typings/express-async-errors"],
+      "@postlight/mercury-parser": ["typings/@postlight/mercury-parser"],
     },                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": ["./node_modules/@types", "./typings", "./src/declarations"],                       /* List of folders to include type definitions from. */
