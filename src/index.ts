@@ -27,7 +27,7 @@ declare global {
 }
 
 global.__rootdir__ = path.resolve(__dirname + '/../') || path.resolve(process.cwd() + '/../');
-
+console.log('global rootdir', global.__rootdir__);
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
