@@ -1,8 +1,9 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "sourceMap": true,
+    // "sourceMap": true,
     "inlineSources": true,
+    "inlineSourceMap": true,
     "sourceRoot": "/"
   }
 }
