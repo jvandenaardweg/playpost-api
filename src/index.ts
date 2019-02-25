@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
     environment: 'production',
-    release: (process.env.HEROKU_SLUG_COMMIT) ? process.env.HEROKU_SLUG_COMMIT : '',
+    release: (process.env.HEROKU_RELEASE_VERSION) ? process.env.HEROKU_RELEASE_VERSION : '',
     integrations: [
       new Sentry.Integrations.RewriteFrames({
         root: process.cwd()
@@ -55,8 +55,8 @@ if (process.env.NODE_ENV === 'production') {
   });
 
   // The request handler must be the first middleware on the app
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.errorHandler());
+  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
+  app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 }
 
 // Use passport authentication
