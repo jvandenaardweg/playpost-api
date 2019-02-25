@@ -38,14 +38,14 @@ export const getAudiofile = async (req: Request, res: Response) => {
   // Find an existing file in our cloud storage
   const existingFiles: Array<File> = await storage.listFilesByPrefix(`${uploadPath}/`);
   const foundFile = existingFiles && existingFiles.length
-    ? existingFiles.find(file => file.name.includes(articleId))
+    ? existingFiles.find((file: File) => file.name.includes(articleId))
     : null;
 
   // If we already have a file in storage, we just return that (for now)
   // TODO: we should not use the cloud storage API for this? use a database?
   // so we an also return information about the article?
   if (foundFile) {
-    return res.json({ publicFileUrl: storage.getPublicFileUrlFromMetaData(foundFile), article: {} });
+    return res.json({ publicFileUrl: storage.getPublicFileUrlFromFileMetaData(foundFile), article: {} });
   }
 
   // If we don't have an audiofile, we go into here
@@ -71,11 +71,13 @@ export const getAudiofile = async (req: Request, res: Response) => {
   // ]
 
   // Concatinate the different files into one .mp3 file
-  const concatinatedLocalAudiofilePath = utils.audio.concatAudioFiles(
+  const concatinatedLocalAudiofilePath = await utils.audio.concatAudioFiles(
     articleId,
     localAudiofilePaths,
     synthesizerOptions,
   );
+
+  console.log('concatinatedLocalAudiofilePath', concatinatedLocalAudiofilePath)
 
   // const audioFileDurationInSeconds = await utils.audio.getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
