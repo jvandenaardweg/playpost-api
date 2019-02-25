@@ -2,16 +2,21 @@
   "name": "readto-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "npm run dev:database && npm run dev:nodemon",
+    "start:ts": "ts-node src/index.ts",
+    "dev": "nodemon -L ./node_modules/dotenv/config dist/index.js",
+    "serve-debug": "nodemon --inspect dist/index.js",
     "dev:nodemon": "nodemon -L ./node_modules/dotenv/config index.js",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
-    "start": "node index.js",
+    "watch:typescript": "tsc -w",
+    "build:typescript": "tsc",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore",
-    "eslint:fix": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore --fix"
+    "eslint:fix": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore --fix",
+    "prisma": "prisma"
   },
   "repository": {
     "type": "git",
@@ -52,11 +57,28 @@
     "unfluff": "^3.2.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/compression": "0.0.36",
+    "@types/express": "^4.16.1",
+    "@types/franc": "^4.0.0",
+    "@types/fs-extra": "^5.0.5",
+    "@types/graphql": "^14.0.7",
+    "@types/helmet": "0.0.42",
+    "@types/jsonwebtoken": "^8.3.0",
+    "@types/node": "^11.9.5",
+    "@types/node-fetch": "^2.1.6",
+    "@types/passport": "^1.0.0",
+    "@types/passport-jwt": "^3.0.1",
+    "@types/ws": "^6.0.1",
+    "concurrently": "^4.1.0",
     "eslint": "^5.3.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
-    "nodemon": "^1.18.9"
+    "nodemon": "^1.18.9",
+    "ts-node": "^8.0.2",
+    "tsc-watch": "^2.1.2",
+    "typescript": "^3.3.3333"
   }
 }
