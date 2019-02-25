@@ -39,6 +39,7 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
     environment: 'production',
+    release: (process.env.SOURCE_VERSION) ? process.env.SOURCE_VERSION : '',
     integrations: [
       new Sentry.Integrations.RewriteFrames({
         root: global.__rootdir__
