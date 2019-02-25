@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStatic } from 'passport';
 // const { prisma } = require('../generated/prisma-client');

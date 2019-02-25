@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 import AWS from 'aws-sdk';
 import fs from 'fs-extra';
 import appRoot from 'app-root-path';
