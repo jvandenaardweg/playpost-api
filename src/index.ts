@@ -45,7 +45,7 @@ if (process.env.NODE_ENV === 'production') {
     release: (process.env.HEROKU_SLUG_COMMIT) ? process.env.HEROKU_SLUG_COMMIT : '',
     integrations: [
       new Sentry.Integrations.RewriteFrames({
-        root: '/app'
+        root: '/app/src'
       })
     ]
   });
