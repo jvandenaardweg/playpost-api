@@ -29,6 +29,7 @@ declare global {
 const rootDir = path.resolve(__dirname || process.cwd());
 
 console.log('rootDir', rootDir);
+console.log('__dirname', __dirname);
 console.log('process.cwd()', process.cwd());
 
 
@@ -49,7 +50,7 @@ if (process.env.NODE_ENV === 'production') {
     release: (process.env.HEROKU_SLUG_COMMIT) ? process.env.HEROKU_SLUG_COMMIT : '',
     integrations: [
       new Sentry.Integrations.RewriteFrames({
-        root: process.cwd()
+        root: __dirname
       })
     ]
   });
