@@ -16,7 +16,7 @@
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
     "watch:typescript": "tsc -w",
-    "build:typescript": "tsc -p .",
+    "build:typescript": "tsc",
     "build": "npm run build:typescript",
     "build:live": "nodemon -L ./node_modules/dotenv/config --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "start": "node dist/index.js",
