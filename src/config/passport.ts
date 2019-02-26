@@ -9,9 +9,14 @@ const opts = {
   secretOrKey: JWT_SECRET
 };
 
+type StrategyPayload = {
+  id: string,
+  email: string
+}
+
 module.exports = (passport: PassportStatic) => {
   return passport.use(
-    new Strategy(opts, (payload, done) => {
+    new Strategy(opts, (payload: StrategyPayload, done) => {
 
       const { id, email } = payload;
 

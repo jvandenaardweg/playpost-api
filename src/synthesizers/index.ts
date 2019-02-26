@@ -1,5 +1,5 @@
-import { GooglessmlPartsToSpeech } from './google';
-import { AWSssmlPartsToSpeech } from './aws';
+import { googleSsmlPartsToSpeech } from './google';
+import { awsSsmlPartsToSpeech } from './aws';
 
 export type SynthesizerOptions = {
   synthesizer: string,
@@ -10,7 +10,7 @@ export type SynthesizerOptions = {
 
 /* eslint-disable no-console */
 
-export const ssmlPartsToSpeech = (id: string, ssmlParts: Array<string>, synthesizerOptions: SynthesizerOptions) => {
+export const ssmlPartsToSpeech = (id: string, ssmlParts: string[], synthesizerOptions: SynthesizerOptions): Promise<string[]> => {
   const { synthesizer } = synthesizerOptions;
   const availableSynthesizers = ['Google', 'AWS'];
 
@@ -21,8 +21,8 @@ export const ssmlPartsToSpeech = (id: string, ssmlParts: Array<string>, synthesi
   console.log(`Using synthesizer "${synthesizer}".`);
 
   if (synthesizer === 'Google') {
-    return GooglessmlPartsToSpeech(id, ssmlParts, synthesizerOptions);
+    return googleSsmlPartsToSpeech(id, ssmlParts, synthesizerOptions);
   }
 
-  return AWSssmlPartsToSpeech(id, ssmlParts, synthesizerOptions);
+  return awsSsmlPartsToSpeech(id, ssmlParts, synthesizerOptions);
 };

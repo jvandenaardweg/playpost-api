@@ -1,6 +1,7 @@
 {
     "extends": ["airbnb"],
     "rules": {
-      "comma-dangle": "off"
+      "comma-dangle": "off",
+      "max-line-length": [true, 200]
     }
 }

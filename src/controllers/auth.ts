@@ -9,7 +9,13 @@ const MESSAGE_AUTH_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
 
-export const postAuth = async (req: Request, res: Response) => {
+/**
+ * Uses the "email" address and "password" of a user to return an token.
+ * The user can use that token to authenticate with our API.
+ *
+ * @returns token
+ */
+export const getAuthenticationToken = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email && !password) {

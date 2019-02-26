@@ -1,6 +1,6 @@
-import fs from 'fs-extra';
+import fsExtra from 'fs-extra';
 import textToSpeech from '@google-cloud/text-to-speech';
-import appRoot from 'app-root-path';
+import appRootPath from 'app-root-path';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
@@ -16,14 +16,15 @@ const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 //     }
 // };
 
-export const GooglessmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions) => {
+export const googleSsmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
-    const audioFilePath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+    const { source, languageCode, name } = synthesizerOptions;
+    const audioFilePath = `${appRootPath}/temp/${source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
     const request = {
       voice: {
-        languageCode: synthesizerOptions.languageCode, // TODO: make based on post language
-        name: synthesizerOptions.name
+        languageCode, // TODO: make based on post language
+        name
       },
       input: {
         ssml: ssmlPart
@@ -33,10 +34,10 @@ export const GooglessmlToSpeech = (mediumPostId: string, ssmlPart: string, index
       }
     };
 
-    console.log(`Synthesizing Medium Post ID '${mediumPostId}' SSML part ${index} to '${synthesizerOptions.languageCode}' speech using '${synthesizerOptions.name}' at: ${audioFilePath}`);
+    console.log(`Synthesizing Medium Post ID '${mediumPostId}' SSML part ${index} to '${languageCode}' speech using '${name}' at: ${audioFilePath}`);
 
     // Make sure the path exists, if not, we create it
-    fs.ensureFileSync(audioFilePath);
+    fsExtra.ensureFileSync(audioFilePath);
 
     // Performs the Text-to-Speech request
     client.synthesizeSpeech(request, (synthesizeSpeechError: any, response: any) => {
@@ -45,7 +46,7 @@ export const GooglessmlToSpeech = (mediumPostId: string, ssmlPart: string, index
       if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
 
       // Write the binary audio content to a local file
-      return fs.writeFile(audioFilePath, response.audioContent, 'binary', (writeFileError) => {
+      return fsExtra.writeFile(audioFilePath, response.audioContent, 'binary', (writeFileError) => {
         if (writeFileError) return reject(writeFileError);
 
         console.log(`Google Text To Speech: Received synthesized audio file for Medium Post ID '${mediumPostId}' SSML part ${index}: ${audioFilePath}`);
@@ -55,11 +56,11 @@ export const GooglessmlToSpeech = (mediumPostId: string, ssmlPart: string, index
   });
 };
 
-export const GooglessmlPartsToSpeech = (id: string, ssmlParts: Array<string>, synthesizerOptions: SynthesizerOptions) => {
-  const promises: Array<any> = [];
+export const googleSsmlPartsToSpeech = (id: string, ssmlParts: string[], synthesizerOptions: SynthesizerOptions) => {
+  const promises: Promise<any>[] = [];
 
-  ssmlParts.forEach((ssmlPart, index) => {
-    return promises.push(GooglessmlToSpeech(id, ssmlPart, index, synthesizerOptions))
+  ssmlParts.forEach((ssmlPart: string, index: number) => {
+    return promises.push(googleSsmlToSpeech(id, ssmlPart, index, synthesizerOptions));
   });
 
   return Promise.all(promises);

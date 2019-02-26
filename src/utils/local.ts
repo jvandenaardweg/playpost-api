@@ -1,8 +1,8 @@
-import fs from 'fs-extra';
+import fsExtra from 'fs-extra';
 
 export const removeFile = async (fileName: string) => {
   try {
-    await fs.remove(fileName);
+    await fsExtra.remove(fileName);
     console.log(`Removed file/folder: ${fileName}`);
     return fileName;
   } catch (err) {

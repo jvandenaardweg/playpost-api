@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
-import fs from 'fs-extra';
-import appRoot from 'app-root-path';
+import fsExtra from 'fs-extra';
+import appRootPath from 'app-root-path';
 import { SynthesizerOptions } from '../synthesizers';
 
 // Create an Polly client
@@ -13,9 +13,9 @@ const Polly = new AWS.Polly({
 
 /* eslint-disable no-console */
 
-export const AWSssmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions) => {
+export const awsSsmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
-    const audioFilePath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+    const audioFilePath = `${appRootPath}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
 
     // TODO: use SSML
     // TODO: use voice from synthesizerOptions
@@ -32,7 +32,7 @@ export const AWSssmlToSpeech = (mediumPostId: string, ssmlPart: string, index: n
 
       if (!(response.AudioStream instanceof Buffer)) return reject(new Error('AWS Polly: Received AudioStream is not an instance of Buffer.'));
 
-      return fs.writeFile(audioFilePath, response.AudioStream, (writeFileError: any) => {
+      return fsExtra.writeFile(audioFilePath, response.AudioStream, (writeFileError: any) => {
         if (writeFileError) return reject(new Error(writeFileError));
 
         console.log(`AWS Polly: Received synthesized audio file for Medium Post ID '${mediumPostId}' SSML part ${index}: ${audioFilePath}`);
@@ -42,11 +42,11 @@ export const AWSssmlToSpeech = (mediumPostId: string, ssmlPart: string, index: n
   });
 };
 
-export const AWSssmlPartsToSpeech = (id: string, ssmlParts: Array<string>, synthesizerOptions: SynthesizerOptions) => {
-  const promises: Array<any> = [];
+export const awsSsmlPartsToSpeech = (id: string, ssmlParts: string[], synthesizerOptions: SynthesizerOptions) => {
+  const promises: Promise<any>[] = [];
 
-  ssmlParts.forEach((ssmlPart, index) => {
-    return promises.push(AWSssmlToSpeech(id, ssmlPart, index, synthesizerOptions))
+  ssmlParts.forEach((ssmlPart: string, index: number) => {
+    return promises.push(awsSsmlToSpeech(id, ssmlPart, index, synthesizerOptions))
   });
 
   return Promise.all(promises);

@@ -1,8 +1,8 @@
 import audioconcat from 'audioconcat';
-import fs from 'fs-extra';
+import fsExtra from 'fs-extra';
 import * as mp3Duration from 'mp3-duration';
 import { SynthesizerOptions} from '../synthesizers';
-import appRoot from 'app-root-path';
+import appRootPath from 'app-root-path';
 
 /* eslint-disable no-console */
 
@@ -19,9 +19,9 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string) => {
   });
 };
 
-export const concatAudioFiles = (mediumPostId: string, audioFiles: Array<string>, synthesizerOptions: SynthesizerOptions): Promise<string> => {
+export const concatAudioFiles = (mediumPostId: string, audioFiles: string[], synthesizerOptions: SynthesizerOptions): Promise<string> => {
   return new Promise((resolve, reject) => {
-    if (!audioFiles.length) reject('No audiofiles given to concat.');
+    if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
 
     // If we have just one file, we don't need to concat it
     // We just remove the index number and return the file
@@ -30,8 +30,8 @@ export const concatAudioFiles = (mediumPostId: string, audioFiles: Array<string>
       const audioFileNameWithoutIndex = audioFile.split('-0.mp3')[0];
       const newAudiofileName = `${audioFileNameWithoutIndex}.mp3`;
 
-      return fs.copy(audioFile, newAudiofileName)
-        .then(() => resolve(newAudiofileName))
+      return fsExtra.copy(audioFile, newAudiofileName)
+        .then(() => resolve(newAudiofileName));
     }
 
     // If we have multiple audiofiles, we concat them
@@ -42,12 +42,12 @@ export const concatAudioFiles = (mediumPostId: string, audioFiles: Array<string>
 
     console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
-    const outputPath = `${appRoot}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
+    const outputPath = `${appRootPath}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
 
     return audioconcat(audioFiles)
       .concat(outputPath)
-      .on('error', (err: any) => reject(err))
+      .on('error', (err: any) => reject(new Error(err)))
       .on('end', () => resolve(outputPath));
-  })
+  });
 
 };
