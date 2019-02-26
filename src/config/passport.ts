@@ -1,6 +1,5 @@
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStatic } from 'passport';
-// const { prisma } = require('../generated/prisma-client');
 
 const { JWT_SECRET } = process.env;
 

@@ -1,31 +1,19 @@
-version: '3'
+version: '2'
 services:
-  prisma:
-    image: prismagraphql/prisma:1.25
-    restart: always
-    ports:
-    - "4466:4466"
-    environment:
-      PRISMA_CONFIG: |
-        managementApiSecret: HwUrfWU5RPkAT7YZ
-        port: 4466
-        databases:
-          default:
-            connector: postgres
-            host: postgres
-            port: 5432
-            user: prisma
-            password: prisma
-            migrations: true
   postgres:
-    image: postgres:10.5
-    restart: always
+    image: postgres:latest
+    env_file: .env
     ports:
-     - "5432:5432"
-    environment:
-      POSTGRES_USER: prisma
-      POSTGRES_PASSWORD: prisma
-    volumes:
-      - postgres:/var/lib/postgresql/data
-volumes:
-  postgres:
+      - "5432:5432"
+    container_name: "readto-api-postgres"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6381:6379"
+    container_name: "readto-api-redis"
+
+      # Port 6379 is used within the container, use that in your .env file
+      # Port 6381 is opened on your host.
+
+      # Use port 6381 to connect to Redis using a client
+      # Use port 5432 to connect to Postgres using a client

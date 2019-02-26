@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-// const { prisma } = require('../generated/prisma-client');
 
 // const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is deleted.';
 // const MESSAGE_ME_NOT_UPDATED = 'Your account is not updated.';
