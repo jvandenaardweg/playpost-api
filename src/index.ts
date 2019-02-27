@@ -125,7 +125,16 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
   // Catch all
-  app.all('*', async (req: Request, res: Response) => res.status(404).json({ message: `No route found for ${req.method} ${req.url}` }));
+  app.all('*', async (req: Request, res: Response) => {
+    const message = `No route found for ${req.method} ${req.url}`;
+
+    if (process.env.NODE_ENV === 'production') {
+      // Capture this error in Sentry, maybe we can fix it when users go to unused routes alot
+      Sentry.captureMessage(message);
+    }
+
+    return res.status(404).json({ message });
+  });
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
