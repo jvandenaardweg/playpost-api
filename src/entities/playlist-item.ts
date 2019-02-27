@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn, Unique, ManyToOne } from 'typeorm';
 import { IsUUID, IsInt } from 'class-validator';
-import { Playlist } from './playlist';
-import { Article } from './article';
+import { Playlist } from './Playlist';
+import { Article } from './Article';
 
 @Entity()
 @Unique(['playlist', 'article']) // Don't allow articles that are already in the user's playlist

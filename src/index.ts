@@ -17,10 +17,10 @@ import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 
-import { User } from './entities/user';
-import { Article } from './entities/article';
-import { Playlist } from './entities/playlist';
-import { PlaylistItem } from './entities/playlist-item';
+import { User } from './entities/User';
+import { Article } from './entities/Article';
+import { Playlist } from './entities/Playlist';
+import { PlaylistItem } from './entities/Playlist-item';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
