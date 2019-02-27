@@ -1,16 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { IsUUID } from 'class-validator';
 import { User } from './user';
 import { PlaylistItem } from './playlist-item';
 
 @Entity()
-export class Playlist {
+export class Playlist extends BaseEntity {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
 
-  @OneToOne(type => User)
+  @ManyToOne(type => User, { nullable: false, onDelete: 'CASCADE' }) // When a User is deleted, we delete their Playlist
   @JoinColumn()
   user: User;
 
@@ -26,6 +26,19 @@ export class Playlist {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // static async updatePlaylistItemPlays(id: string): Promise<PlaylistItem> {
+  //   const currentPlaylistItem = await this.findOne({ id }, { relations: ['playlist_items'] } )
+
+  //   PlaylistItem.findOne({ id }, re);
+
+  //   const updatedPlays = currentPlaylistItem.plays + 1;
+
+  //   return this.update(currentPlaylistItem.id, {
+  //     plays: currentPlaylistItem.plays + 1,
+  //     lastPlayedAt: new Date()
+  //   })
+  // }
 
 }
 /*

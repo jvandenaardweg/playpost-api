@@ -1,5 +1,5 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, IsNull } from 'typeorm';
-import { IsDate, IsUUID, IsUrl } from 'class-validator';
+import { IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
 
 @Entity()

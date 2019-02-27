@@ -23,21 +23,15 @@ export class PlaylistItem {
   @IsInt()
   order: number;
 
+  @Column({ nullable: true })
+  lastPlayedAt: Date;
+
+  @Column({ nullable: true, default: 0 })
+  plays: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }
-/*
-
-type Playlist {
-  user: User! @relation(name: "UserToPlaylist")
-  article: Article! @relation(name: "ArticleToPlaylist")
-  order: Int!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-*/

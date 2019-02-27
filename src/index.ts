@@ -21,6 +21,7 @@ import { User } from './entities/user';
 import { Article } from './entities/article';
 import { Playlist } from './entities/playlist';
 import { PlaylistItem } from './entities/playlist-item';
+import { Audiofile } from './entities/audiofile';
 
 /* eslint-disable no-console */
 
@@ -39,7 +40,8 @@ const connectionOptions: ConnectionOptions = {
     User,
     Playlist,
     PlaylistItem,
-    Article
+    Article,
+    Audiofile
   ],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
