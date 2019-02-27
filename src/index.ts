@@ -23,6 +23,9 @@ const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithErro
 
 const connectionOptions: ConnectionOptions = {
   type: 'postgres',
+  // cache: {
+  //   duration: 3600000 // 60 minutes
+  // },
   url: process.env.DATABASE_URL,
   extra: {
     ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
@@ -36,7 +39,7 @@ const connectionOptions: ConnectionOptions = {
 
 // Create a connection with the database
 createConnection(connectionOptions).then(async (connection: any) => {
-  console.log('App init', 'Connected with database', connection.options.url);
+  console.log('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
   app.use(helmet());
@@ -71,20 +74,21 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   // Public
   app.post('/v1/auth', authController.getAuthenticationToken);
-  app.post('/v1/users', usersController.postUsers); // Creating of users is not protected by a login ofcourse
+  app.post('/v1/users', usersController.createUser); // Creating of users is not protected by a login ofcourse
   app.get('/v1/audiofile', audiofileController.getAudiofile); // Legacy, now in use by our iOS App
 
   // Protected
 
-  app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUsers);
+  app.get('/v1/users', IS_PROTECTED, usersController.findAllUsers);
+  app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUser);
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.getMe);
   app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
   app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
-  app.patch('/v1/me/email', IS_PROTECTED, meController.patchMeEmail);
-  app.patch('/v1/me/password', IS_PROTECTED, meController.patchMePassword);
+  app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
+  app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
   app.delete('/v1/me', IS_PROTECTED, meController.deleteMe);
 
   // /v1/archives
@@ -143,6 +147,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
       }
 
       console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
+      console.error(err);
 
       if (err.message === 'Unauthorized') {
         return res.status(401).json({
@@ -160,5 +165,5 @@ createConnection(connectionOptions).then(async (connection: any) => {
   });
 
   /* eslint-disable no-console */
-  app.listen(PORT, () => console.log(`App listening on port ${PORT}!`));
+  app.listen(PORT, () => console.log(`App init: Listening on port ${PORT}!`));
 });

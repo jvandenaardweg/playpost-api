@@ -24,7 +24,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
     return res.status(400).json({ message: MESSAGE_AUTH_EMAIL_PASSWORD_REQUIRED });
   }
 
-  const user = await userRepository.findOne({ email });
+  const user = await userRepository.findOne({ email }, { select: ['id', 'email', 'password'] });
 
   if (!user) return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
 
@@ -38,7 +38,15 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   // We use the e-mail in the token as an extra way to get some easy context during debugging
   // For example, we can use the email in Sentry to maybe contact the user
-  const token = jsonwebtoken.sign({ id: user.id, email: user.email }, JWT_SECRET);
+  const token = generateJWTToken(user.id, user.email);
 
   return res.json({ token });
 };
+
+export const generateJWTToken = (id: string, email: string) => {
+  return jsonwebtoken.sign({ id, email }, JWT_SECRET);
+};
+
+export const hashPassword = (password: string) => {
+  return bcryptjs.hash(password, 10);
+}

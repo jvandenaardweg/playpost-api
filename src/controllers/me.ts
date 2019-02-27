@@ -1,5 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-const bcrypt = require('bcryptjs');
+import { Request, Response } from 'express';
+import { getRepository } from 'typeorm';
+import { User } from '../entities/User';
+import { hashPassword } from './auth';
 const { prisma } = require('../generated/prisma-client');
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
@@ -14,85 +16,44 @@ const MESSAGE_ME_FAVORITE_ARTICLE_EXISTS = 'This article is already in your favo
 
 export const getMe = async (req: Request, res: Response) => {
   const { id } = req.user;
+  const userRepository = getRepository(User);
 
-  const fragment = `
-    fragment GetUserWithoutPassword on User {
-      id
-      email
-      createdAt
-      updatedAt
-      activatedAt
-      authenticatedAt
-    }
-  `;
-
-  const user = await prisma.user({ id }).$fragment(fragment);
+  const user = await userRepository.findOne({ id });
 
   if (!user) return res.status(404).json({ message: MESSAGE_ME_NOT_FOUND });
 
-  return res.json({ ...user });
+  return res.json(user);
 };
 
-export const patchMeEmail = async (req: Request, res: Response) => {
+export const updateEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   const { id } = req.user;
+  const userRepository = getRepository(User);
 
   if (!email) return res.status(400).json({ message: MESSAGE_ME_EMAIL_REQUIRED });
 
-  const fragment = `
-    fragment PatchUserWithoutPassword on User {
-      id
-      email
-      updatedAt
-    }
-  `;
+  await userRepository.update(id, { email });
 
-  const updatedUser = await prisma
-    .updateUser({
-      data: {
-        email,
-      },
-      where: {
-        id
-      },
-    })
-    .$fragment(fragment);
+  const updatedUser = await userRepository.findOne({ id });
 
-  if (!updatedUser) return res.json({ message: MESSAGE_ME_NOT_UPDATED });
-
-  return res.json({ ...updatedUser });
+  return res.json(updatedUser);
 };
 
-export const patchMePassword = async (req: Request, res: Response) => {
+export const updatePassword = async (req: Request, res: Response) => {
   const { password } = req.body;
   const { id } = req.user;
 
+  const userRepository = getRepository(User);
+
   if (!password) return res.status(400).json({ message: MESSAGE_ME_PASSWORD_REQUIRED });
 
-  const fragment = `
-    fragment PatchUserWithoutPassword on User {
-      id
-      email
-      updatedAt
-    }
-  `;
+  const hashedPassword = await hashPassword(password);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  await userRepository.update(id, { password: hashedPassword });
 
-  const updatedUser = await prisma
-    .updateUser({
-      data: {
-        password: hashedPassword,
-      },
-      where: {
-        id
-      },
-    })
-    .$fragment(fragment);
+  const updatedUser = await userRepository.findOne({ id });
 
-  if (!updatedUser) return res.json({ message: MESSAGE_ME_NOT_UPDATED });
-
-  return res.json({ ...updatedUser });
+  return res.json(updatedUser);
 };
 
 export const deleteMe = async (req: Request, res: Response) => {

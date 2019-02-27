@@ -2,10 +2,7 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/User';
 import { validateInput } from '../validators/entity';
-import bcryptjs from 'bcryptjs';
-import jsonwebtoken from 'jsonwebtoken';
-
-const { JWT_SECRET } = process.env;
+import { generateJWTToken, hashPassword } from './auth';
 
 const MESSAGE_USER_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
@@ -13,7 +10,7 @@ const MESSAGE_USER_NOT_FOUND = 'No user found';
 const MESSAGE_USER_DELETED = 'User is deleted! This cannot be undone.';
 const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
-export const postUsers = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response) => {
   // TODO: validate email, password
   const { email, password } = req.body;
   const userRepository = getRepository(User);
@@ -26,7 +23,7 @@ export const postUsers = async (req: Request, res: Response) => {
 
   if (existingUser) return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS });
 
-  const hashedPassword = await bcryptjs.hash(password, 10);
+  const hashedPassword = await hashPassword(password);
 
   const userToCreate = { email, password: hashedPassword };
 
@@ -39,13 +36,13 @@ export const postUsers = async (req: Request, res: Response) => {
   const createdUser = await userRepository.save(newUserToSave);
 
   // Send a token within a successful signup, so we can log the user in right away
-  const token = jsonwebtoken.sign({ id: createdUser.id, email: createdUser.email }, JWT_SECRET);
+  const token = generateJWTToken(createdUser.id, createdUser.email);
 
   // TODO: as we return a token here, we should also set "authenticatedAt" date upon a signup?
   return res.json({ token });
 };
 
-export const deleteUsers = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   const { email } = req.user;
   const { userId } = req.params;
   const userRepository = getRepository(User);
@@ -62,4 +59,12 @@ export const deleteUsers = async (req: Request, res: Response) => {
   await userRepository.remove(userToDelete);
 
   return res.json({ message: MESSAGE_USER_DELETED });
+};
+
+export const findAllUsers = async (req: Request, res: Response) => {
+  const userRepository = getRepository(User);
+
+  const users = await userRepository.find();
+
+  return res.json(users);
 };

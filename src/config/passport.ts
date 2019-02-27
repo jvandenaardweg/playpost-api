@@ -11,7 +11,7 @@ const opts = {
 type StrategyPayload = {
   id: string,
   email: string
-}
+};
 
 module.exports = (passport: PassportStatic) => {
   return passport.use(
@@ -19,8 +19,12 @@ module.exports = (passport: PassportStatic) => {
 
       const { id, email } = payload;
 
+      console.log(payload);
+
       // Send make the id and email available using "req.user.id" and "req.user.email"
       if (id && email) return done(null, { id, email });
+
+
 
       return done(null, false);
       // Get the user from the database
