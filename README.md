@@ -28,21 +28,23 @@ TYPEORM_MIGRATIONS = "src/migrations/**/*.ts"
 5. Run `npm run dev`, this will launch the database and start the Node server.
 6. The local server should be available at http://localhost:3000
 
-# Database changes
-Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`
-
-## Manually sync database
-
-**IMPORTANT**: this action could destroy production data. Always try to use migrations instead.
+# Production database changes
+Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`.
 
 Make sure these environment variables are set in Heroku:
 ```
-TYPEORM_URL = "" # This should be filled with your DATABASE_URL
+DATABASE_URL = "" # Filled by Heroku Postgres
+TYPEORM_URL = "" # This should be filled with the value of DATABASE_URL
 TYPEORM_ENTITIES = "dist/entities/**/*.js"
 TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
 ```
 
 The above `TYPEORM_ENTITIES` and `TYPEORM_MIGRATIONS` differ from your local dev environment, as it is now using the `./dist` folder.
+
+## Manually sync database
+For whatever reason, you maybe want to manually sync and bypass the migration workflow. 
+
+**IMPORTANT**: This action could destroy production data. Always try to use migrations instead.
 
 1. Login into Heroku
 2. Go to your Dyno and open the console
