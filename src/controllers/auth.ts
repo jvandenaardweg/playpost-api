@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 import { User } from '../entities/User';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
+import { check, validationResult } from 'express-validator/check';
 
 const { JWT_SECRET } = process.env;
 
