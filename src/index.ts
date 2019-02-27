@@ -47,7 +47,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   if (process.env.NODE_ENV === 'production') {
     Sentry.init({
-      dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
+      dsn: process.env.SENTRY_DSN,
       environment: 'production',
       release: process.env.HEROKU_SLUG_COMMIT,
       integrations: [
