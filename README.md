@@ -9,14 +9,21 @@
 3. Install npm modules: `npm install`
 4. Create a `.env` file in the root of this project with the following data:
 ```
-GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID="" # Ask the repository owner for the contents of this environment variable.
-GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL="" # Ask the repository owner for the contents of this environment variable.
-GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY="" # Ask the repository owner for the contents of this environment variable.
-JWT_SECRET="JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
-NODE_ENV="development"
-DATABASE_URL="postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
-TYPEORM_URL="postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
-REDIS_URL="redis://localhost:6381"
+NODE_ENV = "development"
+
+GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner for the contents of this environment variable.
+GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL = "" # Ask the repository owner for the contents of this environment variable.
+GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner for the contents of this environment variable.
+
+JWT_SECRET = "JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
+
+DATABASE_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+
+REDIS_URL = "redis://localhost:6381"
+
+TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+TYPEORM_ENTITIES = "dist/entities/**/*.js"
+TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
 ```
 5. Run `npm run dev`, this will launch the database and start the Node server.
 6. The local server should be available at http://localhost:3000
