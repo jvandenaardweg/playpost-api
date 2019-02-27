@@ -33,6 +33,7 @@ const connectionOptions: ConnectionOptions = {
   logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
   synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
   entities: [path.join(__dirname, 'entities/**/*')],
+  migrations: [path.join(__dirname, 'migrations/**/*')],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
 };
