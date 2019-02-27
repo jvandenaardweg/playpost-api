@@ -28,6 +28,27 @@ TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
 5. Run `npm run dev`, this will launch the database and start the Node server.
 6. The local server should be available at http://localhost:3000
 
+# Database changes
+1. Deploy to Heroku
+2. Migrations are automatically run upon start, see `migrationsRun: true` in `./src/index.ts`
+
+## Manually sync database
+
+**IMPORTANT**: this action could destroy production data. Always try to use migrations instead.
+
+Make sure these environment variables are set in Heroku:
+```
+TYPEORM_URL = "" # This should be filled with your DATABASE_URL
+TYPEORM_ENTITIES = "dist/entities/**/*.js"
+TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
+```
+
+1. Login into Heroku
+2. Go to your Dyno and open the console
+3. Run `typeorm schema:sync`
+
+The schema should now be synced.
+
 ## Access to Medium
 Medium does not offer an API to retrieve the bookmarks. So we use a Webview to read the bookmarks for the user. The user is asked to login into the Medium.com website. When loggedin, we can read retrieve the Medium post URL's from that user. Completely safe and secure.
 
