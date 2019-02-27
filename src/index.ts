@@ -6,6 +6,7 @@ import passport from 'passport';
 import helmet from 'helmet';
 import compression from 'compression';
 import * as Sentry from '@sentry/node';
+import path from 'path';
 import { createConnection, ConnectionOptions } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofile';
@@ -36,12 +37,7 @@ const connectionOptions: ConnectionOptions = {
   },
   logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
   synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
-  entities: [
-    User,
-    Article,
-    Playlist,
-    PlaylistItem
-  ],
+  entities: [path.join(__dirname, 'entities/**/*')],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
 };
