@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
+import passport from 'passport';
 import { User } from '../entities/user';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
@@ -51,3 +52,5 @@ export const generateJWTToken = (id: string, email: string) => {
 export const hashPassword = (password: string) => {
   return bcryptjs.hash(password, 10);
 }
+
+export const routeIsProtected = passport.authenticate('jwt', { session: false, failWithError: true });

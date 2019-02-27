@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn } from 'typeorm';
 import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
+import { Article } from './article';
 
 @Entity()
 export class User {
@@ -13,27 +14,25 @@ export class User {
   email: string;
 
   @Column({ nullable: false, select: false })
-  @IsString()
   password: string;
 
   @Column({ nullable: true })
-  @IsDate()
   onboardedAt: Date;
 
   @Column({ nullable: true })
-  @IsDate()
   authenticatedAt: Date;
 
   @Column({ nullable: true })
-  @IsDate()
   activatedAt: Date;
 
+  @OneToMany(type => Article, article => article.user)
+  @JoinColumn()
+  articles: Article[];
+
   @CreateDateColumn()
-  @IsDate()
   createdAt: Date;
 
   @UpdateDateColumn()
-  @IsDate()
   updatedAt: Date;
 
   @AfterInsert()

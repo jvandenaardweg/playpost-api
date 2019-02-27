@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
+import { check, validationResult } from 'express-validator/check';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/user';
 import { validateInput } from '../validators/entity';
-import { hashPassword } from './auth';
+import { hashPassword, routeIsProtected } from './auth';
 
 const MESSAGE_USER_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
@@ -10,7 +11,18 @@ const MESSAGE_USER_NOT_FOUND = 'No user found';
 const MESSAGE_USER_DELETED = 'User is deleted! This cannot be undone.';
 const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = [
+  // routeIsProtected,
+  // [
+  //   check('email').isEmail(),
+  //   check('password').exists()
+  // ],
+  async (req: Request, res: Response) => {
+
+  // const errors: ValidationError[] = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   return res.status(422).json({ errors: errors.array() });
+  // }
   // TODO: validate email, password
   const { email, password } = req.body;
   const userRepository = getRepository(User);
@@ -39,9 +51,9 @@ export const createUser = async (req: Request, res: Response) => {
   const user = await userRepository.findOne({ id: createdUser.id });
 
   return res.json(user);
-};
+}];
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = [routeIsProtected, async (req: Request, res: Response) => {
   const { email } = req.user;
   const { userId } = req.params;
   const userRepository = getRepository(User);
@@ -58,12 +70,14 @@ export const deleteUser = async (req: Request, res: Response) => {
   await userRepository.remove(userToDelete);
 
   return res.json({ message: MESSAGE_USER_DELETED });
-};
+}];
 
-export const findAllUsers = async (req: Request, res: Response) => {
+export const findAllUsers = [
+  routeIsProtected,
+  async (req: Request, res: Response) => {
   const userRepository = getRepository(User);
 
   const users = await userRepository.find();
 
   return res.json(users);
-};
+}];

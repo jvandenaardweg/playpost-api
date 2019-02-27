@@ -18,6 +18,9 @@ import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 
 import { User } from './entities/user';
+import { Article } from './entities/article';
+import { Playlist } from './entities/playlist';
+import { PlaylistItem } from './entities/playlist-item';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
@@ -34,7 +37,10 @@ const connectionOptions: ConnectionOptions = {
   logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
   synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
   entities: [
-    User
+    User,
+    Article,
+    Playlist,
+    PlaylistItem
   ],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
@@ -82,8 +88,8 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   // Protected
 
-  app.get('/v1/users', IS_PROTECTED, usersController.findAllUsers);
-  app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUser);
+  app.get('/v1/users', usersController.findAllUsers);
+  app.delete('/v1/users/:userId', usersController.deleteUser);
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.getMe);

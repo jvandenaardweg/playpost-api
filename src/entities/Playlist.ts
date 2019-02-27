@@ -1,37 +1,41 @@
-// import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToOne, JoinColumn } from 'typeorm';
-// import { IsEmail, IsDate, IsUUID } from 'class-validator';
-// import { User } from './user';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { IsUUID } from 'class-validator';
+import { User } from './user';
+import { PlaylistItem } from './playlist-item';
 
-// @Entity()
-// export class Playlist {
+@Entity()
+export class Playlist {
 
-//   @PrimaryGeneratedColumn('uuid')
-//   @IsUUID()
-//   id: string;
+  @PrimaryGeneratedColumn('uuid')
+  @IsUUID()
+  id: string;
 
-//   @OneToOne(type => User)
-//   @JoinColumn()
-//   user: User;
+  @OneToOne(type => User)
+  @JoinColumn()
+  user: User;
 
-//   // articles
+  @Column({ nullable: false, default: 'main' })
+  name: string;
 
-//   @CreateDateColumn({ nullable: false })
-//   @IsDate()
-//   createdAt: Date;
+  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article)
+  @JoinColumn()
+  articles: PlaylistItem[];
 
-//   @UpdateDateColumn()
-//   @IsDate()
-//   updatedAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-// }
-// /*
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-// type Playlist {
-//   user: User! @relation(name: "UserToPlaylist")
-//   article: Article! @relation(name: "ArticleToPlaylist")
-//   order: Int!
-//   createdAt: DateTime!
-//   updatedAt: DateTime!
-// }
+}
+/*
 
-// */
+type Playlist {
+  user: User! @relation(name: "UserToPlaylist")
+  article: Article! @relation(name: "ArticleToPlaylist")
+  order: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+*/
