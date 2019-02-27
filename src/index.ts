@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import passport from 'passport';
 import helmet from 'helmet';
 import compression from 'compression';
+import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection, ConnectionOptions } from 'typeorm';
 
@@ -55,6 +56,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   console.log('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
+  app.use(responseTime());
   app.use(helmet());
   app.use(compression());
 

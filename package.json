@@ -66,6 +66,7 @@
     "prisma-client-lib": "^1.27.3",
     "readability": "https://github.com/mozilla/readability#master",
     "reflect-metadata": "^0.1.13",
+    "response-time": "^2.3.2",
     "typeorm": "^0.2.14",
     "typescript-tslint-plugin": "^0.3.1",
     "unfluff": "^3.2.0"
@@ -85,6 +86,7 @@
     "@types/node-fetch": "^2.1.6",
     "@types/passport": "^1.0.0",
     "@types/passport-jwt": "^3.0.1",
+    "@types/response-time": "^2.3.3",
     "@types/ws": "^6.0.1",
     "concurrently": "^4.1.0",
     "eslint": "^5.3.0",
