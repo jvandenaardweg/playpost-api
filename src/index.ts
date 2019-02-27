@@ -6,7 +6,6 @@ import passport from 'passport';
 import helmet from 'helmet';
 import compression from 'compression';
 import * as Sentry from '@sentry/node';
-import path from 'path';
 import { createConnection, ConnectionOptions } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofile';
@@ -17,6 +16,11 @@ import * as favoritesController from './controllers/favorites';
 import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
+
+import { User } from './entities/user';
+import { Article } from './entities/article';
+import { Playlist } from './entities/playlist';
+import { PlaylistItem } from './entities/playlist-item';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
@@ -32,8 +36,14 @@ const connectionOptions: ConnectionOptions = {
   },
   logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
   synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
-  entities: [path.join(__dirname, 'entities/**/*')],
-  migrations: [path.join(__dirname, 'migrations/**/*')],
+  entities: [
+    User,
+    Playlist,
+    PlaylistItem,
+    Article
+  ],
+  // entities: [path.join(__dirname, 'entities/**/*')],
+  // migrations: [path.join(__dirname, 'entities/**/*')],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
 };
