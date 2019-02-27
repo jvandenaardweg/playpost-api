@@ -35,6 +35,8 @@ const connectionOptions: ConnectionOptions = {
   entities: [
     User
   ],
+  migrationsRun: true,
+  dropSchema: false
 };
 
 // Create a connection with the database
