@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { IsUUID } from 'class-validator';
 import { User } from './User';
-import { PlaylistItem } from './Playlist-item';
+import { PlaylistItem } from './PlaylistItem';
 
 @Entity()
 export class Playlist {

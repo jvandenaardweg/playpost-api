@@ -20,7 +20,7 @@ import * as articlesController from './controllers/articles';
 import { User } from './entities/User';
 import { Article } from './entities/Article';
 import { Playlist } from './entities/Playlist';
-import { PlaylistItem } from './entities/Playlist-item';
+import { PlaylistItem } from './entities/PlaylistItem';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
