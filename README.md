@@ -29,8 +29,7 @@ TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
 6. The local server should be available at http://localhost:3000
 
 # Database changes
-1. Deploy to Heroku
-2. Migrations are automatically run upon start, see `migrationsRun: true` in `./src/index.ts`
+Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`
 
 ## Manually sync database
 
