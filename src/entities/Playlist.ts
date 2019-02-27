@@ -1,6 +1,6 @@
 // import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToOne, JoinColumn } from 'typeorm';
 // import { IsEmail, IsDate, IsUUID } from 'class-validator';
-// import { User } from './User';
+// import { User } from './user';
 
 // @Entity()
 // export class Playlist {

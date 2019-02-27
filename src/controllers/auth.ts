@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import { User } from '../entities/User';
+import { User } from '../entities/user';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
 import { check, validationResult } from 'express-validator/check';

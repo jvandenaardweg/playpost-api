@@ -16,7 +16,8 @@ import * as favoritesController from './controllers/favorites';
 import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
-import { User } from './entities/User';
+
+import { User } from './entities/user';
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert } from 'typeorm';
-import { IsEmail, IsDate, IsUUID } from 'class-validator';
+import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
 
 @Entity()
 export class User {
@@ -13,6 +13,7 @@ export class User {
   email: string;
 
   @Column({ nullable: false, select: false })
+  @IsString()
   password: string;
 
   @Column({ nullable: true })
@@ -27,7 +28,7 @@ export class User {
   @IsDate()
   activatedAt: Date;
 
-  @CreateDateColumn({ nullable: false })
+  @CreateDateColumn()
   @IsDate()
   createdAt: Date;
 
