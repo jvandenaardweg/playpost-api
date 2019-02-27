@@ -1,19 +1,25 @@
 ## Requirements:
+- Docker
 - ffmpeg: https://evermeet.cx/ffmpeg/
 - When using Heroku, use this buildpack: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
 
-## Local GraphQL playground
-http://localhost:4466/management
-
-
-## Setup
-1. Install ffmpeg: `brew install ffmpeg`
-2. Install npm modules: `npm install`
-3. Create a `.env` file in the root of this project
-4. Add `GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID` > Ask the repository owner for the contents of this environment variable.
-5. Add `GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL` > Ask the repository owner for the contents of this environment variable.
-6. Add `GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY` > Ask the repository owner for the contents of this environment variable.
-7. Start development server: `npm run dev`
+## Setup for development
+1. Use the correct node version, run: `nvm use`
+2. Install ffmpeg: `brew install ffmpeg`
+3. Install npm modules: `npm install`
+4. Create a `.env` file in the root of this project with the following data:
+```
+GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID="" # Ask the repository owner for the contents of this environment variable.
+GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL="" # Ask the repository owner for the contents of this environment variable.
+GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY="" # Ask the repository owner for the contents of this environment variable.
+JWT_SECRET="JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
+NODE_ENV="development"
+DATABASE_URL="postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+TYPEORM_URL="postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+REDIS_URL="redis://localhost:6381"
+```
+5. Run `npm run dev`, this will launch the database and start the Node server.
+6. The local server should be available at http://localhost:3000
 
 ## Access to Medium
 Medium does not offer an API to retrieve the bookmarks. So we use a Webview to read the bookmarks for the user. The user is asked to login into the Medium.com website. When loggedin, we can read retrieve the Medium post URL's from that user. Completely safe and secure.
