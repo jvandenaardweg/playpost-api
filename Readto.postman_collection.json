@@ -10,7 +10,7 @@
 			"name": "Me",
 			"item": [
 				{
-					"name": "Get profile",
+					"name": "Get account details",
 					"event": [
 						{
 							"listen": "test",
@@ -38,7 +38,14 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
@@ -52,25 +59,87 @@
 								"v1",
 								"me"
 							]
-						}
+						},
+						"description": "Gets basic account details of the current user."
 					},
 					"response": []
 				},
 				{
-					"name": "Update profile",
+					"name": "Update email",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"email"
+							]
+						},
+						"description": "Allow the user to change his e-mail address and password."
+					},
+					"response": []
+				},
+				{
+					"name": "Update password",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/me",
@@ -81,9 +150,213 @@
 								"v1",
 								"me"
 							]
+						},
+						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
+					},
+					"response": []
+				},
+				{
+					"name": "Get all favorites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"favorites"
+							]
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Create a favorite",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"articleId\": \"cjshmabjl007h0731vl5fjol3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"favorites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all created articles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"articles"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d2d45ef4-53f8-466b-b37c-2732b69d58e4",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e1b5dbde-3619-48cd-ab25-c3745c4edc57",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -110,14 +383,86 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1",
+							"raw": "{{baseUrl}}/v1/articles/cjshmabjl007h0731vl5fjol3",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
+								"cjshmabjl007h0731vl5fjol3"
+							]
+						},
+						"description": "We generate the audio of an article on-demand. Because this is what costs the most. If a user just adds an article, but never listens to it, we don't have wasted costs to generate an audiofile of it.\n\nWhat this endpoint does: If it needs to generate an audiofile > crawls the article URL to extract all the content, generate a readable format of the article and use that to create a voice recording. All this data is saved in the database and returned to the user.\n\nSo this endpoint could take a little longer to load when it still needs to generate an audiofile."
+					},
+					"response": []
+				},
+				{
+					"name": "Get a audiofile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/audiofile/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"audiofile",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download audiofile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/audiofile/1/download",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"audiofile",
+								"1",
+								"download"
 							]
 						}
 					},
@@ -216,7 +561,7 @@
 								"audiofile"
 							]
 						},
-						"description": "Crawls the article URL to extract all the content, generate a readable format of the article and use that to create a voice recording"
+						"description": "Create another audiofile for this article using a different voice then the default one."
 					},
 					"response": []
 				},
@@ -228,13 +573,13 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles/1/favorite",
@@ -247,7 +592,8 @@
 								"1",
 								"favorite"
 							]
-						}
+						},
+						"description": "Adds an article to the user's favorite list"
 					},
 					"response": []
 				},
@@ -265,18 +611,21 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/favorites",
+							"raw": "{{baseUrl}}/v1/articles/1/playlist",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"favorites"
+								"articles",
+								"1",
+								"playlist"
 							]
-						}
+						},
+						"description": "Adds an article to the user's favorite list. The newest article is put below the other ones (using the correct \"order\")"
 					},
 					"response": []
 				},
@@ -294,7 +643,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles/1/archive",
@@ -307,7 +656,8 @@
 								"1",
 								"archive"
 							]
-						}
+						},
+						"description": "Adds an article to the user's archive. When an article is added to the archive, it is removed from the user's playlist."
 					},
 					"response": []
 				},
@@ -325,7 +675,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles/1/favorite",
@@ -356,7 +706,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles/1/playlist",
@@ -387,7 +737,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles/1/archive",
@@ -403,12 +753,128 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Delete article (admin only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1"
+							]
+						},
+						"description": "Completely deletes an article from the database, including all the referencies for the users (archives, playlists, favorites) and audiofiles. Normal users should not have access to this endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete audiofile (admin only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"language\": \"en\",\n\t\"voice\": \"\",\n\t\"synthesizer\": \"GOOGLE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/articles/1/audiofile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"articles",
+								"1",
+								"audiofile"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "Users",
 			"item": [
+				{
+					"name": "Get all users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Create a user",
 					"event": [
@@ -417,8 +883,7 @@
 							"script": {
 								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"token\", jsonData.token);"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -439,7 +904,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.de\",\n\t\"password\": \"demo\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/users",
@@ -450,13 +915,24 @@
 								"v1",
 								"users"
 							]
-						}
+						},
+						"description": "Allows a new user to create an account."
 					},
 					"response": []
 				},
 				{
-					"name": "Delete a user",
+					"name": "Delete a user (admin only)",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -468,18 +944,20 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/users",
+							"raw": "{{baseUrl}}/v1/users/f991b5c1-1382-4b2a-bab0-f540526b4c16",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"users"
+								"users",
+								"f991b5c1-1382-4b2a-bab0-f540526b4c16"
 							]
-						}
+						},
+						"description": "An endpoint to delete a user on request. The endpoint should only be available to a certain user ID."
 					},
 					"response": []
 				}
@@ -497,7 +975,10 @@
 								"id": "b3969486-82e1-4a52-bcc7-72974164f2db",
 								"exec": [
 									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"token\", jsonData.token);"
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);    ",
+									"}",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -541,7 +1022,7 @@
 				{
 					"name": "Change order in playlist",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -552,7 +1033,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": \"1231231\",\n\t\"order\": 2\n}"
+							"raw": "{\n\t\"articleId\": \"1231231\",\n\t\"order\": 2\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlists",
@@ -563,7 +1044,8 @@
 								"v1",
 								"playlists"
 							]
-						}
+						},
+						"description": "Change the order of the playlist by sending the article ID that changed in order. The endpoint will correctly order the other articles in the playlist. It returns the new ordered playlist."
 					},
 					"response": []
 				},
@@ -662,6 +1144,73 @@
 								"archives"
 							]
 						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "Get subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/subscriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"subscriptions"
+							]
+						},
+						"description": "Gets the subscription details of the user"
+					},
+					"response": []
+				},
+				{
+					"name": "Create subscription",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/subscriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"subscriptions"
+							]
+						},
+						"description": "Create a subscription for a user. In essense setting up a recurring subscription plan for the user."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete subscription",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": ""
+						},
+						"description": "Allows the user to delete a subscription, so cancelling any subscription at the end of the subscription period."
 					},
 					"response": []
 				}

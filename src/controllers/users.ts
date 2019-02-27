@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/user';
 import { validateInput } from '../validators/entity';
-import { generateJWTToken, hashPassword } from './auth';
+import { hashPassword } from './auth';
 
 const MESSAGE_USER_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
@@ -35,11 +35,10 @@ export const createUser = async (req: Request, res: Response) => {
   const newUserToSave = await userRepository.create(userToCreate);
   const createdUser = await userRepository.save(newUserToSave);
 
-  // Send a token within a successful signup, so we can log the user in right away
-  const token = generateJWTToken(createdUser.id, createdUser.email);
+  // Get the created user and return it
+  const user = await userRepository.findOne({ id: createdUser.id });
 
-  // TODO: as we return a token here, we should also set "authenticatedAt" date upon a signup?
-  return res.json({ token });
+  return res.json(user);
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
