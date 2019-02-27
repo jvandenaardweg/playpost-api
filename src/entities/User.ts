@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn } from 'typeorm';
 import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
-import { Article } from './Article';
+import { Article } from './article';
 
 @Entity()
 export class User {
