@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, IsNull } from 'typeorm';
 import { IsDate, IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
 
 @Entity()
-export class Article {
+export class Article extends BaseEntity {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -62,6 +62,43 @@ export class Article {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  /**
+   * Returns the basic article information needed to display the article in an overview.
+   * @param {string} id the UUID of the article
+   *
+   * @returns {Promise<Article>} the article
+   */
+  static findOneBasicArticle(id: string): Promise<Article> {
+    return this.findOne({ id }, { select: ['id', 'title', 'description', 'url', 'language', 'sourceName'] });
+  }
+
+  /**
+   * Returns the articles that are missing the data required to generate an audiofile for.
+   * If `ssml`, `html` and `text` are not populated with data, we return the given article.
+   *
+   * @param {string} id the UUID of the article
+   * @returns {Promise<Article>} the article
+   */
+  static findOneUnpopulatedArticle(id: string): Promise<Article> {
+    return this.findOne(
+      {
+        id,
+        ssml: IsNull(),
+        html: IsNull(),
+        text: IsNull()
+      },
+      {
+        select: [
+          'id',
+          'title',
+          'description',
+          'url',
+          'language',
+          'sourceName'
+        ]
+      }
+    );
+  }
 }
 
 /*
