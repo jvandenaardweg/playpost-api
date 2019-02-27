@@ -2,7 +2,11 @@ version: '2'
 services:
   postgres:
     image: postgres:latest
-    env_file: .env
+    # env_file: .env
+    environment:
+    - POSTGRES_PASSWORD=readtoapi
+    - POSTGRES_USER=readtoapi
+    - POSTGRES_DB=readtoapi
     ports:
       - "5432:5432"
     container_name: "readto-api-postgres"
