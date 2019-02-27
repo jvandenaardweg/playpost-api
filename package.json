@@ -19,7 +19,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore",
     "eslint:fix": "./node_modules/eslint/bin/eslint.js *.js --ignore-path .gitignore --fix",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build",
+    "typeorm:schema:sync": "typeorm schema:sync",
+    "typeorm:migration:revert": "typeorm migration:revert",
+    "typeorm:migration:run": "typeorm migration:run"
   },
   "repository": {
     "type": "git",

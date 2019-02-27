@@ -35,7 +35,7 @@ const connectionOptions: ConnectionOptions = {
   entities: [
     User
   ],
-  migrationsRun: true,
+  migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
 };
 
