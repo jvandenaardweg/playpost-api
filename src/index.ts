@@ -22,14 +22,13 @@ import { Article } from './entities/article';
 import { Playlist } from './entities/playlist';
 import { PlaylistItem } from './entities/playlist-item';
 
+/* eslint-disable no-console */
+
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
 const connectionOptions: ConnectionOptions = {
   type: 'postgres',
-  // cache: {
-  //   duration: 3600000 // 60 minutes
-  // },
   url: process.env.DATABASE_URL,
   extra: {
     ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
@@ -42,11 +41,12 @@ const connectionOptions: ConnectionOptions = {
     PlaylistItem,
     Article
   ],
-  // entities: [path.join(__dirname, 'entities/**/*')],
-  // migrations: [path.join(__dirname, 'entities/**/*')],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
   dropSchema: false
 };
+
+console.log('App init:', 'Connecting with database...', 'Using options:');
+console.log(connectionOptions);
 
 // Create a connection with the database
 createConnection(connectionOptions).then(async (connection: any) => {
@@ -94,7 +94,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/users/:userId', usersController.deleteUser);
 
   // /v1/me
-  app.get('/v1/me', IS_PROTECTED, meController.getMe);
+  app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
   app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
   app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
@@ -138,8 +138,6 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    /* eslint-disable no-console */
-
     if (err) {
       if (process.env.NODE_ENV === 'production') {
         // Grab the user so we can give some context to our errors
@@ -154,7 +152,8 @@ createConnection(connectionOptions).then(async (connection: any) => {
         }
 
         // Capture the error for us to see in Sentry
-        if (err.message === 'Unauthorized') {
+        // Do not capture Unauthorized errors
+        if (err.message !== 'Unauthorized') {
           Sentry.captureException(err);
         }
 
@@ -178,6 +177,5 @@ createConnection(connectionOptions).then(async (connection: any) => {
     return next(err);
   });
 
-  /* eslint-disable no-console */
   app.listen(PORT, () => console.log(`App init: Listening on port ${PORT}!`));
 });

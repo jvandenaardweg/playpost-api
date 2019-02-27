@@ -7,6 +7,7 @@ const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
 const MESSAGE_ARTICLE_USER_NOT_FOUND = 'User not found. You are not logged in, or your account is deleted.';
 const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
 
+// TODO: remove prisma
 export const postArticles = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { url } = req.body;
@@ -66,6 +67,7 @@ export const postArticles = async (req: Request, res: Response) => {
   return res.json({ ...createdArticle });
 };
 
+// TODO: remove prisma
 export const getArticlesById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
 
@@ -85,6 +87,7 @@ export const getArticlesById = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const getAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
 
@@ -100,6 +103,7 @@ export const getAudiofileByArticleId = async (req: Request, res: Response) => {
   return res.json({ message: `get (default) audiofile for article ID: ${articleId}` });
 };
 
+// TODO: remove prisma
 export const postAudiofileByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -124,6 +128,7 @@ export const postAudiofileByArticleId = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const postFavoriteByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -134,6 +139,7 @@ export const postFavoriteByArticleId = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const deleteFavoriteByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -144,6 +150,7 @@ export const deleteFavoriteByArticleId = async (req: Request, res: Response) => 
   });
 };
 
+// TODO: remove prisma
 export const postArchiveByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -154,6 +161,7 @@ export const postArchiveByArticleId = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const deleteArchiveByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -164,6 +172,7 @@ export const deleteArchiveByArticleId = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const postPlaylistByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,
@@ -174,6 +183,7 @@ export const postPlaylistByArticleId = async (req: Request, res: Response) => {
   });
 };
 
+// TODO: remove prisma
 export const deletePlaylistByArticleId = async (req: Request, res: Response) => {
   const {
     articleId,

@@ -14,7 +14,7 @@ const MESSAGE_ME_ARTICLE_ID_REQUIRED = 'ArticleId needs to be present.';
 const MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND = 'The Article you want to favorite is not found.';
 const MESSAGE_ME_FAVORITE_ARTICLE_EXISTS = 'This article is already in your favorites, you cannot favorite it again.';
 
-export const getMe = async (req: Request, res: Response) => {
+export const findCurrentUser = async (req: Request, res: Response) => {
   const { id } = req.user;
   const userRepository = getRepository(User);
 
@@ -56,6 +56,7 @@ export const updatePassword = async (req: Request, res: Response) => {
   return res.json(updatedUser);
 };
 
+// TODO: remove prisma
 export const deleteMe = async (req: Request, res: Response) => {
   const { id } = req.user;
 
@@ -66,6 +67,7 @@ export const deleteMe = async (req: Request, res: Response) => {
   return res.json({ message: MESSAGE_ME_DELETED });
 };
 
+// TODO: remove prisma
 export const createFavoriteArticle = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { articleId } = req.body;
@@ -103,6 +105,7 @@ export const createFavoriteArticle = async (req: Request, res: Response) => {
   return res.json(favoriteArticle);
 };
 
+// TODO: remove prisma
 export const findAllFavoriteArticles = async (req: Request, res: Response) => {
   const userId = req.user.id;
 
@@ -132,6 +135,7 @@ export const findAllFavoriteArticles = async (req: Request, res: Response) => {
   return res.json(articles);
 };
 
+// TODO: remove prisma
 export const findAllCreatedArticles = async (req: Request, res: Response) => {
   const userId = req.user.id;
 

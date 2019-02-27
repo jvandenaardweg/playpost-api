@@ -6,12 +6,11 @@ const { prisma } = require('../generated/prisma-client');
 // const MESSAGE_ME_EMAIL_REQUIRED = 'E-mail address is required.';
 
 export const getPlaylists = async (req: Request, res: Response) => {
-  // TODO: get auth user id
   return res.json({ message: 'get the playlist from user ID: X' });
 };
 
+// TODO: remove prisma
 export const postPlaylists = async (req: Request, res: Response) => {
-  // TODO: get auth user id
   const { articleId } = req.body;
 
   const article = await prisma.article({ id: articleId });
@@ -29,7 +28,6 @@ export const postPlaylists = async (req: Request, res: Response) => {
 };
 
 export const putPlaylists = async (req: Request, res: Response) => {
-  // TODO: get auth user id
   const { url } = req.body;
   // First, check to see if we already have the article details
   // Else, crawl the article page and add it to the database
@@ -37,6 +35,5 @@ export const putPlaylists = async (req: Request, res: Response) => {
 };
 
 export const deletePlaylists = async (req: Request, res: Response) => {
-  // TODO: get auth user id
   return res.json({ message: 'delete article from playlist for user ID: X' });
 };

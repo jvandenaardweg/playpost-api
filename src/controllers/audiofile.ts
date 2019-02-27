@@ -36,7 +36,7 @@ export const getAudiofile = async (req: Request, res: Response) => {
     .join('/');
 
   // Find an existing file in our cloud storage
-  const existingFiles: Array<File> = await storage.listFilesByPrefix(`${uploadPath}/`);
+  const existingFiles: File[] = await storage.listFilesByPrefix(`${uploadPath}/`);
   const foundFile = existingFiles && existingFiles.length
     ? existingFiles.find((file: File) => file.name.includes(articleId))
     : null;
@@ -77,7 +77,7 @@ export const getAudiofile = async (req: Request, res: Response) => {
     synthesizerOptions,
   );
 
-  console.log('concatinatedLocalAudiofilePath', concatinatedLocalAudiofilePath)
+  console.log('concatinatedLocalAudiofilePath', concatinatedLocalAudiofilePath);
 
   // const audioFileDurationInSeconds = await utils.audio.getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
