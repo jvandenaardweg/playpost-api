@@ -27,8 +27,8 @@ DATABASE_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
 REDIS_URL = "redis://localhost:6381"
 
 TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
-TYPEORM_ENTITIES = "src/entities/**/*.ts"
-TYPEORM_MIGRATIONS = "src/migrations/**/*.ts"
+TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
+TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
 ```
 5. Run `npm run dev`, this will launch the database and start the Node server.
 6. The local server should be available at http://localhost:3000
@@ -40,8 +40,8 @@ Make sure these environment variables are set in Heroku:
 ```
 DATABASE_URL = "" # Filled by Heroku Postgres
 TYPEORM_URL = "" # This should be filled with the value of DATABASE_URL
-TYPEORM_ENTITIES = "dist/entities/**/*.js"
-TYPEORM_MIGRATIONS = "dist/migrations/**/*.js"
+TYPEORM_ENTITIES = "dist/database/entities/**/*.js"
+TYPEORM_MIGRATIONS = "dist/database/migrations/**/*.js"
 ```
 
 The above `TYPEORM_ENTITIES` and `TYPEORM_MIGRATIONS` differ from your local dev environment, as it is now using the `./dist` folder.
