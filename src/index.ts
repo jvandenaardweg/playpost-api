@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
-import { createConnection, ConnectionOptions } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofile';
 import * as meController from './controllers/me';
@@ -18,35 +18,12 @@ import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 
-import { User } from './entities/user';
-import { Article } from './entities/article';
-import { Playlist } from './entities/playlist';
-import { PlaylistItem } from './entities/playlist-item';
-import { Audiofile } from './entities/audiofile';
+import { connectionOptions } from './database/connection-options';
 
 /* eslint-disable no-console */
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
-
-const connectionOptions: ConnectionOptions = {
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
-  extra: {
-    ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
-  },
-  logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
-  synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
-  entities: [
-    User,
-    Playlist,
-    PlaylistItem,
-    Article,
-    Audiofile
-  ],
-  migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
-  dropSchema: false
-};
 
 console.log('App init:', 'Connecting with database...', 'Using options:');
 console.log(connectionOptions);
@@ -122,11 +99,13 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.post('/v1/favorites', IS_PROTECTED, favoritesController.postFavorites);
   app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorites);
 
-  app.post('/v1/articles', IS_PROTECTED, articlesController.postArticles);
+  // /v1/articles
+  app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.getArticlesById);
 
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.getAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.postAudiofileByArticleId);
+  // app.get('/v1/articles/:articleId/audiofiles/:audiofileId', IS_PROTECTED, articlesController.getAudiofileById);
+  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.createAudiofileByArticleId);
 
   app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
   app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
@@ -136,6 +115,9 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   app.post('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.postPlaylistByArticleId);
   app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
+
+  // v1/audiofiles
+
 
   // Catch all
   app.all('*', async (req: Request, res: Response) => res.status(404).json(`No route found for ${req.method} ${req.url}`));

@@ -14,7 +14,7 @@ export class Playlist extends BaseEntity {
   @JoinColumn()
   user: User;
 
-  @Column({ nullable: false, default: 'main' })
+  @Column({ nullable: false, default: 'Main' })
   name: string;
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article)

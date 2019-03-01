@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import { User } from '../entities/user';
+import { User } from '../database/entities/user';
 import { hashPassword } from './auth';
 const { prisma } = require('../generated/prisma-client');
 

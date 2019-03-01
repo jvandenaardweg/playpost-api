@@ -1,10 +1,13 @@
-import { Request, Response } from 'express';
 import { File } from '@google-cloud/storage';
 import appRootPath from 'app-root-path';
-import { ssmlPartsToSpeech } from '../synthesizers';
+import { Request, Response } from 'express';
+import { getRepository } from 'typeorm';
 import * as dataSource from '../data-sources/medium';
-import * as utils from '../utils';
+import { Audiofile } from '../database/entities/audiofile';
 import * as storage from '../storage/google-cloud';
+import { ssmlPartsToSpeech } from '../synthesizers';
+import * as utils from '../utils';
+import { Article } from '../database/entities/article';
 
 export const getAudiofile = async (req: Request, res: Response) => {
   const { url } = req.query;
@@ -98,4 +101,20 @@ export const getAudiofile = async (req: Request, res: Response) => {
   console.log('Done!');
 
   return res.json({ publicFileUrl, article });
+};
+
+/**
+ * Get's an audiofile out of the database using an URL parameter
+ */
+export const findAudiofileById = async (req: Request, res: Response) => {
+  const { audiofileId } = req.params;
+  const audiofileRepository = getRepository(Audiofile);
+
+  if (!audiofileId) return res.status(400).json({ message: 'The audiofile ID is required.' });
+
+  const audiofile = await audiofileRepository.findOne({ id: audiofileId });
+
+  if (!audiofile) return res.status(404).json({ message: 'Audiofile not found.' });
+
+  return res.json(audiofile);
 };

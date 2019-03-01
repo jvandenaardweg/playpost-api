@@ -1,26 +1,27 @@
 import { Request, Response } from 'express';
+import { getRepository } from 'typeorm';
+import { Article } from '../database/entities/article';
+import { Audiofile } from '../database/entities/audiofile';
 import { prisma } from '../generated/prisma-client';
 import { crawl } from '../extractors/mercury';
 import { detectLanguage } from '../utils/detect-language';
+import { SynthesizerOptions } from '../synthesizers';
 
 const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
-const MESSAGE_ARTICLE_USER_NOT_FOUND = 'User not found. You are not logged in, or your account is deleted.';
 const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
 
-// TODO: remove prisma
-export const postArticles = async (req: Request, res: Response) => {
+export const createArticle = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { url } = req.body;
+  const articleRepository = getRepository(Article);
 
   if (!url) return res.status(400).json({ message: MESSAGE_ARTICLE_URL_REQUIRED });
 
-  const user = await prisma.user({ id: userId });
+  // TODO: sanitize url
 
-  if (!user) return res.status(400).json({ message: MESSAGE_ARTICLE_USER_NOT_FOUND });
+  const article = await articleRepository.findOne({ url });
 
-  const article = await prisma.article({ url });
-
-  if (article) return res.status(400).json({ message: MESSAGE_ARTICLE_EXISTS, article });
+  if (article) return res.status(400).json({ article, message: MESSAGE_ARTICLE_EXISTS });
 
   const {
     title,
@@ -37,34 +38,22 @@ export const postArticles = async (req: Request, res: Response) => {
     });
   }
 
-  // TODO: Crawl the URL, and get these basic data:
-  /*
-  const title = null
-  const description = null
-  const language = null
-  const sourceName = null
-  const url = null
-*/
-
-  /* eslint-disable no-console */
-  // console.log('user', user);
-
-  const createdArticle = await prisma.createArticle({
+  const articleToCreate = await articleRepository.create({
+    url,
     title,
     description: excerpt,
     authorName: author,
     sourceName: domain,
-    url,
-    language: 'EN',
+    languageCode: 'EN',
     user: {
-      connect: {
-        id: userId,
-      },
+      id: userId
     }
   });
 
+  const createdArticle = await articleRepository.save(articleToCreate);
+
   // Create an article with preview data: url, title, description, language and sourceName
-  return res.json({ ...createdArticle });
+  return res.json(createdArticle);
 };
 
 // TODO: remove prisma
@@ -192,4 +181,60 @@ export const deletePlaylistByArticleId = async (req: Request, res: Response) => 
   return res.json({
     message: `delete article ID: ${articleId} from playlist, for user: X`,
   });
+};
+
+export const createAudiofileByArticleId = async (req: Request, res: Response) => {
+  const { articleId } = req.params;
+  // const options: SynthesizerOptions = req.body.options;
+
+  // TODO: use options body to overwrite default options
+  const defaultSynthesizerOptions = {
+    synthesizer: 'Google',
+    languageCode: 'en-US', // TODO: get from article
+    name: 'en-US-Wavenet-D',
+    encoding: 'mp3'
+  };
+
+  const audiofileRepository = getRepository(Audiofile);
+  const articleRepository = getRepository(Article);
+
+  if (!articleId) return res.status(400).json({ message: 'The article ID is required.' });
+
+  const article = await articleRepository.findOne({ id: articleId });
+
+  if (!article) return res.status(400).json({ message: 'Article does not exist, we cannot create an audiofile for that. First create an article, then create an audiofile.' });
+
+  // const audiofile = await audiofileRepository.findOne({ article: { id: articleId } });
+
+  // If we already have an audiofile, just return it
+  // if (audiofile) return res.json(audiofile);
+
+  // Crawl article, get SSML, generate speech to text, upload to bucket, return bucket meta data, connect article to audiofile
+
+  const audiofileToCreate = {
+    article, // The article object we found by articleId
+    url: null,
+    bucket: null,
+    name: null,
+    length: 0,
+    languageCode: defaultSynthesizerOptions.languageCode,
+    encoding: defaultSynthesizerOptions.encoding,
+    voice: defaultSynthesizerOptions.name,
+    synthesizer: defaultSynthesizerOptions.synthesizer
+  };
+
+  // Validate the input
+  // const validationResult = await validateInput(Audiofile, audiofileToCreate);
+  // if (validationResult.errors.length) return res.status(400).json(validationResult);
+
+  // Create the audiofile, so we can use the audiofileId to create a file in the storage
+  const newAudiofileToSave = await audiofileRepository.create(audiofileToCreate);
+  const createdAudiofile = await audiofileRepository.save(newAudiofileToSave);
+
+  // Upon creation in the database, we synthesize the audiofile
+
+  // Get the created audiofile and return it
+  const newlyCreatedAudiofile = await audiofileRepository.findOne({ id: createdAudiofile.id });
+
+  return res.json(newlyCreatedAudiofile);
 };

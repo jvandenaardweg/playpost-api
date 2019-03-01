@@ -20,7 +20,7 @@ export class Article extends BaseEntity {
   url: string;
 
   @Column()
-  language: string;
+  languageCode: string;
 
   @Column()
   sourceName: string;
@@ -68,9 +68,21 @@ export class Article extends BaseEntity {
    *
    * @returns {Promise<Article>} the article
    */
-  static findOneBasicArticle(id: string): Promise<Article> {
-    return this.findOne({ id }, { select: ['id', 'title', 'description', 'url', 'language', 'sourceName'] });
-  }
+  // static findOneBasicArticle(id: string): Promise<Article> {
+  //   return this.findOne({ id }, { select: ['id', 'title', 'description', 'url', 'language', 'sourceName'] });
+  // }
+
+  // static async createBasicArticle(title: string, description: string, url: string, language: string, sourceName: string): Promise<Article> {
+  //   const articleToCreate = await this.create({
+  //     title,
+  //     description,
+  //     url,
+  //     language,
+  //     sourceName
+  //   });
+
+  //   return this.save(articleToCreate);
+  // }
 
   /**
    * Returns the articles that are missing the data required to generate an audiofile for.
@@ -79,26 +91,26 @@ export class Article extends BaseEntity {
    * @param {string} id the UUID of the article
    * @returns {Promise<Article>} the article
    */
-  static findOneUnpopulatedArticle(id: string): Promise<Article> {
-    return this.findOne(
-      {
-        id,
-        ssml: IsNull(),
-        html: IsNull(),
-        text: IsNull()
-      },
-      {
-        select: [
-          'id',
-          'title',
-          'description',
-          'url',
-          'language',
-          'sourceName'
-        ]
-      }
-    );
-  }
+  // static findOneUnpopulatedArticle(id: string): Promise<Article> {
+  //   return this.findOne(
+  //     {
+  //       id,
+  //       ssml: IsNull(),
+  //       html: IsNull(),
+  //       text: IsNull()
+  //     },
+  //     {
+  //       select: [
+  //         'id',
+  //         'title',
+  //         'description',
+  //         'url',
+  //         'language',
+  //         'sourceName'
+  //       ]
+  //     }
+  //   );
+  // }
 }
 
 /*
