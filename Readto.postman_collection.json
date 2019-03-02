@@ -156,7 +156,7 @@
 					"response": []
 				},
 				{
-					"name": "Get all favorites",
+					"name": "Get all playlists",
 					"event": [
 						{
 							"listen": "test",
@@ -197,75 +197,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/me/favorites",
+							"raw": "{{baseUrl}}/v1/me/playlists",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"me",
-								"favorites"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a favorite",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
-								"exec": [
-									"pm.test(\"Should NOT have a password field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.password).to.be.undefined;",
-									"});",
-									"",
-									"pm.test(\"Should have an email field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.email).to.be.string;",
-									"});",
-									"",
-									"pm.test(\"Should have an id field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.be.string;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"articleId\": \"cjshmabjl007h0731vl5fjol3\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/favorites",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"favorites"
+								"playlists"
 							]
 						}
 					},
@@ -364,7 +303,7 @@
 			"name": "Articles",
 			"item": [
 				{
-					"name": "Get a article",
+					"name": "Get article by id",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -383,14 +322,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/cjshmabjl007h0731vl5fjol3",
+							"raw": "{{baseUrl}}/v1/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"cjshmabjl007h0731vl5fjol3"
+								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
 							]
 						},
 						"description": "We generate the audio of an article on-demand. Because this is what costs the most. If a user just adds an article, but never listens to it, we don't have wasted costs to generate an audiofile of it.\n\nWhat this endpoint does: If it needs to generate an audiofile > crawls the article URL to extract all the content, generate a readable format of the article and use that to create a voice recording. All this data is saved in the database and returned to the user.\n\nSo this endpoint could take a little longer to load when it still needs to generate an audiofile."
@@ -398,7 +337,7 @@
 					"response": []
 				},
 				{
-					"name": "Get a audiofile",
+					"name": "Get article audiofiles",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -417,52 +356,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/audiofile/1",
+							"raw": "{{baseUrl}}/v1/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"1",
-								"audiofile",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Download audiofile",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/audiofile/1/download",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"audiofile",
-								"1",
-								"download"
+								"6b420071-d7fe-4951-89fe-4220aadcfd6e",
+								"audiofiles"
 							]
 						}
 					},
@@ -482,7 +384,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"url\": \"https://medium.com/thrive-global/one-behavior-separates-the-successful-from-the-average-adc8e6edd3e3\"\n}"
+							"raw": "{\n\t\"url\": \"https://medium.com/devsdesign/4-reasons-why-you-should-design-without-color-first-c0e38180f689\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/articles",
@@ -534,7 +436,7 @@
 					]
 				},
 				{
-					"name": "Create audio for article",
+					"name": "Create audiofile for article",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -550,145 +452,18 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/audiofile",
+							"raw": "{{baseUrl}}/v1/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"1",
-								"audiofile"
+								"6b420071-d7fe-4951-89fe-4220aadcfd6e",
+								"audiofiles"
 							]
 						},
 						"description": "Create another audiofile for this article using a different voice then the default one."
-					},
-					"response": []
-				},
-				{
-					"name": "Add article to favorites",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/favorite",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"favorite"
-							]
-						},
-						"description": "Adds an article to the user's favorite list"
-					},
-					"response": []
-				},
-				{
-					"name": "Add article to playlist",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/playlist",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"playlist"
-							]
-						},
-						"description": "Adds an article to the user's favorite list. The newest article is put below the other ones (using the correct \"order\")"
-					},
-					"response": []
-				},
-				{
-					"name": "Add article to archive",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/archive",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"archive"
-							]
-						},
-						"description": "Adds an article to the user's archive. When an article is added to the archive, it is removed from the user's playlist."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete article from favorites",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/favorite",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"favorite"
-							]
-						}
 					},
 					"response": []
 				},
@@ -724,37 +499,6 @@
 					"response": []
 				},
 				{
-					"name": "Delete article from archive",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/archive",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"archive"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Delete article (admin only)",
 					"request": {
 						"method": "DELETE",
@@ -771,48 +515,17 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1",
+							"raw": "{{baseUrl}}/v1/articles/be238db2-85f4-40f0-b2a4-2cd794985ba9",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"1"
+								"be238db2-85f4-40f0-b2a4-2cd794985ba9"
 							]
 						},
 						"description": "Completely deletes an article from the database, including all the referencies for the users (archives, playlists, favorites) and audiofiles. Normal users should not have access to this endpoint."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete audiofile (admin only)",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"language\": \"en\",\n\t\"voice\": \"\",\n\t\"synthesizer\": \"GOOGLE\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/audiofile",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"audiofile"
-							]
-						}
 					},
 					"response": []
 				}
@@ -904,7 +617,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.de\",\n\t\"password\": \"demo\"\n}"
+							"raw": "{\n\t\"email\": \"hello@jordyvandenaardweg.nl\",\n\t\"password\": \"demo\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/users",
@@ -947,14 +660,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/users/f991b5c1-1382-4b2a-bab0-f540526b4c16",
+							"raw": "{{baseUrl}}/v1/users/b34dc69d-ec8b-4580-9821-f47a94cfecdd",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"users",
-								"f991b5c1-1382-4b2a-bab0-f540526b4c16"
+								"b34dc69d-ec8b-4580-9821-f47a94cfecdd"
 							]
 						},
 						"description": "An endpoint to delete a user on request. The endpoint should only be available to a certain user ID."
@@ -1050,7 +763,30 @@
 					"response": []
 				},
 				{
-					"name": "Get user playlist",
+					"name": "Get playlist by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/aee50e0c-037f-4346-9a28-abe8044220e0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"aee50e0c-037f-4346-9a28-abe8044220e0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all playlists",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1066,6 +802,108 @@
 							"path": [
 								"v1",
 								"playlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a default playlist",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"default"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a playlist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Example\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to playlist",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"articles",
+								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article from playlist",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"articles",
+								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
 							]
 						}
 					},
@@ -1096,10 +934,10 @@
 			]
 		},
 		{
-			"name": "Favorites",
+			"name": "Audiofiles",
 			"item": [
 				{
-					"name": "Get user favorites",
+					"name": "Get audiofile by id",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1108,25 +946,21 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/favorites",
+							"raw": "{{baseUrl}}/v1/audiofiles/asdsadsadasda",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"favorites"
+								"audiofiles",
+								"asdsadsadasda"
 							]
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Archives",
-			"item": [
+				},
 				{
-					"name": "Get user archive",
+					"name": "Get all audiofiles",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1135,71 +969,20 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/archives",
+							"raw": "{{baseUrl}}/v1/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"archives"
+								"audiofiles"
 							]
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Subscriptions",
-			"item": [
-				{
-					"name": "Get subscription",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/subscriptions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"subscriptions"
-							]
-						},
-						"description": "Gets the subscription details of the user"
-					},
-					"response": []
 				},
 				{
-					"name": "Create subscription",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/subscriptions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"subscriptions"
-							]
-						},
-						"description": "Create a subscription for a user. In essense setting up a recurring subscription plan for the user."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete subscription",
+					"name": "Delete audiofile (admin only)",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -1208,9 +991,16 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": ""
-						},
-						"description": "Allows the user to delete a subscription, so cancelling any subscription at the end of the subscription period."
+							"raw": "{{baseUrl}}/v1/audiofiles/b0cd7bee-8da6-469f-adc5-95e4f88cc78d",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"audiofiles",
+								"b0cd7bee-8da6-469f-adc5-95e4f88cc78d"
+							]
+						}
 					},
 					"response": []
 				}
