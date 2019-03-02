@@ -62,12 +62,17 @@ export const createAudiofile = async (req: Request, res: Response) => {
   return res.json(createdAudiofile);
 };
 
+/**
+ * Gets all the audiofiles from the database.
+ * This endpoint is not visible for other users.
+ */
 export const getAll = async (req: Request, res: Response) => {
+  const userEmail = req.user.email;
   const audiofileRepository = getRepository(Audiofile);
 
-  const audiofiles = await audiofileRepository.findAndCount();
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 
-  if (!audiofiles) return res.status(404).json({ message: 'Audiofiles not found.' });
+  const audiofiles = await audiofileRepository.findAndCount();
 
   return res.json(audiofiles);
 };
@@ -105,5 +110,5 @@ export const deleteById = async (req: Request, res: Response) => {
 
   await audiofileRepository.remove(audiofile);
 
-  return res.json({message: 'Audiofile is deleted!' });
+  return res.json({ message: 'Audiofile is deleted!' });
 };

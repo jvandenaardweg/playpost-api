@@ -155,3 +155,19 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
 
   return res.json(newlyCreatedAudiofile);
 };
+
+export const deleteById = async (req: Request, res: Response) => {
+  const { email } = req.user;
+  const { articleId } = req.params;
+  const articleRepository = getRepository(Article);
+
+  if (email !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+
+  const article = await articleRepository.findOne(articleId);
+
+  if (!article) return res.status(404).json({ message: 'Article not found.' });
+
+  await articleRepository.remove(article);
+
+  return res.json({ message: 'Article is deleted!' });
+};

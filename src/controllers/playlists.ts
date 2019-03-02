@@ -19,7 +19,7 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
 
   if (email !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS });
 
-  const playlists = await playlistRepository.find({ relations: ['articles'] });
+  const playlists = await playlistRepository.find({ relations: ['playlistItems'] });
 
   return res.json(playlists);
 };
@@ -87,8 +87,10 @@ export const putPlaylists = async (req: Request, res: Response) => {
   return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
 };
 
-export const deletePlaylists = async (req: Request, res: Response) => {
-  return res.json({ message: 'delete article from playlist for user ID: X' });
+export const deletePlaylist = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  return res.json({ message: `Should delete a playlist for user ${userId}` });
 };
 
 export const createPlaylistItem = async (req: Request, res: Response) => {
@@ -121,6 +123,7 @@ export const createPlaylistItem = async (req: Request, res: Response) => {
 
   if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
 
+  // TODO: Set correct "order"
   const playlistItemToCreate = await playlistItemRepository.create({
     article: {
       id: articleId
@@ -136,4 +139,35 @@ export const createPlaylistItem = async (req: Request, res: Response) => {
   const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
 
   return res.json(createdPlaylistItem);
+};
+
+export const patchPlaylist = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId } = req.params;
+
+  return res.json({ message: `Should patch playlist ID ${playlistId} for user ${userId}.` });
+};
+
+export const deletePlaylistItem = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId, articleId } = req.params;
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const playlistItem = await playlistItemRepository.findOne({
+    playlist: {
+      id: playlistId
+    },
+    article: {
+      id: articleId
+    },
+    user: {
+      id: userId
+    }
+  });
+
+  if (!playlistItem) return res.json({ message: 'Playlist item does not exist (anymore).' });
+
+  await playlistItemRepository.remove(playlistItem);
+
+  return res.json({ message: 'Playlist item is removed!' });
 };

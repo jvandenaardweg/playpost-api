@@ -2,17 +2,11 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
 import { hashPassword } from './auth';
-const { prisma } = require('../generated/prisma-client');
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
-const MESSAGE_ME_NOT_UPDATED = 'Your account is not updated.';
 const MESSAGE_ME_EMAIL_REQUIRED = 'E-mail address is required.';
 const MESSAGE_ME_PASSWORD_REQUIRED = 'Password is required.';
-const MESSAGE_ME_NOT_DELETED = 'Your account is not deleted. Probably because it is already deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
-const MESSAGE_ME_ARTICLE_ID_REQUIRED = 'ArticleId needs to be present.';
-const MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND = 'The Article you want to favorite is not found.';
-const MESSAGE_ME_FAVORITE_ARTICLE_EXISTS = 'This article is already in your favorites, you cannot favorite it again.';
 
 export const findCurrentUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
@@ -29,9 +23,18 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
 
-  const user = await userRepository.findOne(userId, { relations: ['playlists'] });
+  const { playlists } = await userRepository.findOne(userId, { relations: ['playlists'] });
 
-  return res.json(user.playlists);
+  return res.json(playlists);
+};
+
+export const findAllArticles = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const userRepository = getRepository(User);
+
+  const { articles } = await userRepository.findOne(userId, { relations: ['articles'] });
+
+  return res.json(articles);
 };
 
 export const updateEmail = async (req: Request, res: Response) => {
@@ -65,96 +68,13 @@ export const updatePassword = async (req: Request, res: Response) => {
   return res.json(updatedUser);
 };
 
-// TODO: remove prisma
-export const deleteMe = async (req: Request, res: Response) => {
-  const { id } = req.user;
+export const deleteCurrentUser = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const userRepository = getRepository(User);
 
-  const deletedUser = await prisma.deleteUser({ id });
+  const user = await userRepository.findOne(userId);
 
-  if (!deletedUser) return res.status(400).json({ message: MESSAGE_ME_NOT_DELETED });
+  await userRepository.remove(user);
 
   return res.json({ message: MESSAGE_ME_DELETED });
-};
-
-// TODO: remove prisma
-export const createFavoriteArticle = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const { articleId } = req.body;
-
-  if (!articleId) return res.status(400).json({ message: MESSAGE_ME_ARTICLE_ID_REQUIRED });
-
-  const article = await prisma.article({ id: articleId });
-
-  if (!article) return res.status(400).json({ message: MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND });
-
-  const hasFavorite = await prisma.$exists.favorite({
-    article: {
-      id: articleId
-    },
-    user: {
-      id: userId
-    }
-  });
-
-  if (hasFavorite) return res.status(400).json({ message: MESSAGE_ME_FAVORITE_ARTICLE_EXISTS });
-
-  const favoriteArticle = await prisma.createFavorite({
-    article: {
-      connect: {
-        id: articleId
-      }
-    },
-    user: {
-      connect: {
-        id: userId
-      }
-    }
-  }).article();
-
-  return res.json(favoriteArticle);
-};
-
-// TODO: remove prisma
-export const findAllFavoriteArticles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-
-  const fragment = `
-    fragment BasicArticle on Article {
-      article {
-        id
-        title
-        description
-        url
-        sourceName
-        authorName
-        language
-      }
-    }
-  `;
-
-  const favorites: any[] = await prisma
-    .user({ id: userId })
-    .favorites({ orderBy: 'createdAt_DESC' })
-    .$fragment(fragment);
-
-  if (!favorites.length) return res.json([]);
-
-  const articles = favorites.length && favorites.map(favorite => favorite.article);
-
-  return res.json(articles);
-};
-
-// TODO: remove prisma
-export const findAllCreatedArticles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-
-  const articles = await prisma.articles({
-    where: {
-      user: {
-        id: userId
-      }
-    }
-  });
-
-  return res.json(articles);
 };

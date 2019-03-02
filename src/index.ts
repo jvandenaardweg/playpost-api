@@ -11,7 +11,6 @@ import { createConnection } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofile';
 import * as meController from './controllers/me';
-import * as archivesController from './controllers/archives';
 import * as playlistsController from './controllers/playlists';
 import * as favoritesController from './controllers/favorites';
 import * as usersController from './controllers/users';
@@ -77,26 +76,20 @@ createConnection(connectionOptions).then(async (connection: any) => {
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
   app.get('/v1/me/playlists', IS_PROTECTED, meController.findAllPlaylists);
-  app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
-  app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
-  app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
+  app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
   app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
-  app.delete('/v1/me', IS_PROTECTED, meController.deleteMe);
-
-  // /v1/archives
-  app.get('/v1/archives', IS_PROTECTED, archivesController.getArchives);
-  app.post('/v1/archives', IS_PROTECTED, archivesController.postArchives);
-  app.delete('/v1/archives', IS_PROTECTED, archivesController.deleteArchives);
+  app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
   // /v1/playlists
   app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
   app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
   app.post('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.createPlaylistItem);
+  app.delete('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.deletePlaylistItem);
   app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
   app.post('/v1/playlists/default', IS_PROTECTED, playlistsController.createDefaultPlaylist);
-  app.put('/v1/playlists', IS_PROTECTED, playlistsController.putPlaylists);
-  app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylists);
+  // app.patch('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.patchPlaylist);
+  app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylist);
 
   // /v1/facorites
   app.get('/v1/favorites', IS_PROTECTED, favoritesController.findAllFavorites);
@@ -106,19 +99,9 @@ createConnection(connectionOptions).then(async (connection: any) => {
   // /v1/articles
   app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
+  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
   app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
-  // app.get('/v1/articles/:articleId/audiofiles/:audiofileId', IS_PROTECTED, articlesController.getAudiofileById);
-  // app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.createAudiofileByArticleId);
-
-  // app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
-  // app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
-
-  // app.post('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.postArchiveByArticleId);
-  // app.delete('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
-
-  // app.post('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.postPlaylistByArticleId);
-  // app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
   // v1/audiofiles
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
