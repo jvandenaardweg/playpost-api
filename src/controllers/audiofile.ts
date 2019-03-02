@@ -1,12 +1,7 @@
-import { File } from '@google-cloud/storage';
-import appRootPath from 'app-root-path';
 import { Request, Response } from 'express';
 import { getRepository, } from 'typeorm';
-import * as dataSource from '../data-sources/medium';
 import { Audiofile } from '../database/entities/audiofile';
-import * as storage from '../storage/google-cloud';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
-import * as utils from '../utils';
 import { Article } from '../database/entities/article';
 import uuid from 'uuid';
 
