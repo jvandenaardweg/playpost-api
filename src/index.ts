@@ -76,6 +76,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
+  app.get('/v1/me/playlists', IS_PROTECTED, meController.findAllPlaylists);
   app.get('/v1/me/favorites', IS_PROTECTED, meController.findAllFavoriteArticles);
   app.post('/v1/me/favorites', IS_PROTECTED, meController.createFavoriteArticle);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllCreatedArticles);
@@ -92,7 +93,8 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
   app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
   app.post('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.createPlaylistItem);
-  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createDefaultPlaylist);
+  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
+  app.post('/v1/playlists/default', IS_PROTECTED, playlistsController.createDefaultPlaylist);
   app.put('/v1/playlists', IS_PROTECTED, playlistsController.putPlaylists);
   app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylists);
 

@@ -15,14 +15,23 @@ const MESSAGE_ME_FAVORITE_ARTICLE_NOT_FOUND = 'The Article you want to favorite 
 const MESSAGE_ME_FAVORITE_ARTICLE_EXISTS = 'This article is already in your favorites, you cannot favorite it again.';
 
 export const findCurrentUser = async (req: Request, res: Response) => {
-  const { id } = req.user;
+  const userId = req.user.id;
   const userRepository = getRepository(User);
 
-  const user = await userRepository.findOne(id, { relations: ['playlists'] });
+  const user = await userRepository.findOne(userId);
 
   if (!user) return res.status(404).json({ message: MESSAGE_ME_NOT_FOUND });
 
   return res.json(user);
+};
+
+export const findAllPlaylists = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const userRepository = getRepository(User);
+
+  const user = await userRepository.findOne(userId, { relations: ['playlists'] });
+
+  return res.json(user.playlists);
 };
 
 export const updateEmail = async (req: Request, res: Response) => {

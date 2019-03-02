@@ -45,7 +45,7 @@ export class Audiofile {
   @Column({ nullable: true })
   lastPlayedAt: Date;
 
-  @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
+  @ManyToOne(type => Article, { onDelete: 'CASCADE', primary: true }) // On delete of an Article, delete the Audiofile
   @JoinColumn()
   article: Article;
 

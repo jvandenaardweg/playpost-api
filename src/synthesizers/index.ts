@@ -1,12 +1,12 @@
-import { googleSsmlPartsToSpeech } from './google';
-import { awsSsmlPartsToSpeech } from './aws';
+import appRootPath from 'app-root-path';
+// import { awsSsmlPartsToSpeech } from './aws';
 import { Article } from 'database/entities/article';
 import { Audiofile } from 'database/entities/audiofile';
-import { getSSMLParts } from '../utils/ssml';
-import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import * as storage from '../storage/google-cloud';
+import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import { removeFile } from '../utils/local';
-import appRootPath from 'app-root-path';
+import { getSSMLParts } from '../utils/ssml';
+import { googleSsmlPartsToSpeech } from './google';
 
 export type SynthesizerOptions = {
   synthesizer: string,
