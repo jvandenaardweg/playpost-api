@@ -18,7 +18,7 @@ export const findCurrentUser = async (req: Request, res: Response) => {
   const { id } = req.user;
   const userRepository = getRepository(User);
 
-  const user = await userRepository.findOne({ id });
+  const user = await userRepository.findOne(id);
 
   if (!user) return res.status(404).json({ message: MESSAGE_ME_NOT_FOUND });
 
@@ -34,7 +34,7 @@ export const updateEmail = async (req: Request, res: Response) => {
 
   await userRepository.update(id, { email });
 
-  const updatedUser = await userRepository.findOne({ id });
+  const updatedUser = await userRepository.findOne(id);
 
   return res.json(updatedUser);
 };
@@ -51,7 +51,7 @@ export const updatePassword = async (req: Request, res: Response) => {
 
   await userRepository.update(id, { password: hashedPassword });
 
-  const updatedUser = await userRepository.findOne({ id });
+  const updatedUser = await userRepository.findOne(id);
 
   return res.json(updatedUser);
 };

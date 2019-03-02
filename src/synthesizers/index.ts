@@ -78,7 +78,6 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   audiofile.url = publicFileUrl;
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
-  audiofile.extension = '.mp3';
   audiofile.lengthInSeconds = audiofileLengthInSeconds;
   audiofile.languageCode = synthesizerOptions.languageCode;
   audiofile.encoding = synthesizerOptions.encoding;

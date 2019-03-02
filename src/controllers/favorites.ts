@@ -4,16 +4,16 @@ import { Request, Response } from 'express';
 // const MESSAGE_ME_NOT_UPDATED = 'Your account is not updated.';
 // const MESSAGE_ME_EMAIL_REQUIRED = 'E-mail address is required.';
 
-export const getFavorites = async (req: Request, res: Response) => {
+export const findAllFavorites = async (req: Request, res: Response) => {
   return res.json({ message: 'get the favorites from user ID: X' });
 };
 
-export const postFavorites = async (req: Request, res: Response) => {
+export const createFavorite = async (req: Request, res: Response) => {
   const { id } = req.body;
 
   return res.json({ message: `add article ${id} to favorites for user ID: X` });
 };
 
-export const deleteFavorites = async (req: Request, res: Response) => {
+export const deleteFavorite = async (req: Request, res: Response) => {
   return res.json({ message: 'delete article from favorites for user ID: X' });
 };

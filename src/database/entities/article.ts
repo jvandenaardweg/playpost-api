@@ -45,7 +45,7 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   categoryName: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
   html: string;
 
   @Column('text', { nullable: true })

@@ -1,12 +1,9 @@
 import { Request, Response } from 'express';
+import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
 import { Article } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
-import { prisma } from '../generated/prisma-client';
-import { crawl } from '../extractors/mercury';
 import { detectLanguage } from '../utils/detect-language';
-import { SynthesizerOptions } from '../synthesizers';
-import nodeFetch from 'node-fetch';
 
 const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
 const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
@@ -73,11 +70,11 @@ export const createArticle = async (req: Request, res: Response) => {
   return res.json(createdArticle);
 };
 
-// TODO: remove prisma
-export const getArticlesById = async (req: Request, res: Response) => {
+export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
+  const articleRepository = getRepository(Article);
 
-  const article = await prisma.article({ id: articleId });
+  const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
     return res.status(404).json({
@@ -85,119 +82,22 @@ export const getArticlesById = async (req: Request, res: Response) => {
     });
   }
 
-  // TODO: get auth user id
-
-  // Get the FULL article content, generate an audiofile when it's the first request
-  return res.json({
-    ...article,
-  });
+  return res.json(article);
 };
 
-// TODO: remove prisma
-export const getAudiofileByArticleId = async (req: Request, res: Response) => {
+export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
+  const articleRepository = getRepository(Article);
 
-  const article = await prisma.article({ id: articleId });
-
-  if (!article) {
-    return res.status(404).json({
-      message: `Could not get an audiofile, because article with ID ${articleId} is not found.`,
-    });
-  }
-
-  // TODO: get auth user id
-  return res.json({ message: `get (default) audiofile for article ID: ${articleId}` });
-};
-
-// TODO: remove prisma
-export const postAudiofileByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  const {
-    options,
-  } = req.body;
-
-  const article = await prisma.article({
-    id: articleId,
-  });
+  const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
     return res.status(404).json({
-      message: `Could not create an audiofile, because article with ID ${articleId} is not found.`,
+      message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
     });
   }
 
-  // TODO: get auth user id
-  return res.json({
-    message: `create a new audiofile for article ID: ${articleId}, using options: ${options}`,
-  });
-};
-
-// TODO: remove prisma
-export const postFavoriteByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `favorite article ID: ${articleId}, for user: X`,
-  });
-};
-
-// TODO: remove prisma
-export const deleteFavoriteByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `delete article ID: ${articleId} from favorites, for user: X`,
-  });
-};
-
-// TODO: remove prisma
-export const postArchiveByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `archive article ID: ${articleId}, for user: X`,
-  });
-};
-
-// TODO: remove prisma
-export const deleteArchiveByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `delete article ID: ${articleId} from archive, for user: X`,
-  });
-};
-
-// TODO: remove prisma
-export const postPlaylistByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `add article ID: ${articleId} to playlist, for user: X`,
-  });
-};
-
-// TODO: remove prisma
-export const deletePlaylistByArticleId = async (req: Request, res: Response) => {
-  const {
-    articleId,
-  } = req.params;
-  // TODO: get auth user id
-  return res.json({
-    message: `delete article ID: ${articleId} from playlist, for user: X`,
-  });
+  return res.json(article.audiofiles);
 };
 
 export const createAudiofileByArticleId = async (req: Request, res: Response) => {
@@ -217,7 +117,7 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
 
   if (!articleId) return res.status(400).json({ message: 'The article ID is required.' });
 
-  const article = await articleRepository.findOne({ id: articleId });
+  const article = await articleRepository.findOne(articleId);
 
   if (!article) return res.status(400).json({ message: 'Article does not exist, we cannot create an audiofile for that. First create an article, then create an audiofile.' });
 
@@ -251,7 +151,7 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
   // Upon creation in the database, we synthesize the audiofile
 
   // Get the created audiofile and return it
-  const newlyCreatedAudiofile = await audiofileRepository.findOne({ id: createdAudiofile.id });
+  const newlyCreatedAudiofile = await audiofileRepository.findOne(createdAudiofile.id);
 
   return res.json(newlyCreatedAudiofile);
 };

@@ -67,7 +67,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   // Public
   app.post('/v1/auth', authController.getAuthenticationToken);
   app.post('/v1/users', usersController.createUser); // Creating of users is not protected by a login ofcourse
-  app.get('/v1/audiofile', audiofileController.getAudiofile); // Legacy, now in use by our iOS App
+  app.get('/v1/audiofiles/:audiofileId', audiofileController.findById); // Legacy, now in use by our iOS App
 
   // Protected
 
@@ -95,29 +95,30 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylists);
 
   // /v1/facorites
-  app.get('/v1/favorites', IS_PROTECTED, favoritesController.getFavorites);
-  app.post('/v1/favorites', IS_PROTECTED, favoritesController.postFavorites);
-  app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorites);
+  app.get('/v1/favorites', IS_PROTECTED, favoritesController.findAllFavorites);
+  app.post('/v1/favorites', IS_PROTECTED, favoritesController.createFavorite);
+  app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorite);
 
   // /v1/articles
   app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
-  app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.getArticlesById);
-
-  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.getAudiofileByArticleId);
+  app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
+  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
   // app.get('/v1/articles/:articleId/audiofiles/:audiofileId', IS_PROTECTED, articlesController.getAudiofileById);
   // app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.createAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
 
-  app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
-  app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
+  // app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
+  // app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
 
-  app.post('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.postArchiveByArticleId);
-  app.delete('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
+  // app.post('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.postArchiveByArticleId);
+  // app.delete('/v1/articles/:articleId/archives', IS_PROTECTED, articlesController.deleteArchiveByArticleId);
 
-  app.post('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.postPlaylistByArticleId);
-  app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
+  // app.post('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.postPlaylistByArticleId);
+  // app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
   // v1/audiofiles
+  app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
+  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
 
   // Catch all
   app.all('*', async (req: Request, res: Response) => res.status(404).json(`No route found for ${req.method} ${req.url}`));

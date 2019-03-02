@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateCol
 import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
 import { Article } from './article';
 import bcryptjs from 'bcryptjs';
+import { Audiofile } from './audiofile';
 
 @Entity()
 export class User {
@@ -29,6 +30,10 @@ export class User {
   @OneToMany(type => Article, article => article.user)
   @JoinColumn()
   articles: Article[];
+
+  @OneToMany(type => Audiofile, audiofile => audiofile.user)
+  @JoinColumn()
+  audiofiles: Audiofile[];
 
   @CreateDateColumn()
   createdAt: Date;

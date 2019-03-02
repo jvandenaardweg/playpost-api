@@ -48,7 +48,7 @@ export const createUser = [
     const createdUser = await userRepository.save(newUserToSave);
 
     // Get the created user and return it
-    const user = await userRepository.findOne({ id: createdUser.id });
+    const user = await userRepository.findOne(createdUser.id);
 
     return res.json(user);
   }
@@ -66,7 +66,7 @@ export const deleteUser = [
     const validationResult = await validateInput(User, { id: userId });
     if (validationResult.errors.length) return res.status(400).json(validationResult);
 
-    const userToDelete = await userRepository.findOne({ id: userId });
+    const userToDelete = await userRepository.findOne(userId);
 
     if (!userToDelete) return res.status(404).json({ message: MESSAGE_USER_NOT_FOUND });
 

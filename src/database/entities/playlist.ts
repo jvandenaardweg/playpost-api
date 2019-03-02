@@ -28,7 +28,7 @@ export class Playlist extends BaseEntity {
   updatedAt: Date;
 
   // static async updatePlaylistItemPlays(id: string): Promise<PlaylistItem> {
-  //   const currentPlaylistItem = await this.findOne({ id }, { relations: ['playlist_items'] } )
+  //   const currentPlaylistItem = await this.findOne(id, { relations: ['playlist_items'] } )
 
   //   PlaylistItem.findOne({ id }, re);
 
