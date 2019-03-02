@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, BeforeInsert, BeforeUpdate, getRepository } from 'typeorm';
-import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove } from 'typeorm';
+import { IsEmail, IsUUID } from 'class-validator';
 import { Article } from './article';
-import bcryptjs from 'bcryptjs';
 import { Audiofile } from './audiofile';
 import { Playlist } from './playlist';
 import { PlaylistItem } from './playlist-item';
+import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 
 @Entity()
 export class User {
@@ -53,17 +53,11 @@ export class User {
 
   @AfterInsert()
   async afterInsert() {
-    console.log('Should send an welcome email to:', this.email);
+    await addEmailToMailchimpList(this.email);
+  }
 
-    // console.log(`Should create an empty playlist for user ID "${this.id}".`);
-    // const playlistToCreate = await getRepository(Playlist).create({
-    //   user: {
-    //     id: this.id
-    //   }
-    // });
-
-    // const createdPlaylist = await getRepository(Playlist).save(playlistToCreate);
-
-    // return createdPlaylist;
+  @AfterRemove()
+  async afterRemove() {
+    await removeEmailToMailchimpList(this.email);
   }
 }
