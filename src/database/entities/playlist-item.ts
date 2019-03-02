@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, PrimaryColumn, JoinColumn, Unique, ManyToOne, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Unique, ManyToOne, Index } from 'typeorm';
 import { IsUUID, IsInt } from 'class-validator';
 import { Playlist } from './playlist';
 import { Article } from './article';

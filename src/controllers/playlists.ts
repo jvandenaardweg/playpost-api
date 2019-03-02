@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Playlist } from '../database/entities/playlist';
-import { getRepository, createQueryBuilder } from 'typeorm';
+import { getRepository } from 'typeorm';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 

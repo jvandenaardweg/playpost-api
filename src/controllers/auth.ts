@@ -4,7 +4,6 @@ import passport from 'passport';
 import { User } from '../database/entities/user';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
-import { check, validationResult } from 'express-validator/check';
 
 const { JWT_SECRET } = process.env;
 

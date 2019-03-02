@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { createConnection, getConnection, Connection } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 import { connectionOptions } from './connection-options';
 
 import { articles } from './seeds/article';

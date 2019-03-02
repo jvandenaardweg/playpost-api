@@ -65,11 +65,11 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   // Public
   app.post('/v1/auth', authController.getAuthenticationToken);
-  app.post('/v1/users', usersController.createUser); // Creating of users is not protected by a login ofcourse
-  app.get('/v1/audiofiles/:audiofileId', audiofileController.findById); // Legacy, now in use by our iOS App
+  app.post('/v1/users', usersController.createUser);
 
   // Protected
 
+  // v1/users
   app.get('/v1/users', usersController.findAllUsers);
   app.delete('/v1/users/:userId', usersController.deleteUser);
 
@@ -106,6 +106,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   // v1/audiofiles
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
   app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
+  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 
   // Catch all
   app.all('*', async (req: Request, res: Response) => res.status(404).json(`No route found for ${req.method} ${req.url}`));

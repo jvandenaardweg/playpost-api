@@ -2,7 +2,6 @@ import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, C
 import { IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
 import { Audiofile } from './audiofile';
-import { concatAudioFiles } from 'utils/audio';
 import { PlaylistItem } from './playlist-item';
 
 @Entity()

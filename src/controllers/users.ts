@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { check, validationResult } from 'express-validator/check';
 import { getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
 import { validateInput } from '../validators/entity';
@@ -80,9 +79,16 @@ export const deleteUser = [
 export const findAllUsers = [
   routeIsProtected,
   async (req: Request, res: Response) => {
+    const userEmail = req.user.email;
     const userRepository = getRepository(User);
 
-    const users = await userRepository.find();
+    if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+
+    const users = await userRepository.find({
+      order: {
+        createdAt: 'DESC'
+      }
+    });
 
     return res.json(users);
   }

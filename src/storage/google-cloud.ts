@@ -1,5 +1,4 @@
-import path from 'path';
-import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileOptions, DeleteFileResponse } from '@google-cloud/storage';
+import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from 'database/entities/article';
