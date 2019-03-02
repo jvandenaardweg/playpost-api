@@ -23,7 +23,8 @@
     "heroku-postbuild": "npm run build",
     "typeorm:schema:sync": "typeorm schema:sync",
     "typeorm:migration:revert": "typeorm migration:revert",
-    "typeorm:migration:run": "typeorm migration:run"
+    "typeorm:migration:run": "typeorm migration:run",
+    "upgrade-interactive": "npm-check --update"
   },
   "repository": {
     "type": "git",
@@ -100,6 +101,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
     "nodemon": "^1.18.9",
+    "npm-check": "^5.9.0",
     "ts-node": "^8.0.2",
     "tsc-watch": "^2.1.2",
     "tslint": "^5.13.0",
