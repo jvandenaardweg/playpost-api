@@ -2,6 +2,8 @@
 This repository includes the API for the Readto App.
 
 ## Requirements development:
+- TypeScript 3.0.0+
+- Node 10.0.0+
 - Docker
 - ffmpeg: https://evermeet.cx/ffmpeg/
 
