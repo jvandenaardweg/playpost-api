@@ -1,5 +1,5 @@
 import path from 'path';
-import { Storage, UploadResponse, GetFilesOptions, File } from '@google-cloud/storage';
+import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileOptions, DeleteFileResponse } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from 'database/entities/article';
@@ -94,3 +94,10 @@ export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
 
   return files;
 };
+
+export const deleteFile = async (filename: string) => {
+  console.log(`Google Cloud Storage: Deleting file "${filename}"...`);
+
+  const deleteFileResponse: DeleteFileResponse = await storage.bucket(BUCKET_NAME).file(filename).delete();
+  return deleteFileResponse;
+}
