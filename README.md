@@ -13,12 +13,8 @@ This repository includes the API for the Readto App.
 2. Install ffmpeg: `brew install ffmpeg`
 3. Install npm modules: `npm install`
 4. Create a `.env` file in the root of this project with the following data:
-```
+```yaml
 NODE_ENV = "development"
-
-GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner for the contents of this environment variable.
-GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL = "" # Ask the repository owner for the contents of this environment variable.
-GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner for the contents of this environment variable.
 
 JWT_SECRET = "JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
 
@@ -29,6 +25,13 @@ REDIS_URL = "redis://localhost:6381"
 TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
 TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
 TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
+
+GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner, or create your own
+GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL = "" # Ask the repository owner, or create your own
+GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner, or create your own
+
+MAILCHIMP_LIST_ID = "" # Ask the repository owner, or create your own
+MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
 ```
 5. Run `npm run dev`, this will launch the database and start the Node server.
 6. The local server should be available at http://localhost:3000
@@ -37,8 +40,8 @@ TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
 Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`.
 
 Make sure these environment variables are set in Heroku:
-```
-DATABASE_URL = "" # Filled by Heroku Postgres
+```yaml
+DATABASE_URL = "" # When using Heroku Postgres, this will be filled by Heroku
 TYPEORM_URL = "" # This should be filled with the value of DATABASE_URL
 TYPEORM_ENTITIES = "dist/database/entities/**/*.js"
 TYPEORM_MIGRATIONS = "dist/database/migrations/**/*.js"
