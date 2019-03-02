@@ -23,25 +23,16 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
 };
 
 export const findPlaylistById = async (req: Request, res: Response) => {
+  const userId = req.user.id;
   const { playlistId } = req.params;
   const playlistRepository = getRepository(Playlist);
-  const playlistItemRepository = getRepository(PlaylistItem);
 
-  // const playlist = createQueryBuilder('playlist')
-  //    .innerJoin('article.playlistItem', 'playlistItem')
-  //    .innerJoin('playlistItem.playlist', 'playlist', 'playlist.id = :playlistId', { playlistId })
-  //    .getMany();
+  const playlist = await playlistRepository.findOne(playlistId, { relations: ['playlistItems', 'user'] });
 
-  // const playlistItemId = '3147ad5d-1817-417d-987c-747cf3088657';
-  // const playlist = await playlistRepository.findOne(playlistId, { relations: ['playlistItems', 'user'] });
-  // console.log('playlistId', playlistId);
-  const playlistItems = await playlistItemRepository.find({ playlistId });
+  if (!playlist) return res.status(404).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
+  if (playlist.user.id !== userId) return res.status(403).json({ message: 'This is not your playlist.' });
 
-  if (!playlistItems) return res.status(404).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
-
-  const articles = playlistItems.map(playlistItem => playlistItem.article);
-
-  return res.json(articles);
+  return res.json(playlist);
 };
 
 export const createDefaultPlaylist = async (req: Request, res: Response) => {
