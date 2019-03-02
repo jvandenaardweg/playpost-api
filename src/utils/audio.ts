@@ -1,7 +1,6 @@
 import audioconcat from 'audioconcat';
 import fsExtra from 'fs-extra';
 import mp3Duration from 'mp3-duration';
-import { SynthesizerOptions } from '../synthesizers';
 import appRootPath from 'app-root-path';
 
 /* eslint-disable no-console */
@@ -19,7 +18,10 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
   });
 };
 
-export const concatAudioFiles = (articleId: string, audioFiles: string[], storageUploadPath: string): Promise<string> => {
+/**
+ * Concatinates multiple audiofiles into 1 audiofile
+ */
+export const concatAudioFiles = (audioFiles: string[], storageUploadPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
 

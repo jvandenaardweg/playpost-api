@@ -51,7 +51,6 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
 
   // Combine multiple audiofiles into one
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
-    articleId,
     localAudiofilePaths,
     storageUploadPath
   );

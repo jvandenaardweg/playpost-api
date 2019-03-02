@@ -11,8 +11,8 @@ export const removeFile = async (fileName: string) => {
   }
 };
 
-export const removeFiles = (fileNames: Array<string>) => {
-  const promises: Array<any> = [];
+export const removeFiles = (fileNames: string[]) => {
+  const promises: Promise<any>[] = [];
   fileNames.forEach(fileName => promises.push(removeFile(fileName)));
   return Promise.all(promises);
 };
