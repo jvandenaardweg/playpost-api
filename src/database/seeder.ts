@@ -45,6 +45,3 @@ const seedPlaylists = async (databaseConnection: Connection) => {
   // await seedArticles(databaseConnection);
   // await seedPlaylists(databaseConnection);
 })();
-
-
-

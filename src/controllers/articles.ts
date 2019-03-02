@@ -6,6 +6,7 @@ import { prisma } from '../generated/prisma-client';
 import { crawl } from '../extractors/mercury';
 import { detectLanguage } from '../utils/detect-language';
 import { SynthesizerOptions } from '../synthesizers';
+import nodeFetch from 'node-fetch';
 
 const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
 const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
@@ -21,16 +22,27 @@ export const createArticle = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne({ url });
 
-  if (article) return res.status(400).json({ article, message: MESSAGE_ARTICLE_EXISTS });
+  if (article) return res.status(400).json({ message: MESSAGE_ARTICLE_EXISTS });
 
-  const {
-    title,
-    excerpt,
-    author,
-    domain
-  } = await crawl(url);
+  // TODO: use better crawler, for dev purposes this is now fine
 
-  const language = detectLanguage(excerpt);
+  // Crawl the URL to extract the article data
+  const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${url}`).then(response => response.json());
+
+  // Convert to proper paragraphs
+  const ssml = `<p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`;
+  // const {
+  //   title,
+  //   excerpt,
+  //   author,
+  //   domain,
+  //   content,
+  //   text
+  // } = await crawl(url);
+
+  // return console.log(speech);
+
+  const language = detectLanguage(text);
 
   if (language !== 'eng') {
     return res.status(400).json({
@@ -38,13 +50,18 @@ export const createArticle = async (req: Request, res: Response) => {
     });
   }
 
+  const sourceName = new URL(url).hostname;
+
   const articleToCreate = await articleRepository.create({
     url,
     title,
-    description: excerpt,
-    authorName: author,
-    sourceName: domain,
-    languageCode: 'EN',
+    sourceName,
+    ssml,
+    text,
+    html,
+    description: meta_description,
+    authorName: null,
+    languageCode: 'en',
     user: {
       id: userId
     }

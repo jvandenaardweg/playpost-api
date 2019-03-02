@@ -123,7 +123,7 @@ export const findAllFavoriteArticles = async (req: Request, res: Response) => {
     }
   `;
 
-  const favorites: Array<any> = await prisma
+  const favorites: any[] = await prisma
     .user({ id: userId })
     .favorites({ orderBy: 'createdAt_DESC' })
     .$fragment(fragment);

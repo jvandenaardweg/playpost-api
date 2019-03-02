@@ -1,22 +1,28 @@
 import { File } from '@google-cloud/storage';
 import appRootPath from 'app-root-path';
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, } from 'typeorm';
 import * as dataSource from '../data-sources/medium';
 import { Audiofile } from '../database/entities/audiofile';
 import * as storage from '../storage/google-cloud';
-import { ssmlPartsToSpeech } from '../synthesizers';
+import { synthesizeArticleToAudiofile } from '../synthesizers';
 import * as utils from '../utils';
 import { Article } from '../database/entities/article';
+import uuid from 'uuid';
 
 export const getAudiofile = async (req: Request, res: Response) => {
-  const { url } = req.query;
+  const { articleUrl } = req.query;
+  const audiofileRepository = getRepository(Audiofile);
 
-  if (!url || url === '') return res.status(400).json({ message: 'Please give a URL param.' });
+  if (!articleUrl || articleUrl === '') return res.status(400).json({ message: 'Please give a articleUrl param.' });
 
-  const normalizedUrl = url.toLowerCase();
+  const normalizedUrl = articleUrl.toLowerCase();
 
-  // if (!normalizedUrl.includes('medium.com')) return res.status(400).json({ message: 'We only allow Medium URLs for now.' });
+  const audiofile = audiofileRepository.findOne({ url: normalizedUrl });
+
+  if (!audiofile) return res.status(404).json({ message: 'Audiofile for this article does not exist yet.' });
+
+  return res.json(audiofile);
 
   // Get the Medium Post ID from the URL
   // If the URL is incorrect, we error
@@ -101,6 +107,44 @@ export const getAudiofile = async (req: Request, res: Response) => {
   console.log('Done!');
 
   return res.json({ publicFileUrl, article });
+};
+
+export const createAudiofile = async (req: Request, res: Response) => {
+  const { articleId } = req.params;
+  const articleRepository = getRepository(Article);
+  const audiofileRepository = getRepository(Audiofile);
+
+  if (!articleId) return res.status(400).json({ message: 'Please give a articleId param.' });
+
+  const article: Article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+
+  if (!article) return res.status(400).json({ message: 'Article does not exist.' });
+
+  if (!article.ssml) return res.status(400).json({ message: 'Article has no SSML data yet.' });
+
+  if (article.audiofiles.length) return res.status(400).json({ message: 'Audiofile for this article already exists.' });
+
+  // Manually generate a UUID.
+  // So we can use this ID to upload a file to storage, before we insert it into the database.
+  const audiofileId = uuid.v4();
+
+  // Prepare the audiofile
+  const audiofile = await audiofileRepository.create({
+    id: audiofileId,
+    article: {
+      id: articleId
+    }
+  });
+
+  // Synthesize and return an uploaded audiofile for use to use in the database
+  const audiofileToCreate: Audiofile = await synthesizeArticleToAudiofile(article, audiofile);
+
+  // Then save it in the database
+  const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
+
+  console.log(createdAudiofile);
+
+  return res.json(createdAudiofile);
 };
 
 /**

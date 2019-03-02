@@ -2,50 +2,55 @@ import path from 'path';
 import { Storage, UploadResponse, GetFilesOptions, File } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
+import { Article } from 'database/entities/article';
+import { Audiofile } from 'database/entities/audiofile';
 
 const storage = new Storage(getGoogleCloudCredentials());
 
 const BUCKET_NAME = 'synthesized-audio-files';
 
 /* eslint-disable no-console */
+
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
   const { bucket, name } = file.metadata;
-  // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
-  return `https://storage.googleapis.com/${bucket}/${name}`;
+  return `https://storage.googleapis.com/${bucket}/${name}`; // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
 };
 
 export const getPublicFileUrl = (uploadResponse: UploadResponse) => {
-  const file = uploadResponse[0];
+  const file: File = uploadResponse[0];
   return getPublicFileUrlFromFileMetaData(file);
 };
 
-export const uploadFile = async (filePath: string, uploadPath: string, synthesizerOptions: SynthesizerOptions) => {
-  console.log(`Google Cloud Storage, oploading file "${filePath}" to bucket "${BUCKET_NAME}" in directory "${uploadPath}"...`);
-
-  // TODO: Make sure the "uploadPath" exists in the cloud
+/**
+ * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
+ */
+export const uploadFile = async (
+  concatinatedLocalAudiofilePath: string,
+  storageUploadPath: string,
+  synthesizerOptions: SynthesizerOptions,
+  article: Article,
+  audiofile: Audiofile,
+  audiofileLengthInSeconds: number
+) => {
+  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
   try {
-    const filename = path.basename(filePath);
-    const destination = `${uploadPath}/${filename}`;
-
-    const {
-      synthesizer,
-      languageCode,
-      name,
-      source
-    } = synthesizerOptions;
-
     // Uploads a local file to the bucket
-    // https://www.googleapis.com/storage/v1/b/synthesized-audio-files/o/13eda868daeb.mp3
-    const uploadResponse: UploadResponse = await storage.bucket(BUCKET_NAME).upload(filePath, {
-      destination,
+    const uploadResponse: UploadResponse = await storage.bucket(BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
+      destination: storageUploadPath,
       gzip: true,
       metadata: {
         metadata: {
-          synthesizer,
-          languageCode,
-          name,
-          source,
+          audiofileId: audiofile.id,
+          audiofileLength: audiofileLengthInSeconds,
+          audiofileSynthesizer: synthesizerOptions.synthesizer,
+          audiofileLanguageCode: synthesizerOptions.languageCode,
+          audiofileVoice: synthesizerOptions.name,
+          audiofileEncoding: synthesizerOptions.encoding,
+          articleId: article.id,
+          articleTitle: article.title,
+          articleUrl: article.url,
+          articleSourceName: article.sourceName
         },
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
@@ -54,11 +59,12 @@ export const uploadFile = async (filePath: string, uploadPath: string, synthesiz
       }
     });
 
-    const publicFileUrl = getPublicFileUrl(uploadResponse);
-    console.log(`Google Cloud Storage, Uploaded file: ${publicFileUrl}`);
-    return publicFileUrl;
+    console.log('Google Cloud Storage: Uploaded file!');
+
+    return uploadResponse;
   } catch (err) {
-    console.log('Google Cloud Storage, failed to upload.');
+    console.log('Google Cloud Storage: Failed to upload.');
+    console.error(err);
     throw new Error(err);
   }
 };

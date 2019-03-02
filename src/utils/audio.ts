@@ -1,12 +1,12 @@
 import audioconcat from 'audioconcat';
 import fsExtra from 'fs-extra';
-import * as mp3Duration from 'mp3-duration';
-import { SynthesizerOptions} from '../synthesizers';
+import mp3Duration from 'mp3-duration';
+import { SynthesizerOptions } from '../synthesizers';
 import appRootPath from 'app-root-path';
 
 /* eslint-disable no-console */
 
-export const getAudioFileDurationInSeconds = async (audioFilePath: string) => {
+export const getAudioFileDurationInSeconds = async (audioFilePath: string): Promise<number> => {
   console.log('Get audiofile duration in seconds...');
 
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string) => {
   });
 };
 
-export const concatAudioFiles = (mediumPostId: string, audioFiles: string[], synthesizerOptions: SynthesizerOptions): Promise<string> => {
+export const concatAudioFiles = (articleId: string, audioFiles: string[], storageUploadPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
 
@@ -42,7 +42,7 @@ export const concatAudioFiles = (mediumPostId: string, audioFiles: string[], syn
 
     console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
-    const outputPath = `${appRootPath}/temp/${synthesizerOptions.source}/${mediumPostId}/${mediumPostId}.mp3`;
+    const outputPath = `${appRootPath}/temp/${storageUploadPath}.mp3`;
 
     return audioconcat(audioFiles)
       .concat(outputPath)

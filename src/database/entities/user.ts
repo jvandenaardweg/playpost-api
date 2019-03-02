@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { IsEmail, IsDate, IsUUID, IsString } from 'class-validator';
 import { Article } from './article';
+import bcryptjs from 'bcryptjs';
 
 @Entity()
 export class User {
@@ -39,5 +40,4 @@ export class User {
   sendWelcomeEmail() {
     console.log('Should send an welcome email to:', this.email);
   }
-
 }

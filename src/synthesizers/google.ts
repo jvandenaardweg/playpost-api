@@ -3,23 +3,25 @@ import textToSpeech from '@google-cloud/text-to-speech';
 import appRootPath from 'app-root-path';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
+import { Article } from 'database/entities/article';
+import { Audiofile } from 'database/entities/audiofile';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 /* eslint-disable no-console */
 
-// const AVAILABLE_VOICES = {
-//     'en': {
-//         languageCode: 'en-US',
-//         name: 'en-US-Wavenet-D' // Good sounding male voice
-//         // name: 'en-US-Wavenet-F' // Good sounding female voice
-//     }
-// };
-
-export const googleSsmlToSpeech = (mediumPostId: string, ssmlPart: string, index: number, synthesizerOptions: SynthesizerOptions): Promise<string | {}> => {
+export const googleSsmlToSpeech = (
+  index: number,
+  ssmlPart: string,
+  article: Article,
+  audiofile: Audiofile,
+  synthesizerOptions: SynthesizerOptions,
+  storageUploadPath: string
+): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
-    const { source, languageCode, name } = synthesizerOptions;
-    const audioFilePath = `${appRootPath}/temp/${source}/${mediumPostId}/${mediumPostId}-${index}.mp3`;
+    const { languageCode, name, encoding } = synthesizerOptions;
+    const articleId = article.id;
+    const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.mp3`;
 
     const request = {
       voice: {
@@ -30,14 +32,14 @@ export const googleSsmlToSpeech = (mediumPostId: string, ssmlPart: string, index
         ssml: ssmlPart
       },
       audioConfig: {
-        audioEncoding: 'MP3'
+        audioEncoding: encoding.toUpperCase()
       }
     };
 
-    console.log(`Synthesizing Medium Post ID '${mediumPostId}' SSML part ${index} to '${languageCode}' speech using '${name}' at: ${audioFilePath}`);
+    console.log(`Google Text To Speech: Synthesizing Article ID '${articleId}' SSML part ${index} to '${languageCode}' speech using '${name}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
-    fsExtra.ensureFileSync(audioFilePath);
+    fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
     // Performs the Text-to-Speech request
     client.synthesizeSpeech(request, (synthesizeSpeechError: any, response: any) => {
@@ -46,21 +48,30 @@ export const googleSsmlToSpeech = (mediumPostId: string, ssmlPart: string, index
       if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
 
       // Write the binary audio content to a local file
-      return fsExtra.writeFile(audioFilePath, response.audioContent, 'binary', (writeFileError) => {
+      return fsExtra.writeFile(tempLocalAudiofilePath, response.audioContent, 'binary', (writeFileError) => {
         if (writeFileError) return reject(writeFileError);
 
-        console.log(`Google Text To Speech: Received synthesized audio file for Medium Post ID '${mediumPostId}' SSML part ${index}: ${audioFilePath}`);
-        return resolve(audioFilePath);
+        console.log(`Google Text To Speech: Received synthesized audio file for Article ID '${articleId}' SSML part ${index}: ${tempLocalAudiofilePath}`);
+        return resolve(tempLocalAudiofilePath);
       });
     });
   });
 };
 
-export const googleSsmlPartsToSpeech = (id: string, ssmlParts: string[], synthesizerOptions: SynthesizerOptions) => {
+/**
+ * Synthesizes the SSML parts into seperate audiofiles
+ */
+export const googleSsmlPartsToSpeech = (
+  ssmlParts: string[],
+  article: Article,
+  audiofile: Audiofile,
+  synthesizerOptions: SynthesizerOptions,
+  storageUploadPath: string
+) => {
   const promises: Promise<any>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(googleSsmlToSpeech(id, ssmlPart, index, synthesizerOptions));
+    return promises.push(googleSsmlToSpeech(index, ssmlPart, article, audiofile, synthesizerOptions, storageUploadPath));
   });
 
   return Promise.all(promises);

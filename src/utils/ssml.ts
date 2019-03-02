@@ -1,4 +1,4 @@
-import pollySSMLSplit from 'polly-ssml-split';
+import pollySsmlSplit from 'polly-ssml-split';
 
 /* eslint-disable no-console */
 
@@ -13,12 +13,12 @@ const options = {
 };
 
 // Apply configuration
-pollySSMLSplit.configure(options);
+pollySsmlSplit.configure(options);
 
 export const getSSMLParts = (ssml: string) => {
   console.log('Splitting SSML content into different parts...');
 
-  const ssmlParts = pollySSMLSplit.split(ssml);
+  const ssmlParts = pollySsmlSplit.split(ssml);
 
   if (!ssmlParts || !ssmlParts.length) throw new Error('Got no SSML parts.');
 

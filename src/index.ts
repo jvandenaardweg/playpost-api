@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
-import { createConnection, Connection } from 'typeorm';
+import { createConnection } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofile';
 import * as meController from './controllers/me';
@@ -105,7 +105,8 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.getAudiofileByArticleId);
   // app.get('/v1/articles/:articleId/audiofiles/:audiofileId', IS_PROTECTED, articlesController.getAudiofileById);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.createAudiofileByArticleId);
+  // app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.createAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
 
   app.post('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.postFavoriteByArticleId);
   app.delete('/v1/articles/:articleId/favorites', IS_PROTECTED, articlesController.deleteFavoriteByArticleId);
@@ -117,7 +118,6 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/articles/:articleId/playlists', IS_PROTECTED, articlesController.deletePlaylistByArticleId);
 
   // v1/audiofiles
-
 
   // Catch all
   app.all('*', async (req: Request, res: Response) => res.status(404).json(`No route found for ${req.method} ${req.url}`));

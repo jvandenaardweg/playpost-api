@@ -1,4 +1,4 @@
-import Mercury from '@postlight/mercury-parser';
+import mercuryParser from '@postlight/mercury-parser';
 // const JSSoup = require('jssoup').default;
 
 // const url="https://hackernoon.com/15-html-element-methods-youve-potentially-never-heard-of-fc6863e41b2a";
@@ -15,7 +15,7 @@ import Mercury from '@postlight/mercury-parser';
 // });
 
 export function crawl(url: string) {
-    return Mercury.parse(url)
+  return mercuryParser.parse(url);
 }
 
 // function removeAllAttributes(soup) {

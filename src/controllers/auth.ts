@@ -15,8 +15,6 @@ const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
 /**
  * Uses the "email" address and "password" of a user to return an token.
  * The user can use that token to authenticate with our API.
- *
- * @returns token
  */
 export const getAuthenticationToken = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -45,12 +43,18 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   return res.json({ token });
 };
 
-export const generateJWTToken = (id: string, email: string) => {
+/**
+ * Creates and reurns a JWT token using a user ID and e-mail address.
+ */
+export const generateJWTToken = (id: string, email: string): string => {
   return jsonwebtoken.sign({ id, email }, JWT_SECRET);
 };
 
-export const hashPassword = (password: string) => {
+/**
+ * Takes a plain text password and returns a hash using bcryptjs.
+ */
+export const hashPassword = (password: string): Promise<string> => {
   return bcryptjs.hash(password, 10);
-}
+};
 
 export const routeIsProtected = passport.authenticate('jwt', { session: false, failWithError: true });

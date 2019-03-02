@@ -1,6 +1,8 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, IsNull } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
+import { Audiofile } from './audiofile';
+import { concatAudioFiles } from 'utils/audio';
 
 @Entity()
 export class Article extends BaseEntity {
@@ -55,6 +57,10 @@ export class Article extends BaseEntity {
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database
   @JoinColumn()
   user: User;
+
+  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'CASCADE' }) // On delete of a Audiofile, remove the
+  @JoinColumn()
+  audiofiles: Audiofile[];
 
   @CreateDateColumn()
   createdAt: Date;
