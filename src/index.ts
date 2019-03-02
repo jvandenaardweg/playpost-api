@@ -109,7 +109,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 
   // Catch all
-  app.all('*', async (req: Request, res: Response) => res.status(404).json(`No route found for ${req.method} ${req.url}`));
+  app.all('*', async (req: Request, res: Response) => res.status(404).json({ message: `No route found for ${req.method} ${req.url}` }));
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
