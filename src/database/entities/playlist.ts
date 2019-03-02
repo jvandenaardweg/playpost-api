@@ -1,9 +1,10 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany, Unique, ManyToMany, JoinTable } from 'typeorm';
 import { IsUUID } from 'class-validator';
 import { User } from './user';
 import { PlaylistItem } from './playlist-item';
 
 @Entity()
+@Unique(['name', 'user']) // Don't allow playlist with the same name for the same user
 export class Playlist extends BaseEntity {
 
   @PrimaryGeneratedColumn('uuid')
@@ -14,12 +15,12 @@ export class Playlist extends BaseEntity {
   @JoinColumn()
   user: User;
 
-  @Column({ nullable: false, default: 'Main' })
+  @Column({ nullable: false, default: 'Default' })
   name: string;
 
-  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article)
-  @JoinColumn()
-  articles: PlaylistItem[];
+  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.playlist, { eager: true })
+  // @JoinTable()
+  playlistItems: PlaylistItem[];
 
   @CreateDateColumn()
   createdAt: Date;

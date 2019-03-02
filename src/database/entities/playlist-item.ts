@@ -1,25 +1,40 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, OneToOne, JoinColumn, Unique, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, PrimaryColumn, JoinColumn, Unique, ManyToOne } from 'typeorm';
 import { IsUUID, IsInt } from 'class-validator';
 import { Playlist } from './playlist';
 import { Article } from './article';
+import { User } from './user';
 
 @Entity()
 @Unique(['playlist', 'article']) // Don't allow articles that are already in the user's playlist
+// @Unique(['playlist', 'article']) // Don't allow articles that are already in the user's playlist
 export class PlaylistItem {
 
-  @PrimaryGeneratedColumn('uuid')
-  @IsUUID()
-  id: string;
+  // @PrimaryGeneratedColumn('uuid')
+  // @IsUUID()
+  // id: string;
+
+  @PrimaryColumn('uuid')
+  playlistId: string;
 
   @ManyToOne(type => Playlist, { onDelete: 'CASCADE' }) // When a Playlist is deleted, we delete this PlaylistItem
-  @JoinColumn()
+  @JoinColumn({ name: 'playlistId' })
   playlist: Playlist;
 
-  @OneToOne(type => Article, { onDelete: 'CASCADE' }) // When an Article is deleted, we delete this PlaylistItem
-  @JoinColumn()
+  @ManyToOne(type => Article, { onDelete: 'CASCADE', eager: true }) // When an Article is deleted, we delete this PlaylistItem
+  @JoinColumn({ name: 'articleId' })
   article: Article;
 
-  @Column({ nullable: false })
+  @PrimaryColumn('uuid')
+  articleId: string;
+
+  @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this PlaylistItem
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @PrimaryColumn('uuid')
+  userId: string;
+
+  @Column({ nullable: false, default: 1 })
   @IsInt()
   order: number;
 

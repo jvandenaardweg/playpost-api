@@ -18,7 +18,7 @@ export const findCurrentUser = async (req: Request, res: Response) => {
   const { id } = req.user;
   const userRepository = getRepository(User);
 
-  const user = await userRepository.findOne(id);
+  const user = await userRepository.findOne(id, { relations: ['playlists'] });
 
   if (!user) return res.status(404).json({ message: MESSAGE_ME_NOT_FOUND });
 

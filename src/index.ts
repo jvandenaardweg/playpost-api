@@ -89,8 +89,10 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/archives', IS_PROTECTED, archivesController.deleteArchives);
 
   // /v1/playlists
-  app.get('/v1/playlists', IS_PROTECTED, playlistsController.getPlaylists);
-  app.post('/v1/playlists', IS_PROTECTED, playlistsController.postPlaylists);
+  app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
+  app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
+  app.post('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.createPlaylistItem);
+  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createDefaultPlaylist);
   app.put('/v1/playlists', IS_PROTECTED, playlistsController.putPlaylists);
   app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylists);
 

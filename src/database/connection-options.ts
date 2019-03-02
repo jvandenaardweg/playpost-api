@@ -12,7 +12,7 @@ export const connectionOptions: ConnectionOptions = {
   extra: {
     ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
   },
-  logging: (process.env.NODE_ENV === 'production') ? false : true, // Loggging in dev
+  logging: (process.env.NODE_ENV === 'production') ? ['error'] : true, // Complete logging in dev, only errors in production
   synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
   entities: [
     User,
@@ -22,5 +22,6 @@ export const connectionOptions: ConnectionOptions = {
     Audiofile
   ],
   migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
-  dropSchema: false
+  dropSchema: false,
+  maxQueryExecutionTime: 1000
 };

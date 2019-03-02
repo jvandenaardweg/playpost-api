@@ -3,6 +3,7 @@ import { IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
 import { Audiofile } from './audiofile';
 import { concatAudioFiles } from 'utils/audio';
+import { PlaylistItem } from './playlist-item';
 
 @Entity()
 export class Article extends BaseEntity {
@@ -55,12 +56,16 @@ export class Article extends BaseEntity {
   text: string;
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database
-  @JoinColumn()
+  // @JoinColumn()
   user: User;
 
-  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'CASCADE' }) // On delete of a Audiofile, remove the
-  @JoinColumn()
+  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'CASCADE', eager: true }) // On delete of a Audiofile, remove the Article
+  // @JoinColumn()
   audiofiles: Audiofile[];
+
+  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the Article
+  // @JoinColumn()
+  playlistItems: PlaylistItem[];
 
   @CreateDateColumn()
   createdAt: Date;

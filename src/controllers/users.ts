@@ -26,6 +26,7 @@ export const createUser = [
   // TODO: validate email, password
     const { email, password } = req.body;
     const userRepository = getRepository(User);
+    // const playlistRepository = getRepository(Playlist);
 
     if (!email && !password) {
       return res.status(400).json({ message: MESSAGE_USER_EMAIL_PASSWORD_REQUIRED });

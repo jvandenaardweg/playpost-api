@@ -4,7 +4,7 @@ export const playlists = [
     user: {
       id: '1e01cc10-475c-4221-aad0-33a1f611ca2d'
     },
-    name: 'Main',
+    name: 'Default',
     articles: [
       {
         id: '84165aa1-5485-4e0b-a30d-23b49158e43c'
