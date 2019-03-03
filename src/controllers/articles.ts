@@ -27,7 +27,7 @@ export const createArticle = async (req: Request, res: Response) => {
   const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${url}`).then(response => response.json());
 
   // Convert to proper paragraphs
-  const ssml = `<p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`;
+  const ssml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
   // const {
   //   title,
   //   excerpt,
