@@ -37,23 +37,32 @@ export const findAllArticles = async (req: Request, res: Response) => {
   return res.json(articles);
 };
 
+export const findAllAudiofiles = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const userRepository = getRepository(User);
+
+  const { audiofiles } = await userRepository.findOne(userId, { relations: ['audiofiles'] });
+
+  return res.json(audiofiles);
+};
+
 export const updateEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
-  const { id } = req.user;
+  const userId = req.user.id;
   const userRepository = getRepository(User);
 
   if (!email) return res.status(400).json({ message: MESSAGE_ME_EMAIL_REQUIRED });
 
-  await userRepository.update(id, { email });
+  await userRepository.update(userId, { email });
 
-  const updatedUser = await userRepository.findOne(id);
+  const updatedUser = await userRepository.findOne(userId);
 
   return res.json(updatedUser);
 };
 
 export const updatePassword = async (req: Request, res: Response) => {
   const { password } = req.body;
-  const { id } = req.user;
+  const userId = req.user.id;
 
   const userRepository = getRepository(User);
 
@@ -61,9 +70,9 @@ export const updatePassword = async (req: Request, res: Response) => {
 
   const hashedPassword = await hashPassword(password);
 
-  await userRepository.update(id, { password: hashedPassword });
+  await userRepository.update(userId, { password: hashedPassword });
 
-  const updatedUser = await userRepository.findOne(id);
+  const updatedUser = await userRepository.findOne(userId);
 
   return res.json(updatedUser);
 };

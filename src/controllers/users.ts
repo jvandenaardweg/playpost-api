@@ -57,11 +57,11 @@ export const createUser = [
 export const deleteUser = [
   routeIsProtected,
   async (req: Request, res: Response) => {
-    const { email } = req.user;
+    const userEmail = req.user.id;
     const { userId } = req.params;
     const userRepository = getRepository(User);
 
-    if (email !== 'jordyvandenaardweg@gmail.com') return res.status(401).json({ message: MESSAGE_USER_NOT_ALLOWED });
+    if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(401).json({ message: MESSAGE_USER_NOT_ALLOWED });
 
     const validationResult = await validateInput(User, { id: userId });
     if (validationResult.errors.length) return res.status(400).json(validationResult);

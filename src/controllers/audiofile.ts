@@ -19,6 +19,7 @@ export const findById = async (req: Request, res: Response) => {
 };
 
 export const createAudiofile = async (req: Request, res: Response) => {
+  const userId = req.user.id;
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
   const audiofileRepository = getRepository(Audiofile);
@@ -43,6 +44,9 @@ export const createAudiofile = async (req: Request, res: Response) => {
     id: audiofileId,
     article: {
       id: articleId
+    },
+    user: {
+      id: userId
     }
   });
 
@@ -93,11 +97,11 @@ export const findAudiofileById = async (req: Request, res: Response) => {
  * Also deletes the audiofile from our cloud storage using AfterRemove on the Audiofile entity.
  */
 export const deleteById = async (req: Request, res: Response) => {
-  const { email } = req.user;
+  const userEmail = req.user.id;
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
-  if (email !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 

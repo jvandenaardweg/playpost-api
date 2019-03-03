@@ -54,16 +54,13 @@ export class Article extends BaseEntity {
   @Column('text', { nullable: true })
   text: string;
 
-  @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database
-  // @JoinColumn()
+  @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
   user: User;
 
   @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'CASCADE', eager: true }) // On delete of a Audiofile, remove the Article
-  // @JoinColumn()
   audiofiles: Audiofile[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the Article
-  // @JoinColumn()
   playlistItems: PlaylistItem[];
 
   @CreateDateColumn()
@@ -71,80 +68,4 @@ export class Article extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  /**
-   * Returns the basic article information needed to display the article in an overview.
-   * @param {string} id the UUID of the article
-   *
-   * @returns {Promise<Article>} the article
-   */
-  // static findOneBasicArticle(id: string): Promise<Article> {
-  //   return this.findOne({ id }, { select: ['id', 'title', 'description', 'url', 'language', 'sourceName'] });
-  // }
-
-  // static async createBasicArticle(title: string, description: string, url: string, language: string, sourceName: string): Promise<Article> {
-  //   const articleToCreate = await this.create({
-  //     title,
-  //     description,
-  //     url,
-  //     language,
-  //     sourceName
-  //   });
-
-  //   return this.save(articleToCreate);
-  // }
-
-  /**
-   * Returns the articles that are missing the data required to generate an audiofile for.
-   * If `ssml`, `html` and `text` are not populated with data, we return the given article.
-   *
-   * @param {string} id the UUID of the article
-   * @returns {Promise<Article>} the article
-   */
-  // static findOneUnpopulatedArticle(id: string): Promise<Article> {
-  //   return this.findOne(
-  //     {
-  //       id,
-  //       ssml: IsNull(),
-  //       html: IsNull(),
-  //       text: IsNull()
-  //     },
-  //     {
-  //       select: [
-  //         'id',
-  //         'title',
-  //         'description',
-  //         'url',
-  //         'language',
-  //         'sourceName'
-  //       ]
-  //     }
-  //   );
-  // }
-}
-
-/*
-type Article {
-  id: ID! @unique
-  title: String!
-  description: String
-  url: String! @unique
-  imageUrl: String
-  readingTime: Float
-  language: Language!
-  authorName: String
-  authorUrl: String
-  categoryName: String
-  html: String # The raw article HTML we took as a base to generate the SSML
-  ssml: String # The generated SSML using <speak> <p> etc...
-  text: String # Plain text of the article, using `\n` for new lines
-  sourceName: String
-  user: User @relation(name: "ArticleCreator") # A reference to which user created this article, we generally don't return this to other users , TODO: what happens when we delete a user?
-  audiofiles: [Audiofile]! @relation(name: "ArticleAudiofiles", onDelete: CASCADE) # When we delete an article, we delete all audiofiles
-  playlists: [Playlist!]! @relation(name: "ArticleToPlaylist")
-  archives: [Archive!]! @relation(name: "ArticleToArchive")
-  favorites: [Favorite!]! @relation(name: "ArticleToFavorite")
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-*/
+};

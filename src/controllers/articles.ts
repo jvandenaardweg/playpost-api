@@ -157,11 +157,11 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
 };
 
 export const deleteById = async (req: Request, res: Response) => {
-  const { email } = req.user;
+  const userEmail = req.user.email;
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  if (email !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 
   const article = await articleRepository.findOne(articleId);
 

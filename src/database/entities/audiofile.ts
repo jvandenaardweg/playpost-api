@@ -46,11 +46,9 @@ export class Audiofile {
   lastPlayedAt: Date;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
-  @JoinColumn()
   article: Article;
 
-  @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its value to "null"
-  @JoinColumn()
+  @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   user: User;
 
   @CreateDateColumn()

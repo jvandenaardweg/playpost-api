@@ -59,6 +59,7 @@ export const uploadFile = async (
     });
 
     console.log('Google Cloud Storage: Uploaded file!');
+    console.log(uploadResponse);
 
     return uploadResponse;
   } catch (err) {
@@ -98,5 +99,8 @@ export const deleteFile = async (filename: string) => {
   console.log(`Google Cloud Storage: Deleting file "${filename}"...`);
 
   const deleteFileResponse: DeleteFileResponse = await storage.bucket(BUCKET_NAME).file(filename).delete();
+
+  console.log(`Google Cloud Storage: Successfully deleted file "${filename}"!`);
+
   return deleteFileResponse;
-}
+};

@@ -15,7 +15,7 @@ pollySsmlSplit.configure(options);
 export const getSSMLParts = (ssml: string) => {
   console.log('Splitting SSML content into different parts...');
 
-  const ssmlParts = pollySsmlSplit.split(ssml);
+  const ssmlParts: string[] = pollySsmlSplit.split(ssml);
 
   if (!ssmlParts || !ssmlParts.length) throw new Error('Got no SSML parts.');
 

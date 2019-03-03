@@ -14,10 +14,10 @@ const MESSAGE_PLAYLISTS_ARTICLE_NOT_FOUND = 'Article does not exist';
 const MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST = 'Article is already in this playlist.';
 
 export const findAllPlaylists = async (req: Request, res: Response) => {
-  const { email } = req.user;
+  const userEmail = req.user.email;
   const playlistRepository = getRepository(Playlist);
 
-  if (email !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS });
 
   const playlists = await playlistRepository.find({ relations: ['playlistItems'] });
 
@@ -38,10 +38,10 @@ export const findPlaylistById = async (req: Request, res: Response) => {
 };
 
 export const createDefaultPlaylist = async (req: Request, res: Response) => {
-  const { id } = req.user;
+  const userId = req.user.id;
   const playlistRepository = getRepository(Playlist);
 
-  const playlist = await playlistRepository.findOne({ name: 'Default', user: { id } });
+  const playlist = await playlistRepository.findOne({ name: 'Default', user: { id: userId } });
 
   if (playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_DEFAULT_EXISTS });
 

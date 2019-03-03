@@ -77,6 +77,7 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
   app.get('/v1/me/playlists', IS_PROTECTED, meController.findAllPlaylists);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
+  app.get('/v1/me/audiofiles', IS_PROTECTED, meController.findAllAudiofiles);
   app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
