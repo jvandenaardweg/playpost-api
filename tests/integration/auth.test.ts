@@ -1,27 +1,27 @@
 import nodeFetch from 'node-fetch';
 
-import { createTestUser, testUserCredentials, testUserCredentialsStringified, deleteTestUser, authenticateTestUser } from '../../../utils/test-setup';
-
-const headers = {
-  'Content-Type': 'application/json',
-};
+import { createTestUser, testUserCredentials, testUserCredentialsStringified, deleteTestUser, authenticateTestUser, baseUrl } from '../test-setup';
 
 describe('auth', () => {
 
   describe('anonymous integration test', () => {
 
     it('Anonymous users should have access to the POST /auth endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/auth', { method: 'POST' });
+      const response = await nodeFetch(`${baseUrl}/v1/auth`, { method: 'POST' });
       expect(response.status).not.toBe(401);
     });
 
     it('Anonymous user should get an error when email does not exist.', async () => {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
       const wrongCredentials = {
         ...testUserCredentials,
         email: 'integration-test-does-not-exist@readtoapp.com'
       };
 
-      const response = await nodeFetch('http://localhost:3000/v1/auth', { headers, method: 'POST', body: JSON.stringify(wrongCredentials) });
+      const response = await nodeFetch(`${baseUrl}/v1/auth`, { headers, method: 'POST', body: JSON.stringify(wrongCredentials) });
       const json = await response.json();
 
       expect(response.status).toBe(400);
@@ -48,7 +48,7 @@ describe('auth', () => {
         password: 'wrong'
       };
 
-      const response = await nodeFetch('http://localhost:3000/v1/auth', { headers, method: 'POST', body: JSON.stringify(wrongCredentials) });
+      const response = await nodeFetch(`${baseUrl}/v1/auth`, { headers, method: 'POST', body: JSON.stringify(wrongCredentials) });
       const json = await response.json();
 
       expect(response.status).toBe(400);
@@ -56,7 +56,7 @@ describe('auth', () => {
     });
 
     it('User should get a token when credentials are correct.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/auth', { headers, method: 'POST', body: testUserCredentialsStringified });
+      const response = await nodeFetch(`${baseUrl}/v1/auth`, { headers, method: 'POST', body: testUserCredentialsStringified });
       const json = await response.json();
 
       expect(response.status).toBe(200);

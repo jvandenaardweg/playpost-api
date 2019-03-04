@@ -1,43 +1,43 @@
 import nodeFetch from 'node-fetch';
 
-import { createTestUser, deleteTestUser, authenticateTestUser, testUserCredentials } from '../../../utils/test-setup';
+import { createTestUser, deleteTestUser, authenticateTestUser, testUserCredentials, baseUrl } from '../test-setup';
 
 describe('me', () => {
 
   describe('anonymous integration test', () => {
 
     it('Anonymous users do not have access to the GET /me endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me', { method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me`, { method: 'GET' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the GET /me/playlists endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/playlists', { method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/playlists`, { method: 'GET' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the GET /me/audiofiles endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/audiofiles', { method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/audiofiles`, { method: 'GET' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the GET /me/audiofiles endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/audiofiles', { method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/audiofiles`, { method: 'GET' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the PATCH /me/email endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/email', { method: 'PATCH' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/email`, { method: 'PATCH' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the PATCH /me/password endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/password', { method: 'PATCH' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/password`, { method: 'PATCH' });
       expect(response.status).toBe(401);
     });
 
     it('Anonymous users do not have access to the DELETE /me endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me', { method: 'DELETE' });
+      const response = await nodeFetch(`${baseUrl}/v1/me`, { method: 'DELETE' });
       expect(response.status).toBe(401);
     });
   });
@@ -56,20 +56,20 @@ describe('me', () => {
     });
 
     it('Authenticated user could access his account endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me', { headers, method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me`, { headers, method: 'GET' });
       const json = await response.json();
       expect(response.status).toBe(200);
     });
 
     it('Authenticated user /me endpoint contains correct data.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me', { headers, method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me`, { headers, method: 'GET' });
       const json = await response.json();
       expect(json.email).toBe(testUserCredentials.email);
       expect(json.password).toBeFalsy();
     });
 
     it('Authenticated user has a default playlist.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/playlists', { headers, method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/playlists`, { headers, method: 'GET' });
       const json = await response.json();
 
       expect(response.status).toBe(200);
@@ -77,12 +77,12 @@ describe('me', () => {
     });
 
     it('Authenticated user could access his articles endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/articles', { headers, method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/articles`, { headers, method: 'GET' });
       expect(response.status).toBe(200);
     });
 
     it('Authenticated user could access his audiofiles endpoint.', async () => {
-      const response = await nodeFetch('http://localhost:3000/v1/me/audiofiles', { headers, method: 'GET' });
+      const response = await nodeFetch(`${baseUrl}/v1/me/audiofiles`, { headers, method: 'GET' });
       expect(response.status).toBe(200);
     });
 
@@ -91,7 +91,7 @@ describe('me', () => {
         password: 'updated'
       });
 
-      const response = await nodeFetch('http://localhost:3000/v1/me/password', { headers, method: 'PATCH', body: updatedPassword });
+      const response = await nodeFetch(`${baseUrl}/v1/me/password`, { headers, method: 'PATCH', body: updatedPassword });
       expect(response.status).toBe(200);
     });
 
@@ -101,7 +101,7 @@ describe('me', () => {
         email: 'ingegration-updated-email@readtoapp.com'
       });
 
-      const response = await nodeFetch('http://localhost:3000/v1/me/email', { headers, method: 'PATCH', body: updatedEmail });
+      const response = await nodeFetch(`${baseUrl}/v1/me/email`, { headers, method: 'PATCH', body: updatedEmail });
       const json = await response.json();
 
       expect(response.status).toBe(200);
