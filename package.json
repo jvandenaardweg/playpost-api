@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/jvandenaardweg/readto-api#readme",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.17",
     "@google-cloud/storage": "^2.4.2",
     "@google-cloud/text-to-speech": "^0.5.1",
     "@postlight/mercury-parser": "^2.0.0",
