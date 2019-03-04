@@ -7,10 +7,10 @@ describe('credentials', () => {
     it('Should give a correct Google Cloud credentials object.', () => {
       const credentials = getGoogleCloudCredentials();
 
-      expect(credentials.projectId).toBeDefined();
-      expect(credentials.credentials).toBeDefined();
-      expect(credentials.credentials.client_email).toBeDefined();
-      expect(credentials.credentials.private_key).toBeDefined();
+      expect(credentials).toHaveProperty('projectId');
+      expect(credentials).toHaveProperty('credentials');
+      expect(credentials.credentials).toHaveProperty('client_email');
+      expect(credentials.credentials).toHaveProperty('private_key');
     });
   });
 
