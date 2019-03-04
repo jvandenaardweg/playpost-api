@@ -8,6 +8,7 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection } from 'typeorm';
+// import expressRateLimit from 'express-rate-limit';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -24,11 +25,16 @@ import { connectionOptions } from './database/connection-options';
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
+// const apiLimiter = expressRateLimit({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 60 // 60 requests allowed per minute
+// });
+
 console.log('App init:', 'Connecting with database...', 'Using options:');
 console.log(connectionOptions);
 
 // Create a connection with the database
-createConnection(connectionOptions).then(async (connection: any) => {
+createConnection(connectionOptions('default')).then(async (connection: any) => {
   console.log('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
@@ -52,6 +58,9 @@ createConnection(connectionOptions).then(async (connection: any) => {
     app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
     app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
   }
+
+  // app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+  // app.use('/v1/', apiLimiter);
 
   // Use passport authentication
   app.use(passport.initialize());
