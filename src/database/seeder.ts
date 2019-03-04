@@ -37,7 +37,7 @@ const seedPlaylists = async (databaseConnection: Connection) => {
 };
 
 (async() => {
-  const databaseConnection: Connection = await createConnection(connectionOptions);
+  const databaseConnection: Connection = await createConnection(connectionOptions());
 
   // Run the seeders
   await seedUsers(databaseConnection);
