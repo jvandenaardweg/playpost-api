@@ -2,8 +2,6 @@
 .env
 dist
 
-*.mp3
-
 # Logs
 logs
 *.log
