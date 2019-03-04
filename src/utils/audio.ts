@@ -1,7 +1,9 @@
-import fsExtra from 'fs-extra';
 import mp3Duration from 'mp3-duration';
 import appRootPath from 'app-root-path';
 import fluentFfmpeg from 'fluent-ffmpeg';
+import ffmpeg from '@ffmpeg-installer/ffmpeg';
+
+fluentFfmpeg.setFfmpegPath(ffmpeg.path);
 
 /* eslint-disable no-console */
 
