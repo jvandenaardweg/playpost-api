@@ -48,7 +48,7 @@ export const createDefaultPlaylist = async (req: Request, res: Response) => {
   const playlistToCreate = await playlistRepository.create({
     name: 'Default',
     user: {
-      id
+      id: userId
     }
   });
 
