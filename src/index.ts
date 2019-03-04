@@ -128,8 +128,10 @@ createConnection(connectionOptions).then(async (connection: any) => {
 
       }
 
-      console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
-      console.error(err);
+      if (process.env.NODE_ENV !== 'test') {
+        console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
+        console.error(err);
+      }
 
       if (err.message === 'Unauthorized') {
         return res.status(401).json({

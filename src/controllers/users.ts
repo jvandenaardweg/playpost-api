@@ -86,7 +86,7 @@ export const deleteUser = [
 
     const userToDelete = await userRepository.findOne(userId);
 
-    if (!userToDelete) return res.status(404).json({ message: MESSAGE_USER_NOT_FOUND });
+    if (!userToDelete) return res.status(400).json({ message: MESSAGE_USER_NOT_FOUND });
 
     await userRepository.remove(userToDelete);
 

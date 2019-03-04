@@ -14,7 +14,7 @@ export const findCurrentUser = async (req: Request, res: Response) => {
 
   const user = await userRepository.findOne(userId);
 
-  if (!user) return res.status(404).json({ message: MESSAGE_ME_NOT_FOUND });
+  if (!user) return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND });
 
   return res.json(user);
 };

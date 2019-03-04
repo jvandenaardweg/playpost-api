@@ -31,7 +31,7 @@ export const findPlaylistById = async (req: Request, res: Response) => {
 
   const playlist = await playlistRepository.findOne(playlistId, { relations: ['playlistItems', 'user'] });
 
-  if (!playlist) return res.status(404).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
+  if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
   if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
   return res.json(playlist);
@@ -65,12 +65,6 @@ export const putPlaylists = async (req: Request, res: Response) => {
   // First, check to see if we already have the article details
   // Else, crawl the article page and add it to the database
   return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
-};
-
-export const deletePlaylist = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-
-  return res.json({ message: `Should delete a playlist for user ${userId}` });
 };
 
 export const createPlaylistItem = async (req: Request, res: Response) => {
@@ -145,7 +139,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     }
   });
 
-  if (!playlistItem) return res.json({ message: 'Playlist item does not exist (anymore).' });
+  if (!playlistItem) return res.status(400).json({ message: 'Playlist item does not exist (anymore).' });
 
   await playlistItemRepository.remove(playlistItem);
 

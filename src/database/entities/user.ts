@@ -53,13 +53,19 @@ export class User {
 
   @AfterInsert()
   async afterInsert() {
-    console.log('User @AfterInsert()', `Adding "${this.email}" to Mailchimp list.`);
-    await addEmailToMailchimpList(this.email);
+    // Don't add our integration test account to Mailchimp
+    if (!this.email.includes('integrationtest-1337')) {
+      console.log('User @AfterInsert()', `Adding "${this.email}" to Mailchimp list.`);
+      await addEmailToMailchimpList(this.email);
+    }
   }
 
   @AfterRemove()
   async afterRemove() {
-    console.log('User @AfterRemove()', `Remove "${this.email}" from Mailchimp list.`);
-    await removeEmailToMailchimpList(this.email);
+    // Do not run for our integration test user
+    if (!this.email.includes('integrationtest-1337')) {
+      console.log('User @AfterRemove()', `Remove "${this.email}" from Mailchimp list.`);
+      await removeEmailToMailchimpList(this.email);
+    }
   }
 }

@@ -77,7 +77,7 @@ export const findArticleById = async (req: Request, res: Response) => {
   const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
-    return res.status(404).json({
+    return res.status(400).json({
       message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
     });
   }
@@ -92,7 +92,7 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
-    return res.status(404).json({
+    return res.status(400).json({
       message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
     });
   }
@@ -165,7 +165,7 @@ export const deleteById = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) return res.status(404).json({ message: 'Article not found.' });
+  if (!article) return res.status(400).json({ message: 'Article not found.' });
 
   await articleRepository.remove(article);
 

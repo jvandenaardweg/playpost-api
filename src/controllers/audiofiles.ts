@@ -13,7 +13,7 @@ export const findById = async (req: Request, res: Response) => {
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 
-  if (!audiofile) return res.status(404).json({ message: 'Audiofile not found.' });
+  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
 
   return res.json(audiofile);
 };
@@ -87,7 +87,7 @@ export const findAudiofileById = async (req: Request, res: Response) => {
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 
-  if (!audiofile) return res.status(404).json({ message: 'Audiofile not found.' });
+  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
 
   return res.json(audiofile);
 };
@@ -105,7 +105,7 @@ export const deleteById = async (req: Request, res: Response) => {
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 
-  if (!audiofile) return res.status(404).json({ message: 'Audiofile not found.' });
+  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
 
   await audiofileRepository.remove(audiofile);
 
