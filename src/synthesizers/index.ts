@@ -4,9 +4,9 @@ import { Article } from 'database/entities/article';
 import { Audiofile } from 'database/entities/audiofile';
 import * as storage from '../storage/google-cloud';
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
-import { removeFile } from '../utils/local';
 import { getSSMLParts } from '../utils/ssml';
 import { googleSsmlPartsToSpeech } from './google';
+import fsExtra from 'fs-extra';
 
 export type SynthesizerOptions = {
   synthesizer: string,
@@ -69,7 +69,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   );
 
   // Delete the local file, we don't need it anymore
-  await removeFile(`${appRootPath}/temp/${articleId}`);
+  await fsExtra.remove(`${appRootPath}/temp/${articleId}`);
 
   // Create a publicfile URL our users can use
   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
