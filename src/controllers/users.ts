@@ -57,7 +57,7 @@ export const createUser = [
 export const deleteUser = [
   routeIsProtected,
   async (req: Request, res: Response) => {
-    const userEmail = req.user.id;
+    const userEmail = req.user.email;
     const { userId } = req.params;
     const userRepository = getRepository(User);
 

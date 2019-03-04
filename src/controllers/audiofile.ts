@@ -97,7 +97,7 @@ export const findAudiofileById = async (req: Request, res: Response) => {
  * Also deletes the audiofile from our cloud storage using AfterRemove on the Audiofile entity.
  */
 export const deleteById = async (req: Request, res: Response) => {
-  const userEmail = req.user.id;
+  const userEmail = req.user.email;
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
