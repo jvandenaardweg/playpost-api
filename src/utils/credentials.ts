@@ -1,3 +1,4 @@
+require('dotenv').config();
 // Create the required Google Cloud Credentials based on env variables
 // So we can use it on any platform and not store our credentials in git
 export const getGoogleCloudCredentials = () => {
