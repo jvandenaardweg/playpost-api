@@ -23,7 +23,7 @@
     ]
   },
   "include": [
-    "src/**/*", "tests/test-setup.ts"
+    "src/**/*",
   ],
   "exclude": [
     "node_modules",
