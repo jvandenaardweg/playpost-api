@@ -12,7 +12,6 @@ import { createConnection } from 'typeorm';
 import * as audiofileController from './controllers/audiofile';
 import * as meController from './controllers/me';
 import * as playlistsController from './controllers/playlists';
-import * as favoritesController from './controllers/favorites';
 import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
@@ -91,10 +90,6 @@ createConnection(connectionOptions).then(async (connection: any) => {
   // app.patch('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.patchPlaylist);
   app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylist);
 
-  // /v1/facorites
-  app.get('/v1/favorites', IS_PROTECTED, favoritesController.findAllFavorites);
-  app.post('/v1/favorites', IS_PROTECTED, favoritesController.createFavorite);
-  app.delete('/v1/favorites', IS_PROTECTED, favoritesController.deleteFavorite);
 
   // /v1/articles
   app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
