@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove, getRepository } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
 import { Article } from './article';
 import { Audiofile } from './audiofile';
@@ -53,11 +53,13 @@ export class User {
 
   @AfterInsert()
   async afterInsert() {
+    console.log('User @AfterInsert()', `Adding "${this.email}" to Mailchimp list.`);
     await addEmailToMailchimpList(this.email);
   }
 
   @AfterRemove()
   async afterRemove() {
+    console.log('User @AfterRemove()', `Remove "${this.email}" from Mailchimp list.`);
     await removeEmailToMailchimpList(this.email);
   }
 }

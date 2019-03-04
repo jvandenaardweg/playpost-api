@@ -37,26 +37,6 @@ export const findPlaylistById = async (req: Request, res: Response) => {
   return res.json(playlist);
 };
 
-export const createDefaultPlaylist = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const playlistRepository = getRepository(Playlist);
-
-  const playlist = await playlistRepository.findOne({ name: 'Default', user: { id: userId } });
-
-  if (playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_DEFAULT_EXISTS });
-
-  const playlistToCreate = await playlistRepository.create({
-    name: 'Default',
-    user: {
-      id: userId
-    }
-  });
-
-  const createdPlaylist = await playlistRepository.save(playlistToCreate);
-
-  return res.json(createdPlaylist);
-};
-
 export const createPlaylist = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { name } = req.body;
