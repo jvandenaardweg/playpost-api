@@ -53,8 +53,7 @@ export const removeEmailToMailchimpList = async (emailAddress: string) => {
     const response = await nodeFetch(`${MAILCHIMP_API_LIST_MEMBERS_URL}/${subscriberHash}`, {
       headers,
       method: 'DELETE'
-    })
-    .then(response => response.json());
+    });
 
     console.log(`Mailchimp: Deleted ${emailAddress} from list "${MAILCHIMP_LIST_ID}".`);
     return response;
