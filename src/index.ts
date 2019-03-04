@@ -9,7 +9,7 @@ import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection } from 'typeorm';
 
-import * as audiofileController from './controllers/audiofile';
+import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
 import * as playlistsController from './controllers/playlists';
 import * as usersController from './controllers/users';
@@ -89,8 +89,6 @@ createConnection(connectionOptions).then(async (connection: any) => {
   app.delete('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.deletePlaylistItem);
   app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
   // app.patch('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.patchPlaylist);
-  app.delete('/v1/playlists', IS_PROTECTED, playlistsController.deletePlaylist);
-
 
   // /v1/articles
   app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
