@@ -5,16 +5,11 @@ This repository includes the API for the Readto App.
 - TypeScript 3.0.0+
 - Node 10.0.0+
 - Docker
-- ffmpeg: https://evermeet.cx/ffmpeg/
-
-## Requirements production (Heroku)
-- ffmpeg: https://elements.heroku.com/buildpacks/jonathanong/heroku-buildpack-ffmpeg-latest
 
 ## Setup for development
 1. Use the correct node version, run: `nvm use`
-2. Install ffmpeg: `brew install ffmpeg`
-3. Install npm modules: `npm install`
-4. Create a `.env` file in the root of this project with the following data:
+2. Install npm modules: `npm install`
+3. Create a `.env` file in the root of this project with the following data:
 ```yaml
 NODE_ENV = "development"
 
@@ -35,8 +30,8 @@ GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner, or create 
 MAILCHIMP_LIST_ID = "" # Ask the repository owner, or create your own
 MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
 ```
-5. Run `npm run dev`, this will launch the database and start the Node server.
-6. The local server should be available at http://localhost:3000
+4. Run `npm run dev`, this will launch the database and start the Node server.
+5. The local server should be available at http://localhost:3000
 
 ## Production database changes
 Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`.
@@ -61,3 +56,7 @@ For whatever reason, you maybe want to manually sync and bypass the migration wo
 3. Run `typeorm schema:sync`
 
 The schema should now be synced.
+
+
+## Heroku Dyno Preparation
+Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a readto-api-production`
