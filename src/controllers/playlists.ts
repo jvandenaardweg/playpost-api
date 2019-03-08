@@ -4,6 +4,8 @@ import { getRepository } from 'typeorm';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 
+import { fetchArticleDetails } from './articles';
+
 const MESSAGE_PLAYLISTS_NO_ACCESS = 'You do not have access to this endpoint.';
 const MESSAGE_PLAYLISTS_NOT_FOUND = 'Playlist does not exist. You should create one first.';
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
@@ -65,6 +67,87 @@ export const putPlaylists = async (req: Request, res: Response) => {
   // First, check to see if we already have the article details
   // Else, crawl the article page and add it to the database
   return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
+};
+
+export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId } = req.params;
+  const { articleUrl } = req.body; // TODO: normalize articleUrl
+
+  const playlistItemRepository = getRepository(PlaylistItem);
+  const playlistRepository = getRepository(Playlist);
+  const articleRepository = getRepository(Article);
+
+  let createdArticle;
+
+  const playlist = await playlistRepository.findOne(playlistId, { relations: ['user'] });
+
+  if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
+
+  if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+
+  const article = await articleRepository.findOne({ url: articleUrl });
+
+  // If we do not have an article yet, fetch the basic details and add it to the database
+  if (!article) {
+    const articleDetails = await fetchArticleDetails(articleUrl);
+
+    if (articleDetails.language !== 'eng') {
+      return res.status(400).json({
+        message: `The language of the Article '${articleDetails.language}' is currently not supported. Please only add English articles.`,
+      });
+    }
+
+    const articleToCreate = await articleRepository.create({
+      url: articleDetails.url,
+      title: articleDetails.title,
+      sourceName: articleDetails.sourceName,
+      ssml: articleDetails.ssml,
+      text: articleDetails.text,
+      html: articleDetails.html,
+      description: articleDetails.description,
+      authorName: articleDetails.authorName,
+      languageCode: 'en', // TODO: make dynamic
+      user: {
+        id: userId
+      }
+    });
+
+    createdArticle = await articleRepository.save(articleToCreate);
+  }
+
+  // The found article ID or the newly created article ID
+  const articleId = (article) ? article.id : createdArticle.id;
+
+  // Create the playlist item
+  const playlistItem = await playlistItemRepository.findOne({
+    article: {
+      id: articleId
+    },
+    playlist: {
+      id: playlistId
+    }
+  });
+
+  if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
+
+  // TODO: Set correct "order"
+  const playlistItemToCreate = await playlistItemRepository.create({
+    article: {
+      id: articleId
+    },
+    playlist: {
+      id: playlistId
+    },
+    user: {
+      id: userId
+    }
+  });
+
+  const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+
+  return res.json(createdPlaylistItem);
+
 };
 
 export const createPlaylistItem = async (req: Request, res: Response) => {

@@ -24,41 +24,24 @@ export const createArticle = async (req: Request, res: Response) => {
   // TODO: use better crawler, for dev purposes this is now fine
 
   // Crawl the URL to extract the article data
-  const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${url}`).then(response => response.json());
+  const articleDetails = await fetchArticleDetails(url);
 
-  // Convert to proper paragraphs
-  const ssml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
-  // const {
-  //   title,
-  //   excerpt,
-  //   author,
-  //   domain,
-  //   content,
-  //   text
-  // } = await crawl(url);
-
-  // return console.log(speech);
-
-  const language = detectLanguage(text);
-
-  if (language !== 'eng') {
+  if (articleDetails.language !== 'eng') {
     return res.status(400).json({
-      message: `The language of the Article '${language}' is currently not supported. Please only add English articles.`,
+      message: `The language of the Article '${articleDetails.language}' is currently not supported. Please only add English articles.`,
     });
   }
 
-  const sourceName = new URL(url).hostname;
-
   const articleToCreate = await articleRepository.create({
-    url,
-    title,
-    sourceName,
-    ssml,
-    text,
-    html,
-    description: meta_description,
-    authorName: null,
-    languageCode: 'en',
+    url: articleDetails.url,
+    title: articleDetails.title,
+    sourceName: articleDetails.sourceName,
+    ssml: articleDetails.ssml,
+    text: articleDetails.text,
+    html: articleDetails.html,
+    description: articleDetails.description,
+    authorName: articleDetails.authorName,
+    languageCode: 'en', // TODO: make dynamic
     user: {
       id: userId
     }
@@ -170,4 +153,27 @@ export const deleteById = async (req: Request, res: Response) => {
   await articleRepository.remove(article);
 
   return res.json({ message: 'Article is deleted!' });
+};
+
+export const fetchArticleDetails = async (articleUrl: string) => {
+  const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${articleUrl}`).then(response => response.json());
+
+  // Convert to proper paragraphs
+  const ssml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
+
+  const language = detectLanguage(text);
+
+  const sourceName = new URL(articleUrl).hostname;
+
+  return  {
+    title,
+    sourceName,
+    ssml,
+    text,
+    html,
+    language,
+    url: articleUrl,
+    description: meta_description,
+    authorName: null
+  };
 };
