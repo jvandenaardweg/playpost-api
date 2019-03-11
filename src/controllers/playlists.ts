@@ -186,7 +186,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
 };
 
-export const createPlaylistItem = async (req: Request, res: Response) => {
+export const createPlaylistItemByArticleId = async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const { playlistId, articleId } = req.params;
