@@ -23,7 +23,14 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
 
   const playlists = await playlistRepository.find({ relations: ['playlistItems'] });
 
-  return res.json(playlists);
+  // Sort by createdAt on playlistItems
+  // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
+  const sortedPlaylist = playlists.map((playlist) => {
+    playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
+    return playlist;
+  });
+
+  return res.json(sortedPlaylist);
 };
 
 export const findPlaylistById = async (req: Request, res: Response) => {
@@ -35,6 +42,12 @@ export const findPlaylistById = async (req: Request, res: Response) => {
 
   if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
   if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+
+  // Sort by createdAt on playlistItems
+  // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
+  if (playlist.playlistItems.length) {
+    playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
+  }
 
   return res.json(playlist);
 };
@@ -69,6 +82,8 @@ export const putPlaylists = async (req: Request, res: Response) => {
   return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
 };
 
+// TODO: maybe only add the article URL and return a success or fail
+// Then, after that's done, crawl the article
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId } = req.params;

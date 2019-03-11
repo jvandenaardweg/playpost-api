@@ -4,7 +4,9 @@ import { Playlist } from './playlist';
 import { Article } from './article';
 import { User } from './user';
 
-@Entity()
+@Entity({ orderBy: {
+  createdAt: 'ASC'
+}})
 @Unique(['playlist', 'article']) // Don't allow articles that are already in the user's playlist
 @Index(['user'])
 export class PlaylistItem {

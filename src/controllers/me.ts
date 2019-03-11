@@ -25,7 +25,14 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
 
   const { playlists } = await userRepository.findOne(userId, { relations: ['playlists'] });
 
-  return res.json(playlists);
+  // Sort by createdAt on playlistItems
+  // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
+  const sortedPlaylist = playlists.map((playlist) => {
+    playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
+    return playlist;
+  });
+
+  return res.json(sortedPlaylist);
 };
 
 export const findAllArticles = async (req: Request, res: Response) => {
