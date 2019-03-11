@@ -89,6 +89,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const { playlistId } = req.params;
   const { articleUrl } = req.body; // TODO: normalize articleUrl
 
+  console.log(userId, playlistId, articleUrl);
+
   const playlistItemRepository = getRepository(PlaylistItem);
   const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
@@ -108,10 +110,18 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // If there's an article, check if that one already exists in the user's playlist
   if (article) {
     const playlistItem = await playlistItemRepository.findOne({
-      playlistId,
-      userId,
-      articleId: article.id
+      playlist: {
+        id: playlistId
+      },
+      user: {
+        id: userId
+      },
+      article: {
+        id: article.id
+      }
     });
+
+    console.log('playlistItem', playlistItem)
 
     if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
   }
@@ -200,6 +210,9 @@ export const createPlaylistItem = async (req: Request, res: Response) => {
   if (!article) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_NOT_FOUND });
 
   const playlistItem = await playlistItemRepository.findOne({
+    user: {
+      id: userId
+    },
     article: {
       id: articleId
     },
