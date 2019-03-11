@@ -89,8 +89,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const { playlistId } = req.params;
   const { articleUrl } = req.body; // TODO: normalize articleUrl
 
-  console.log(userId, playlistId, articleUrl);
-
   const playlistItemRepository = getRepository(PlaylistItem);
   const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
@@ -120,8 +118,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
         id: article.id
       }
     });
-
-    console.log('playlistItem', playlistItem)
 
     if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
   }
