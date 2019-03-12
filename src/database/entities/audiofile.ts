@@ -4,6 +4,16 @@ import { Article } from './article';
 import { User } from './user';
 import * as storage from '../../storage/google-cloud';
 
+// From: https://github.com/typeorm/typeorm/issues/873#issuecomment-424643086
+class ColumnNumericTransformer {
+  to(data: number): number {
+    return data;
+  }
+  from(data: string): number {
+    return parseFloat(data);
+  }
+}
+
 @Entity()
 @Index(['article'])
 export class Audiofile {
@@ -21,8 +31,8 @@ export class Audiofile {
   @Column({ nullable: true })
   filename: string;
 
-  @Column({ type: 'decimal', nullable: true })
-  lengthInSeconds: number;
+  @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
+  length: number; // Length in seconds
 
   @Column({ nullable: true })
   languageCode: string;

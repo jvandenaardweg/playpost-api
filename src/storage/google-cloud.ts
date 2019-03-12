@@ -29,7 +29,7 @@ export const uploadFile = async (
   synthesizerOptions: SynthesizerOptions,
   article: Article,
   audiofile: Audiofile,
-  audiofileLengthInSeconds: number
+  audiofileLength: number
 ) => {
   console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
@@ -40,8 +40,8 @@ export const uploadFile = async (
       gzip: true,
       metadata: {
         metadata: {
+          audiofileLength,
           audiofileId: audiofile.id,
-          audiofileLength: audiofileLengthInSeconds,
           audiofileSynthesizer: synthesizerOptions.synthesizer,
           audiofileLanguageCode: synthesizerOptions.languageCode,
           audiofileVoice: synthesizerOptions.name,

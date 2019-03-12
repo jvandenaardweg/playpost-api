@@ -56,7 +56,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   );
 
   // Get the length of the audiofile
-  const audiofileLengthInSeconds = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
+  const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
   // Upload the one mp3 file to Google Cloud Storage
   const uploadResponse = await storage.uploadFile(
@@ -65,7 +65,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
     synthesizerOptions,
     article,
     audiofile,
-    audiofileLengthInSeconds
+    audiofileLength
   );
 
   // Delete the local file, we don't need it anymore
@@ -77,7 +77,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   audiofile.url = publicFileUrl;
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
-  audiofile.lengthInSeconds = audiofileLengthInSeconds;
+  audiofile.length = audiofileLength;
   audiofile.languageCode = synthesizerOptions.languageCode;
   audiofile.encoding = synthesizerOptions.encoding;
   audiofile.voice = synthesizerOptions.name;

@@ -27,6 +27,7 @@ export const findAllPlaylists = async (req: Request, res: Response) => {
 
   // Sort by createdAt on playlistItems
   // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
+  // TODO: use custom order if we have implemented it
   const sortedPlaylist = playlists.map((playlist) => {
     playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
     return playlist;
