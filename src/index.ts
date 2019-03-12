@@ -145,7 +145,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
       if (err.message === 'Unauthorized') {
         return res.status(401).json({
-          message: 'Unauthorized. You don\'t have access to this endpoint. If you are not loggedin, try again by logging in.'
+          message: 'You are not logged in. Please log in to the app and try again.'
         });
       }
 
