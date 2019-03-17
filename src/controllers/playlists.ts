@@ -130,7 +130,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
     if (articleDetails.language !== 'eng') {
       return res.status(400).json({
-        message: `The language of the Article '${articleDetails.language}' is currently not supported. Please only add English articles.`,
+        message: `The language "${articleDetails.language}" of the Article "${articleUrl}" is currently not supported. Please only add English articles.`
       });
     }
 
