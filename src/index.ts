@@ -112,6 +112,8 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 
+  app.get('/v1/crawler', articlesController.testCrawler)
+
   // Catch all
   app.all('*', catchAllController.catchAll);
 

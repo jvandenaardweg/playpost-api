@@ -155,11 +155,29 @@ export const deleteById = async (req: Request, res: Response) => {
   return res.json({ message: 'Article is deleted!' });
 };
 
+export const testCrawler = async (req: Request, res: Response) => {
+  const { url } = req.query;
+
+  const articleDetails = await fetchArticleDetails(url);
+
+  return res.json(articleDetails);
+}
+
 export const fetchArticleDetails = async (articleUrl: string) => {
-  const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${articleUrl}`).then(response => response.json());
+  let urlToCrawl = articleUrl;
+
+  // Convert link.medium.com URL's to /p/ ones, because they are publically crawlable
+  // link.medium.com files usually give a 403 or return an AMP page without the complete article
+  if (articleUrl.includes('link.medium.com')) {
+    const mediumPostId = articleUrl.split('link.medium.com/')[1];
+    urlToCrawl = `https://medium.com/p/${mediumPostId}`;
+  }
+
+  const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${urlToCrawl}`).then(response => response.json());
 
   // Convert to proper paragraphs
   const ssml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
+
 
   const language = detectLanguage(text);
 
