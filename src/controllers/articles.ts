@@ -176,8 +176,12 @@ export const fetchArticleDetails = async (articleUrl: string) => {
   const { text, title, meta_description, html } = await nodeFetch(`https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${urlToCrawl}`).then(response => response.json());
 
   // Convert to proper paragraphs
-  const ssml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
+  const preSsml = `<speak><p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
 
+  // Make sure each paragraph ends with a dot
+  const ssmlWithoutParagraphEndings = preSsml.replace(/.<\/p>/g, '</p>');
+  const ssmlWithParagraphEndsings = ssmlWithoutParagraphEndings.replace(/<\/p>/g, '.</p>');
+  const ssml = ssmlWithParagraphEndsings;
 
   const language = detectLanguage(text);
 
