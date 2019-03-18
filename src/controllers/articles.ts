@@ -8,7 +8,6 @@ import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { Article } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
-import { detectLanguage } from '../utils/detect-language';
 
 const metascraper = require('metascraper')([
   require('metascraper-author')(),
