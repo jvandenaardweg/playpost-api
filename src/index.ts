@@ -190,12 +190,23 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
     if (channel === 'ADD_TO_MAILCHIMP_LIST') {
       const userEmail = message;
-      await addEmailToMailchimpList(userEmail);
+
+      try {
+        await addEmailToMailchimpList(userEmail);
+      } catch (err) {
+        console.log('ADD_TO_MAILCHIMP_LIST failed.', err);
+      }
+
     }
 
     if (channel === 'REMOVE_FROM_MAILCHIMP_LIST') {
       const userEmail = message;
-      await removeEmailToMailchimpList(userEmail);
+
+      try {
+        await removeEmailToMailchimpList(userEmail);
+      } catch (err) {
+        console.log('REMOVE_FROM_MAILCHIMP_LIST failed.', err);
+      }
     }
   });
 
