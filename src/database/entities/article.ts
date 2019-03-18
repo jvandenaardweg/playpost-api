@@ -1,8 +1,10 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany, getRepository } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
 import { User } from './user';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
+
+import { redisClientPub } from '../../pubsub';
 
 @Entity()
 export class Article extends BaseEntity {
@@ -68,4 +70,11 @@ export class Article extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-};
+
+  @AfterInsert()
+  afterInsert() {
+    // Should get the full article details, like ssml, text and html
+    console.log('Should get the full article details, like ssml, text and html');
+    redisClientPub.publish('FETCH_FULL_ARTICLE', this.id);
+  }
+}

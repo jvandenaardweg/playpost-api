@@ -4,7 +4,7 @@ import { getRepository } from 'typeorm';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 
-import { fetchArticleDetails } from './articles';
+import { fastFetchArticleDetails } from './articles';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS = 'You do not have access to this endpoint.';
 const MESSAGE_PLAYLISTS_NOT_FOUND = 'Playlist does not exist. You should create one first.';
@@ -103,7 +103,22 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // Check if the user is the owner of that playlist
   if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
-  const article = await articleRepository.findOne({ url: articleUrl });
+  // Fetch the article details from the article URL
+  // Important: this is doing a request to the URL
+  const articleDetails = await fastFetchArticleDetails(articleUrl);
+
+  if (!articleDetails) return res.status(400).json({ message: 'Could not get the basic article details.' });
+
+  if (articleDetails.language !== 'en') {
+    return res.status(400).json({
+      message: `The language "${articleDetails.language}" of the Article "${articleUrl}" is currently not supported. Please only add English articles.`
+    });
+  }
+
+  // Use the URL of the fastFetchArticleDetails, because it includes the canonical
+  // Important: "articleUrl" and "articleDetails.url" could be different, but it should point the the same article.
+  const url = (articleDetails.url) ? articleDetails.url : articleUrl;
+  const article = await articleRepository.findOne({ url });
 
   // If there's an article, check if that one already exists in the user's playlist
   if (article) {
@@ -124,26 +139,16 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   // If we do not have an article yet, fetch the basic details and add it to the database
   if (!article) {
-    // Fetch the article details from the article URL
-    // Important: this is doing a request to the URL
-    const articleDetails = await fetchArticleDetails(articleUrl);
-
-    if (articleDetails.language !== 'eng') {
-      return res.status(400).json({
-        message: `The language "${articleDetails.language}" of the Article "${articleUrl}" is currently not supported. Please only add English articles.`
-      });
-    }
-
     const articleToCreate = await articleRepository.create({
-      url: articleDetails.url,
+      url,
       title: articleDetails.title,
-      sourceName: articleDetails.sourceName,
-      ssml: articleDetails.ssml,
-      text: articleDetails.text,
-      html: articleDetails.html,
+      sourceName: articleDetails.hostname,
+      // ssml: articleDetails.ssml,
+      // text: articleDetails.text,
+      // html: articleDetails.html,
       description: articleDetails.description,
-      authorName: articleDetails.authorName,
-      languageCode: 'en', // TODO: make dynamic
+      authorName: articleDetails.author,
+      languageCode: articleDetails.language,
       user: {
         id: userId
       }

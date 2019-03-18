@@ -7,8 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
-import { createConnection } from 'typeorm';
-// import expressRateLimit from 'express-rate-limit';
+import { createConnection, getRepository } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -18,7 +17,10 @@ import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 
+import { Article } from './database/entities/article';
+
 import { connectionOptions } from './database/connection-options';
+import { redisClientSub } from './pubsub';
 
 /* eslint-disable no-console */
 
@@ -101,7 +103,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   // app.patch('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.patchPlaylist);
 
   // /v1/articles
-  app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
+  // app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
   app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
@@ -158,6 +160,33 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
     }
 
     return next(err);
+  });
+
+
+
+  // Listen for the message to fetch the full article.
+  // This happens right after the insert of a new article.
+  // Since the crawling of the full article details takes longer...
+  // ...we do it right after insertion in the database of the minimal article details
+  redisClientSub.on('message', async (channel, message) => {
+    if (channel === 'FETCH_FULL_ARTICLE') {
+      const articleId = message;
+
+      try {
+        const articleRepository = getRepository(Article);
+        const article = await articleRepository.findOne(articleId);
+
+        const { ssml, text, html } = await articlesController.fetchFullArticleContents(article.url);
+
+        await articleRepository.update(article.id, {
+          ssml,
+          text,
+          html
+        });
+      } catch (err) {
+        console.log('FETCH_FULL_ARTICLE failed.', err);
+      }
+    }
   });
 
   app.listen(PORT, () => console.log(`App init: Listening on port ${PORT}!`));
