@@ -17,6 +17,8 @@ import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 
+import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
+
 import { Article } from './database/entities/article';
 
 import { connectionOptions } from './database/connection-options';
@@ -162,8 +164,6 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
     return next(err);
   });
 
-
-
   // Listen for the message to fetch the full article.
   // This happens right after the insert of a new article.
   // Since the crawling of the full article details takes longer...
@@ -186,6 +186,16 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       } catch (err) {
         console.log('FETCH_FULL_ARTICLE failed.', err);
       }
+    }
+
+    if (channel === 'ADD_TO_MAILCHIMP_LIST') {
+      const userEmail = message;
+      await addEmailToMailchimpList(userEmail);
+    }
+
+    if (channel === 'REMOVE_FROM_MAILCHIMP_LIST') {
+      const userEmail = message;
+      await removeEmailToMailchimpList(userEmail);
     }
   });
 

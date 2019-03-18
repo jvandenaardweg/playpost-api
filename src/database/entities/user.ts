@@ -4,7 +4,8 @@ import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { Playlist } from './playlist';
 import { PlaylistItem } from './playlist-item';
-import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
+
+import { redisClientPub } from '../../pubsub';
 
 @Entity()
 export class User {
@@ -56,7 +57,7 @@ export class User {
     // Don't add our integration test account to Mailchimp
     if (!this.email.includes('integrationtest-1337')) {
       console.log('User @AfterInsert()', `Adding "${this.email}" to Mailchimp list.`);
-      await addEmailToMailchimpList(this.email);
+      redisClientPub.publish('ADD_TO_MAILCHIMP_LIST', this.email);
     }
   }
 
@@ -65,7 +66,7 @@ export class User {
     // Do not run for our integration test user
     if (!this.email.includes('integrationtest-1337')) {
       console.log('User @AfterRemove()', `Remove "${this.email}" from Mailchimp list.`);
-      await removeEmailToMailchimpList(this.email);
+      redisClientPub.publish('REMOVE_FROM_MAILCHIMP_LIST', this.email);
     }
   }
 }
