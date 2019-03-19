@@ -41,10 +41,6 @@ export class Article extends BaseEntity {
   authorName: string;
 
   @Column({ nullable: true })
-  @IsUrl()
-  authorUrl: string;
-
-  @Column({ nullable: true })
   categoryName: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
