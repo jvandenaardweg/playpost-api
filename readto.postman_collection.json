@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "bb3cdce1-ac5e-4e30-99fb-9430d1bca04d",
-		"name": "Readto",
+		"name": "readto",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -60,7 +60,7 @@
 								"me"
 							]
 						},
-						"description": "Gets basic account details of the current user."
+						"description": "Gets basic account details of the current user. It excludes the password."
 					},
 					"response": []
 				},
@@ -156,7 +156,7 @@
 					"response": []
 				},
 				{
-					"name": "Get all playlists",
+					"name": "Get all created playlists",
 					"event": [
 						{
 							"listen": "test",
@@ -187,8 +187,8 @@
 						"header": [
 							{
 								"key": "",
-								"value": "",
 								"type": "text",
+								"value": "",
 								"disabled": true
 							}
 						],
@@ -260,6 +260,61 @@
 								"v1",
 								"me",
 								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all created audiofiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/audiofiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"audiofiles"
 							]
 						}
 					},
@@ -535,7 +590,52 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Get all users",
+					"name": "Create a user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						},
+						"description": "Allows a new user to create an account."
+					},
+					"response": []
+				},
+				{
+					"name": "Get all users (admin only)",
 					"event": [
 						{
 							"listen": "test",
@@ -585,51 +685,6 @@
 								"users"
 							]
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a user",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"email\": \"hello@jordyvandenaardweg.nl\",\n\t\"password\": \"demo\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/users",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"users"
-							]
-						},
-						"description": "Allows a new user to create an account."
 					},
 					"response": []
 				},
@@ -808,29 +863,6 @@
 					"response": []
 				},
 				{
-					"name": "Create a default playlist",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/default",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlists",
-								"default"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Create a playlist",
 					"request": {
 						"method": "POST",
@@ -904,6 +936,37 @@
 								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
 								"articles",
 								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to playlist by url",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"articles"
 							]
 						}
 					},
