@@ -232,6 +232,32 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   };
 };
 
+/**
+ * Takes the articleId and crawls the article URL to fetch the full article contents
+ * This is a long running process and is done after the creation of a new article
+ */
+export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
+  let readingTimeInSeconds = null;
+  const articleRepository = getRepository(Article);
+  const article = await articleRepository.findOne(articleId);
+
+  const { ssml, text, html } = await fetchFullArticleContents(article.url);
+
+  if (text) {
+    const { minutes } = readingTime(text);
+    readingTimeInSeconds = (minutes) ? minutes * 60 : null;
+  }
+
+  const updatedArticle = await articleRepository.update(article.id, {
+    ssml,
+    text,
+    html,
+    readingTime: readingTimeInSeconds
+  });
+
+  return updatedArticle;
+};
+
 interface CrawlerResponse {
   message?: string;
   title: string;
