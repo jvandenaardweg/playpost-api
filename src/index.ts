@@ -16,7 +16,6 @@ import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
-import * as crawlersController from './controllers/crawlers';
 
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 
@@ -114,12 +113,6 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
   app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
-
-  app.get('/v1/crawler', articlesController.testCrawler);
-  app.get('/v1/crawler/readability', crawlersController.crawlUsingReadability);
-  app.get('/v1/crawler/mercury', crawlersController.crawlUsingMercury);
-  app.get('/v1/crawler/headlesschrome', crawlersController.crawlUsingHeadlessChrome);
-  app.get('/v1/crawler/apify', crawlersController.crawlUsingApify);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

@@ -3,9 +3,7 @@ import nodeFetch from 'node-fetch';
 import { getRepository, UpdateResult } from 'typeorm';
 import { Translate } from '@google-cloud/translate';
 import got from 'got';
-import readingTime from 'reading-time';
-
-import { trimTextAtWords } from '../utils/string';
+import { URL } from 'url';
 
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
@@ -175,14 +173,6 @@ export const deleteById = async (req: Request, res: Response) => {
   return res.json({ message: 'Article is deleted!' });
 };
 
-export const testCrawler = async (req: Request, res: Response) => {
-  const { url } = req.query;
-
-  const articleDetails = await fastFetchArticleDetails(url);
-  console.log(articleDetails);
-  return res.json(articleDetails);
-}
-
 /**
  * Method to quickly extract basic data from the article
  * Like: title, description, image, author and language
@@ -213,24 +203,32 @@ export const fastFetchArticleDetails = async (articleUrl: string) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: CrawlerResponse = await nodeFetch(
-    `https://europe-west1-medium-audio.cloudfunctions.net/parse_article?url=${articleUrl}`,)
-    .then(response => response.json());
+  const response: ReadtoCrawler.Response = await nodeFetch(`https://readto-crawler.herokuapp.com/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  if (response && response.message) throw new Error(response.message);
+  let ssml = null;
+  let text = null;
+  let html = null;
+  let readingTime = null;
+  let imageUrl = null;
+  let authorName = null;
+  let description = null;
 
-  // Convert to proper paragraphs
-  const preSsml = `<speak><p>${response.text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p></speak>`;
-
-  // Make sure each paragraph ends with a dot
-  const ssmlWithoutParagraphEndings = preSsml.replace(/.<\/p>/g, '</p>'); // First remove the dots, so we don't end up with double dots ".."
-  const ssmlWithParagraphEndsings = ssmlWithoutParagraphEndings.replace(/<\/p>/g, '.</p>'); // Then add a dot before every </p>, like so: ".</p>"
-  const ssml = ssmlWithParagraphEndsings;
+  if (response.ssml) ssml = response.ssml;
+  if (response.cleanText) text = response.cleanText;
+  if (response.html) html = response.html;
+  if (response.readingTimeInSeconds) readingTime = response.readingTimeInSeconds;
+  if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
+  if (response.metadata && response.metadata.author) authorName = response.metadata.author;
+  if (response.description) description = response.description;
 
   return  {
     ssml,
-    text: response.text,
-    html: response.html
+    text,
+    html,
+    readingTime,
+    imageUrl,
+    authorName,
+    description
   };
 };
 
@@ -239,51 +237,20 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
  * This is a long running process and is done after the creation of a new article
  */
 export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
-  let readingTimeInSeconds = null;
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  const { ssml, text, html } = await fetchFullArticleContents(article.url);
-
-  let description = article.description;
-
-  if (text) {
-    const { minutes } = readingTime(text);
-    readingTimeInSeconds = (minutes) ? minutes * 60 : null;
-
-    // Generate a description out of the text,
-    // If the text we got from the full article is bigger then the description we have
-    // Then, trim the words and use the new description taken from the "text"
-    const maxLength = 200; // Max. 200 characters
-    if (text.length > description.length) {
-      description = trimTextAtWords(text, maxLength);
-    }
-  }
+  const { ssml, text, html, readingTime, imageUrl, authorName, description } = await fetchFullArticleContents(article.url);
 
   const updatedArticle = await articleRepository.update(article.id, {
     ssml,
     text,
     html,
+    readingTime,
     description,
-    readingTime: readingTimeInSeconds
+    imageUrl,
+    authorName
   });
 
   return updatedArticle;
 };
-
-interface CrawlerResponse {
-  message?: string;
-  title: string;
-  url: string;
-  text: string;
-  authors: string;
-  article_html: string;
-  html: string;
-  top_image: string;
-  publish_date: string;
-  meta_lang: String;
-  meta_description: string;
-  meta_data: string;
-  canonical_link: string;
-  speech_html: string;
-}

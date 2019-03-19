@@ -15,8 +15,7 @@
       "audioconcat": ["typings/audioconcat"],
       "mp3-duration": ["typings/mp3-duration"],
       "polly-ssml-split": ["typings/polly-ssml-split"],
-      "express-async-errors": ["typings/express-async-errors"],
-      "@postlight/mercury-parser": ["typings/@postlight/mercury-parser"],
+      "express-async-errors": ["typings/express-async-errors"]
     },
     "plugins": [
       { "name": "typescript-tslint-plugin" }
