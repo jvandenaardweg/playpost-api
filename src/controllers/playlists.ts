@@ -143,6 +143,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       url,
       title: articleDetails.title,
       sourceName: articleDetails.hostname,
+      imageUrl: articleDetails.image,
       // ssml: articleDetails.ssml,
       // text: articleDetails.text,
       // html: articleDetails.html,
