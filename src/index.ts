@@ -7,8 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
-import { createConnection, getRepository } from 'typeorm';
-import readingTime from 'reading-time';
+import { createConnection } from 'typeorm';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -19,8 +18,6 @@ import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
-
-import { Article } from './database/entities/article';
 
 import { connectionOptions } from './database/connection-options';
 import { redisClientSub } from './pubsub';
@@ -174,23 +171,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       const articleId = message;
 
       try {
-        let readingTimeInSeconds = null;
-        const articleRepository = getRepository(Article);
-        const article = await articleRepository.findOne(articleId);
-
-        const { ssml, text, html } = await articlesController.fetchFullArticleContents(article.url);
-
-        if (text) {
-          const { minutes } = readingTime(text);
-          readingTimeInSeconds = (minutes) ? minutes * 60 : null;
-        }
-
-        await articleRepository.update(article.id, {
-          ssml,
-          text,
-          html,
-          readingTime: readingTimeInSeconds
-        });
+        await articlesController.updateArticleToFull(articleId);
       } catch (err) {
         console.log('FETCH_FULL_ARTICLE failed.', err);
       }

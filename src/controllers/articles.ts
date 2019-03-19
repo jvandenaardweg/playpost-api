@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
-import { getRepository } from 'typeorm';
+import { getRepository, UpdateResult } from 'typeorm';
 import { Translate } from '@google-cloud/translate';
 import got from 'got';
+import readingTime from 'reading-time';
 
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
