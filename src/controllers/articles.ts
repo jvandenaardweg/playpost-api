@@ -243,15 +243,26 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   const { ssml, text, html } = await fetchFullArticleContents(article.url);
 
+  let description = article.description;
+
   if (text) {
     const { minutes } = readingTime(text);
     readingTimeInSeconds = (minutes) ? minutes * 60 : null;
+
+    // Generate a description out of the text,
+    // If the text we got from the full article is bigger then the description we have
+    // Then, trim the words and use the new description taken from the "text"
+    if (text.length > description.length) {
+      const trimmedText = text.substr(0, 30); // Max. 50 words
+      description = trimmedText.substr(0, Math.min(trimmedText.length, trimmedText.lastIndexOf(' ')));
+    }
   }
 
   const updatedArticle = await articleRepository.update(article.id, {
     ssml,
     text,
     html,
+    description,
     readingTime: readingTimeInSeconds
   });
 
