@@ -3,6 +3,8 @@ import { getRepository, } from 'typeorm';
 import { Audiofile } from '../database/entities/audiofile';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { Article } from '../database/entities/article';
+
+import { updateArticleToFull } from '../controllers/articles';
 import uuid from 'uuid';
 
 export const findById = async (req: Request, res: Response) => {
@@ -19,6 +21,7 @@ export const findById = async (req: Request, res: Response) => {
 };
 
 export const createAudiofile = async (req: Request, res: Response) => {
+  let article = null;
   const userId = req.user.id;
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
@@ -26,9 +29,24 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   if (!articleId) return res.status(400).json({ message: 'Please give a articleId param.' });
 
-  const article: Article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) return res.status(400).json({ message: 'Article does not exist.' });
+
+  // If there is not SSML data, try to generate it on-demand
+  // Usually the SSML data is generated after insertion of an article in the database
+  // But if for some reason that didn't work, try it again here.
+  if (!article.ssml) {
+    try {
+      // Fetch the full article details
+      await updateArticleToFull(articleId);
+
+      // Get the updated article
+      article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+    } catch (err) {
+      return res.status(400).json({ message: 'Could not update the article to include SSML data. We cannot generate an audiofile.' });
+    }
+  }
 
   if (!article.ssml) return res.status(400).json({ message: 'Article has no SSML data. We cannot generate an audiofile.' });
 
