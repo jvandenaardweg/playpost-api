@@ -252,8 +252,9 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     // Generate a description out of the text,
     // If the text we got from the full article is bigger then the description we have
     // Then, trim the words and use the new description taken from the "text"
-    if (text.length > description.length) {
-      const trimmedText = text.substr(0, 30); // Max. 30 words
+    const maxLength = 200; // Max. 200 characters
+    if (text.length > description.length && text.length > maxLength) {
+      const trimmedText = text.substr(0, maxLength);
       description = trimmedText.substr(0, Math.min(trimmedText.length, trimmedText.lastIndexOf(' ')));
     }
   }
