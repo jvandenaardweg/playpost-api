@@ -35,7 +35,7 @@ export class Article extends BaseEntity {
   imageUrl: string;
 
   @Column({ nullable: true })
-  readingTime: number;
+  readingTime: number; // Time in seconds
 
   @Column({ nullable: true })
   authorName: string;
