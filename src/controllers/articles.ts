@@ -5,6 +5,8 @@ import { Translate } from '@google-cloud/translate';
 import got from 'got';
 import readingTime from 'reading-time';
 
+import { trimTextAtWords } from '../utils/string';
+
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { Article } from '../database/entities/article';
@@ -253,9 +255,8 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     // If the text we got from the full article is bigger then the description we have
     // Then, trim the words and use the new description taken from the "text"
     const maxLength = 200; // Max. 200 characters
-    if (text.length > description.length && text.length > maxLength) {
-      const trimmedText = text.substr(0, maxLength);
-      description = trimmedText.substr(0, Math.min(trimmedText.length, trimmedText.lastIndexOf(' ')));
+    if (text.length > description.length) {
+      description = trimTextAtWords(text, maxLength);
     }
   }
 
