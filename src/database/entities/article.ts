@@ -6,6 +6,8 @@ import { PlaylistItem } from './playlist-item';
 
 import { redisClientPub } from '../../pubsub';
 
+import { ColumnNumericTransformer } from '../utils';
+
 @Entity()
 export class Article extends BaseEntity {
 
@@ -34,7 +36,7 @@ export class Article extends BaseEntity {
   @IsUrl()
   imageUrl: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
   readingTime: number; // Time in seconds
 
   @Column({ nullable: true })
