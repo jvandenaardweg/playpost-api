@@ -8,6 +8,7 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection, getRepository } from 'typeorm';
+import readingTime from 'reading-time';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -173,15 +174,22 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       const articleId = message;
 
       try {
+        let readingTimeInSeconds = null;
         const articleRepository = getRepository(Article);
         const article = await articleRepository.findOne(articleId);
 
         const { ssml, text, html } = await articlesController.fetchFullArticleContents(article.url);
 
+        if (text) {
+          const { minutes } = readingTime(text);
+          readingTimeInSeconds = (minutes) ? minutes * 60 : null;
+        }
+
         await articleRepository.update(article.id, {
           ssml,
           text,
-          html
+          html,
+          readingTime: readingTimeInSeconds
         });
       } catch (err) {
         console.log('FETCH_FULL_ARTICLE failed.', err);
