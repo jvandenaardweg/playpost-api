@@ -1,36 +1,27 @@
 import { Request, Response } from 'express';
 import { getRepository, getConnection } from 'typeorm';
-import { User } from '../database/entities/user';
+import { User, userInputValidationSchema } from '../database/entities/user';
 import { validateInput } from '../validators/entity';
 import { hashPassword, routeIsProtected } from './auth';
 import { Playlist } from '../database/entities/playlist';
+import joi from 'joi';
 
-const MESSAGE_USER_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
 const MESSAGE_USER_NOT_FOUND = 'No user found';
 const MESSAGE_USER_DELETED = 'User is deleted! This cannot be undone.';
 const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
 export const createUser = [
-  // routeIsProtected,
-  // [
-  //   check('email').isEmail(),
-  //   check('password').exists()
-  // ],
   async (req: Request, res: Response) => {
-
-  // const errors: ValidationError[] = validationResult(req);
-  // if (!errors.isEmpty()) {
-  //   return res.status(422).json({ errors: errors.array() });
-  // }
-  // TODO: validate email, password
     const { email, password } = req.body;
     const userRepository = getRepository(User);
     const playlistRepository = getRepository(Playlist);
-    // const playlistRepository = getRepository(Playlist);
 
-    if (!email && !password) {
-      return res.status(400).json({ message: MESSAGE_USER_EMAIL_PASSWORD_REQUIRED });
+    const { error } = joi.validate({ email, password }, userInputValidationSchema.requiredKeys('email', 'password'));
+
+    if (error) {
+      const messageDetails = error.details.map(detail => detail.message).join(' and ');
+      return res.status(400).json({ message: messageDetails });
     }
 
     const existingUser = await userRepository.findOne({ email });

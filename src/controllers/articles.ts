@@ -3,12 +3,13 @@ import nodeFetch from 'node-fetch';
 import { getRepository, UpdateResult } from 'typeorm';
 import { Translate } from '@google-cloud/translate';
 import got from 'got';
+import joi from 'joi';
 import { URL } from 'url';
 
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { Article } from '../database/entities/article';
-import { Audiofile } from '../database/entities/audiofile';
+import { Audiofile, audiofileInputValidationSchema } from '../database/entities/audiofile';
 
 const metascraper = require('metascraper')([
   require('metascraper-author')(),
@@ -22,9 +23,6 @@ const metascraper = require('metascraper')([
 
 // Creates a client
 const translate = new Translate(getGoogleCloudCredentials());
-
-const MESSAGE_ARTICLE_URL_REQUIRED = 'URL payload is required.';
-const MESSAGE_ARTICLE_EXISTS = 'Article already exists.';
 
 // export const createArticle = async (req: Request, res: Response) => {
 //   const userId = req.user.id;
@@ -75,6 +73,13 @@ export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
+  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
@@ -90,6 +95,13 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
+  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
@@ -103,7 +115,12 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
 
 export const createAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
-  // const options: SynthesizerOptions = req.body.options;
+  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   // TODO: use options body to overwrite default options
   const defaultSynthesizerOptions = {
@@ -115,8 +132,6 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
 
   const audiofileRepository = getRepository(Audiofile);
   const articleRepository = getRepository(Article);
-
-  if (!articleId) return res.status(400).json({ message: 'The article ID is required.' });
 
   const article = await articleRepository.findOne(articleId);
 
@@ -161,6 +176,13 @@ export const deleteById = async (req: Request, res: Response) => {
   const userEmail = req.user.email;
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
+
+  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 

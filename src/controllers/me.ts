@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import { User } from '../database/entities/user';
+import joi from 'joi';
+import { User, userInputValidationSchema } from '../database/entities/user';
 import { hashPassword } from './auth';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
-const MESSAGE_ME_EMAIL_REQUIRED = 'E-mail address is required.';
-const MESSAGE_ME_PASSWORD_REQUIRED = 'Password is required.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
 
 export const findCurrentUser = async (req: Request, res: Response) => {
@@ -59,7 +58,12 @@ export const updateEmail = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
 
-  if (!email) return res.status(400).json({ message: MESSAGE_ME_EMAIL_REQUIRED });
+  const { error } = joi.validate({ email, userId }, userInputValidationSchema.requiredKeys('email', 'userId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   await userRepository.update(userId, { email });
 
@@ -71,10 +75,14 @@ export const updateEmail = async (req: Request, res: Response) => {
 export const updatePassword = async (req: Request, res: Response) => {
   const { password } = req.body;
   const userId = req.user.id;
-
   const userRepository = getRepository(User);
 
-  if (!password) return res.status(400).json({ message: MESSAGE_ME_PASSWORD_REQUIRED });
+  const { error } = joi.validate({ password, userId }, userInputValidationSchema.requiredKeys('password', 'userId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const hashedPassword = await hashPassword(password);
 
@@ -88,6 +96,13 @@ export const updatePassword = async (req: Request, res: Response) => {
 export const deleteCurrentUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
+
+  const { error } = joi.validate({ userId }, userInputValidationSchema.requiredKeys('userId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const user = await userRepository.findOne(userId);
 

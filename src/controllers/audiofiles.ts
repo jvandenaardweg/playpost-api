@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository, } from 'typeorm';
-import { Audiofile } from '../database/entities/audiofile';
+import joi from 'joi';
+import { Audiofile, audiofileInputValidationSchema } from '../database/entities/audiofile';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { Article } from '../database/entities/article';
 
@@ -10,8 +11,12 @@ import uuid from 'uuid';
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
+  const { error } = joi.validate({ audiofileId }, audiofileInputValidationSchema.requiredKeys('audiofileId'));
 
-  if (!audiofileId) return res.status(400).json({ message: 'Please give an audiofile ID.' });
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 
@@ -27,7 +32,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const articleRepository = getRepository(Article);
   const audiofileRepository = getRepository(Audiofile);
 
-  if (!articleId) return res.status(400).json({ message: 'Please give a articleId param.' });
+  const { error } = joi.validate({ articleId, userId }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
@@ -101,7 +111,12 @@ export const findAudiofileById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
-  if (!audiofileId) return res.status(400).json({ message: 'The audiofile ID is required.' });
+  const { error } = joi.validate({ audiofileId }, audiofileInputValidationSchema.requiredKeys('audiofileId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 

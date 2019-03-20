@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { Playlist } from '../database/entities/playlist';
+import { Playlist, playlistInputValidationSchema } from '../database/entities/playlist';
 import { getRepository } from 'typeorm';
+import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 
@@ -11,7 +12,6 @@ const MESSAGE_PLAYLISTS_NOT_FOUND = 'Playlist does not exist. You should create 
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
 const MESSAGE_PLAYLISTS_DEFAULT_EXISTS = 'There is already a Default playlist for you. We cannot create another one.';
 const MESSAGE_PLAYLISTS_NAME_EXISTS = 'There is already a playlist with this name. We cannot create another one. Choose a different name.';
-const MESSAGE_PLAYLISTS_NAME_REQUIRED = 'A name for a playlist is required.';
 const MESSAGE_PLAYLISTS_ARTICLE_NOT_FOUND = 'Article does not exist';
 const MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST = 'You already have this article in your playlist!';
 
@@ -38,6 +38,13 @@ export const findPlaylistById = async (req: Request, res: Response) => {
   const { playlistId } = req.params;
   const playlistRepository = getRepository(Playlist);
 
+  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const playlist = await playlistRepository.findOne(playlistId, { relations: ['playlistItems', 'user'] });
 
   if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
@@ -57,7 +64,12 @@ export const createPlaylist = async (req: Request, res: Response) => {
   const { name } = req.body;
   const playlistRepository = getRepository(Playlist);
 
-  if (!name) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NAME_REQUIRED });
+  const { error } = joi.validate({ userId, name }, playlistInputValidationSchema.requiredKeys('userId', 'name'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const playlist = await playlistRepository.findOne({ name, user: { id: userId } });
 
@@ -92,6 +104,13 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const playlistItemRepository = getRepository(PlaylistItem);
   const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
+
+  const { error } = joi.validate({ playlistId, articleUrl }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleUrl'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   let createdArticle: Article;
 
@@ -201,6 +220,13 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
   const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
 
+  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const playlist = await playlistRepository.findOne(playlistId, { relations: ['user'] });
 
   if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
@@ -254,6 +280,13 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId, articleId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
+
+  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
 
   const playlistItem = await playlistItemRepository.findOne({
     playlist: {

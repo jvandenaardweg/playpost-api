@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import passport from 'passport';
-import { User } from '../database/entities/user';
+import { User, userInputValidationSchema } from '../database/entities/user';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
+import joi from 'joi';
 
 const { JWT_SECRET } = process.env;
 
-const MESSAGE_AUTH_EMAIL_PASSWORD_REQUIRED = 'No e-mail and or password given.';
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
 
@@ -18,9 +18,11 @@ const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
 export const getAuthenticationToken = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const userRepository = getRepository(User);
+  const { error } = joi.validate({ email, password }, userInputValidationSchema.requiredKeys('email', 'password'));
 
-  if (!email && !password) {
-    return res.status(400).json({ message: MESSAGE_AUTH_EMAIL_PASSWORD_REQUIRED });
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
   }
 
   const user = await userRepository.findOne({ email }, { select: ['id', 'email', 'password'] });

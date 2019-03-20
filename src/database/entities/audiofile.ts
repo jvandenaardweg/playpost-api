@@ -1,10 +1,20 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToOne, Index, AfterRemove } from 'typeorm';
 import { IsUUID } from 'class-validator';
+import joi from 'joi';
 import { Article } from './article';
 import { User } from './user';
 import * as storage from '../../storage/google-cloud';
 
 import { ColumnNumericTransformer } from '../utils';
+
+export const audiofileInputValidationSchema = joi.object().keys({
+  userId: joi.string().uuid(),
+  playlistId: joi.string().uuid(),
+  articleId: joi.string().uuid(),
+  name: joi.string(),
+  articleUrl: joi.string().uri(),
+  audiofileId: joi.string().uuid()
+});
 
 @Entity()
 @Index(['article'])
