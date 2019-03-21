@@ -31,16 +31,19 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   if (!ssml) throw new Error('ssml (string) is not given to synthesizeArticleToAudiofile.');
   if (!audiofileId) throw new Error('audiofileId (string) is not given to synthesizeArticleToAudiofile.');
 
+  const hrstart = process.hrtime();
+
   const synthesizerOptions: SynthesizerOptions = {
     synthesizer: 'Google', // or Amazon
     languageCode: 'en-US', // or en-GB, en-AU
-    name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A
+    name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
     encoding: 'mp3'
   };
 
+  // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml);
 
-  // Send the SSML parts to Google's Text to Speech API and download the audio files
+  // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
   const localAudiofilePaths = await googleSsmlPartsToSpeech(
     ssmlParts,
     article,
@@ -49,16 +52,16 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
     storageUploadPath
   );
 
-  // Combine multiple audiofiles into one
+  // Step 3: Combine multiple audiofiles into one
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
     localAudiofilePaths,
     storageUploadPath
   );
 
-  // Get the length of the audiofile
+  // Step 4: Get the length of the audiofile
   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
-  // Upload the one mp3 file to Google Cloud Storage
+  // Step 5: Upload the one mp3 file to Google Cloud Storage
   const uploadResponse = await storage.uploadFile(
     concatinatedLocalAudiofilePath,
     storageUploadPath,
@@ -68,12 +71,13 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
     audiofileLength
   );
 
-  // Delete the local file, we don't need it anymore
+  // Step 6: Delete the local file, we don't need it anymore
   await fsExtra.remove(`${appRootPath}/temp/${articleId}`);
 
-  // Create a publicfile URL our users can use
+  // Step 7: Create a publicfile URL our users can use
   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
 
+  // Step 8: Return the audiofile properties needed for database insertion
   audiofile.url = publicFileUrl;
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
@@ -83,38 +87,9 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   audiofile.voice = synthesizerOptions.name;
   audiofile.synthesizer = synthesizerOptions.synthesizer;
 
+  const hrend = process.hrtime(hrstart);
+  console.info('Execution time (hr) of synthesizeArticleToAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+
   // Return the audiofile with the correct properties, so it can be saved in the database
   return audiofile;
 };
-
-// export const ssmlPartsToSpeech = (articleId: string, ssmlParts: string[], synthesizerOptions: SynthesizerOptions, storageUploadPath: string): Promise<string[]> => {
-//   const { synthesizer } = synthesizerOptions;
-//   const availableSynthesizers = ['Google', 'AWS'];
-
-//   if (!articleId || typeof articleId !== 'string') throw new Error('articleId (string) is not given to ssmlPartsToSpeech.');
-//   if (!ssmlParts || !ssmlParts.length) throw new Error('ssmlParts (array) is not given to ssmlPartsToSpeech.');
-//   if (!synthesizerOptions) throw new Error('synthesizerOptions is not given to ssmlPartsToSpeech.');
-//   if (!storageUploadPath) throw new Error('storageUploadPath is not given to ssmlPartsToSpeech.');
-
-//   if (!availableSynthesizers.includes(synthesizer)) {
-//     throw new Error(`Synthesizer option ${synthesizer} is not available. Please use: ${availableSynthesizers.join(' or ')}`);
-//   }
-
-//   console.log(`Using synthesizer "${synthesizer}".`);
-
-//   const ssmlParts = utils.ssml.getSSMLParts(ssml);
-
-//   // Send the SSML parts to Google's Text to Speech API and download the audio files
-//   const localAudiofilePaths = await ssmlPartsToSpeech(
-//     articleId,
-//     ssmlParts,
-//     synthesizerOptions,
-//     storageUploadPath
-//   );
-
-//   if (synthesizer === 'Google') {
-//     return googleSsmlPartsToSpeech(articleId, ssmlParts, synthesizerOptions, storageUploadPath);
-//   }
-
-//   return awsSsmlPartsToSpeech(articleId, ssmlParts, synthesizerOptions, storageUploadPath);
-// };
