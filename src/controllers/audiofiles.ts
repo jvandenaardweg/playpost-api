@@ -26,6 +26,8 @@ export const findById = async (req: Request, res: Response) => {
 };
 
 export const createAudiofile = async (req: Request, res: Response) => {
+  const hrstart = process.hrtime();
+
   let article = null;
   const userId = req.user.id;
   const { articleId } = req.params;
@@ -85,6 +87,9 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
 
   console.log('Created audiofile: ', createdAudiofile);
+
+  const hrend = process.hrtime(hrstart);
+  console.info('Execution time (hr) of createAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);
 
   return res.json(createdAudiofile);
 };
