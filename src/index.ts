@@ -22,14 +22,15 @@ import * as catchAllController from './controllers/catch-all';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 
 import { connectionOptions } from './database/connection-options';
-import { expressRateLimitRedisStore, expressBruteRedisStore, redisClientSub } from './cache';
+import { expressRateLimitRedisStore, redisClientSub } from './cache';
 
 /* eslint-disable no-console */
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
-const bruteforce = new ExpressBrute(expressBruteRedisStore, {
+const bruteStore = new ExpressBrute.MemoryStore();
+const bruteforce = new ExpressBrute(bruteStore, {
   freeRetries: 3,
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
@@ -100,6 +101,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   // Public
   // Use expressBrute to increase the delay between each requests
   app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
+  app.post('/v1/auth', authController.getAuthenticationToken);
   app.post('/v1/users', usersController.createUser);
 
   // Protected
