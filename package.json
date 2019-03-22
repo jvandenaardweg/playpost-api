@@ -90,6 +90,7 @@
     "pg": "^7.8.1",
     "polly-ssml-split": "^0.1.0",
     "rate-limit-redis": "^1.6.0",
+    "readability": "^0.1.0",
     "reflect-metadata": "^0.1.13",
     "response-time": "^2.3.2",
     "typeorm": "^0.2.14",
