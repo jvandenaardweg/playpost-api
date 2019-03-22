@@ -6,7 +6,7 @@ import RateLimitRedis from 'rate-limit-redis';
 const redisClient = new IORedis(process.env.REDIS_URL);
 const redisClientPub = new IORedis(process.env.REDIS_URL);
 const redisClientSub = new IORedis(process.env.REDIS_URL);
-const expressBruteRedisStore = new ExpressBruteRedis({ url: process.env.REDIS_URL, prefix: 'express-brute:' });
+const expressBruteRedisStore = new ExpressBruteRedis({ url: process.env.REDIS_URL, port: null, host: null, prefix: 'express-brute:' });
 const expressRateLimitRedisStore = new RateLimitRedis({
   client: redisClient
 });
