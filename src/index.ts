@@ -8,6 +8,7 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection } from 'typeorm';
+import expressRateLimit from 'express-rate-limit';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -27,10 +28,11 @@ import { redisClientSub } from './pubsub';
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
-// const apiLimiter = expressRateLimit({
-//   windowMs: 1 * 60 * 1000, // 1 minute
-//   max: 60 // 60 requests allowed per minute
-// });
+const rateLimiter = expressRateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // 60 requests allowed per minute, 1 per second
+  message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
+});
 
 console.log('App init:', 'Connecting with database...', 'Using options:');
 console.log(connectionOptions);
@@ -47,6 +49,8 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   app.use(helmet.noCache());  // https://helmetjs.github.io/docs/nocache/
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
+
+  app.use(rateLimiter);
 
   app.use(responseTime());
   app.use(compression());
