@@ -37,8 +37,6 @@ const bruteforce = new ExpressBrute(expressBruteRedisStore, {
   handleStoreError: (err) => console.log(err)
 });
 
-console.log(bruteforce.store)
-
 const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
