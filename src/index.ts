@@ -8,7 +8,8 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
 import { createConnection } from 'typeorm';
-import expressRateLimit from 'express-rate-limit';
+import ExpressRateLimit from 'express-rate-limit';
+import ExpressBrute from 'express-brute';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -21,14 +22,22 @@ import * as catchAllController from './controllers/catch-all';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 
 import { connectionOptions } from './database/connection-options';
-import { redisClientSub } from './pubsub';
+import { expressRateLimitRedisStore, expressBruteRedisStore, redisClientSub } from './cache';
 
 /* eslint-disable no-console */
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
-const rateLimiter = expressRateLimit({
+const bruteforce = new ExpressBrute(expressBruteRedisStore, {
+  freeRetries: 3,
+  failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
+    return res.json({ message: `Hold your horses! Too many failed logins. Please try again later at: ${nextValidRequestDate}` });
+  }
+});
+
+const rateLimiter = new ExpressRateLimit({
+  store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 60, // 60 requests allowed per minute, 1 per second
   message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
@@ -86,7 +95,8 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   // API Endpoints
 
   // Public
-  app.post('/v1/auth', authController.getAuthenticationToken);
+  // Use expressBrute to increase the delay between each requests
+  app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
   app.post('/v1/users', usersController.createUser);
 
   // Protected
@@ -97,6 +107,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
+  // app.get('/v1/me/logout', IS_PROTECTED, meController.logout);
   app.get('/v1/me/playlists', IS_PROTECTED, meController.findAllPlaylists);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
   app.get('/v1/me/audiofiles', IS_PROTECTED, meController.findAllAudiofiles);

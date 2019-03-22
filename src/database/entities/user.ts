@@ -7,7 +7,7 @@ import { Audiofile } from './audiofile';
 import { Playlist } from './playlist';
 import { PlaylistItem } from './playlist-item';
 
-import { redisClientPub } from '../../pubsub';
+import { redisClientPub } from '../../cache';
 
 export const userInputValidationSchema = joi.object().keys({
   id: joi.string().uuid(),

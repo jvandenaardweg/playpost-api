@@ -5,7 +5,7 @@ import { User } from './user';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
-import { redisClientPub } from '../../pubsub';
+import { redisClientPub } from '../../cache';
 
 import { ColumnNumericTransformer } from '../utils';
 

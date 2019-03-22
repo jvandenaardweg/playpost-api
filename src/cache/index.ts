@@ -1,8 +1,15 @@
 require('dotenv').config();
-import ioredis from 'ioredis';
+import IORedis from 'ioredis';
+import ExpressBruteRedis from 'express-brute-redis';
+import RateLimitRedis from 'rate-limit-redis';
 
-const redisClientPub = new ioredis(process.env.REDIS_URL);
-const redisClientSub = new ioredis(process.env.REDIS_URL);
+const redisClient = new IORedis(process.env.REDIS_URL);
+const redisClientPub = new IORedis(process.env.REDIS_URL);
+const redisClientSub = new IORedis(process.env.REDIS_URL);
+const expressBruteRedisStore = new ExpressBruteRedis({ url: process.env.REDIS_URL });
+const expressRateLimitRedisStore = new RateLimitRedis({
+  client: redisClient
+});
 
 // Subscriber client, listening for messages
 redisClientSub.on('ready', () => {
@@ -45,4 +52,4 @@ redisClientPub.on('end', () => {
   console.log('Redis Client Pub:', 'End.');
 });
 
-export { redisClientSub, redisClientPub };
+export { redisClientSub, redisClientPub, redisClient, expressBruteRedisStore, expressRateLimitRedisStore };

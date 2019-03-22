@@ -3,6 +3,7 @@
   "rules": {
     "comma-dangle": "off",
     "trailing-comma": false,
-    "max-line-length": [true, 200]
+    "max-line-length": [true, 200],
+    "import-name": false
   }
 }
