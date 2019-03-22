@@ -33,8 +33,11 @@ const bruteforce = new ExpressBrute(expressBruteRedisStore, {
   freeRetries: 3,
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
-  }
+  },
+  handleStoreError: (err) => console.log(err)
 });
+
+console.log(bruteforce.store)
 
 const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
