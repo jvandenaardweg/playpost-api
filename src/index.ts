@@ -89,7 +89,9 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   require('./config/passport')(passport);
 
   // Make express allow JSON payload bodies
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({
+    limit: '10kb' // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
+  }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // API Endpoints
