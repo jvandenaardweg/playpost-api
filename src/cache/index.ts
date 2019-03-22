@@ -11,6 +11,8 @@ const expressRateLimitRedisStore = new RateLimitRedis({
   client: redisClient
 });
 
+console.log('expressBruteRedisStore', expressBruteRedisStore);
+
 // Subscriber client, listening for messages
 redisClientSub.on('ready', () => {
   console.log('Redis Client Sub:', 'Connection successful!');
