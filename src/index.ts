@@ -40,8 +40,15 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
   console.log('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
-  app.use(responseTime());
+
+  // Hardening our server using Helmet
   app.use(helmet());
+  app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"], styleSrc: ["'self'"] } })); // https://helmetjs.github.io/docs/csp/
+  app.use(helmet.noCache());  // https://helmetjs.github.io/docs/nocache/
+  app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
+  app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
+
+  app.use(responseTime());
   app.use(compression());
 
   if (process.env.NODE_ENV === 'production') {
