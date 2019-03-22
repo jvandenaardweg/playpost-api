@@ -22,6 +22,8 @@ export type SynthesizerOptions = {
  * It will return an audiofile object ready to be saved in the database.
  */
 export const synthesizeArticleToAudiofile = async (article: Article, audiofile: Audiofile): Promise<Audiofile> => {
+  const hrstart = process.hrtime();
+
   const articleId = article.id;
   const ssml = article.ssml;
   const audiofileId = audiofile.id;
@@ -30,8 +32,6 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   if (!articleId || typeof articleId !== 'string') throw new Error('articleId (string) is not given to synthesizeArticleToAudiofile.');
   if (!ssml) throw new Error('ssml (string) is not given to synthesizeArticleToAudiofile.');
   if (!audiofileId) throw new Error('audiofileId (string) is not given to synthesizeArticleToAudiofile.');
-
-  const hrstart = process.hrtime();
 
   const synthesizerOptions: SynthesizerOptions = {
     synthesizer: 'Google', // or Amazon

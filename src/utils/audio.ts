@@ -26,6 +26,8 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
  */
 export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
+    const hrstart = process.hrtime();
+
     if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
 
     const tempPath = `${appRootPath}/temp`;
@@ -45,12 +47,11 @@ export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: 
     .outputOptions('-acodec copy')
     .save(outputPath)
     .on('error', (err: any) => reject(err))
-    .on('end', () => resolve(outputPath));
-
-      // return audioconcat(audioFiles)
-      //   .concat(outputPath)
-      //   .on('error', (err: any) => reject(new Error(err)))
-      //   .on('end', () => resolve(outputPath));
+    .on('end', () => {
+      const hrend = process.hrtime(hrstart);
+      console.info('Execution time (hr) of concatAudioFiles(): %ds %dms', hrend[0], hrend[1] / 1000000);
+      return resolve(outputPath);
+    });
   });
 
 };

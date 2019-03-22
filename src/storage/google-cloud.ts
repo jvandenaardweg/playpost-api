@@ -31,6 +31,8 @@ export const uploadFile = async (
   audiofile: Audiofile,
   audiofileLength: number
 ) => {
+  const hrstart = process.hrtime();
+
   console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
   try {
@@ -66,6 +68,9 @@ export const uploadFile = async (
     console.log('Google Cloud Storage: Failed to upload.');
     console.error(err);
     throw new Error(err);
+  } finally {
+    const hrend = process.hrtime(hrstart);
+    console.info('Execution time (hr) of uploadFile(): %ds %dms', hrend[0], hrend[1] / 1000000);
   }
 };
 
