@@ -14,6 +14,12 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
     extra: {
       ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
     },
+    // cache: {
+    //   type: 'ioredis',
+    //   options: {
+    //     url: process.env.REDIS_URL
+    //   }
+    // },
     logging: (process.env.NODE_ENV === 'production') ? ['error'] : true, // Complete logging in dev, only errors in production
     synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
     entities: [

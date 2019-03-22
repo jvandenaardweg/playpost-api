@@ -1,6 +1,6 @@
 require('dotenv').config();
 import IORedis from 'ioredis';
-import ExpressBruteRedis from 'express-brute-redis';
+// import ExpressBruteRedis from 'express-brute-redis';
 import RateLimitRedis from 'rate-limit-redis';
 
 const redisClient = new IORedis(process.env.REDIS_URL);
