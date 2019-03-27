@@ -1,74 +1,11 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
 import { getRepository, UpdateResult } from 'typeorm';
-import { Translate } from '@google-cloud/translate';
-import got from 'got';
 import joi from 'joi';
-import { URL } from 'url';
-
-import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
 import { audiofileInputValidationSchema } from '../database/validators';
-
-const metascraper = require('metascraper')([
-  require('metascraper-author')(),
-  require('metascraper-description')(),
-  require('metascraper-image')(),
-  require('metascraper-publisher')(),
-  require('metascraper-title')(),
-  require('metascraper-url')(),
-  require('metascraper-readability')()
-]);
-
-// Creates a client
-const translate = new Translate(getGoogleCloudCredentials());
-
-// export const createArticle = async (req: Request, res: Response) => {
-//   const userId = req.user.id;
-//   const { url } = req.body;
-//   const articleRepository = getRepository(Article);
-
-//   if (!url) return res.status(400).json({ message: MESSAGE_ARTICLE_URL_REQUIRED });
-
-//   // TODO: sanitize url
-
-//   const article = await articleRepository.find({ url, canonicalUrl: url });
-
-//   if (article) return res.status(400).json({ message: MESSAGE_ARTICLE_EXISTS });
-
-//   // TODO: use better crawler, for dev purposes this is now fine
-
-//   // Crawl the URL to extract the article data
-//   const articleDetails = await fetchArticleDetails(url);
-
-//   if (articleDetails.language !== 'eng') {
-//     return res.status(400).json({
-//       message: `The language of the Article '${articleDetails.language}' is currently not supported. Please only add English articles.`,
-//     });
-//   }
-
-//   const articleToCreate = await articleRepository.create({
-//     url: articleDetails.url,
-//     title: articleDetails.title,
-//     sourceName: articleDetails.sourceName,
-//     ssml: articleDetails.ssml,
-//     text: articleDetails.text,
-//     html: articleDetails.html,
-//     description: articleDetails.description,
-//     authorName: articleDetails.authorName,
-//     languageCode: 'en', // TODO: make dynamic
-//     user: {
-//       id: userId
-//     }
-//   });
-
-//   const createdArticle = await articleRepository.save(articleToCreate);
-
-//   // Create an article with preview data: url, title, description, language and sourceName
-//   return res.json(createdArticle);
-// };
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -194,35 +131,6 @@ export const deleteById = async (req: Request, res: Response) => {
   await articleRepository.remove(article);
 
   return res.json({ message: 'Article is deleted!' });
-};
-
-/**
- * Method to quickly extract basic data from the article
- * Like: title, description, image, author and language
- * This data can be extracted without parsing the whole page
- */
-export const fastFetchArticleDetails = async (articleUrl: string) => {
-  const response = await got(articleUrl, {
-    followRedirect: true,
-    headers: {
-      'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-    }
-  });
-
-  const metadata = await metascraper({ url: response.url, html: response.body });
-
-  const hostname = new URL(articleUrl).hostname;
-
-  // Detect language using Google Translate API
-  const textToDetectLanguage = (metadata.description.length > metadata.title.length) ? metadata.description : metadata.title;
-  const detections = await translate.detect(textToDetectLanguage);
-  const language = detections[0].language;
-
-  return {
-    hostname,
-    language,
-    ...metadata
-  };
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {

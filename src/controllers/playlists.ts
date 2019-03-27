@@ -126,22 +126,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // Check if the user is the owner of that playlist
   if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
-  // Fetch the article details from the article URL
-  // Important: this is doing a request to the URL
-  const articleDetails = await fastFetchArticleDetails(articleUrl);
-
-  if (!articleDetails) return res.status(400).json({ message: 'Could not get the basic article details.' });
-
-  if (articleDetails.language !== 'en') {
-    return res.status(400).json({
-      message: `The language "${articleDetails.language}" of the Article "${articleUrl}" is currently not supported. Please only add English articles.`
-    });
-  }
-
-  // Use the URL of the fastFetchArticleDetails, because it includes the canonical
-  // Important: "articleUrl" and "articleDetails.url" could be different, but it should point the the same article.
-  const url = (articleDetails.url) ? articleDetails.url : articleUrl;
-
   // Find the article by "url" OR "canonicalUrl"
   const article = await articleRepository.findOne({
     where: [
