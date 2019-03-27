@@ -10,6 +10,7 @@ import { ArticleStatus } from 'database/entities/article';
 redisClientSub.on('message', async (channel, message) => {
   if (channel === 'FETCH_FULL_ARTICLE') {
     const articleId = message;
+    console.log('Worker process started: ', channel, articleId);
 
     try {
       await articlesController.updateArticleStatus(articleId, ArticleStatus.CRAWLING);
@@ -17,27 +18,35 @@ redisClientSub.on('message', async (channel, message) => {
     } catch (err) {
       console.log('FETCH_FULL_ARTICLE failed.', err);
       await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
+    } finally {
+      console.log('Worker process ended: ', channel, articleId);
     }
   }
 
   if (channel === 'ADD_TO_MAILCHIMP_LIST') {
     const userEmail = message;
+    console.log('Worker process started: ', channel, userEmail);
 
     try {
       await addEmailToMailchimpList(userEmail);
     } catch (err) {
       console.log('ADD_TO_MAILCHIMP_LIST failed.', err);
+    } finally {
+      console.log('Worker process ended: ', channel, userEmail);
     }
 
   }
 
   if (channel === 'REMOVE_FROM_MAILCHIMP_LIST') {
     const userEmail = message;
+    console.log('Worker process started: ', channel, userEmail);
 
     try {
       await removeEmailToMailchimpList(userEmail);
     } catch (err) {
       console.log('REMOVE_FROM_MAILCHIMP_LIST failed.', err);
+    } finally {
+      console.log('Worker process ended: ', channel, userEmail);
     }
   }
 });
