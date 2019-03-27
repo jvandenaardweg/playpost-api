@@ -145,6 +145,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   let description = null;
   let currentUrl = null;
   let language = null;
+  let title = null;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -155,6 +156,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.description) description = response.description;
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
+  if (response.title) title = response.title;
 
   return  {
     ssml,
@@ -165,7 +167,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     authorName,
     description,
     currentUrl,
-    language
+    language,
+    title
   };
 };
 
@@ -185,9 +188,10 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language } = await fetchFullArticleContents(article.url);
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title } = await fetchFullArticleContents(article.url);
 
   const updatedArticle = await articleRepository.update(article.id, {
+    title,
     ssml,
     text,
     html,
