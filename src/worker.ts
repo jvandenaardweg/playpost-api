@@ -1,7 +1,7 @@
 import { redisClientSub } from './cache';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 import * as articlesController from './controllers/articles';
-import { ArticleStatus } from 'database/entities/article';
+import { ArticleStatus } from './database/entities/article';
 
 // Listen for the message to fetch the full article.
 // This happens right after the insert of a new article.
