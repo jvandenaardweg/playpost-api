@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import joi from 'joi';
-import { User, userInputValidationSchema } from '../database/entities/user';
+import { User } from '../database/entities/user';
+import { userInputValidationSchema } from '../database/validators';
 import { hashPassword } from './auth';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';

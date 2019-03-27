@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { getRepository, } from 'typeorm';
 import joi from 'joi';
-import { Audiofile, audiofileInputValidationSchema } from '../database/entities/audiofile';
+import { Audiofile } from '../database/entities/audiofile';
+import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { Article } from '../database/entities/article';
 

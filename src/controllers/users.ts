@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository, getConnection } from 'typeorm';
-import { User, userInputValidationSchema } from '../database/entities/user';
+import { User } from '../database/entities/user';
+import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
 import { hashPassword, routeIsProtected } from './auth';
 import { Playlist } from '../database/entities/playlist';

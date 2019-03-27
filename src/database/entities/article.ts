@@ -1,6 +1,5 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
-import joi from 'joi';
 import { User } from './user';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
@@ -8,10 +7,6 @@ import { PlaylistItem } from './playlist-item';
 import { redisClientPub } from '../../cache';
 
 import { ColumnNumericTransformer } from '../utils';
-
-export const articleInputValidationSchema = joi.object().keys({
-  articleUrl: joi.string().uri()
-});
 
 export enum ArticleStatus {
   CRAWLING = 'crawling',

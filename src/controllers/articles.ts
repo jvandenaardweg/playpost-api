@@ -9,7 +9,8 @@ import { URL } from 'url';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { Article, ArticleStatus } from '../database/entities/article';
-import { Audiofile, audiofileInputValidationSchema } from '../database/entities/audiofile';
+import { Audiofile } from '../database/entities/audiofile';
+import { audiofileInputValidationSchema } from '../database/validators';
 
 const metascraper = require('metascraper')([
   require('metascraper-author')(),

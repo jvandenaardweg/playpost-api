@@ -1,16 +1,7 @@
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, JoinColumn, OneToMany, Unique } from 'typeorm';
 import { IsUUID } from 'class-validator';
-import joi from 'joi';
 import { User } from './user';
 import { PlaylistItem } from './playlist-item';
-
-export const playlistInputValidationSchema = joi.object().keys({
-  userId: joi.string().uuid(),
-  playlistId: joi.string().uuid(),
-  articleId: joi.string().uuid(),
-  name: joi.string(),
-  articleUrl: joi.string().uri()
-});
 
 @Entity()
 @Unique(['name', 'user']) // Don't allow playlist with the same name for the same user

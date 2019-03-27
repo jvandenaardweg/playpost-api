@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { Playlist, playlistInputValidationSchema } from '../database/entities/playlist';
+import { Playlist } from '../database/entities/playlist';
+import { playlistInputValidationSchema } from '../database/validators';
 import { getRepository } from 'typeorm';
 import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';

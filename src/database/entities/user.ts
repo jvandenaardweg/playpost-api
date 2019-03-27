@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove, getRepository } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
-import joi from 'joi';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
@@ -8,13 +7,6 @@ import { Playlist } from './playlist';
 import { PlaylistItem } from './playlist-item';
 
 import { redisClientPub } from '../../cache';
-
-export const userInputValidationSchema = joi.object().keys({
-  id: joi.string().uuid(),
-  userId: joi.string().uuid(),
-  email: joi.string().email({ minDomainAtoms: 2 }),
-  password: joi.string(),
-});
 
 @Entity()
 export class User {

@@ -29,7 +29,8 @@
     "typeorm:schema:sync": "typeorm schema:sync",
     "typeorm:migration:revert": "typeorm migration:revert",
     "typeorm:migration:run": "typeorm migration:run",
-    "upgrade-interactive": "npm-check --update"
+    "upgrade-interactive": "npm-check --update",
+    "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync"
   },
   "repository": {
     "type": "git",

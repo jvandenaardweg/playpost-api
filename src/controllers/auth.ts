@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import passport from 'passport';
-import { User, userInputValidationSchema } from '../database/entities/user';
+import { User } from '../database/entities/user';
+import { userInputValidationSchema } from '../database/validators';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
 import joi from 'joi';
