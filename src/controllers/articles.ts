@@ -8,7 +8,7 @@ import { URL } from 'url';
 
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
-import { Article } from '../database/entities/article';
+import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile, audiofileInputValidationSchema } from '../database/entities/audiofile';
 
 const metascraper = require('metascraper')([
@@ -257,6 +257,14 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   };
 };
 
+export const updateArticleStatus = async (articleId: string, status: ArticleStatus) => {
+  const articleRepository = getRepository(Article);
+  const article = await articleRepository.findOne(articleId);
+
+  const updatedArticle = await articleRepository.update(article.id, { status });
+
+  return updatedArticle;
+}
 /**
  * Takes the articleId and crawls the article URL to fetch the full article contents
  * This is a long running process and is done after the creation of a new article
@@ -275,7 +283,8 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     description,
     imageUrl,
     authorName,
-    canonicalUrl: currentUrl // We add a canonicalUrl, this one could be different than "url", but should point to the same article
+    canonicalUrl: currentUrl, // We add a canonicalUrl, this one could be different than "url", but should point to the same article
+    status: ArticleStatus.FINISHED
   });
 
   return updatedArticle;

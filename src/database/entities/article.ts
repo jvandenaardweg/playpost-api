@@ -13,6 +13,13 @@ export const articleInputValidationSchema = joi.object().keys({
   articleUrl: joi.string().uri()
 });
 
+export enum ArticleStatus {
+  CRAWLING = 'crawling',
+  NEW = 'new',
+  FINISHED = 'finished',
+  FAILED = 'failed'
+}
+
 @Entity()
 export class Article extends BaseEntity {
 
@@ -34,6 +41,9 @@ export class Article extends BaseEntity {
   @Column({ unique: true, nullable: true })
   @IsUrl()
   canonicalUrl: string;
+
+  @Column({ type: 'enum', enum: ArticleStatus, default: ArticleStatus.NEW })
+  status: ArticleStatus;
 
   @Column()
   languageCode: string;

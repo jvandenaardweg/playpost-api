@@ -1,6 +1,7 @@
 import { redisClientSub } from './cache';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 import * as articlesController from './controllers/articles';
+import { ArticleStatus } from 'database/entities/article';
 
 // Listen for the message to fetch the full article.
 // This happens right after the insert of a new article.
@@ -11,9 +12,11 @@ redisClientSub.on('message', async (channel, message) => {
     const articleId = message;
 
     try {
+      await articlesController.updateArticleStatus(articleId, ArticleStatus.CRAWLING);
       await articlesController.updateArticleToFull(articleId);
     } catch (err) {
       console.log('FETCH_FULL_ARTICLE failed.', err);
+      await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
     }
   }
 
