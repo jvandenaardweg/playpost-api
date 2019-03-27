@@ -22,10 +22,10 @@ export class Article extends BaseEntity {
   @IsUUID()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @Column({ unique: true })
@@ -40,10 +40,10 @@ export class Article extends BaseEntity {
   @Column({ type: 'enum', enum: ArticleStatus, default: ArticleStatus.NEW })
   status: ArticleStatus;
 
-  @Column()
+  @Column({ nullable: true })
   languageCode: string;
 
-  @Column()
+  @Column({ nullable: true })
   sourceName: string;
 
   // Not required
