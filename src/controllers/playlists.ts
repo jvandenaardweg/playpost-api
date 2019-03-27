@@ -6,7 +6,7 @@ import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 
-import { fastFetchArticleDetails } from './articles';
+import { getNormalizedUrl } from '../utils/string';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS = 'You do not have access to this endpoint.';
 const MESSAGE_PLAYLISTS_NOT_FOUND = 'Playlist does not exist. You should create one first.';
@@ -100,7 +100,7 @@ export const putPlaylists = async (req: Request, res: Response) => {
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId } = req.params;
-  const { articleUrl } = req.body; // TODO: normalize articleUrl
+  const { articleUrl } = req.body;
 
   const playlistItemRepository = getRepository(PlaylistItem);
   const playlistRepository = getRepository(Playlist);
@@ -114,6 +114,9 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   }
 
   let createdArticle: Article;
+
+  // Normalize the URL
+  const normalizedUrl = getNormalizedUrl(articleUrl);
 
   // Get the playlist to check if it exists
   const playlist = await playlistRepository.findOne(playlistId, { relations: ['user'] });
@@ -142,8 +145,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // Find the article by "url" OR "canonicalUrl"
   const article = await articleRepository.findOne({
     where: [
-      { url },
-      { canonicalUrl: url }
+      { url: normalizedUrl },
+      { canonicalUrl: normalizedUrl }
     ]
   });
 
@@ -164,16 +167,11 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
   }
 
-  // If we do not have an article yet, fetch the basic details and add it to the database
+  // If we do not have an article yet, create one in the database...
+  // ...so our crawler tries to fetch the article in the background
   if (!article) {
     const articleToCreate = await articleRepository.create({
-      url,
-      title: articleDetails.title,
-      sourceName: articleDetails.hostname,
-      imageUrl: articleDetails.image,
-      description: articleDetails.description,
-      authorName: articleDetails.author,
-      languageCode: articleDetails.language,
+      url: normalizedUrl,
       user: {
         id: userId
       }
