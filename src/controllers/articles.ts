@@ -234,6 +234,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   let imageUrl = null;
   let authorName = null;
   let description = null;
+  let currentUrl = null;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -242,6 +243,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
   if (response.metadata && response.metadata.author) authorName = response.metadata.author;
   if (response.description) description = response.description;
+  if (response.currentUrl) currentUrl = response.currentUrl;
 
   return  {
     ssml,
@@ -250,7 +252,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     readingTime,
     imageUrl,
     authorName,
-    description
+    description,
+    currentUrl
   };
 };
 
@@ -262,7 +265,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description } = await fetchFullArticleContents(article.url);
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl } = await fetchFullArticleContents(article.url);
 
   const updatedArticle = await articleRepository.update(article.id, {
     ssml,
@@ -271,7 +274,8 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     readingTime,
     description,
     imageUrl,
-    authorName
+    authorName,
+    canonicalUrl: currentUrl // We add a canonicalUrl, this one could be different than "url", but should point to the same article
   });
 
   return updatedArticle;

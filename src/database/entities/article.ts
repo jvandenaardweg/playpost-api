@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany, getRepository } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
 import joi from 'joi';
 import { User } from './user';
@@ -29,6 +29,11 @@ export class Article extends BaseEntity {
   @Column({ unique: true })
   @IsUrl()
   url: string;
+
+  // The "canonicalUrl" is filled in after we crawl the page. We could get redirects. The URL we end up is the "canonicalUrl", which could be different then "url".
+  @Column({ unique: true, nullable: true })
+  @IsUrl()
+  canonicalUrl: string;
 
   @Column()
   languageCode: string;

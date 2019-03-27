@@ -137,7 +137,14 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // Use the URL of the fastFetchArticleDetails, because it includes the canonical
   // Important: "articleUrl" and "articleDetails.url" could be different, but it should point the the same article.
   const url = (articleDetails.url) ? articleDetails.url : articleUrl;
-  const article = await articleRepository.findOne({ url });
+
+  // Find the article by "url" OR "canonicalUrl"
+  const article = await articleRepository.findOne({
+    where: [
+      { url },
+      { canonicalUrl: url }
+    ]
+  });
 
   // If there's an article, check if that one already exists in the user's playlist
   if (article) {
@@ -163,9 +170,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       title: articleDetails.title,
       sourceName: articleDetails.hostname,
       imageUrl: articleDetails.image,
-      // ssml: articleDetails.ssml,
-      // text: articleDetails.text,
-      // html: articleDetails.html,
       description: articleDetails.description,
       authorName: articleDetails.author,
       languageCode: articleDetails.language,
@@ -179,18 +183,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   // The found article ID or the newly created article ID
   const articleId = (article) ? article.id : createdArticle.id;
-
-  // Create the playlist item
-  // const playlistItem = await playlistItemRepository.findOne({
-  //   article: {
-  //     id: articleId
-  //   },
-  //   playlist: {
-  //     id: playlistId
-  //   }
-  // });
-
-  // if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
 
   // TODO: Set correct "order"
   const playlistItemToCreate = await playlistItemRepository.create({
