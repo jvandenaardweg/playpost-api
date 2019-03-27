@@ -2,20 +2,20 @@ declare namespace ReadtoCrawler {
 
   export interface Response {
     title: string | null;
-    byline: string | null;
-    dir: string | null;
-    content: string | null;
-    textContent: string | null;
-    length: number | null;
-    excerpt: string | null;
+    url: string;
+    currentUrl: string;
+    hostName: string | null;
     siteName: string | null;
+    readingTimeInSeconds: number | null;
+    metadata: Metadata;
+    description: string | null;
+    excerpt: string | null;
+    length: number | null;
     cleanText: string | null;
     ssml: string | null;
-    metadata: Metadata
-    hostName: string | null;
     html: string | null;
-    readingTimeInSeconds: number | null;
-    description: string | null;
+    content: string | null;
+    textContent: string | null;
   }
 
   export interface Metadata {
