@@ -43,11 +43,12 @@ const rateLimiter = new ExpressRateLimit({
   message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
 });
 
-console.log('App init:', 'Connecting with database...', 'Using options:');
-console.log(connectionOptions);
+const defaultConnection = connectionOptions('default');
+
+console.log('App init:', 'Connecting with database...');
 
 // Create a connection with the database
-createConnection(connectionOptions('default')).then(async (connection: any) => {
+createConnection(defaultConnection).then(async (connection: any) => {
   console.log('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
