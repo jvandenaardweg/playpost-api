@@ -17,6 +17,7 @@
     "build:typescript": "npx tsc",
     "build:typescript:production": "npx tsc -p tsconfig.production.json",
     "start": "forever -m 5 dist/index.js",
+    "worker": "forever -m 5 dist/worker.js",
     "test": "jest --silent",
     "test:watch": "jest --watch --silent",
     "test:integration:local": "BASE_API_URL=http://localhost:3000 jest --roots=./tests --runInBand --silent",
