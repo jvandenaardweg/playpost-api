@@ -46,6 +46,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   if (!article) return res.status(400).json({ message: 'Article does not exist.' });
 
+  if (article.languageCode !== 'en') return res.status(400).json({ message: `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}` });
+
   // If there is not SSML data, try to generate it on-demand
   // Usually the SSML data is generated after insertion of an article in the database
   // But if for some reason that didn't work, try it again here.
