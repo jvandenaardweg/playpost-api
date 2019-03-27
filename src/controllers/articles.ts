@@ -236,6 +236,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   let authorName = null;
   let description = null;
   let currentUrl = null;
+  let language = null;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -245,6 +246,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.metadata && response.metadata.author) authorName = response.metadata.author;
   if (response.description) description = response.description;
   if (response.currentUrl) currentUrl = response.currentUrl;
+  if (response.language) language = response.language;
 
   return  {
     ssml,
@@ -254,7 +256,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     imageUrl,
     authorName,
     description,
-    currentUrl
+    currentUrl,
+    language
   };
 };
 
@@ -274,7 +277,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl } = await fetchFullArticleContents(article.url);
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language } = await fetchFullArticleContents(article.url);
 
   const updatedArticle = await articleRepository.update(article.id, {
     ssml,
@@ -285,7 +288,8 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     imageUrl,
     authorName,
     canonicalUrl: currentUrl, // We add a canonicalUrl, this one could be different than "url", but should point to the same article
-    status: ArticleStatus.FINISHED
+    status: ArticleStatus.FINISHED,
+    languageCode: language
   });
 
   return updatedArticle;

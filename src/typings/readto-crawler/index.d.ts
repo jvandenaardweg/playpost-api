@@ -7,6 +7,7 @@ declare namespace ReadtoCrawler {
     hostName: string | null;
     siteName: string | null;
     readingTimeInSeconds: number | null;
+    language: string | null;
     metadata: Metadata;
     description: string | null;
     excerpt: string | null;
