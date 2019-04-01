@@ -1,7 +1,7 @@
 import appRootPath from 'app-root-path';
 // import { awsSsmlPartsToSpeech } from './aws';
 import { Article } from 'database/entities/article';
-import { Audiofile } from 'database/entities/audiofile';
+import { Audiofile, AudiofileEncoding } from 'database/entities/audiofile';
 import * as storage from '../storage/google-cloud';
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import { getSSMLParts } from '../utils/ssml';
@@ -12,7 +12,7 @@ export type SynthesizerOptions = {
   synthesizer: string,
   languageCode: string,
   name: string,
-  encoding: 'MP3' | 'OGG_OPUS'
+  encoding: AudiofileEncoding
 };
 
 /* eslint-disable no-console */

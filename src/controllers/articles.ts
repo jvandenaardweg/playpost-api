@@ -4,7 +4,7 @@ import { getRepository, UpdateResult } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
-import { Audiofile } from '../database/entities/audiofile';
+import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
 import { audiofileInputValidationSchema } from '../database/validators';
 import { SynthesizerOptions } from 'synthesizers';
 
@@ -66,7 +66,7 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
     synthesizer: 'Google',
     languageCode: 'en-US', // TODO: get from article
     name: 'en-US-Wavenet-D',
-    encoding: 'MP3'
+    encoding: AudiofileEncoding.MP3
   };
 
   const audiofileRepository = getRepository(Audiofile);
@@ -187,7 +187,7 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
   const updatedArticle = await articleRepository.update(article.id, { status });
 
   return updatedArticle;
-}
+};
 /**
  * Takes the articleId and crawls the article URL to fetch the full article contents
  * This is a long running process and is done after the creation of a new article
