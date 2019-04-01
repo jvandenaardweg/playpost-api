@@ -7,6 +7,12 @@ import * as storage from '../../storage/google-cloud';
 
 import { ColumnNumericTransformer } from '../utils';
 
+export enum AudiofileEncoding {
+  MP3 = 'MP3',
+  OGG_OPUS = 'OGG_OPUS',
+  LINEAR16 = 'LINEAR16'
+}
+
 @Entity()
 @Index(['article'])
 export class Audiofile {
@@ -30,8 +36,8 @@ export class Audiofile {
   @Column({ nullable: true })
   languageCode: string;
 
-  @Column({ nullable: true })
-  encoding: string;
+  @Column({ nullable: true, type: 'enum', enum: AudiofileEncoding })
+  encoding: AudiofileEncoding;
 
   @Column({ nullable: true })
   voice: string;
