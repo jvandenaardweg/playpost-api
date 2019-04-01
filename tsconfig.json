@@ -13,7 +13,6 @@
     "paths": {
       "@google-cloud/text-to-speech": ["typings/@google-cloud/text-to-speech"],
       "audioconcat": ["typings/audioconcat"],
-      "mp3-duration": ["typings/mp3-duration"],
       "polly-ssml-split": ["typings/polly-ssml-split"],
       "express-async-errors": ["typings/express-async-errors"]
     },
