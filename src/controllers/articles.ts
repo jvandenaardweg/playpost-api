@@ -6,6 +6,7 @@ import joi from 'joi';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
 import { audiofileInputValidationSchema } from '../database/validators';
+import { SynthesizerOptions } from 'synthesizers';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -61,11 +62,11 @@ export const createAudiofileByArticleId = async (req: Request, res: Response) =>
   }
 
   // TODO: use options body to overwrite default options
-  const defaultSynthesizerOptions = {
+  const defaultSynthesizerOptions: SynthesizerOptions = {
     synthesizer: 'Google',
     languageCode: 'en-US', // TODO: get from article
     name: 'en-US-Wavenet-D',
-    encoding: 'mp3'
+    encoding: 'MP3'
   };
 
   const audiofileRepository = getRepository(Audiofile);

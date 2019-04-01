@@ -19,9 +19,15 @@ export const googleSsmlToSpeech = (
   storageUploadPath: string
 ): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
+    let extension = 'mp3';
     const { languageCode, name, encoding } = synthesizerOptions;
     const articleId = article.id;
-    const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.mp3`;
+
+    if (encoding === 'OGG_OPUS') {
+      extension = 'opus';
+    }
+
+    const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
     const request = {
       voice: {
@@ -32,7 +38,7 @@ export const googleSsmlToSpeech = (
         ssml: ssmlPart
       },
       audioConfig: {
-        audioEncoding: encoding.toUpperCase()
+        audioEncoding: encoding
       }
     };
 

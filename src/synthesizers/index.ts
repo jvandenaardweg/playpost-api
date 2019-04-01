@@ -12,7 +12,7 @@ export type SynthesizerOptions = {
   synthesizer: string,
   languageCode: string,
   name: string,
-  encoding: string
+  encoding: 'MP3' | 'OGG_OPUS'
 };
 
 /* eslint-disable no-console */
@@ -37,7 +37,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
     synthesizer: 'Google', // or Amazon
     languageCode: 'en-US', // or en-GB, en-AU
     name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
-    encoding: 'mp3'
+    encoding: 'MP3'
   };
 
   // Step 1: Split the SSML into chunks the synthesizer allows
@@ -55,7 +55,8 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   // Step 3: Combine multiple audiofiles into one
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
     localAudiofilePaths,
-    storageUploadPath
+    storageUploadPath,
+    synthesizerOptions.encoding
   );
 
   // Step 4: Get the length of the audiofile
