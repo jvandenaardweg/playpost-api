@@ -100,13 +100,13 @@ export const putPlaylists = async (req: Request, res: Response) => {
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId } = req.params;
-  const { articleUrl, encoding } = req.body;
+  const { articleUrl } = req.body;
 
   const playlistItemRepository = getRepository(PlaylistItem);
   const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ playlistId, articleUrl, encoding }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleUrl', 'encoding'));
+  const { error } = joi.validate({ playlistId, articleUrl }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleUrl'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

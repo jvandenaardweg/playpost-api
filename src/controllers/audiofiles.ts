@@ -32,10 +32,11 @@ export const createAudiofile = async (req: Request, res: Response) => {
   let article = null;
   const userId = req.user.id;
   const { articleId } = req.params;
+  const { encoding } = req.body;
   const articleRepository = getRepository(Article);
   const audiofileRepository = getRepository(Audiofile);
 
-  const { error } = joi.validate({ articleId, userId }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId'));
+  const { error } = joi.validate({ articleId, userId, encoding }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'encoding'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -84,7 +85,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   });
 
   // Synthesize and return an uploaded audiofile for use to use in the database
-  const audiofileToCreate: Audiofile = await synthesizeArticleToAudiofile(article, audiofile);
+  const audiofileToCreate: Audiofile = await synthesizeArticleToAudiofile(article, audiofile, encoding);
 
   // Then save it in the database
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);

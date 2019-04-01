@@ -11,7 +11,8 @@ export const audiofileInputValidationSchema = joi.object().keys({
   articleId: joi.string().uuid(),
   name: joi.string(),
   articleUrl: joi.string().uri(),
-  audiofileId: joi.string().uuid()
+  audiofileId: joi.string().uuid(),
+  encoding: joi.any().valid('MP3', 'OGG_OPUS')
 });
 
 export const playlistInputValidationSchema = joi.object().keys({
@@ -19,8 +20,7 @@ export const playlistInputValidationSchema = joi.object().keys({
   playlistId: joi.string().uuid(),
   articleId: joi.string().uuid(),
   name: joi.string(),
-  articleUrl: joi.string().uri(),
-  encoding: joi.any().valid('MP3', 'OGG_OPUS')
+  articleUrl: joi.string().uri()
 });
 
 export const userInputValidationSchema = joi.object().keys({

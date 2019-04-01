@@ -21,7 +21,7 @@ export type SynthesizerOptions = {
  * Takes the article and prepared audiofile object to synthesize the SSML to Speech.
  * It will return an audiofile object ready to be saved in the database.
  */
-export const synthesizeArticleToAudiofile = async (article: Article, audiofile: Audiofile): Promise<Audiofile> => {
+export const synthesizeArticleToAudiofile = async (article: Article, audiofile: Audiofile, encoding: SynthesizerOptions['encoding']): Promise<Audiofile> => {
   const hrstart = process.hrtime();
 
   const articleId = article.id;
@@ -34,10 +34,10 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   if (!audiofileId) throw new Error('audiofileId (string) is not given to synthesizeArticleToAudiofile.');
 
   const synthesizerOptions: SynthesizerOptions = {
+    encoding,
     synthesizer: 'Google', // or Amazon
     languageCode: 'en-US', // or en-GB, en-AU
-    name: 'en-US-Wavenet-D', // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
-    encoding: 'MP3'
+    name: 'en-US-Wavenet-D' // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
   };
 
   // Step 1: Split the SSML into chunks the synthesizer allows
@@ -68,7 +68,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
     storageUploadPath,
     synthesizerOptions,
     article,
-    audiofile,
+    audiofile.id,
     audiofileLength
   );
 

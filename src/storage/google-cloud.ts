@@ -28,22 +28,31 @@ export const uploadFile = async (
   storageUploadPath: string,
   synthesizerOptions: SynthesizerOptions,
   article: Article,
-  audiofile: Audiofile,
+  audiofileId: string,
   audiofileLength: number
 ) => {
   const hrstart = process.hrtime();
 
   console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
+  let contentType = 'audio/mpeg';
+  let extension = 'mp3';
+
+  if (synthesizerOptions.encoding === 'OGG_OPUS') {
+    contentType = 'audio/opus';
+    extension = 'opus';
+  }
+
   try {
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
-      destination: storageUploadPath,
+      contentType,
+      destination: `${storageUploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
           audiofileLength,
-          audiofileId: audiofile.id,
+          audiofileId,
           audiofileSynthesizer: synthesizerOptions.synthesizer,
           audiofileLanguageCode: synthesizerOptions.languageCode,
           audiofileVoice: synthesizerOptions.name,
@@ -51,12 +60,12 @@ export const uploadFile = async (
           articleId: article.id,
           articleTitle: article.title,
           articleUrl: article.url,
-          articleSourceName: article.sourceName
+          articleSourceName: article.sourceName,
         },
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
         // (If the contents will change, use cacheControl: 'no-cache')
-        cacheControl: 'public, max-age=31536000',
+        cacheControl: 'public, max-age=31536000'
       }
     });
 
