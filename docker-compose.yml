@@ -6,9 +6,11 @@ services:
     environment:
     - POSTGRES_PASSWORD=readtoapi
     - POSTGRES_USER=readtoapi
-    - POSTGRES_DB=readtoapi
+    - POSTGRES_DB=d5sgoa8nt7dnim # So we can use a production dump locally
     ports:
       - "5432:5432"
+    # volumes:
+      # - ./dump:/docker-entrypoint-initdb.d
     container_name: "postplay-api-postgres"
   redis:
     image: redis:alpine
