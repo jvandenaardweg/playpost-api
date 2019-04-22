@@ -1,5 +1,5 @@
-# Readto API
-This repository includes the API for the Readto App.
+# Postplay API
+This repository includes the API for the Postplay App.
 
 ## Requirements development:
 - TypeScript 3.0.0+
@@ -59,4 +59,4 @@ The schema should now be synced.
 
 
 ## Heroku Dyno Preparation
-Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a readto-api-production`
+Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a postplay-api-production`

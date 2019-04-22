@@ -1,5 +1,5 @@
 {
-  "name": "readto-api",
+  "name": "postplay-api",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -35,14 +35,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jvandenaardweg/readto-api.git"
+    "url": "git+https://github.com/jvandenaardweg/postplay-api.git"
   },
   "author": "Jordy van den Aardweg",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jvandenaardweg/readto-api/issues"
+    "url": "https://github.com/jvandenaardweg/postplay-api/issues"
   },
-  "homepage": "https://github.com/jvandenaardweg/readto-api#readme",
+  "homepage": "https://github.com/jvandenaardweg/postplay-api#readme",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.17",
     "@google-cloud/storage": "^2.4.2",

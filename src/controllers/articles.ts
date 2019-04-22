@@ -135,7 +135,7 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: ReadtoCrawler.Response = await nodeFetch(`https://crawler.postplay.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
+  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.postplay.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
   let ssml = null;
   let text = null;

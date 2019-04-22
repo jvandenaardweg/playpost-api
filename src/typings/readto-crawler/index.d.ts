@@ -1,4 +1,4 @@
-declare namespace ReadtoCrawler {
+declare namespace PostplayCrawler {
 
   export interface Response {
     title: string | null;
