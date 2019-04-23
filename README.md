@@ -15,11 +15,11 @@ NODE_ENV = "development"
 
 JWT_SECRET = "JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
 
-DATABASE_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+DATABASE_URL = "postgres://readtoapi:readtoapi@localhost:5432/d5sgoa8nt7dnim"
 
 REDIS_URL = "redis://localhost:6381"
 
-TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/readtoapi"
+TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/d5sgoa8nt7dnim"
 TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
 TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
 
