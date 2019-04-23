@@ -9,7 +9,7 @@ const headers = {
 };
 
 export const testUserCredentials = {
-  email: 'integrationtest-1337@readtoapp.com',
+  email: 'integrationtest-1337@playpostapp.com',
   password: 'integrationtest'
 };
 

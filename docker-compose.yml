@@ -4,8 +4,8 @@ services:
     image: postgres:latest
     # env_file: .env
     environment:
-    - POSTGRES_PASSWORD=readtoapi
-    - POSTGRES_USER=readtoapi
+    - POSTGRES_PASSWORD=playpostapi
+    - POSTGRES_USER=playpostapi
     - POSTGRES_DB=d5sgoa8nt7dnim # So we can use a production dump locally
     ports:
       - "5432:5432"

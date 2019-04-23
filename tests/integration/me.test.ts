@@ -98,14 +98,14 @@ describe('me', () => {
     // Last
     it('Authenticated user can change his e-mail address.', async () => {
       const updatedEmail = JSON.stringify({
-        email: 'ingegration-updated-email@readtoapp.com'
+        email: 'ingegration-updated-email@playpostapp.com'
       });
 
       const response = await nodeFetch(`${baseUrl}/v1/me/email`, { headers, method: 'PATCH', body: updatedEmail });
       const json = await response.json();
 
       expect(response.status).toBe(200);
-      expect(json.email).toBe('ingegration-updated-email@readtoapp.com');
+      expect(json.email).toBe('ingegration-updated-email@playpostapp.com');
     });
   });
 });

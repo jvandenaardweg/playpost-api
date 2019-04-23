@@ -15,11 +15,11 @@ NODE_ENV = "development"
 
 JWT_SECRET = "JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
 
-DATABASE_URL = "postgres://readtoapi:readtoapi@localhost:5432/d5sgoa8nt7dnim"
+DATABASE_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
 
 REDIS_URL = "redis://localhost:6381"
 
-TYPEORM_URL = "postgres://readtoapi:readtoapi@localhost:5432/d5sgoa8nt7dnim"
+TYPEORM_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
 TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
 TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
 
@@ -33,7 +33,9 @@ MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
 4. Run `npm run dev`, this will launch the database and start the Node server.
 5. Generate a production database dump
 6. Save it in `./dump/database.dump`
-7. Run `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
+7. Remove the created DB: `docker exec -i "playpost-api-postgres" dropdb -U "playpostapi" "d5sgoa8nt7dnim"`
+8. Create the db: `docker exec -i "playpost-api-postgres" createdb -U "playpostapi" "d5sgoa8nt7dnim"`
+7. Restore the db: `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "playpostapi" -d "d5sgoa8nt7dnim" < "dump/database.dump"`
 8. The local server should be available at http://localhost:3000
 
 ## Production database changes
@@ -63,7 +65,7 @@ The schema should now be synced.
 ## Update local database with production
 1. Generate a production database dump
 2. Save it in `./dump/database.dump`
-3. Run `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
+3. Run `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "playpostapi" -d "d5sgoa8nt7dnim" < "dump/database.dump"`
 
 ## Heroku Dyno Preparation
 Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a playpost-api-production`

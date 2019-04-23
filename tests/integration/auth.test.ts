@@ -18,7 +18,7 @@ describe('auth', () => {
 
       const wrongCredentials = {
         ...testUserCredentials,
-        email: 'integration-test-does-not-exist@readtoapp.com'
+        email: 'integration-test-does-not-exist@playpostapp.com'
       };
 
       const response = await nodeFetch(`${baseUrl}/v1/auth`, { headers, method: 'POST', body: JSON.stringify(wrongCredentials) });
