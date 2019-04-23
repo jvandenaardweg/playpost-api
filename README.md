@@ -1,5 +1,5 @@
-# Postplay API
-This repository includes the API for the Postplay App.
+# Playpost API
+This repository includes the API for the Playpost App.
 
 ## Requirements development:
 - TypeScript 3.0.0+
@@ -33,7 +33,7 @@ MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
 4. Run `npm run dev`, this will launch the database and start the Node server.
 5. Generate a production database dump
 6. Save it in `./dump/database.dump`
-7. Run `docker exec -i "postplay-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
+7. Run `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
 8. The local server should be available at http://localhost:3000
 
 ## Production database changes
@@ -63,7 +63,7 @@ The schema should now be synced.
 ## Update local database with production
 1. Generate a production database dump
 2. Save it in `./dump/database.dump`
-3. Run `docker exec -i "postplay-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
+3. Run `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "readtoapi" -d "readtoapi" < "dump/database.dump"`
 
 ## Heroku Dyno Preparation
-Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a postplay-api-production`
+Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a playpost-api-production`

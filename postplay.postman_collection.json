@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "bb3cdce1-ac5e-4e30-99fb-9430d1bca04d",
-		"name": "postplay",
+		"name": "playpost",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},

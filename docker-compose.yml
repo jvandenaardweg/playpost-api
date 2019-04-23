@@ -11,12 +11,12 @@ services:
       - "5432:5432"
     # volumes:
       # - ./dump:/docker-entrypoint-initdb.d
-    container_name: "postplay-api-postgres"
+    container_name: "playpost-api-postgres"
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
-    container_name: "postplay-api-redis"
+    container_name: "playpost-api-redis"
 
       # Port 6379 is used within the container, use that in your .env file
       # Port 6381 is opened on your host.
