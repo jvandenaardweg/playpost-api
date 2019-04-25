@@ -40,21 +40,6 @@ export class Audiofile {
   @Column({ nullable: true, type: 'enum', enum: AudiofileEncoding })
   encoding: AudiofileEncoding;
 
-  // @Column({ nullable: true })
-  // voice: string;
-
-  // @Column({ nullable: true })
-  // synthesizer: string;
-
-  @Column({ nullable: false, default: 0 })
-  partialPlays: number;
-
-  @Column({ nullable: false, default: 0 })
-  completedPlays: number;
-
-  @Column({ nullable: true })
-  lastPlayedAt: Date;
-
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;
 
