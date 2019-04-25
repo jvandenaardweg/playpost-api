@@ -44,26 +44,33 @@ export const addAllAWSVoices = async () => {
     if (foundVoice) {
       console.log(`AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
-      const voiceToCreate = await voiceRepository.create({
-        languageCode: voiceLanguageCode,
-        countryCode: LocaleCode.getCountryCode(voiceLanguageCode),
-        languageName: LocaleCode.getLanguageName(voiceLanguageCode),
-        name: voiceName,
-        label: voiceName, // Use default
-        gender: voiceGender,
-        synthesizer: Synthesizer.AWS,
-        // audioProfile: AudioProfile.DEFAULT, // Use default
-        // speakingRate: 1, // Use default
-        // pitch: 0, // Use default
-        // naturalSampleRateHertz: null, // Use default
-        // isActive: false, // Use default
-        // isPremium: true, // Use default
-        // exampleAudioUrl: null // Use default
-      });
+      const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+      const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
-      const createdVoice = await voiceRepository.save(voiceToCreate);
+      if (!countryCode || !languageName) {
+        console.log(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+      } else {
+        const voiceToCreate = await voiceRepository.create({
+          countryCode,
+          languageName,
+          languageCode: voiceLanguageCode,
+          name: voiceName,
+          label: voiceName, // Use default
+          gender: voiceGender,
+          synthesizer: Synthesizer.AWS,
+          // audioProfile: AudioProfile.DEFAULT, // Use default
+          // speakingRate: 1, // Use default
+          // pitch: 0, // Use default
+          // naturalSampleRateHertz: null, // Use default
+          // isActive: false, // Use default
+          // isPremium: true, // Use default
+          // exampleAudioUrl: null // Use default
+        });
 
-      console.log('AWS Polly: Added new voice to database: ', createdVoice.name);
+        const createdVoice = await voiceRepository.save(voiceToCreate);
+
+        console.log('AWS Polly: Added new voice to database: ', createdVoice.name);
+      }
     }
   }
 }

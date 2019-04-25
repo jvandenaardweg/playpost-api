@@ -63,26 +63,35 @@ export const addAllGoogleVoices = async () => {
     if (foundVoice) {
       console.log(`Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
-      const voiceToCreate = await voiceRepository.create({
-        languageCode: voiceLanguageCode,
-        countryCode: LocaleCode.getCountryCode(voiceLanguageCode),
-        languageName: LocaleCode.getLanguageName(voiceLanguageCode),
-        name: voiceName,
-        // label: null, // Use default
-        gender: voiceGender,
-        synthesizer: Synthesizer.GOOGLE,
-        // audioProfile: AudioProfile.DEFAULT, // Use default
-        // speakingRate: 1, // Use default
-        // pitch: 0, // Use default
-        naturalSampleRateHertz: voiceNaturalSampleRateHertz,
-        // isActive: false, // Use default
-        // isPremium: true, // Use default
-        // exampleAudioUrl: null // Use default
-      });
 
-      const createdVoice = await voiceRepository.save(voiceToCreate);
+      const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+      const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
-      console.log('Google Text To Speech: Added new voice to database: ', createdVoice.name);
+      if (!countryCode || !languageName) {
+        console.log(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+      } else {
+        const voiceToCreate = await voiceRepository.create({
+          countryCode,
+          languageName,
+          languageCode: voiceLanguageCode,
+          name: voiceName,
+          // label: null, // Use default
+          gender: voiceGender,
+          synthesizer: Synthesizer.GOOGLE,
+          // audioProfile: AudioProfile.DEFAULT, // Use default
+          // speakingRate: 1, // Use default
+          // pitch: 0, // Use default
+          naturalSampleRateHertz: voiceNaturalSampleRateHertz,
+          // isActive: false, // Use default
+          // isPremium: true, // Use default
+          // exampleAudioUrl: null // Use default
+        });
+
+        const createdVoice = await voiceRepository.save(voiceToCreate);
+
+        console.log('Google Text To Speech: Added new voice to database: ', createdVoice.name);
+      }
+
     }
   }
 }
