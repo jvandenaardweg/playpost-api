@@ -1,12 +1,10 @@
+require('dotenv').config();
 import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from 'database/entities/article';
-import { Audiofile } from 'database/entities/audiofile';
 
 const storage = new Storage(getGoogleCloudCredentials());
-
-const BUCKET_NAME = 'synthesized-audio-files';
 
 /* eslint-disable no-console */
 
@@ -33,7 +31,7 @@ export const uploadFile = async (
 ) => {
   const hrstart = process.hrtime();
 
-  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${BUCKET_NAME}" in directory "${storageUploadPath}"...`);
+  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
   let contentType = 'audio/mpeg';
   let extension = 'mp3';
@@ -45,7 +43,7 @@ export const uploadFile = async (
 
   try {
     // Uploads a local file to the bucket
-    const uploadResponse: UploadResponse = await storage.bucket(BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
+    const uploadResponse: UploadResponse = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
       contentType,
       destination: `${storageUploadPath}.${extension}`,
       gzip: true,
@@ -85,7 +83,7 @@ export const uploadFile = async (
 
 export const listFiles = async () => {
   // Lists files in the bucket
-  const [files] = await storage.bucket(BUCKET_NAME).getFiles();
+  const [files] = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).getFiles();
 
   console.log('Google Cloud Storage, listFiles()');
 
@@ -104,7 +102,7 @@ export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
   console.log('Google Cloud Storage, listFilesByPrefix()');
 
   // Lists files in the bucket, filtered by a prefix
-  const [files] = await storage.bucket(BUCKET_NAME).getFiles(options);
+  const [files] = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).getFiles(options);
 
   return files;
 };
@@ -112,7 +110,7 @@ export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
 export const deleteFile = async (filename: string) => {
   console.log(`Google Cloud Storage: Deleting file "${filename}"...`);
 
-  const deleteFileResponse: DeleteFileResponse = await storage.bucket(BUCKET_NAME).file(filename).delete();
+  const deleteFileResponse: DeleteFileResponse = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).file(filename).delete();
 
   console.log(`Google Cloud Storage: Successfully deleted file "${filename}"!`);
 
