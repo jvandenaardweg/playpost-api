@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "bb3cdce1-ac5e-4e30-99fb-9430d1bca04d",
-		"name": "playpost",
+		"name": "playpost-api",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -504,17 +504,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": ""
+							"raw": "{\n\t\"encoding\": \"MP3\",\n\t\"voiceId\": \"6e4c1ec7-98a0-464b-b6e9-53e00629df6c\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e/audiofiles",
+							"raw": "{{baseUrl}}/v1/articles/f1884b99-7730-4798-849a-851ebf01f8cb/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"6b420071-d7fe-4951-89fe-4220aadcfd6e",
+								"f1884b99-7730-4798-849a-851ebf01f8cb",
 								"audiofiles"
 							]
 						},
@@ -761,8 +761,8 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -955,7 +955,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\"\n}"
+							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\",\n\t\"encoding\": \"OGG_OPUS\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles",
@@ -1062,6 +1062,104 @@
 								"v1",
 								"audiofiles",
 								"b0cd7bee-8da6-469f-adc5-95e4f88cc78d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Voices",
+			"item": [
+				{
+					"name": "Get all voices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all active free voices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices/active/free",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices",
+								"active",
+								"free"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all active premium voices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices/active/premium",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices",
+								"active",
+								"premium"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all active voices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices/active",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices",
+								"active"
 							]
 						}
 					},
