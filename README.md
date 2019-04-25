@@ -69,3 +69,6 @@ The schema should now be synced.
 
 ## Heroku Dyno Preparation
 Make sure the correct release environment variables are available, run in your own terminal: `heroku labs:enable runtime-dyno-metadata -a playpost-api-production`
+
+## Get all available voices
+To get all the available voices from our synthesizing service run `npm run addvoices`. This will do a call to our sythesizer service and puts all the correct voice data in the database. You can run this script once in a while to make sure we always have the correct voices.
