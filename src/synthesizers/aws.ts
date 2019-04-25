@@ -7,7 +7,6 @@ import { getRepository } from 'typeorm';
 
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 
-import { SynthesizerOptions } from '../synthesizers';
 import { Article } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
 
@@ -15,8 +14,9 @@ import { Audiofile } from '../database/entities/audiofile';
 const client = new Polly({
   signatureVersion: 'v4',
   region: 'eu-central-1',
-
 });
+
+export interface AWSSynthesizerOptions extends Polly.Types.SynthesizeSpeechInput {}
 
 export const getAllAWSVoices = async (): Promise<Polly.Voice[]> => {
   return new Promise((resolve, reject) => {
@@ -72,30 +72,29 @@ export const awsSsmlToSpeech = (
   index: number,
   ssmlPart: string,
   article: Article,
-  audiofile: Audiofile,
-  synthesizerOptions: SynthesizerOptions,
+  synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
 ): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
-    const { languageCode, name, encoding } = synthesizerOptions;
+    const { VoiceId, LanguageCode, OutputFormat, TextType } = synthesizerOptions;
 
     let extension = 'mp3';
 
-    if (encoding === 'OGG_OPUS') {
-      extension = 'opus';
+    if (OutputFormat === 'ogg_vorbis') {
+      extension = 'ogg';
     }
 
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
     const request: Polly.Types.SynthesizeSpeechInput = {
+      OutputFormat,
+      VoiceId,
+      LanguageCode,
+      TextType,
       Text: ssmlPart,
-      OutputFormat: encoding.toLowerCase(),
-      VoiceId: 'Joanna', /* Brian, is also a good voice, male british */
-      LanguageCode: languageCode,
-      TextType: 'ssml'
     };
 
-    console.log(`AWS Polly: Synthesizing Article ID '${article.id}' SSML part ${index} to '${languageCode}' speech using '${name}' at: ${tempLocalAudiofilePath}`);
+    console.log(`AWS Polly: Synthesizing Article ID '${article.id}' SSML part ${index} to '${LanguageCode}' speech using '${VoiceId}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
@@ -123,14 +122,13 @@ export const awsSsmlToSpeech = (
 export const awsSsmlPartsToSpeech = (
   ssmlParts: string[],
   article: Article,
-  audiofile: Audiofile,
-  synthesizerOptions: SynthesizerOptions,
+  synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
 ) => {
   const promises: Promise<any>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(awsSsmlToSpeech(index, ssmlPart, article, audiofile, synthesizerOptions, storageUploadPath));
+    return promises.push(awsSsmlToSpeech(index, ssmlPart, article, synthesizerOptions, storageUploadPath));
   });
 
   return Promise.all(promises);

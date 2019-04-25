@@ -1,19 +1,38 @@
 import fsExtra from 'fs-extra';
 import textToSpeech from '@google-cloud/text-to-speech';
 import appRootPath from 'app-root-path';
-import { getRepository, createConnection } from 'typeorm';
+import { getRepository } from 'typeorm';
 import LocaleCode from 'locale-code';
+import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
 
-import { Voice, Gender, Synthesizer, AudioProfile } from '../database/entities/voice';
+import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 
-import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from 'database/entities/article';
-import { Audiofile } from 'database/entities/audiofile';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 /* eslint-disable no-console */
+
+export type GoogleSynthesizerOptions = {
+  input: {
+    text?: string,
+    ssml?: string
+  },
+  voice: {
+    languageCode: string,
+    name: string,
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL' | 'SSML_VOICE_GENDER_UNSPECIFIED'
+  },
+  audioConfig: {
+    audioEncoding: 'MP3' | 'LINEAR16' | 'OGG_OPUS' | 'AUDIO_ENCODING_UNSPECIFIED',
+    speakingRate?: number,
+    pitch?: number,
+    volumeGainDb?: number,
+    sampleRateHertz?: number,
+    effectsProfileId?: string[]
+  }
+};
 
 interface TextToSpeechVoice {
   languageCodes: string[];
@@ -72,41 +91,27 @@ export const googleSsmlToSpeech = (
   index: number,
   ssmlPart: string,
   article: Article,
-  audiofile: Audiofile,
-  synthesizerOptions: SynthesizerOptions,
+  synthesizerOptions: GoogleSynthesizerOptions,
   storageUploadPath: string
 ): Promise<string | {}> => {
   return new Promise((resolve, reject) => {
-    const { languageCode, name, encoding } = synthesizerOptions;
-
     let extension = 'mp3';
 
-    if (encoding === 'OGG_OPUS') {
+    if (synthesizerOptions.audioConfig.audioEncoding === 'OGG_OPUS') {
       extension = 'opus';
     }
 
+    synthesizerOptions.input.ssml = ssmlPart;
+
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-    const request = {
-      voice: {
-        languageCode, // TODO: make based on post language
-        name
-      },
-      input: {
-        ssml: ssmlPart
-      },
-      audioConfig: {
-        audioEncoding: encoding
-      }
-    };
-
-    console.log(`Google Text To Speech: Synthesizing Article ID '${article.id}' SSML part ${index} to '${languageCode}' speech using '${name}' at: ${tempLocalAudiofilePath}`);
+    console.log(`Google Text To Speech: Synthesizing Article ID '${article.id}' SSML part ${index} to '${synthesizerOptions.voice.languageCode}' speech using '${synthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
     // Performs the Text-to-Speech request
-    client.synthesizeSpeech(request, (synthesizeSpeechError: any, response: any) => {
+    client.synthesizeSpeech(synthesizerOptions, (synthesizeSpeechError: any, response: any) => {
       if (synthesizeSpeechError) return reject(new Error(synthesizeSpeechError));
 
       if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
@@ -128,14 +133,13 @@ export const googleSsmlToSpeech = (
 export const googleSsmlPartsToSpeech = (
   ssmlParts: string[],
   article: Article,
-  audiofile: Audiofile,
-  synthesizerOptions: SynthesizerOptions,
+  synthesizerOptions: GoogleSynthesizerOptions,
   storageUploadPath: string
 ) => {
   const promises: Promise<any>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(googleSsmlToSpeech(index, ssmlPart, article, audiofile, synthesizerOptions, storageUploadPath));
+    return promises.push(googleSsmlToSpeech(index, ssmlPart, article, synthesizerOptions, storageUploadPath));
   });
 
   return Promise.all(promises);

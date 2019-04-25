@@ -1,9 +1,11 @@
 require('dotenv').config();
 import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
-import { SynthesizerOptions } from '../synthesizers';
+import { GoogleSynthesizerOptions, } from '../synthesizers/google';
+import { AWSSynthesizerOptions, } from '../synthesizers/aws';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
+import { AudiofileEncoding } from 'database/entities/audiofile';
 
 const storage = new Storage(getGoogleCloudCredentials());
 
@@ -26,7 +28,7 @@ export const uploadFile = async (
   voice: Voice,
   concatinatedLocalAudiofilePath: string,
   storageUploadPath: string,
-  synthesizerOptions: SynthesizerOptions,
+  encoding: AudiofileEncoding,
   article: Article,
   audiofileId: string,
   audiofileLength: number
@@ -38,7 +40,7 @@ export const uploadFile = async (
   let contentType = 'audio/mpeg';
   let extension = 'mp3';
 
-  if (synthesizerOptions.encoding === 'OGG_OPUS') {
+  if (encoding === 'OGG_OPUS') {
     contentType = 'audio/opus';
     extension = 'opus';
   }
@@ -56,7 +58,7 @@ export const uploadFile = async (
           audiofileSynthesizer: voice.synthesizer,
           audiofileLanguageCode: voice.languageCode,
           audiofileVoice: voice.name,
-          audiofileEncoding: synthesizerOptions.encoding,
+          audiofileEncoding: encoding,
           articleId: article.id,
           articleTitle: article.title,
           articleUrl: article.url,
