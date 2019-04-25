@@ -4,9 +4,7 @@ import { getRepository, UpdateResult } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
-import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
 import { audiofileInputValidationSchema } from '../database/validators';
-import { SynthesizerOptions } from 'synthesizers';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
