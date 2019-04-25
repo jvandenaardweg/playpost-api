@@ -8,7 +8,7 @@ import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
 import * as storage from '../storage/google-cloud';
 
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
-import { getSSMLParts } from '../utils/ssml';
+import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
 
 import { googleSsmlPartsToSpeech, GoogleSynthesizerOptions } from './google';
 import { awsSsmlPartsToSpeech, AWSSynthesizerOptions } from './aws';
@@ -50,7 +50,10 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
 
 const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, audiofile: Audiofile, encoding: AudiofileEncoding, storageUploadPath: string) => {
   // Step 1: Split the SSML into chunks the synthesizer allows
-  const ssmlParts = getSSMLParts(ssml);
+  const ssmlParts = getSSMLParts(ssml, {
+    softLimit: AWS_CHARACTER_LIMIT - 500,
+    hardLimit: AWS_CHARACTER_LIMIT
+  });
 
   const synthesizerOptions: AWSSynthesizerOptions = {
     OutputFormat: encoding.toLowerCase(),
