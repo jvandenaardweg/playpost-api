@@ -51,7 +51,7 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
 const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, audiofile: Audiofile, encoding: AudiofileEncoding, storageUploadPath: string) => {
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
-    softLimit: AWS_CHARACTER_LIMIT - 500,
+    softLimit: AWS_CHARACTER_LIMIT - 1000,
     hardLimit: AWS_CHARACTER_LIMIT
   });
 
