@@ -18,6 +18,7 @@ import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
+import * as voicesController from './controllers/voices';
 
 import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
@@ -139,6 +140,12 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
   app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
+
+  // v1/voices
+  app.get('/v1/voices', IS_PROTECTED, voicesController.findAll);
+  app.get('/v1/voices/active', IS_PROTECTED, voicesController.findAllActive);
+  app.get('/v1/voices/active/free', IS_PROTECTED, voicesController.findAllActiveFreeVoices);
+  app.get('/v1/voices/active/premium', IS_PROTECTED, voicesController.findAllActivePremiumVoices);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

@@ -31,7 +31,8 @@
     "typeorm:migration:revert": "typeorm migration:revert",
     "typeorm:migration:run": "typeorm migration:run",
     "upgrade-interactive": "npm-check --update",
-    "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync"
+    "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
+    "addvoices": "ts-node src/addVoices.ts"
   },
   "repository": {
     "type": "git",
@@ -69,6 +70,7 @@
     "ioredis": "^4.6.2",
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.5.0",
+    "locale-code": "^2.0.2",
     "md5": "^2.2.1",
     "music-metadata": "^3.5.3",
     "node-fetch": "^2.3.0",

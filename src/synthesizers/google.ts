@@ -10,6 +10,12 @@ const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 /* eslint-disable no-console */
 
+export const getAllVoices = async () => {
+  const [result] = await client.listVoices({});
+  const voices = result.voices;
+   return voices;
+};
+
 export const googleSsmlToSpeech = (
   index: number,
   ssmlPart: string,
