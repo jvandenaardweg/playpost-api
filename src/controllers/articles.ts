@@ -52,65 +52,6 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   return res.json(article.audiofiles);
 };
 
-export const createAudiofileByArticleId = async (req: Request, res: Response) => {
-  const { articleId } = req.params;
-  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
-  // TODO: use options body to overwrite default options
-  const defaultSynthesizerOptions: SynthesizerOptions = {
-    synthesizer: 'Google',
-    languageCode: 'en-US', // TODO: get from article
-    name: 'en-US-Wavenet-D',
-    encoding: AudiofileEncoding.MP3
-  };
-
-  const audiofileRepository = getRepository(Audiofile);
-  const articleRepository = getRepository(Article);
-
-  const article = await articleRepository.findOne(articleId);
-
-  if (!article) return res.status(400).json({ message: 'Article does not exist, we cannot create an audiofile for that. First create an article, then create an audiofile.' });
-
-  // const audiofile = await audiofileRepository.findOne({ article: { id: articleId } });
-
-  // If we already have an audiofile, just return it
-  // if (audiofile) return res.json(audiofile);
-
-  // Crawl article, get SSML, generate speech to text, upload to bucket, return bucket meta data, connect article to audiofile
-
-  const audiofileToCreate = {
-    article, // The article object we found by articleId
-    url: null,
-    bucket: null,
-    name: null,
-    length: 0,
-    languageCode: defaultSynthesizerOptions.languageCode,
-    encoding: defaultSynthesizerOptions.encoding,
-    voice: defaultSynthesizerOptions.name,
-    synthesizer: defaultSynthesizerOptions.synthesizer
-  };
-
-  // Validate the input
-  // const validationResult = await validateInput(Audiofile, audiofileToCreate);
-  // if (validationResult.errors.length) return res.status(400).json(validationResult);
-
-  // Create the audiofile, so we can use the audiofileId to create a file in the storage
-  const newAudiofileToSave = await audiofileRepository.create(audiofileToCreate);
-  const createdAudiofile = await audiofileRepository.save(newAudiofileToSave);
-
-  // Upon creation in the database, we synthesize the audiofile
-
-  // Get the created audiofile and return it
-  const newlyCreatedAudiofile = await audiofileRepository.findOne(createdAudiofile.id);
-
-  return res.json(newlyCreatedAudiofile);
-};
-
 export const deleteById = async (req: Request, res: Response) => {
   const userEmail = req.user.email;
   const { articleId } = req.params;
