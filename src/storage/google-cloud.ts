@@ -2,7 +2,8 @@ require('dotenv').config();
 import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
 import { SynthesizerOptions } from '../synthesizers';
 import { getGoogleCloudCredentials } from '../utils/credentials';
-import { Article } from 'database/entities/article';
+import { Article } from '../database/entities/article';
+import { Voice } from '../database/entities/voice';
 
 const storage = new Storage(getGoogleCloudCredentials());
 
@@ -22,6 +23,7 @@ export const getPublicFileUrl = (uploadResponse: UploadResponse) => {
  * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
  */
 export const uploadFile = async (
+  voice: Voice,
   concatinatedLocalAudiofilePath: string,
   storageUploadPath: string,
   synthesizerOptions: SynthesizerOptions,
@@ -51,9 +53,9 @@ export const uploadFile = async (
         metadata: {
           audiofileLength,
           audiofileId,
-          audiofileSynthesizer: synthesizerOptions.synthesizer,
-          audiofileLanguageCode: synthesizerOptions.languageCode,
-          audiofileVoice: synthesizerOptions.name,
+          audiofileSynthesizer: voice.synthesizer,
+          audiofileLanguageCode: voice.languageCode,
+          audiofileVoice: voice.name,
           audiofileEncoding: synthesizerOptions.encoding,
           articleId: article.id,
           articleTitle: article.title,

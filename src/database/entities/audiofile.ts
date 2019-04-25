@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateCol
 import { IsUUID } from 'class-validator';
 import joi from 'joi';
 import { Article } from './article';
+import { Voice } from './voice';
 import { User } from './user';
 import * as storage from '../../storage/google-cloud';
 
@@ -39,11 +40,11 @@ export class Audiofile {
   @Column({ nullable: true, type: 'enum', enum: AudiofileEncoding })
   encoding: AudiofileEncoding;
 
-  @Column({ nullable: true })
-  voice: string;
+  // @Column({ nullable: true })
+  // voice: string;
 
-  @Column({ nullable: true })
-  synthesizer: string;
+  // @Column({ nullable: true })
+  // synthesizer: string;
 
   @Column({ nullable: false, default: 0 })
   partialPlays: number;
@@ -56,6 +57,9 @@ export class Audiofile {
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;
+
+  @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL' }) // On delete of an Voices, set this column to null. So the audiofile stays available.
+  voice: Voice;
 
   @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   user: User;

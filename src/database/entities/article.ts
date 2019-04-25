@@ -78,10 +78,10 @@ export class Article extends BaseEntity {
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
   user: User;
 
-  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'CASCADE', eager: true }) // On delete of a Audiofile, remove the Article
+  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
   audiofiles: Audiofile[];
 
-  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the Article
+  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'NO ACTION' }) // On delete of a PlaylistItem, don't remove the Article
   playlistItems: PlaylistItem[];
 
   @CreateDateColumn()

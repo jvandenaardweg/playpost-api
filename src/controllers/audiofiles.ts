@@ -1,13 +1,17 @@
 import { Request, Response } from 'express';
 import { getRepository, } from 'typeorm';
 import joi from 'joi';
+import uuid from 'uuid';
+
 import { Audiofile } from '../database/entities/audiofile';
+import { Article } from '../database/entities/article';
+import { Voice } from '../database/entities/voice';
+
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
-import { Article } from '../database/entities/article';
-
 import { updateArticleToFull } from '../controllers/articles';
-import uuid from 'uuid';
+
+
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -32,11 +36,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
   let article = null;
   const userId = req.user.id;
   const { articleId } = req.params;
-  const { encoding } = req.body;
+  const { encoding, voiceId } = req.body;
   const articleRepository = getRepository(Article);
+  const voiceRepository = getRepository(Voice);
   const audiofileRepository = getRepository(Audiofile);
 
-  const { error } = joi.validate({ articleId, userId, encoding }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'encoding'));
+  const { error } = joi.validate({ articleId, userId, voiceId, encoding }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'voiceId', 'encoding'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -69,6 +74,10 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // For now, only allow one audiofile
   if (article.audiofiles.length) return res.status(400).json({ message: 'Audiofile for this article already exists.', id: article.audiofiles[0].id });
 
+  // Get the voice
+  const voice = await voiceRepository.findOne(voiceId);
+  if (!voice) return res.status(400).json({ message: 'The given voice to be used to create the audio cannot be found.' });
+
   // Manually generate a UUID.
   // So we can use this ID to upload a file to storage, before we insert it into the database.
   const audiofileId = uuid.v4();
@@ -81,11 +90,14 @@ export const createAudiofile = async (req: Request, res: Response) => {
     },
     user: {
       id: userId
+    },
+    voice: {
+      id: voice.id
     }
   });
 
   // Synthesize and return an uploaded audiofile for use to use in the database
-  const audiofileToCreate: Audiofile = await synthesizeArticleToAudiofile(article, audiofile, encoding);
+  const audiofileToCreate: Audiofile = await synthesizeArticleToAudiofile(voice, article, audiofile, encoding);
 
   // Then save it in the database
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);

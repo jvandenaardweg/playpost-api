@@ -7,6 +7,7 @@ import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio'
 import { getSSMLParts } from '../utils/ssml';
 import { googleSsmlPartsToSpeech } from './google';
 import fsExtra from 'fs-extra';
+import { Voice } from 'database/entities/voice';
 
 export type SynthesizerOptions = {
   synthesizer: string,
@@ -21,7 +22,7 @@ export type SynthesizerOptions = {
  * Takes the article and prepared audiofile object to synthesize the SSML to Speech.
  * It will return an audiofile object ready to be saved in the database.
  */
-export const synthesizeArticleToAudiofile = async (article: Article, audiofile: Audiofile, encoding: SynthesizerOptions['encoding']): Promise<Audiofile> => {
+export const synthesizeArticleToAudiofile = async (voice: Voice, article: Article, audiofile: Audiofile, encoding: SynthesizerOptions['encoding']): Promise<Audiofile> => {
   const hrstart = process.hrtime();
 
   const articleId = article.id;
@@ -35,9 +36,9 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
 
   const synthesizerOptions: SynthesizerOptions = {
     encoding,
-    synthesizer: 'Google', // or Amazon
-    languageCode: 'en-US', // or en-GB, en-AU
-    name: 'en-US-Wavenet-D' // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
+    synthesizer: voice.synthesizer, // or Amazon
+    languageCode: voice.languageCode, // or en-GB, en-AU
+    name: voice.name // or en-GB-Wavenet-A or en-GB-Standard-D (British) cheaper)
   };
 
   // Step 1: Split the SSML into chunks the synthesizer allows
@@ -64,6 +65,7 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
 
   // Step 5: Upload the one mp3 file to Google Cloud Storage
   const uploadResponse = await storage.uploadFile(
+    voice,
     concatinatedLocalAudiofilePath,
     storageUploadPath,
     synthesizerOptions,
@@ -85,8 +87,6 @@ export const synthesizeArticleToAudiofile = async (article: Article, audiofile: 
   audiofile.length = audiofileLength;
   audiofile.languageCode = synthesizerOptions.languageCode;
   audiofile.encoding = synthesizerOptions.encoding;
-  audiofile.voice = synthesizerOptions.name;
-  audiofile.synthesizer = synthesizerOptions.synthesizer;
 
   const hrend = process.hrtime(hrstart);
   console.info('Execution time (hr) of synthesizeArticleToAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);

@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index, OneToMany } from 'typeorm';
 import { IsUUID } from 'class-validator';
 
+import { Audiofile } from './audiofile';
 import { ColumnNumericTransformer } from '../utils';
 
 export enum Gender {
@@ -82,4 +83,7 @@ export class Voice {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the voice
+  audiofiles: Audiofile[];
 }
