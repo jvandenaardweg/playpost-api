@@ -111,7 +111,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // Then save it in the database
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
 
-  console.log('Created audiofile: ', createdAudiofile);
+  console.log('Created audiofile: ', createdAudiofile.id);
 
   const hrend = process.hrtime(hrstart);
   console.info('Execution time (hr) of createAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);
