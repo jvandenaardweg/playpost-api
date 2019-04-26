@@ -72,7 +72,7 @@
     "jsonwebtoken": "^8.5.0",
     "locale-code": "^2.0.2",
     "md5": "^2.2.1",
-    "music-metadata": "^3.5.3",
+    "music-metadata": "^3.6.1",
     "node-fetch": "^2.3.0",
     "normalize-url": "^4.2.0",
     "passport": "^0.4.0",
