@@ -74,7 +74,7 @@ export const awsSsmlToSpeech = (
   identifier: string,
   synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
-): Promise<string | {}> => {
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const { VoiceId, LanguageCode, OutputFormat, TextType } = synthesizerOptions;
 
@@ -82,6 +82,10 @@ export const awsSsmlToSpeech = (
 
     if (OutputFormat === 'ogg_vorbis') {
       extension = 'ogg';
+    }
+
+    if (OutputFormat === 'pcm') {
+      extension = 'wav';
     }
 
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;

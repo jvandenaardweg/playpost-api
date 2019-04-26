@@ -92,7 +92,7 @@ export const uploadArticleAudioFile = async (
 export const uploadVoicePreviewAudiofile = async (
   voice: Voice,
   audiofilePath: string,
-  encoding: AudiofileEncoding,
+  encoding: string,
   audiofileLength: number
 ) => {
   const hrstart = process.hrtime();
