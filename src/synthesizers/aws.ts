@@ -7,8 +7,7 @@ import { getRepository } from 'typeorm';
 
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 
-import { Article } from '../database/entities/article';
-import { Audiofile } from '../database/entities/audiofile';
+import { SynthesizerType } from './index';
 
 // Create an Polly client
 const client = new Polly({
@@ -55,16 +54,9 @@ export const addAllAWSVoices = async () => {
           languageName,
           languageCode: voiceLanguageCode,
           name: voiceName,
-          label: voiceName, // Use default
+          label: voiceName,
           gender: voiceGender,
-          synthesizer: Synthesizer.AWS,
-          // audioProfile: AudioProfile.DEFAULT, // Use default
-          // speakingRate: 1, // Use default
-          // pitch: 0, // Use default
-          // naturalSampleRateHertz: null, // Use default
-          // isActive: false, // Use default
-          // isPremium: true, // Use default
-          // exampleAudioUrl: null // Use default
+          synthesizer: Synthesizer.AWS
         });
 
         const createdVoice = await voiceRepository.save(voiceToCreate);
@@ -78,7 +70,8 @@ export const addAllAWSVoices = async () => {
 export const awsSsmlToSpeech = (
   index: number,
   ssmlPart: string,
-  article: Article,
+  type: SynthesizerType,
+  identifier: string,
   synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
 ): Promise<string | {}> => {
@@ -101,7 +94,7 @@ export const awsSsmlToSpeech = (
       Text: ssmlPart,
     };
 
-    console.log(`AWS Polly: Synthesizing Article ID '${article.id}' SSML part ${index} to '${LanguageCode}' speech using '${VoiceId}' at: ${tempLocalAudiofilePath}`);
+    console.log(`AWS Polly: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${LanguageCode}' speech using '${VoiceId}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
@@ -116,7 +109,7 @@ export const awsSsmlToSpeech = (
       return fsExtra.writeFile(tempLocalAudiofilePath, response.AudioStream, 'binary', (writeFileError) => {
         if (writeFileError) return reject(writeFileError);
 
-        console.log(`AWS Polly: Received synthesized audio file for Article ID '${article.id}' SSML part ${index}: ${tempLocalAudiofilePath}`);
+        console.log(`AWS Polly: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
         return resolve(tempLocalAudiofilePath);
       });
     });
@@ -128,14 +121,15 @@ export const awsSsmlToSpeech = (
  */
 export const awsSsmlPartsToSpeech = (
   ssmlParts: string[],
-  article: Article,
+  type: SynthesizerType,
+  identifier: string,
   synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
 ) => {
   const promises: Promise<any>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(awsSsmlToSpeech(index, ssmlPart, article, synthesizerOptions, storageUploadPath));
+    return promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
   });
 
   return Promise.all(promises);

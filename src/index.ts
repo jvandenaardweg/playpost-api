@@ -143,6 +143,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   // v1/voices
   app.get('/v1/voices', IS_PROTECTED, voicesController.findAll);
+  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED, voicesController.createVoicePreview);
   app.get('/v1/voices/active', IS_PROTECTED, voicesController.findAllActive);
   app.get('/v1/voices/active/free', IS_PROTECTED, voicesController.findAllActiveFreeVoices);
   app.get('/v1/voices/active/premium', IS_PROTECTED, voicesController.findAllActivePremiumVoices);

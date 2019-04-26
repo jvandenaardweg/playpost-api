@@ -1,13 +1,14 @@
 require('dotenv').config();
 import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
-import { GoogleSynthesizerOptions, } from '../synthesizers/google';
-import { AWSSynthesizerOptions, } from '../synthesizers/aws';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
-import { AudiofileEncoding } from 'database/entities/audiofile';
+import { AudiofileEncoding } from '../database/entities/audiofile';
+
+import LocaleCode from 'locale-code';
 
 const storage = new Storage(getGoogleCloudCredentials());
+const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 
 /* eslint-disable no-console */
 
@@ -24,7 +25,7 @@ export const getPublicFileUrl = (uploadResponse: UploadResponse) => {
 /**
  * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
  */
-export const uploadFile = async (
+export const uploadArticleAudioFile = async (
   voice: Voice,
   concatinatedLocalAudiofilePath: string,
   storageUploadPath: string,
@@ -35,7 +36,7 @@ export const uploadFile = async (
 ) => {
   const hrstart = process.hrtime();
 
-  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}" in directory "${storageUploadPath}"...`);
+  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
   let contentType = 'audio/mpeg';
   let extension = 'mp3';
@@ -47,7 +48,7 @@ export const uploadFile = async (
 
   try {
     // Uploads a local file to the bucket
-    const uploadResponse: UploadResponse = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
+    const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
       contentType,
       destination: `${storageUploadPath}.${extension}`,
       gzip: true,
@@ -67,12 +68,67 @@ export const uploadFile = async (
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
         // (If the contents will change, use cacheControl: 'no-cache')
-        cacheControl: 'public, max-age=31536000'
+        cacheControl: 'public, max-age=31536000',
+        contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
       }
     });
 
-    console.log('Google Cloud Storage: Uploaded file!');
-    console.log(uploadResponse);
+    console.log('Google Cloud Storage: Uploaded file!', uploadResponse[0].metadata.name);
+
+    return uploadResponse;
+  } catch (err) {
+    console.log('Google Cloud Storage: Failed to upload.');
+    console.error(err);
+    throw new Error(err);
+  } finally {
+    const hrend = process.hrtime(hrstart);
+    console.info('Execution time (hr) of uploadFile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+  }
+};
+
+/**
+ * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
+ */
+export const uploadVoicePreviewAudiofile = async (
+  voice: Voice,
+  audiofilePath: string,
+  encoding: AudiofileEncoding,
+  audiofileLength: number
+) => {
+  const hrstart = process.hrtime();
+  const uploadPath = `voice-previews/${voice.id}`;
+
+  console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${uploadPath}"...`);
+
+  let contentType = 'audio/mpeg';
+  let extension = 'mp3';
+
+  if (encoding === 'LINEAR16') {
+    contentType = 'audio/wav';
+    extension = 'wav';
+  }
+
+  try {
+    // Uploads a local file to the bucket
+    const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
+      contentType,
+      destination: `${uploadPath}.${extension}`,
+      gzip: true,
+      metadata: {
+        metadata: {
+          audiofileLength,
+          audiofileEncoding: encoding,
+          voiceId: voice.id,
+          voiceSynthesizer: voice.synthesizer,
+          voiceLanguageCode: voice.languageCode,
+          voiceName: voice.name
+        },
+        cacheControl: 'public, max-age=31536000',
+        contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
+      }
+    });
+
+    console.log('Google Cloud Storage: Uploaded file!', uploadResponse[0].metadata.name);
 
     return uploadResponse;
   } catch (err) {
@@ -87,7 +143,7 @@ export const uploadFile = async (
 
 export const listFiles = async () => {
   // Lists files in the bucket
-  const [files] = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).getFiles();
+  const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles();
 
   console.log('Google Cloud Storage, listFiles()');
 
@@ -106,7 +162,7 @@ export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
   console.log('Google Cloud Storage, listFilesByPrefix()');
 
   // Lists files in the bucket, filtered by a prefix
-  const [files] = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).getFiles(options);
+  const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles(options);
 
   return files;
 };
@@ -114,7 +170,7 @@ export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
 export const deleteFile = async (filename: string) => {
   console.log(`Google Cloud Storage: Deleting file "${filename}"...`);
 
-  const deleteFileResponse: DeleteFileResponse = await storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME).file(filename).delete();
+  const deleteFileResponse: DeleteFileResponse = await storage.bucket(DEFAULT_BUCKET_NAME).file(filename).delete();
 
   console.log(`Google Cloud Storage: Successfully deleted file "${filename}"!`);
 

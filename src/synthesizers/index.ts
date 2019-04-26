@@ -15,6 +15,8 @@ import { awsSsmlPartsToSpeech, AWSSynthesizerOptions } from './aws';
 
 /* eslint-disable no-console */
 
+export type SynthesizerType = 'article' | 'preview';
+
 /**
  * Takes the article and prepared audiofile object to synthesize the SSML to Speech.
  * It will return an audiofile object ready to be saved in the database.
@@ -66,7 +68,8 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
   const localAudiofilePaths = await awsSsmlPartsToSpeech(
     ssmlParts,
-    article,
+    'article',
+    article.id,
     synthesizerOptions,
     storageUploadPath
   );
@@ -82,7 +85,7 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
   // Step 5: Upload the one mp3 file to Google Cloud Storage
-  const uploadResponse = await storage.uploadFile(
+  const uploadResponse = await storage.uploadArticleAudioFile(
     voice,
     concatinatedLocalAudiofilePath,
     storageUploadPath,
@@ -130,7 +133,8 @@ const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Articl
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
   const localAudiofilePaths = await googleSsmlPartsToSpeech(
     ssmlParts,
-    article,
+    'article',
+    article.id,
     synthesizerOptions,
     storageUploadPath
   );
@@ -146,7 +150,7 @@ const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Articl
   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
   // Step 5: Upload the one mp3 file to Google Cloud Storage
-  const uploadResponse = await storage.uploadFile(
+  const uploadResponse = await storage.uploadArticleAudioFile(
     voice,
     concatinatedLocalAudiofilePath,
     storageUploadPath,
