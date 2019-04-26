@@ -12,6 +12,8 @@ const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 /* eslint-disable no-console */
 
+export type GoogleAudioEncodingType = 'MP3' | 'LINEAR16' | 'OGG_OPUS' | 'AUDIO_ENCODING_UNSPECIFIED';
+
 export interface GoogleSynthesizerOptions {
   input: {
     text?: string,
@@ -23,7 +25,7 @@ export interface GoogleSynthesizerOptions {
     ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL' | 'SSML_VOICE_GENDER_UNSPECIFIED'
   };
   audioConfig: {
-    audioEncoding: 'MP3' | 'LINEAR16' | 'OGG_OPUS' | 'AUDIO_ENCODING_UNSPECIFIED',
+    audioEncoding: GoogleAudioEncodingType | string,
     speakingRate?: number,
     pitch?: number,
     volumeGainDb?: number,

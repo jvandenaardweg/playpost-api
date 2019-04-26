@@ -1,27 +1,69 @@
 import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
-import { Voice } from 'database/entities/voice';
 
+import { Voice, Synthesizer } from '../database/entities/voice';
 import { Article } from '../database/entities/article';
-import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
+import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 
 import * as storage from '../storage/google-cloud';
 
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
 
-import { googleSsmlPartsToSpeech, GoogleSynthesizerOptions } from './google';
+import { googleSsmlPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
 import { awsSsmlPartsToSpeech, AWSSynthesizerOptions } from './aws';
+import { Polly } from 'aws-sdk';
 
 /* eslint-disable no-console */
 
 export type SynthesizerType = 'article' | 'preview';
+export type SynthesizerAudioEncodingTypes = GoogleAudioEncodingType & Polly.OutputFormat;
+
+export enum SynthesizerEncoding {
+  GOOGLE_MP3 = 'MP3',
+  GOOGLE_OGG_OPUS = 'OGG_OPUS',
+  GOOGLE_LINEAR16 = 'LINEAR16',
+  AWS_MP3 = 'mp3',
+  AWS_PCM = 'pcm',
+  AWS_OGG_VORBIS = 'ogg_vorbis'
+}
+
+/**
+ * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
+ *
+ * For example: when someone requests an article text to be synthesized into a "audio/mpeg" file, the synthesizer will use the parameter:
+ * { "audioConfig": { "audioEncoding": "MP3" } } (Google)
+ * or
+ * { "OutputFormat": "mp3" } (AWS)
+ *
+ */
+export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesizer: Synthesizer) => {
+  if (mimeType === 'audio/mpeg') {
+    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : SynthesizerEncoding.AWS_MP3;
+  }
+
+  if (mimeType === 'audio/wav') {
+    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : null;
+  }
+
+  if (mimeType === 'audio/pcm') {
+    return (synthesizer === Synthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_PCM;
+  }
+
+  if (mimeType === 'audio/ogg') {
+    return (synthesizer === Synthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_OGG_VORBIS;
+  }
+
+  if (mimeType === 'audio/opus') {
+    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_OGG_OPUS : null;
+  }
+};
 
 /**
  * Takes the article and prepared audiofile object to synthesize the SSML to Speech.
  * It will return an audiofile object ready to be saved in the database.
  */
-export const synthesizeArticleToAudiofile = async (voice: Voice, article: Article, audiofile: Audiofile, encoding: AudiofileEncoding): Promise<Audiofile> => {
+export const synthesizeArticleToAudiofile = async (voice: Voice, article: Article, audiofile: Audiofile, mimeType: AudiofileMimeType): Promise<Audiofile> => {
   const hrstart = process.hrtime();
 
   let createdAudiofile: Audiofile = null;
@@ -30,15 +72,17 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   const ssml = article.ssml;
   const audiofileId = audiofile.id;
   const storageUploadPath = `${articleId}/${audiofileId}`;
+  const encodingParameter = mimeTypeToEncoderParameter(mimeType, voice.synthesizer);
 
+  if (!encodingParameter) throw new Error(`${voice.synthesizer} does not support ${mimeType}.`);
   if (!articleId || typeof articleId !== 'string') throw new Error('articleId (string) is not given to synthesizeArticleToAudiofile.');
   if (!ssml) throw new Error('ssml (string) is not given to synthesizeArticleToAudiofile.');
   if (!audiofileId) throw new Error('audiofileId (string) is not given to synthesizeArticleToAudiofile.');
 
   if (voice.synthesizer === 'Google') {
-    createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, encoding, storageUploadPath);
+    createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
   } else if (voice.synthesizer === 'AWS') {
-    createdAudiofile = await synthesizeUsingAWS(ssml, voice, article, audiofile, encoding, storageUploadPath);
+    createdAudiofile = await synthesizeUsingAWS(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
   } else {
     throw new Error('Synthesizer not supported. Please use Google or AWS.');
   }
@@ -50,7 +94,15 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   return createdAudiofile;
 };
 
-const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, audiofile: Audiofile, encoding: AudiofileEncoding, storageUploadPath: string) => {
+const synthesizeUsingAWS = async (
+  ssml: string,
+  voice: Voice,
+  article: Article,
+  audiofile: Audiofile,
+  mimeType: AudiofileMimeType,
+  encodingParameter: SynthesizerEncoding,
+  storageUploadPath: string
+) => {
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
     softLimit: AWS_CHARACTER_LIMIT - 1000,
@@ -58,7 +110,7 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
   });
 
   const synthesizerOptions: AWSSynthesizerOptions = {
-    OutputFormat: encoding.toLowerCase(),
+    OutputFormat: encodingParameter,
     VoiceId: voice.name,
     LanguageCode: voice.languageCode,
     TextType: 'ssml',
@@ -78,7 +130,7 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
     localAudiofilePaths,
     storageUploadPath,
-    encoding
+    encodingParameter
   );
 
   // Step 4: Get the length of the audiofile
@@ -89,7 +141,7 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
     voice,
     concatinatedLocalAudiofilePath,
     storageUploadPath,
-    encoding,
+    mimeType,
     article,
     audiofile.id,
     audiofileLength
@@ -107,18 +159,25 @@ const synthesizeUsingAWS = async (ssml: string, voice: Voice, article: Article, 
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
   audiofile.languageCode = synthesizerOptions.LanguageCode;
-  audiofile.encoding = encoding;
 
   return audiofile;
 };
 
-const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Article, audiofile: Audiofile, encoding: AudiofileEncoding, storageUploadPath: string) => {
+const synthesizeUsingGoogle = async (
+  ssml: string,
+  voice: Voice,
+  article: Article,
+  audiofile: Audiofile,
+  mimeType: AudiofileMimeType,
+  encodingParameter: SynthesizerEncoding,
+  storageUploadPath: string
+) => {
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml);
 
   const synthesizerOptions: GoogleSynthesizerOptions = {
     audioConfig: {
-      audioEncoding: encoding
+      audioEncoding: encodingParameter
     },
     voice: {
       languageCode: voice.languageCode,
@@ -143,7 +202,7 @@ const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Articl
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
     localAudiofilePaths,
     storageUploadPath,
-    encoding
+    encodingParameter
   );
 
   // Step 4: Get the length of the audiofile
@@ -154,7 +213,7 @@ const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Articl
     voice,
     concatinatedLocalAudiofilePath,
     storageUploadPath,
-    encoding,
+    mimeType,
     article,
     audiofile.id,
     audiofileLength
@@ -172,7 +231,6 @@ const synthesizeUsingGoogle = async (ssml: string, voice: Voice, article: Articl
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
   audiofile.languageCode = synthesizerOptions.voice.languageCode;
-  audiofile.encoding = encoding;
 
   return audiofile;
 };

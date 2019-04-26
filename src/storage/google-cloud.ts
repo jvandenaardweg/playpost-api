@@ -3,7 +3,7 @@ import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } fr
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
-import { AudiofileEncoding } from '../database/entities/audiofile';
+import { AudiofileMimeType } from '../database/entities/audiofile';
 
 import LocaleCode from 'locale-code';
 
@@ -29,7 +29,7 @@ export const uploadArticleAudioFile = async (
   voice: Voice,
   concatinatedLocalAudiofilePath: string,
   storageUploadPath: string,
-  encoding: AudiofileEncoding,
+  mimeType: AudiofileMimeType,
   article: Article,
   audiofileId: string,
   audiofileLength: number
@@ -38,18 +38,16 @@ export const uploadArticleAudioFile = async (
 
   console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${storageUploadPath}"...`);
 
-  let contentType = 'audio/mpeg';
   let extension = 'mp3';
 
-  if (encoding === 'OGG_OPUS') {
-    contentType = 'audio/opus';
+  if (mimeType === 'audio/opus') {
     extension = 'opus';
   }
 
   try {
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
-      contentType,
+      contentType: mimeType,
       destination: `${storageUploadPath}.${extension}`,
       gzip: true,
       metadata: {
@@ -59,7 +57,6 @@ export const uploadArticleAudioFile = async (
           audiofileSynthesizer: voice.synthesizer,
           audiofileLanguageCode: voice.languageCode,
           audiofileVoice: voice.name,
-          audiofileEncoding: encoding,
           articleId: article.id,
           articleTitle: article.title,
           articleUrl: article.url,
@@ -92,7 +89,7 @@ export const uploadArticleAudioFile = async (
 export const uploadVoicePreviewAudiofile = async (
   voice: Voice,
   audiofilePath: string,
-  encoding: string,
+  mimeType: AudiofileMimeType,
   audiofileLength: number
 ) => {
   const hrstart = process.hrtime();
@@ -100,24 +97,21 @@ export const uploadVoicePreviewAudiofile = async (
 
   console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${uploadPath}"...`);
 
-  let contentType = 'audio/mpeg';
   let extension = 'mp3';
 
-  if (encoding === 'LINEAR16') {
-    contentType = 'audio/wav';
+  if (mimeType === 'audio/wav') {
     extension = 'wav';
   }
 
   try {
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
-      contentType,
+      contentType: mimeType,
       destination: `${uploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
           audiofileLength,
-          audiofileEncoding: encoding,
           voiceId: voice.id,
           voiceSynthesizer: voice.synthesizer,
           voiceLanguageCode: voice.languageCode,

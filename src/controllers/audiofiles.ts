@@ -3,15 +3,13 @@ import { getRepository, } from 'typeorm';
 import joi from 'joi';
 import uuid from 'uuid';
 
-import { Audiofile, AudiofileEncoding } from '../database/entities/audiofile';
+import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
 
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { updateArticleToFull } from '../controllers/articles';
-
-
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -32,7 +30,7 @@ export const findById = async (req: Request, res: Response) => {
 
 export const createAudiofile = async (req: Request, res: Response) => {
   interface RequestBody {
-    encoding: AudiofileEncoding;
+    mimeType: AudiofileMimeType;
     voiceId: string;
   }
 
@@ -46,13 +44,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const userId = req.user.id;
   const { articleId } = req.params as RequestParams;
-  const { encoding, voiceId } = req.body as RequestBody;
+  const { mimeType, voiceId } = req.body as RequestBody;
 
   const articleRepository = getRepository(Article);
   const voiceRepository = getRepository(Voice);
   const audiofileRepository = getRepository(Audiofile);
 
-  const { error } = joi.validate({ articleId, userId, voiceId, encoding }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'voiceId', 'encoding'));
+  const { error } = joi.validate({ articleId, userId, voiceId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'voiceId', 'mimeType'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -108,7 +106,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   });
 
   // Synthesize and return an uploaded audiofile for use to use in the database
-  const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, encoding);
+  const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, mimeType);
 
   // Then save it in the database
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);

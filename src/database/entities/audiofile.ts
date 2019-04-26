@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToOne, Index, AfterRemove } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, Index, AfterRemove } from 'typeorm';
 import { IsUUID } from 'class-validator';
-import joi from 'joi';
 import { Article } from './article';
 import { Voice } from './voice';
 import { User } from './user';
@@ -8,10 +7,13 @@ import * as storage from '../../storage/google-cloud';
 
 import { ColumnNumericTransformer } from '../utils';
 
-export enum AudiofileEncoding {
-  MP3 = 'MP3',
-  OGG_OPUS = 'OGG_OPUS',
-  LINEAR16 = 'LINEAR16'
+// encoding formats supported by Google and AWS Polly
+export enum AudiofileMimeType {
+  MP3 = 'audio/mpeg',
+  WAV = 'audio/wav',
+  PCM = 'audio/pcm',
+  OGG_OPUS = 'audio/opus',
+  OGG_VORBIS = 'audio/ogg'
 }
 
 @Entity()
@@ -37,8 +39,8 @@ export class Audiofile {
   @Column({ nullable: true })
   languageCode: string;
 
-  @Column({ nullable: true, type: 'enum', enum: AudiofileEncoding })
-  encoding: AudiofileEncoding;
+  @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
+  mimeType: AudiofileMimeType;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;

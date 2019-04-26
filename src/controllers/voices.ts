@@ -3,11 +3,15 @@ import { getRepository } from 'typeorm';
 import fsExtra from 'fs-extra';
 
 import { Voice } from '../database/entities/voice';
+import { AudiofileMimeType } from '../database/entities/audiofile';
+
+import { SynthesizerEncoding } from '../synthesizers';
 import { googleSsmlToSpeech, GoogleSynthesizerOptions } from '../synthesizers/google';
-import { getAudioFileDurationInSeconds } from '../utils/audio';
-import * as storage from '../storage/google-cloud';
-import { AudiofileEncoding } from '../database/entities/audiofile';
 import { awsSsmlToSpeech, AWSSynthesizerOptions } from '../synthesizers/aws';
+
+import * as storage from '../storage/google-cloud';
+
+import { getAudioFileDurationInSeconds } from '../utils/audio';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
@@ -51,8 +55,9 @@ export const findAllActiveFreeVoices = async (req: Request, res: Response) => {
 
 export const createVoicePreview = async (req: Request, res: Response) => {
   let updatedVoice: Voice;
-  let localAudiofilePath: string;
-  let encoding: string;
+  let localAudiofilePath: string = '';
+  let audioEncoding: SynthesizerEncoding;
+  let mimeType: AudiofileMimeType;
 
   const { voiceId } = req.params;
   const voiceRepository = getRepository(Voice);
@@ -67,11 +72,13 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   if (!['Google', 'AWS'].includes(voice.synthesizer)) res.status(400).json({ message: 'Voice synthesizer not supported.' });
 
   if (voice.synthesizer === 'Google') {
-    encoding = 'LINEAR16';
+    audioEncoding = SynthesizerEncoding.GOOGLE_LINEAR16;
+    mimeType = AudiofileMimeType.WAV;
+
     // Step 1: Prepare the config
     const synthesizerOptions: GoogleSynthesizerOptions = {
       audioConfig: {
-        audioEncoding: encoding
+        audioEncoding
       },
       voice: {
         languageCode: voice.languageCode,
@@ -96,12 +103,14 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   }
 
   if (voice.synthesizer === 'AWS') {
-    encoding = 'mp3';
+    audioEncoding = SynthesizerEncoding.AWS_MP3;
+    mimeType = AudiofileMimeType.MP3;
+
     // Step 1: Prepare the config
     const synthesizerOptions: AWSSynthesizerOptions = {
       VoiceId: voice.name,
       LanguageCode: voice.languageCode,
-      OutputFormat: encoding,
+      OutputFormat: audioEncoding,
       TextType: 'ssml',
       Text: previewSsml
     };
@@ -116,8 +125,6 @@ export const createVoicePreview = async (req: Request, res: Response) => {
       voice.id
     );
 
-  } else {
-    return new Error('Synthesizer not supported.');
   }
 
   // Step 3: Get the length of the audiofile
@@ -127,7 +134,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   const uploadResponse = await storage.uploadVoicePreviewAudiofile(
     voice,
     localAudiofilePath,
-    encoding,
+    mimeType,
     audiofileLength
   );
 

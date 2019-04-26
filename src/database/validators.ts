@@ -13,7 +13,7 @@ export const audiofileInputValidationSchema = joi.object().keys({
   name: joi.string(),
   articleUrl: joi.string().uri(),
   audiofileId: joi.string().uuid(),
-  encoding: joi.any().valid('MP3', 'OGG_OPUS')
+  mimeType: joi.string()
 });
 
 export const playlistInputValidationSchema = joi.object().keys({
