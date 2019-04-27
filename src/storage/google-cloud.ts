@@ -9,13 +9,12 @@ import LocaleCode from 'locale-code';
 
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
-const STORAGE_BASE_URL = process.env.GOOGLE_CLOUD_STORAGE_BASE_URL;
 
 /* eslint-disable no-console */
 
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
-  const { bucket, name } = file.metadata;
-  return `${STORAGE_BASE_URL}/${bucket}/${name}`; // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
+  const { name } = file.metadata;
+  return `https://${DEFAULT_BUCKET_NAME}/${name}`; // Example: https://storage.googleapis.com/synthesized-audio-files/13eda868daeb.mp3
 };
 
 export const getPublicFileUrl = (uploadResponse: UploadResponse) => {
