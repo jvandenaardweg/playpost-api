@@ -137,6 +137,12 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(article.url);
 
+  // Set minimum required data for the article to update
+  // As without this data, we can do nothing
+  if (!ssml || !text || !html || !language || !title) {
+    throw new Error('The information we got from crawling the page was not enough. We cannot update the article.');
+  }
+
   const updatedArticle = await articleRepository.update(article.id, {
     title,
     ssml,
