@@ -84,6 +84,6 @@ export class Voice {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the voice
+  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, don't remove the voice
   audiofiles: Audiofile[];
 }
