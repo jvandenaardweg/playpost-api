@@ -71,7 +71,7 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   const articleId = article.id;
   const ssml = article.ssml;
   const audiofileId = audiofile.id;
-  const storageUploadPath = `${articleId}/${audiofileId}`;
+  const storageUploadPath = `${articleId}/audiofiles/${audiofileId}`;
   const encodingParameter = mimeTypeToEncoderParameter(mimeType, voice.synthesizer);
 
   if (!encodingParameter) throw new Error(`${voice.synthesizer} does not support ${mimeType}.`);

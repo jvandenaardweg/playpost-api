@@ -10,6 +10,9 @@ import LocaleCode from 'locale-code';
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 
+const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
+const DEFAULT_VOICE_PREVIEWS_BASE_PATH = 'voices';
+
 /* eslint-disable no-console */
 
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
@@ -48,7 +51,7 @@ export const uploadArticleAudioFile = async (
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
       contentType: mimeType,
-      destination: `${storageUploadPath}.${extension}`,
+      destination: `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${storageUploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
@@ -93,7 +96,7 @@ export const uploadVoicePreviewAudiofile = async (
   audiofileLength: number
 ) => {
   const hrstart = process.hrtime();
-  const uploadPath = `voice-previews/${voice.id}`;
+  const uploadPath = `${voice.id}`;
 
   console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${uploadPath}"...`);
 
@@ -107,7 +110,7 @@ export const uploadVoicePreviewAudiofile = async (
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
       contentType: mimeType,
-      destination: `${uploadPath}.${extension}`,
+      destination: `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${uploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
