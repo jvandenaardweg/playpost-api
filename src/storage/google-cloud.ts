@@ -39,19 +39,25 @@ export const uploadArticleAudioFile = async (
 ) => {
   const hrstart = process.hrtime();
 
-  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${storageUploadPath}"...`);
-
   let extension = 'mp3';
 
   if (mimeType === 'audio/opus') {
     extension = 'opus';
   }
 
+  if (mimeType === 'audio/wav') {
+    extension = 'wav';
+  }
+
+  const destination = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${storageUploadPath}.${extension}`;
+
+  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
+
   try {
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
+      destination,
       contentType: mimeType,
-      destination: `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${storageUploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
@@ -98,19 +104,25 @@ export const uploadVoicePreviewAudiofile = async (
   const hrstart = process.hrtime();
   const uploadPath = `${voice.id}`;
 
-  console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in directory "${uploadPath}"...`);
-
   let extension = 'mp3';
+
+  if (mimeType === 'audio/opus') {
+    extension = 'opus';
+  }
 
   if (mimeType === 'audio/wav') {
     extension = 'wav';
   }
 
+  const destination = `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${uploadPath}.${extension}`;
+
+  console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
+
   try {
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
+      destination,
       contentType: mimeType,
-      destination: `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${uploadPath}.${extension}`,
       gzip: true,
       metadata: {
         metadata: {
