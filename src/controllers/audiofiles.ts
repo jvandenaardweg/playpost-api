@@ -54,8 +54,17 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const { error } = joi.validate({ articleId, userId, voiceId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'voiceId', 'mimeType'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('mimeType', mimeType);
+      scope.setExtra('voiceId', voiceId);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message });
   }
 
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
@@ -74,7 +83,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}`;
 
     Sentry.withScope((scope) => {
-      scope.setExtra('articleId', article.id);
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
       scope.setExtra('languageCode', article.languageCode);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
@@ -96,7 +106,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
       const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
 
       Sentry.withScope((scope) => {
-        scope.setExtra('articleId', article.id);
+        scope.setExtra('userId', userId);
+        scope.setExtra('articleId', articleId);
         Sentry.captureMessage(message, Sentry.Severity.Info);
       });
 
@@ -108,7 +119,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'Article has no SSML data. We cannot generate an audiofile.';
 
     Sentry.withScope((scope) => {
-      scope.setExtra('articleId', article.id);
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -120,7 +132,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'Audiofile for this article already exists. In this version we only allow one audio per article.';
 
     Sentry.withScope((scope) => {
-      scope.setExtra('articleId', article.id);
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -134,6 +147,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'The given voice to be used to create the audio cannot be found.';
 
     Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
       scope.setExtra('voiceId', voiceId);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
