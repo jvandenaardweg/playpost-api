@@ -1,5 +1,5 @@
 import { createConnection } from 'typeorm';
-
+import * as Sentry from '@sentry/node';
 import { connectionOptions } from './database/connection-options';
 import { redisClientSub } from './cache';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
@@ -23,6 +23,13 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
         await articlesController.updateArticleToFull(articleId);
       } catch (err) {
         console.log('FETCH_FULL_ARTICLE failed.', err);
+
+        Sentry.withScope((scope) => {
+          scope.setExtra('articleId', articleId);
+          scope.setExtra('Error', err);
+          Sentry.captureMessage('Failed to fully fetch an article.', Sentry.Severity.Critical);
+        });
+
         await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
       } finally {
         console.log('Worker process ended: ', channel, articleId);
@@ -37,10 +44,15 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
         await addEmailToMailchimpList(userEmail);
       } catch (err) {
         console.log('ADD_TO_MAILCHIMP_LIST failed.', err);
+
+        Sentry.withScope((scope) => {
+          scope.setExtra('email', userEmail);
+          scope.setExtra('Error', err);
+          Sentry.captureMessage('Failed to add an e-mail address to Mailchimp list.', Sentry.Severity.Error);
+        });
       } finally {
         console.log('Worker process ended: ', channel, userEmail);
       }
-
     }
 
     if (channel === 'REMOVE_FROM_MAILCHIMP_LIST') {
@@ -51,6 +63,12 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
         await removeEmailToMailchimpList(userEmail);
       } catch (err) {
         console.log('REMOVE_FROM_MAILCHIMP_LIST failed.', err);
+
+        Sentry.withScope((scope) => {
+          scope.setExtra('email', userEmail);
+          scope.setExtra('Error', err);
+          Sentry.captureMessage('Failed to remove an e-mail address from a Mailchimp list.', Sentry.Severity.Error);
+        });
       } finally {
         console.log('Worker process ended: ', channel, userEmail);
       }
