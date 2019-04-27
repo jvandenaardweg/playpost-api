@@ -22,7 +22,7 @@ export const findById = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const audiofile = await audiofileRepository.findOne(audiofileId);
+  const audiofile = await audiofileRepository.findOne(audiofileId, { relations: ['voice'] });
 
   if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
 
