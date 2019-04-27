@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getRepository, } from 'typeorm';
 import joi from 'joi';
 import uuid from 'uuid';
+import * as Sentry from '@sentry/node';
 
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Article } from '../database/entities/article';
@@ -59,9 +60,27 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
-  if (!article) return res.status(400).json({ message: 'Article does not exist.' });
+  if (!article) {
+    const message = 'Article does not exist.';
 
-  if (article.languageCode !== 'en') return res.status(400).json({ message: `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}` });
+    Sentry.withScope((scope) => {
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message });
+  }
+
+  if (article.languageCode !== 'en') {
+    const message = `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}`;
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('articleId', article.id);
+      scope.setExtra('languageCode', article.languageCode);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message });
+  }
 
   // If there is not SSML data, try to generate it on-demand
   // Usually the SSML data is generated after insertion of an article in the database
@@ -74,18 +93,53 @@ export const createAudiofile = async (req: Request, res: Response) => {
       // Get the updated article
       article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
     } catch (err) {
-      return res.status(400).json({ message: 'Could not update the article to include SSML data. We cannot generate an audiofile.' });
+      const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
+
+      Sentry.withScope((scope) => {
+        scope.setExtra('articleId', article.id);
+        Sentry.captureMessage(message, Sentry.Severity.Info);
+      });
+
+      return res.status(400).json({ message });
     }
   }
 
-  if (!article.ssml) return res.status(400).json({ message: 'Article has no SSML data. We cannot generate an audiofile.' });
+  if (!article.ssml) {
+    const message = 'Article has no SSML data. We cannot generate an audiofile.';
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('articleId', article.id);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message });
+  }
 
   // For now, only allow one audiofile
-  if (article.audiofiles.length) return res.status(400).json({ message: 'Audiofile for this article already exists.', id: article.audiofiles[0].id });
+  if (article.audiofiles.length) {
+    const message = 'Audiofile for this article already exists. In this version we only allow one audio per article.';
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('articleId', article.id);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message, id: article.audiofiles[0].id });
+  }
 
   // Get the voice
   const voice = await voiceRepository.findOne(voiceId);
-  if (!voice) return res.status(400).json({ message: 'The given voice to be used to create the audio cannot be found.' });
+
+  if (!voice) {
+    const message = 'The given voice to be used to create the audio cannot be found.';
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('voiceId', voiceId);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    return res.status(400).json({ message });
+  }
 
   // Manually generate a UUID.
   // So we can use this ID to upload a file to storage, before we insert it into the database.
