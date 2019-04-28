@@ -49,6 +49,7 @@
     "@google-cloud/storage": "^2.5.0",
     "@google-cloud/text-to-speech": "^0.5.1",
     "@sentry/cli": "^1.41.2",
+    "@sentry/integrations": "^5.1.0",
     "@sentry/node": "^5.1.0",
     "app-root-path": "^2.2.1",
     "aws-sdk": "^2.444.0",

@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
 import * as Sentry from '@sentry/node';
+import * as Integrations from '@sentry/integrations';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
 import ExpressBrute from 'express-brute';
@@ -72,7 +73,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
       environment: 'production',
       release: process.env.HEROKU_SLUG_COMMIT,
       integrations: [
-        new Sentry.Integrations.RewriteFrames({
+        new Integrations.RewriteFrames({
           root: __dirname,
         })
       ]
