@@ -104,7 +104,7 @@ export const awsSsmlToSpeech = (
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
     // Performs the Text-to-Speech request
-    client.synthesizeSpeech(request, (err, response) => {
+    return client.synthesizeSpeech(request, (err, response) => {
       if (err) return reject(err);
 
       if (!response) return reject(new Error('AWS Polly: Received no response from synthesizeSpeech()'));
@@ -123,18 +123,22 @@ export const awsSsmlToSpeech = (
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const awsSsmlPartsToSpeech = (
+export const awsSsmlPartsToSpeech = async (
   ssmlParts: string[],
   type: SynthesizerType,
   identifier: string,
   synthesizerOptions: AWSSynthesizerOptions,
   storageUploadPath: string
 ) => {
-  const promises: Promise<any>[] = [];
+  const promises: Promise<string>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
+    promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
   });
 
-  return Promise.all(promises);
+  const tempLocalAudiofilePaths = await Promise.all(promises);
+
+  tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
+
+  return tempLocalAudiofilePaths;
 };

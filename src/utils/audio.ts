@@ -41,11 +41,6 @@ export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: 
 
     if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
 
-    // If we have multiple audiofiles, we concat them
-    // First, sort correctly
-    audioFiles.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
-
-    audioFiles.forEach(audioFile => console.log(`Sorted audiofiles, order: ${audioFile}`));
     console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
 
     return fluentFfmpeg()

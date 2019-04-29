@@ -117,8 +117,8 @@ export const googleSsmlToSpeech = (
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
     // Performs the Text-to-Speech request
-    client.synthesizeSpeech(synthesizerOptions, (synthesizeSpeechError: any, response: any) => {
-      if (synthesizeSpeechError) return reject(new Error(synthesizeSpeechError));
+    return client.synthesizeSpeech(synthesizerOptions, (err: any, response: any) => {
+      if (err) return reject(err);
 
       if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
 
@@ -136,18 +136,23 @@ export const googleSsmlToSpeech = (
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const googleSsmlPartsToSpeech = (
+export const googleSsmlPartsToSpeech = async (
   ssmlParts: string[],
   type: SynthesizerType,
   identifier: string,
   synthesizerOptions: GoogleSynthesizerOptions,
   storageUploadPath: string
 ) => {
-  const promises: Promise<any>[] = [];
+  const promises: Promise<string>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    return promises.push(googleSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
+    promises.push(googleSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
   });
 
-  return Promise.all(promises);
+  const tempLocalAudiofilePaths = await Promise.all(promises);
+
+  tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
+
+  return tempLocalAudiofilePaths;
+
 };
