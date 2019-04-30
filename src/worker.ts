@@ -1,10 +1,26 @@
+require('dotenv').config();
 import { createConnection } from 'typeorm';
 import * as Sentry from '@sentry/node';
+import * as Integrations from '@sentry/integrations';
+
 import { connectionOptions } from './database/connection-options';
 import { redisClientSub } from './cache';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from './mailers/mailchimp';
 import * as articlesController from './controllers/articles';
 import { ArticleStatus } from './database/entities/article';
+
+if (process.env.NODE_ENV === 'production') {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: 'production',
+    release: process.env.HEROKU_SLUG_COMMIT,
+    integrations: [
+      new Integrations.RewriteFrames({
+        root: __dirname,
+      })
+    ]
+  });
+}
 
 // Listen for the message to fetch the full article.
 // This happens right after the insert of a new article.
