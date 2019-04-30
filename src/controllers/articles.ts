@@ -162,23 +162,38 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     console.log(`We replace current playlistItems with the existing article ID and remove this duplicate article ID "${article.id}".`);
 
     // Get all playlist items that use the wrong article ID
+    // This is probably just one item, the newly article added to a playlist by a user
     const playlistItems = await playlistItemRepository.find({ article: { id: article.id } });
 
     console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${article.id}".`);
 
-    // Update each playlist item with the correct article ID
-    for (const playlistItem of playlistItems) {
-      await playlistItemRepository.update(playlistItem.id, {
-        article: {
-          id: existingArticle.id
-        }
-      });
-      console.log(`Replaced playlistItem "${playlistItem.id}" with article ID "${existingArticle.id}".`);
-    }
-
-    // Remove the duplicate article
+    // Remove the duplicate article, so we free up the unique constraints in the playlist
     await articleRepository.remove(article);
     console.log(`Removed duplicate article ID: ${article.id}`);
+
+    // Add a new playlistItem using the existing article ID
+    for (const playlistItem of playlistItems) {
+      const userId = playlistItem.user.id;
+      const playlistId = playlistItem.playlist.id;
+      const articleId = existingArticle.id;
+
+      // Create the new playlist item using the existing article ID
+      const playlistItemToCreate = await playlistItemRepository.create({
+        playlist: {
+          id: playlistId
+        },
+        user: {
+          id: userId
+        },
+        article: {
+          id: articleId
+        }
+      });
+
+      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+
+      console.log(`Created playlistItem "${createdPlaylistItem.id}" with article ID "${articleId}".`);
+    }
 
     // We are done
     return;
