@@ -88,68 +88,8 @@ export const addAllGoogleVoices = async () => {
 
     }
   }
-}
+};
 
-/**
- * A method to convert text to speech
- *
- * IMPORTANT: "client.synthesizeSpeech" seems to not be able to handle concurrent requests
- * Use "fetchSsmlPartToSpeech" instead.
- */
-// export const googleSsmlToSpeech = (
-//   index: number,
-//   ssmlPart: string,
-//   type: SynthesizerType,
-//   identifier: string,
-//   synthesizerOptions: GoogleSynthesizerOptions,
-//   storageUploadPath: string
-// ): Promise<string> => {
-//   return new Promise((resolve, reject) => {
-
-//     let extension = 'mp3';
-
-//     if (synthesizerOptions.audioConfig.audioEncoding === 'OGG_OPUS') {
-//       extension = 'opus';
-//     }
-
-//     if (synthesizerOptions.audioConfig.audioEncoding === 'LINEAR16') {
-//       extension = 'wav';
-//     }
-
-//     synthesizerOptions.input.ssml = ssmlPart;
-
-//     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
-
-//     console.log(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${synthesizerOptions.voice.languageCode}' speech using '${synthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
-
-//     // Make sure the path exists, if not, we create it
-//     fsExtra.ensureFileSync(tempLocalAudiofilePath);
-
-//     // Performs the Text-to-Speech request
-//     return client.synthesizeSpeech(synthesizerOptions, (err: any, response: any) => {
-//       if (err) return reject(err);
-
-//       if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
-
-//       // Write the binary audio content to a local file
-//       return fsExtra.writeFile(tempLocalAudiofilePath, response.audioContent, 'binary', (writeFileError) => {
-//         if (writeFileError) return reject(writeFileError);
-
-//         console.log(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
-//         return resolve(tempLocalAudiofilePath);
-//       });
-//     });
-//   });
-// };
-
-/**
- * A temporary solution to allow concurrent requests to the Speech API.
- *
- * The library method "synthesizeSpeech" seems to not handle concurrent requests correctly
- * As every audioContent seems the same.
- *
- * Endpoint documentation: https://cloud.google.com/text-to-speech/docs/reference/rest/v1/text/synthesize
- */
 export const googleSsmlToSpeech = (
   index: number,
   ssmlPart: string,
@@ -158,51 +98,47 @@ export const googleSsmlToSpeech = (
   synthesizerOptions: GoogleSynthesizerOptions,
   storageUploadPath: string
 ): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
+
+    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Note: this seem to fix the problem we had with concurrent requests
+    const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
+      input: {
+        ssml: ssmlPart
+      }
+    });
+
     let extension = 'mp3';
 
-    if (synthesizerOptions.audioConfig.audioEncoding === 'OGG_OPUS') {
+    if (ssmlPartSynthesizerOptions.audioConfig.audioEncoding === 'OGG_OPUS') {
       extension = 'opus';
     }
 
-    if (synthesizerOptions.audioConfig.audioEncoding === 'LINEAR16') {
+    if (ssmlPartSynthesizerOptions.audioConfig.audioEncoding === 'LINEAR16') {
       extension = 'wav';
     }
 
-    synthesizerOptions.input.ssml = ssmlPart;
-
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-    console.log(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${synthesizerOptions.voice.languageCode}' speech using '${synthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
+    console.log(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.voice.languageCode}' speech using '${ssmlPartSynthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
-    try {
+    // Performs the Text-to-Speech request
+    return client.synthesizeSpeech(ssmlPartSynthesizerOptions, (err: any, response: any) => {
+      if (err) return reject(err);
 
-      // Get the speech data using the API
-      const response = await nodeFetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
-        method: 'POST',
-        body: JSON.stringify(synthesizerOptions),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': process.env.GOOGLE_CLOUD_API_KEY
-        }
-      })
-      .then(response => response.json());
+      if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
 
-      // Turn the base64 data into a buffer, we can use to write to a file
-      const buff = new Buffer(response.audioContent, 'base64');
+      // Write the binary audio content to a local file
+      return fsExtra.writeFile(tempLocalAudiofilePath, response.audioContent, 'binary', (writeFileError) => {
+        if (writeFileError) return reject(writeFileError);
 
-      // Write the a temporary file
-      await fsExtra.writeFile(tempLocalAudiofilePath, buff, 'binary');
-
-      console.log(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
-
-      return resolve(tempLocalAudiofilePath);
-    } catch (err) {
-      return reject(err);
-    }
+        console.log(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
+        return resolve(tempLocalAudiofilePath);
+      });
+    });
   });
 };
 
@@ -219,7 +155,10 @@ export const googleSsmlPartsToSpeech = async (
   const promises: Promise<string>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    promises.push(googleSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
+    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Note: this seem to fix the problem we had with concurrent requests
+    const synthesizerOptionsCopy = Object.assign({}, synthesizerOptions);
+    promises.push(googleSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 
   const tempLocalAudiofilePaths = await Promise.all(promises);
