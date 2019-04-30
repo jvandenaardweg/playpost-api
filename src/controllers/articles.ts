@@ -192,7 +192,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
   });
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle && existingArticle.id !== article.id) {
+  if (existingArticle && existingArticle.id !== article.id && existingArticle.status === ArticleStatus.FINISHED) {
     const duplicateArticleId = article.id;
     const existingArticleId = existingArticle.id;
 
