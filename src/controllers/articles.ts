@@ -128,6 +128,7 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
 
   return updatedArticle;
 };
+
 /**
  * Takes the articleId and crawls the article URL to fetch the full article contents
  * This is a long running process and is done after the creation of a new article
@@ -193,7 +194,7 @@ const enforceUniqueArticle = async (articleId: string, currentUrl: string) => {
 
     // Get all playlist items that use the wrong article ID
     // This is probably just one item, the newly article added to a playlist by a user
-    const playlistItems = await playlistItemRepository.find({ article: { id: duplicateArticleId } });
+    const playlistItems = await playlistItemRepository.find({ relations: ['user', 'playlist'], where: { article: { id: duplicateArticleId } } });
 
     console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
