@@ -238,7 +238,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
         console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
       }
     }
+  } else {
+    return null;
   }
-
-  return existingArticle;
-}
+};
