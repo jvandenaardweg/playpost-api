@@ -144,7 +144,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
-  if (!ssml || !text || !html || !language || !title) {
+  if (!ssml || !text || !html || !language || !title || !currentUrl || !description) {
     throw new Error('The information we got from crawling the page was not enough. We cannot update the article.');
   }
 
@@ -187,7 +187,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
   });
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle) {
+  if (existingArticle && existingArticle.id !== article.id) {
     const duplicateArticleId = article.id;
     const existingArticleId = existingArticle.id;
 
