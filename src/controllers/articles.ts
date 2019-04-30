@@ -124,6 +124,8 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
+  if (!article) throw new Error('Cannot update article status, because the article is not found.');
+
   const updatedArticle = await articleRepository.update(article.id, { status });
 
   return updatedArticle;
@@ -207,21 +209,29 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
       const userId = playlistItem.user.id;
       const playlistId = playlistItem.playlist.id;
 
-      // Create the new playlist item using the existing article ID
-      const playlistItemToCreate = await playlistItemRepository.create({
-        playlist: {
-          id: playlistId
-        },
-        user: {
-          id: userId
-        },
-        article: {
-          id: existingArticleId
-        }
-      });
+      // Check if articleId already exists in playlistId
+      const userPlaylistItems = await playlistItemRepository.find({ user: { id: userId }, playlist: { id: playlistId } });
+      const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
 
-      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-      console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
+        console.log(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
+      } else {
+        // Create the new playlist item using the existing article ID
+        const playlistItemToCreate = await playlistItemRepository.create({
+          playlist: {
+            id: playlistId
+          },
+          user: {
+            id: userId
+          },
+          article: {
+            id: existingArticleId
+          }
+        });
+
+        const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+        console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      }
     }
   }
 
