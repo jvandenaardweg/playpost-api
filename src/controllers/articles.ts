@@ -149,8 +149,13 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   }
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
-  const existingArticle = await enforceUniqueArticle(article, currentUrl);
-  if (existingArticle) return;
+  if (article.status !== ArticleStatus.FINISHED) {
+    const existingArticle = await enforceUniqueArticle(article, currentUrl);
+    if (existingArticle) {
+      console.log('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
+      return;
+    }
+  }
 
   const updatedArticle = await articleRepository.update(article.id, {
     title,
