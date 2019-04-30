@@ -189,18 +189,18 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
     const duplicateArticleId = article.id;
     const existingArticleId = existingArticle.id;
 
-    console.log(`Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
-    console.log(`We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+    console.log(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
+    console.log(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
 
     // Get all playlist items that use the wrong article ID
     // This is probably just one item, the newly article added to a playlist by a user
     const playlistItems = await playlistItemRepository.find({ relations: ['user', 'playlist'], where: { article: { id: duplicateArticleId } } });
 
-    console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+    console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
     // Remove the duplicate article, so we free up the unique constraints in the playlist
     await articleRepository.remove(article);
-    console.log(`Removed duplicate article ID: ${duplicateArticleId}`);
+    console.log(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
 
     // Add a new playlistItem using the existing article ID
     for (const playlistItem of playlistItems) {
@@ -221,7 +221,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
       });
 
       const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-      console.log(`Transaction: Create playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
     }
   }
 
