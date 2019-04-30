@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
-import { getRepository, UpdateResult } from 'typeorm';
+import { getRepository, UpdateResult, getManager } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
@@ -146,7 +146,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   }
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
-  const existingArticle = await enforceUniqueArticle(article, currentUrl);
+  const existingArticle = await enforceUniqueArticle(article.id, currentUrl);
   if (existingArticle) return;
 
   const updatedArticle = await articleRepository.update(article.id, {
@@ -171,13 +171,11 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
  * Business logic to ensure we only have 1 article per canonicalUrl in the database
  *
  */
-const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
+const enforceUniqueArticle = async (articleId: string, currentUrl: string) => {
   const articleRepository = getRepository(Article);
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
-  // We replace playlistItem's with the (wrong) article
-  // We remove the duplicate article
+  // Find any existing article using the currentUrl, which is the "canonicalUrl" we get from the crawler
   const existingArticle = await articleRepository.findOne({
     where: [
       { url: currentUrl },
@@ -187,8 +185,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
   if (existingArticle) {
-    const duplicateArticle = article;
-    const duplicateArticleId = article.id;
+    const duplicateArticleId = articleId;
     const existingArticleId = existingArticle.id;
 
     console.log(`Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
@@ -200,32 +197,38 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
 
     console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
-    // Remove the duplicate article, so we free up the unique constraints in the playlist
-    await articleRepository.remove(duplicateArticle);
-    console.log(`Removed duplicate article ID: ${duplicateArticleId}`);
+    // Run queries inside a transaction, so we are for sure they get run correctly
+    await getManager().transaction(async (transactionalEntityManager) => {
+      console.log('Transaction: Starting...');
 
-    // Add a new playlistItem using the existing article ID
-    for (const playlistItem of playlistItems) {
-      const userId = playlistItem.user.id;
-      const playlistId = playlistItem.playlist.id;
+      // Remove the duplicate article, so we free up the unique constraints in the playlist
+      await transactionalEntityManager.remove(Article, { id: duplicateArticleId });
+      console.log(`Transaction: Removed duplicate article ID: ${duplicateArticleId}`);
 
-      // Create the new playlist item using the existing article ID
-      const playlistItemToCreate = await playlistItemRepository.create({
-        playlist: {
-          id: playlistId
-        },
-        user: {
-          id: userId
-        },
-        article: {
-          id: existingArticleId
-        }
-      });
+      // Add a new playlistItem using the existing article ID
+      for (const playlistItem of playlistItems) {
+        const userId = playlistItem.user.id;
+        const playlistId = playlistItem.playlist.id;
 
-      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+        // Create the new playlist item using the existing article ID
+        const playlistItemToCreate = await transactionalEntityManager.create(PlaylistItem, {
+          playlist: {
+            id: playlistId
+          },
+          user: {
+            id: userId
+          },
+          article: {
+            id: existingArticleId
+          }
+        });
 
-      console.log(`Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
-    }
+        const createdPlaylistItem = await transactionalEntityManager.save(playlistItemToCreate);
+        console.log(`Transaction: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      }
+
+      console.log('Transaction: Done!');
+    });
   }
 
   return existingArticle;
