@@ -76,35 +76,31 @@ export const awsSsmlToSpeech = (
   storageUploadPath: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const { VoiceId, LanguageCode, OutputFormat, TextType } = synthesizerOptions;
+    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Note: this seem to fix the problem we had with concurrent requests
+    const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
+      Text: ssmlPart
+    });
 
     let extension = 'mp3';
 
-    if (OutputFormat === 'ogg_vorbis') {
+    if (ssmlPartSynthesizerOptions.OutputFormat === 'ogg_vorbis') {
       extension = 'ogg';
     }
 
-    if (OutputFormat === 'pcm') {
+    if (ssmlPartSynthesizerOptions.OutputFormat === 'pcm') {
       extension = 'wav';
     }
 
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-    const request: Polly.Types.SynthesizeSpeechInput = {
-      OutputFormat,
-      VoiceId,
-      LanguageCode,
-      TextType,
-      Text: ssmlPart,
-    };
-
-    console.log(`AWS Polly: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${LanguageCode}' speech using '${VoiceId}' at: ${tempLocalAudiofilePath}`);
+    console.log(`AWS Polly: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.LanguageCode}' speech using '${ssmlPartSynthesizerOptions.VoiceId}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
     // Performs the Text-to-Speech request
-    return client.synthesizeSpeech(request, (err, response) => {
+    return client.synthesizeSpeech(ssmlPartSynthesizerOptions, (err, response) => {
       if (err) return reject(err);
 
       if (!response) return reject(new Error('AWS Polly: Received no response from synthesizeSpeech()'));
@@ -133,7 +129,10 @@ export const awsSsmlPartsToSpeech = async (
   const promises: Promise<string>[] = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
-    promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptions, storageUploadPath));
+    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Note: this seem to fix the problem we had with concurrent requests
+    const synthesizerOptionsCopy = Object.assign({}, synthesizerOptions);
+    promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 
   const tempLocalAudiofilePaths = await Promise.all(promises);
