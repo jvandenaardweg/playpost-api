@@ -90,7 +90,7 @@ export const addAllGoogleVoices = async () => {
   }
 };
 
-export const googleSsmlToSpeech = (
+export const googleSSMLToSpeech = (
   index: number,
   ssmlPart: string,
   type: SynthesizerType,
@@ -99,8 +99,7 @@ export const googleSsmlToSpeech = (
   storageUploadPath: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-
-    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Create a copy of the synthesizerOptions before giving it to the synthesizeSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
     const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
       input: {
@@ -145,7 +144,7 @@ export const googleSsmlToSpeech = (
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const googleSsmlPartsToSpeech = async (
+export const googleSSMLPartsToSpeech = async (
   ssmlParts: string[],
   type: SynthesizerType,
   identifier: string,
@@ -158,7 +157,7 @@ export const googleSsmlPartsToSpeech = async (
     // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
     const synthesizerOptionsCopy = Object.assign({}, synthesizerOptions);
-    promises.push(googleSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
+    promises.push(googleSSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 
   const tempLocalAudiofilePaths = await Promise.all(promises);

@@ -67,7 +67,7 @@ export const addAllAWSVoices = async () => {
   }
 }
 
-export const awsSsmlToSpeech = (
+export const awsSSMLToSpeech = (
   index: number,
   ssmlPart: string,
   type: SynthesizerType,
@@ -76,7 +76,7 @@ export const awsSsmlToSpeech = (
   storageUploadPath: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-    // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
+    // Create a copy of the synthesizerOptions before giving it to the synthesizeSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
     const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
       Text: ssmlPart
@@ -119,7 +119,7 @@ export const awsSsmlToSpeech = (
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const awsSsmlPartsToSpeech = async (
+export const awsSSMLPartsToSpeech = async (
   ssmlParts: string[],
   type: SynthesizerType,
   identifier: string,
@@ -132,7 +132,7 @@ export const awsSsmlPartsToSpeech = async (
     // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
     const synthesizerOptionsCopy = Object.assign({}, synthesizerOptions);
-    promises.push(awsSsmlToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
+    promises.push(awsSSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 
   const tempLocalAudiofilePaths = await Promise.all(promises);

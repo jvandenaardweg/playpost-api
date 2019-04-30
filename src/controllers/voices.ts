@@ -6,8 +6,8 @@ import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
 
 import { SynthesizerEncoding } from '../synthesizers';
-import { googleSsmlToSpeech, GoogleSynthesizerOptions } from '../synthesizers/google';
-import { awsSsmlToSpeech, AWSSynthesizerOptions } from '../synthesizers/aws';
+import { googleSSMLToSpeech, GoogleSynthesizerOptions } from '../synthesizers/google';
+import { awsSSMLToSpeech, AWSSynthesizerOptions } from '../synthesizers/aws';
 
 import * as storage from '../storage/google-cloud';
 
@@ -91,7 +91,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
     };
 
     // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-    localAudiofilePath = await googleSsmlToSpeech(
+    localAudiofilePath = await googleSSMLToSpeech(
       0,
       synthesizerOptions.input.ssml,
       'preview',
@@ -116,7 +116,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
     };
 
     // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-    localAudiofilePath = await awsSsmlToSpeech(
+    localAudiofilePath = await awsSSMLToSpeech(
       0,
       synthesizerOptions.Text,
       'preview',

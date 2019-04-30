@@ -10,8 +10,8 @@ import * as storage from '../storage/google-cloud';
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
 
-import { googleSsmlPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
-import { awsSsmlPartsToSpeech, AWSSynthesizerOptions } from './aws';
+import { googleSSMLPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
+import { awsSSMLPartsToSpeech, AWSSynthesizerOptions } from './aws';
 import { Polly } from 'aws-sdk';
 
 /* eslint-disable no-console */
@@ -118,7 +118,7 @@ const synthesizeUsingAWS = async (
   };
 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await awsSsmlPartsToSpeech(
+  const localAudiofilePaths = await awsSSMLPartsToSpeech(
     ssmlParts,
     'article',
     article.id,
@@ -190,7 +190,7 @@ const synthesizeUsingGoogle = async (
   };
 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await googleSsmlPartsToSpeech(
+  const localAudiofilePaths = await googleSSMLPartsToSpeech(
     ssmlParts,
     'article',
     article.id,
