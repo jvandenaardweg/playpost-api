@@ -134,7 +134,6 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
  */
 export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
   const articleRepository = getRepository(Article);
-  const playlistItemRepository = getRepository(PlaylistItem);
 
   const article = await articleRepository.findOne(articleId);
 
@@ -147,57 +146,8 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   }
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
-  // We replace playlistItem's with the (wrong) article
-  // We remove the duplicate article
-  const existingArticle = await articleRepository.findOne({
-    where: [
-      { url: currentUrl },
-      { canonicalUrl: currentUrl }
-    ]
-  });
-
-  // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle) {
-    console.log(`Found an existing article ID "${existingArticle.id}" using the URL we got from the crawler: ${currentUrl}`);
-    console.log(`We replace current playlistItems with the existing article ID and remove this duplicate article ID "${article.id}".`);
-
-    // Get all playlist items that use the wrong article ID
-    // This is probably just one item, the newly article added to a playlist by a user
-    const playlistItems = await playlistItemRepository.find({ article: { id: article.id } });
-
-    console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${article.id}".`);
-
-    // Remove the duplicate article, so we free up the unique constraints in the playlist
-    await articleRepository.remove(article);
-    console.log(`Removed duplicate article ID: ${article.id}`);
-
-    // Add a new playlistItem using the existing article ID
-    for (const playlistItem of playlistItems) {
-      const userId = playlistItem.user.id;
-      const playlistId = playlistItem.playlist.id;
-      const articleId = existingArticle.id;
-
-      // Create the new playlist item using the existing article ID
-      const playlistItemToCreate = await playlistItemRepository.create({
-        playlist: {
-          id: playlistId
-        },
-        user: {
-          id: userId
-        },
-        article: {
-          id: articleId
-        }
-      });
-
-      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-
-      console.log(`Created playlistItem "${createdPlaylistItem.id}" with article ID "${articleId}".`);
-    }
-
-    // We are done
-    return;
-  }
+  const existingArticle = await enforceUniqueArticle(article, currentUrl);
+  if (existingArticle) return;
 
   const updatedArticle = await articleRepository.update(article.id, {
     title,
@@ -216,3 +166,67 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   return updatedArticle;
 };
+
+/**
+ * Business logic to ensure we only have 1 article per canonicalUrl in the database
+ *
+ */
+const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
+  const articleRepository = getRepository(Article);
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
+  // We replace playlistItem's with the (wrong) article
+  // We remove the duplicate article
+  const existingArticle = await articleRepository.findOne({
+    where: [
+      { url: currentUrl },
+      { canonicalUrl: currentUrl }
+    ]
+  });
+
+  // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
+  if (existingArticle) {
+    const duplicateArticle = article;
+    const duplicateArticleId = article.id;
+    const existingArticleId = existingArticle.id;
+
+    console.log(`Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
+    console.log(`We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+
+    // Get all playlist items that use the wrong article ID
+    // This is probably just one item, the newly article added to a playlist by a user
+    const playlistItems = await playlistItemRepository.find({ article: { id: duplicateArticleId } });
+
+    console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+
+    // Remove the duplicate article, so we free up the unique constraints in the playlist
+    await articleRepository.remove(duplicateArticle);
+    console.log(`Removed duplicate article ID: ${duplicateArticleId}`);
+
+    // Add a new playlistItem using the existing article ID
+    for (const playlistItem of playlistItems) {
+      const userId = playlistItem.user.id;
+      const playlistId = playlistItem.playlist.id;
+
+      // Create the new playlist item using the existing article ID
+      const playlistItemToCreate = await playlistItemRepository.create({
+        playlist: {
+          id: playlistId
+        },
+        user: {
+          id: userId
+        },
+        article: {
+          id: existingArticleId
+        }
+      });
+
+      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+
+      console.log(`Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+    }
+  }
+
+  return existingArticle;
+}
