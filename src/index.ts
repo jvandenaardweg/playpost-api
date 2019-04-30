@@ -79,6 +79,10 @@ createConnection(defaultConnection).then(async (connection: any) => {
       ]
     });
 
+    Sentry.configureScope((scope) => {
+      scope.setExtra('process', 'web');
+    });
+
     // The request handler must be the first middleware on the app
     app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
     app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
