@@ -5,6 +5,7 @@ import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema } from '../database/validators';
+import { PlaylistItem } from '../database/entities/playlist-item';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -133,6 +134,8 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
  */
 export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
   const articleRepository = getRepository(Article);
+  const playlistItemRepository = getRepository(PlaylistItem);
+
   const article = await articleRepository.findOne(articleId);
 
   const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(article.url);
@@ -141,6 +144,39 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   // As without this data, we can do nothing
   if (!ssml || !text || !html || !language || !title) {
     throw new Error('The information we got from crawling the page was not enough. We cannot update the article.');
+  }
+
+  // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
+  // We replace playlistItem's with the (wrong) article
+  // We remove the duplicate article
+  const existingArticle = await articleRepository.findOne({
+    where: [
+      { url: currentUrl },
+      { canonicalUrl: currentUrl }
+    ]
+  });
+
+  // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
+  if (existingArticle) {
+    console.log('Found an existing article using the URL we got from the crawler. We replace current playlistItems with the existing article, and remove this duplicate article.');
+
+    // Get all playlist items that use the wrong article ID
+    const playlistItems = await playlistItemRepository.find({ article: { id: article.id } });
+
+    // Update each playlist item with the correct article ID
+    for (const playlistItem of playlistItems) {
+      await playlistItemRepository.update(playlistItem.id, {
+        article: {
+          id: existingArticle.id
+        }
+      });
+    }
+
+    // Remove the duplicate article
+    await articleRepository.remove(article);
+
+    // We are done
+    return;
   }
 
   const updatedArticle = await articleRepository.update(article.id, {

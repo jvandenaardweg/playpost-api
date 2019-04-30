@@ -116,6 +116,9 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   let createdArticle: Article;
 
   // Normalize the URL
+  // IMPORTANT: the normalized URL could still be different than the canonicalUrl in the database
+  // For this we'll do an extra check later in the updateArticleToFull() method, to ensure we don't get duplicates
+  // By doing it this way, we keep this method very quick and responsive for our user
   const normalizedUrl = getNormalizedUrl(articleUrl);
 
   // Get the playlist to check if it exists
