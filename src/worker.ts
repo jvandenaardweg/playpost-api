@@ -18,7 +18,11 @@ if (process.env.NODE_ENV === 'production') {
       new Integrations.RewriteFrames({
         root: __dirname,
       })
-    ]
+    ],
+  });
+
+  Sentry.configureScope((scope) => {
+    scope.setExtra('process', 'worker');
   });
 }
 
@@ -42,10 +46,11 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
         if (process.env.NODE_ENV === 'production') {
           Sentry.withScope((scope) => {
-            scope.setExtra('process', 'worker');
             scope.setExtra('articleId', articleId);
             scope.setExtra('Error', err);
-            Sentry.captureMessage('Failed to fully fetch an article.', Sentry.Severity.Critical);
+            scope.setLevel(Sentry.Severity.Critical);
+            Sentry.captureMessage('Failed to fully fetch an article.');
+            Sentry.captureException(err);
           });
         }
 
@@ -66,10 +71,11 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
         if (process.env.NODE_ENV === 'production') {
           Sentry.withScope((scope) => {
-            scope.setExtra('process', 'worker');
             scope.setExtra('email', userEmail);
             scope.setExtra('Error', err);
-            Sentry.captureMessage('Failed to add an e-mail address to Mailchimp list.', Sentry.Severity.Error);
+            scope.setLevel(Sentry.Severity.Critical);
+            Sentry.captureMessage('Failed to add an e-mail address to Mailchimp list.');
+            Sentry.captureException(err);
           });
         }
 
@@ -89,10 +95,11 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
         if (process.env.NODE_ENV === 'production') {
           Sentry.withScope((scope) => {
-            scope.setExtra('process', 'worker');
             scope.setExtra('email', userEmail);
             scope.setExtra('Error', err);
-            Sentry.captureMessage('Failed to remove an e-mail address from a Mailchimp list.', Sentry.Severity.Error);
+            scope.setLevel(Sentry.Severity.Critical);
+            Sentry.captureMessage('Failed to remove an e-mail address from a Mailchimp list.');
+            Sentry.captureException(err);
           });
         }
 
