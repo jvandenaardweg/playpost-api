@@ -40,11 +40,14 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       } catch (err) {
         console.log('FETCH_FULL_ARTICLE failed.', err);
 
-        Sentry.withScope((scope) => {
-          scope.setExtra('articleId', articleId);
-          scope.setExtra('Error', err);
-          Sentry.captureMessage('Failed to fully fetch an article.', Sentry.Severity.Critical);
-        });
+        if (process.env.NODE_ENV === 'production') {
+          Sentry.withScope((scope) => {
+            scope.setExtra('process', 'worker');
+            scope.setExtra('articleId', articleId);
+            scope.setExtra('Error', err);
+            Sentry.captureMessage('Failed to fully fetch an article.', Sentry.Severity.Critical);
+          });
+        }
 
         await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
       } finally {
@@ -61,11 +64,15 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       } catch (err) {
         console.log('ADD_TO_MAILCHIMP_LIST failed.', err);
 
-        Sentry.withScope((scope) => {
-          scope.setExtra('email', userEmail);
-          scope.setExtra('Error', err);
-          Sentry.captureMessage('Failed to add an e-mail address to Mailchimp list.', Sentry.Severity.Error);
-        });
+        if (process.env.NODE_ENV === 'production') {
+          Sentry.withScope((scope) => {
+            scope.setExtra('process', 'worker');
+            scope.setExtra('email', userEmail);
+            scope.setExtra('Error', err);
+            Sentry.captureMessage('Failed to add an e-mail address to Mailchimp list.', Sentry.Severity.Error);
+          });
+        }
+
       } finally {
         console.log('Worker process ended: ', channel, userEmail);
       }
@@ -80,11 +87,15 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
       } catch (err) {
         console.log('REMOVE_FROM_MAILCHIMP_LIST failed.', err);
 
-        Sentry.withScope((scope) => {
-          scope.setExtra('email', userEmail);
-          scope.setExtra('Error', err);
-          Sentry.captureMessage('Failed to remove an e-mail address from a Mailchimp list.', Sentry.Severity.Error);
-        });
+        if (process.env.NODE_ENV === 'production') {
+          Sentry.withScope((scope) => {
+            scope.setExtra('process', 'worker');
+            scope.setExtra('email', userEmail);
+            scope.setExtra('Error', err);
+            Sentry.captureMessage('Failed to remove an e-mail address from a Mailchimp list.', Sentry.Severity.Error);
+          });
+        }
+
       } finally {
         console.log('Worker process ended: ', channel, userEmail);
       }
