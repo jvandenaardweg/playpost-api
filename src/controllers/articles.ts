@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
-import { getRepository, UpdateResult, getManager, Not } from 'typeorm';
+import { getRepository, UpdateResult, getManager } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
@@ -182,13 +182,12 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
   const existingArticle = await articleRepository.findOne({
     where: [
       { url: currentUrl },
-      { canonicalUrl: currentUrl },
-      { id: Not(article.id) }
+      { canonicalUrl: currentUrl }
     ]
   });
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle) {
+  if (existingArticle && existingArticle.id !== article.id) {
     const duplicateArticleId = article.id;
     const existingArticleId = existingArticle.id;
 
