@@ -164,18 +164,21 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
     // Get all playlist items that use the wrong article ID
     const playlistItems = await playlistItemRepository.find({ article: { id: article.id } });
 
+    console.log(`Found ${playlistItems.length} playlist items with the duplicate article ID "${article.id}".`);
+
     // Update each playlist item with the correct article ID
     for (const playlistItem of playlistItems) {
-      console.log(`Replace playlistItem "${playlistItem.id}" with article ID "${existingArticle.id}".`);
       await playlistItemRepository.update(playlistItem.id, {
         article: {
           id: existingArticle.id
         }
       });
+      console.log(`Replaced playlistItem "${playlistItem.id}" with article ID "${existingArticle.id}".`);
     }
 
     // Remove the duplicate article
     await articleRepository.remove(article);
+    console.log(`Removed duplicate article ID: ${article.id}`);
 
     // We are done
     return;
