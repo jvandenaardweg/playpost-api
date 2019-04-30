@@ -158,13 +158,15 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
   if (existingArticle) {
-    console.log('Found an existing article using the URL we got from the crawler. We replace current playlistItems with the existing article, and remove this duplicate article.');
+    console.log(`Found an existing article ID "${existingArticle.id}" using the URL we got from the crawler: ${currentUrl}`);
+    console.log(`We replace current playlistItems with the existing article ID and remove this duplicate article ID "${article.id}".`);
 
     // Get all playlist items that use the wrong article ID
     const playlistItems = await playlistItemRepository.find({ article: { id: article.id } });
 
     // Update each playlist item with the correct article ID
     for (const playlistItem of playlistItems) {
+      console.log(`Replace playlistItem "${playlistItem.id}" with article ID "${existingArticle.id}".`);
       await playlistItemRepository.update(playlistItem.id, {
         article: {
           id: existingArticle.id
