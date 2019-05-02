@@ -183,13 +183,13 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     user: {
       id: userId
     },
-    order: 0
+    order: -1
   });
 
   const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
 
   // Move the newly created playlistItem to the first position and re-order all the other playlist items
-  await reOrderPlaylistItem(createdPlaylistItem.id, 1, 0, createdPlaylistItem.playlist.id, userId);
+  await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, createdPlaylistItem.playlist.id, userId);
 
   return res.json(createdPlaylistItem);
 
@@ -230,6 +230,12 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
+  const currentOrderNumber = playlistItem.order;
+
+  // The order is the same, just return success, no need to update the database for this
+  if (currentOrderNumber === newOrderNumber) return res.status(200).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL });
+
+  // Get all the playlistItems, so we can determine the maximum order number
   const allPlaylistPlaylistItems = await playlistItemRepository.find({
     where: {
       playlist: {
@@ -241,16 +247,12 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
     }
   });
 
-  // Restrict ordering when the newOrderNumber is greater than the last
   const lastPlaylistItem = allPlaylistPlaylistItems[allPlaylistPlaylistItems.length - 1];
+
+  // Restrict ordering when the newOrderNumber is greater than the last
   if (newOrderNumber > lastPlaylistItem.order) {
     return res.status(400).json({ message: 'You cannot use this order number, as it is beyond the last playlist item\'s order number.' });
   }
-
-  const currentOrderNumber = playlistItem.order;
-
-  // The order is the same, just return success, no need to update the database for this
-  if (currentOrderNumber === newOrderNumber) return res.status(200).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL });
 
   // Re-order all the playlist items in the playlistId of the logged in user
   await reOrderPlaylistItem(playlistItemId, newOrderNumber, currentOrderNumber, playlistId, userId);
