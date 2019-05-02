@@ -24,7 +24,7 @@ export class PlaylistItem {
   @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this PlaylistItem
   user: User;
 
-  @Column({ nullable: false, default: 1 })
+  @Column({ nullable: false, default: 0 })
   @IsInt()
   order: number;
 
