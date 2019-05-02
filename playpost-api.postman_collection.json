@@ -504,17 +504,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"encoding\": \"MP3\",\n\t\"voiceId\": \"6e4c1ec7-98a0-464b-b6e9-53e00629df6c\"\n}"
+							"raw": "{\n\t\"mimeType\": \"audio/mpeg\",\n\t\"voiceId\": \"d2ede165-9dc0-4969-af8c-f4ff3716da53\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/f1884b99-7730-4798-849a-851ebf01f8cb/audiofiles",
+							"raw": "{{baseUrl}}/v1/articles/b13a3868-d161-4463-b6eb-b1f0942788ea/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"f1884b99-7730-4798-849a-851ebf01f8cb",
+								"b13a3868-d161-4463-b6eb-b1f0942788ea",
 								"audiofiles"
 							]
 						},
@@ -801,16 +801,20 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"articleId\": \"1231231\",\n\t\"order\": 2\n}"
+							"raw": "{\n\t\"order\": \"26\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists",
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/0d06eeb0-3597-48b9-bfbf-a80b9eeb85f5/order",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists"
+								"playlists",
+								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlistitems",
+								"0d06eeb0-3597-48b9-bfbf-a80b9eeb85f5",
+								"order"
 							]
 						},
 						"description": "Change the order of the playlist by sending the article ID that changed in order. The endpoint will correctly order the other articles in the playlist. It returns the new ordered playlist."
@@ -1054,14 +1058,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/audiofiles/b0cd7bee-8da6-469f-adc5-95e4f88cc78d",
+							"raw": "{{baseUrl}}/v1/audiofiles/511c4082-8a57-4b5a-8073-3865f4a6d55c",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"audiofiles",
-								"b0cd7bee-8da6-469f-adc5-95e4f88cc78d"
+								"511c4082-8a57-4b5a-8073-3865f4a6d55c"
 							]
 						}
 					},
@@ -1164,8 +1168,79 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Create voice preview",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices/d2ede165-9dc0-4969-af8c-f4ff3716da53/preview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices",
+								"d2ede165-9dc0-4969-af8c-f4ff3716da53",
+								"preview"
+							]
+						}
+					},
+					"response": []
 				}
 			]
+		},
+		{
+			"name": "test",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Goog-Api-Key",
+						"value": "AIzaSyCa09kAmDwBmuFghCLpaSU9tty-nYrotyI",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"input\": {\n    \t\"ssml\": \"<speak><p>test</p></speak>\"\n\t},\n\t\"voice\": {\n    \t\"languageCode\": \"en-US\",\n    \t\"name\": \"en-US-Wavenet-D\"\n\t},\n\t\"audioConfig\": {\n\t\t\"audioEncoding\": \"MP3\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://texttospeech.googleapis.com/v1/text:synthesize",
+					"protocol": "https",
+					"host": [
+						"texttospeech",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"v1",
+						"text:synthesize"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {
