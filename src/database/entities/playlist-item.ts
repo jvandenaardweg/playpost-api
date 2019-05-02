@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Unique, ManyToOne, Index } from 'typeorm';
-import { IsUUID, IsInt } from 'class-validator';
+import { IsUUID, IsInt, IsDate } from 'class-validator';
 import { Playlist } from './playlist';
 import { Article } from './article';
 import { User } from './user';
 
 @Entity({ orderBy: {
-  createdAt: 'ASC'
+  order: 'ASC'
 }})
 @Unique(['playlist', 'article']) // Don't allow articles that are already in the user's playlist
 @Index(['user'])
@@ -29,14 +29,22 @@ export class PlaylistItem {
   order: number;
 
   @Column({ nullable: true })
+  @IsDate()
   lastPlayedAt: Date;
 
-  @Column({ nullable: true, default: 0 })
-  plays: number;
+  @Column({ nullable: true })
+  @IsDate()
+  archivedAt: Date;
+
+  @Column({ nullable: true })
+  @IsDate()
+  favoritedAt: Date;
 
   @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 }

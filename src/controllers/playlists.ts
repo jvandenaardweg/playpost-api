@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Playlist } from '../database/entities/playlist';
 import { playlistInputValidationSchema } from '../database/validators';
-import { getRepository, getManager } from 'typeorm';
+import { getRepository, getManager, Not, MoreThan } from 'typeorm';
 import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
@@ -63,6 +63,66 @@ export const findPlaylistById = async (req: Request, res: Response) => {
   }
 
   return res.json(playlist);
+};
+
+export const findAllFavoritedItems = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId } = req.params;
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const favoritedPlaylistItems = await playlistItemRepository.find({
+    where: {
+      playlist: {
+        id: playlistId
+      },
+      user: {
+        id: userId
+      },
+      favoritedAt: MoreThan(new Date(2000, 12, 31, 23, 59, 59, 0)) // Some past date
+    },
+    order: {
+      favoritedAt: 'ASC'
+    }
+  });
+
+  return res.json(favoritedPlaylistItems);
+};
+
+export const findAllArchivedItems = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId } = req.params;
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const archivedPlaylistItems = await playlistItemRepository.find({
+    where: {
+      playlist: {
+        id: playlistId
+      },
+      user: {
+        id: userId
+      },
+      archivedAt: MoreThan(new Date(2000, 12, 31, 23, 59, 59, 0)) // Some past date
+    },
+    order: {
+      archivedAt: 'ASC'
+    }
+  });
+
+  return res.json(archivedPlaylistItems);
 };
 
 export const createPlaylist = async (req: Request, res: Response) => {
