@@ -19,8 +19,10 @@ export const audiofileInputValidationSchema = joi.object().keys({
 export const playlistInputValidationSchema = joi.object().keys({
   userId: joi.string().uuid(),
   playlistId: joi.string().uuid(),
+  playlistItemId: joi.string().uuid(),
   articleId: joi.string().uuid(),
   name: joi.string(),
+  order: joi.number().integer().min(0),
   articleUrl: joi.string().uri()
 });
 

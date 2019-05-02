@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Playlist } from '../database/entities/playlist';
 import { playlistInputValidationSchema } from '../database/validators';
-import { getRepository } from 'typeorm';
+import { getRepository, getManager } from 'typeorm';
 import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
@@ -247,11 +247,103 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
   return res.json(createdPlaylistItem);
 };
 
-export const patchPlaylist = async (req: Request, res: Response) => {
+/**
+ * Allows the user to give a custom order to the playlist items
+ *
+ */
+export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId } = req.params;
+  const { playlistId, playlistItemId } = req.params;
+  const { order } = req.body;
 
-  return res.json({ message: `Should patch playlist ID ${playlistId} for user ${userId}.` });
+  const { error } = joi.validate({ playlistId, playlistItemId, order }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId', 'order'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const newOrderNumber = parseInt(order, 10); // Convert string to integer, so we can compare
+
+  if (!newOrderNumber) return res.status(400).json({ message: 'The given order needs to be 1 or higher.' });
+
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  // Find the playlistItem of the current user to verify he can do this action
+  const playlistItem = await playlistItemRepository.findOne(playlistItemId, {
+    relations: ['user'],
+    where: {
+      id: playlistItemId,
+      playlist: {
+        id: playlistId
+      }
+    }
+  });
+
+  if (!playlistItem) return res.status(400).json({ message: 'The given playlist item does not exist.' });
+
+  if (playlistItem.user.id !== userId) return res.status(400).json({ message: 'You do not have access to this playlist.' });
+
+  const currentOrderNumber = playlistItem.order;
+  const move = (newOrderNumber > currentOrderNumber) ? 'down' : 'up';
+
+  // The order is the same, just return success, no need to update the database for this
+  if (currentOrderNumber === newOrderNumber) return res.status(200).json({ message: 'The given order is the same. We do not update the order.' });
+
+  // Re-ordering the given playlist of the current user
+  // Helpful: https://blogs.wayne.edu/web/2017/03/13/updating-a-database-display-order-with-drag-and-drop-in-sql/
+
+  // Re-order all the playlist items in the playlistId of the logged in user
+  await getManager().transaction(async (transactionalEntityManager) => {
+    try {
+      // Move the playlistItem out of the normal ordering temporary, this creates a gap
+      await transactionalEntityManager.createQueryBuilder()
+      .update(PlaylistItem)
+      .set({ order: -1 })
+      .where('"id" = :id', { id: playlistItemId })
+      .andWhere('"userId" = :userId', { userId })
+      .andWhere('"playlistId" = :playlistId', { playlistId })
+      .execute();
+
+      // Move all other playlistItem's to their new position...
+      if (move === 'up') {
+        // If we move the item up, we need to increment the order of all the items above the newOrderNumber
+        await transactionalEntityManager.createQueryBuilder()
+        .update(PlaylistItem)
+        .set({ order: () => '"order" + 1' })
+        .where('"order" >= :newOrderNumber', { newOrderNumber })
+        .andWhere('"order" < :currentOrderNumber', { currentOrderNumber })
+        .andWhere('"userId" = :userId', { userId })
+        .andWhere('"playlistId" = :playlistId', { playlistId })
+        .execute();
+      } else {
+        // If we move the item down, we need to decrement the order of all the items below the newOrderNumber
+        await transactionalEntityManager.createQueryBuilder()
+        .update(PlaylistItem)
+        .set({ order: () => '"order" - 1' })
+        .where('"order" > :currentOrderNumber', { currentOrderNumber })
+        .andWhere('"order" <= :newOrderNumber', { newOrderNumber })
+        .andWhere('"userId" = :userId', { userId })
+        .andWhere('"playlistId" = :playlistId', { playlistId })
+        .execute();
+      }
+
+      // Fill the gap!
+      // Set newOrder to the given playlistItem
+      await transactionalEntityManager.createQueryBuilder()
+      .update(PlaylistItem)
+      .set({ order: newOrderNumber })
+      .where('id = :id', { id: playlistItemId })
+      .andWhere('"userId" = :userId', { userId })
+      .andWhere('"playlistId" = :playlistId', { playlistId })
+      .execute();
+
+      // Done! Playlist item's should now be re-ordered
+      return res.json({ message: 'Playlist is re-ordered!' });
+    } catch (err) {
+      throw err;
+    }
+  });
 };
 
 export const deletePlaylistItem = async (req: Request, res: Response) => {

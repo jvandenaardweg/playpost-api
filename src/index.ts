@@ -125,14 +125,16 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
-  // /v1/playlists
+  // Playlists => /v1/playlists
   app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
+  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
   app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
   // app.post('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.createPlaylistItemByArticleId);
   app.post('/v1/playlists/:playlistId/articles', IS_PROTECTED, playlistsController.createPlaylistItemByArticleUrl);
   app.delete('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.deletePlaylistItem);
-  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
-  // app.patch('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.patchPlaylist);
+
+  // Playlist Items => /v1/playlist/:playlistId/playlistitems
+  app.patch('/v1/playlists/:playlistId/playlistitems/:playlistItemId/order', IS_PROTECTED, playlistsController.patchPlaylistItemOrder);
 
   // /v1/articles
   // app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
