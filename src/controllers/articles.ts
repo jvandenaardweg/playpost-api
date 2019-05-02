@@ -138,9 +138,14 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
 export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
   const articleRepository = getRepository(Article);
 
-  const article = await articleRepository.findOne(articleId);
+  // Get the article details from the database
+  const articleToUpdate = await articleRepository.findOne(articleId);
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(article.url);
+  // Do a request to the crawler, requesting data from the page
+  // This might take a few seconds to resolve, as the crawler parses the whole page
+  // Takes around 5 seconds for new websites
+  // About 2 seconds for already visited websites
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(articleToUpdate.url);
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
@@ -149,15 +154,15 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
   }
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
-  if (article.status !== ArticleStatus.FINISHED) {
-    const existingArticle = await enforceUniqueArticle(article, currentUrl);
-    if (existingArticle) {
+  if (articleToUpdate.status !== ArticleStatus.FINISHED) {
+    const isEnforced = await enforceUniqueArticle(articleToUpdate, currentUrl);
+    if (isEnforced) {
       console.log('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
       return;
     }
   }
 
-  const updatedArticle = await articleRepository.update(article.id, {
+  const updatedArticle = await articleRepository.update(articleToUpdate.id, {
     title,
     ssml,
     text,
@@ -179,7 +184,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
  * Business logic to ensure we only have 1 article per canonicalUrl in the database
  *
  */
-const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
+const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string) => {
   const articleRepository = getRepository(Article);
   const playlistItemRepository = getRepository(PlaylistItem);
 
@@ -192,8 +197,8 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
   });
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle && existingArticle.id !== article.id && existingArticle.status === ArticleStatus.FINISHED) {
-    const duplicateArticleId = article.id;
+  if (existingArticle && existingArticle.id !== articleToUpdate.id && existingArticle.status === ArticleStatus.FINISHED) {
+    const duplicateArticleId = articleToUpdate.id;
     const existingArticleId = existingArticle.id;
 
     console.log(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
@@ -206,7 +211,7 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
     console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
     // Remove the duplicate article, so we free up the unique constraints in the playlist
-    await articleRepository.remove(article);
+    await articleRepository.remove(articleToUpdate);
     console.log(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
 
     // Add a new playlistItem using the existing article ID
@@ -239,6 +244,6 @@ const enforceUniqueArticle = async (article: Article, currentUrl: string) => {
       }
     }
   } else {
-    return null;
+    return false;
   }
 };
