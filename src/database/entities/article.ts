@@ -72,7 +72,7 @@ export class Article extends BaseEntity {
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the SSML to the user. If you need it, use in your find query { select: ['ssml'] }
   ssml: string;
 
-  @Column('text', { nullable: true, select: false })
+  @Column('text', { nullable: true })
   text: string;
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
