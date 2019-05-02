@@ -801,10 +801,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"order\": \"26\"\n}"
+							"raw": "{\n\t\"order\": \"1\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/0d06eeb0-3597-48b9-bfbf-a80b9eeb85f5/order",
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/order",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -813,7 +813,7 @@
 								"playlists",
 								"ead248b0-853f-4f23-88d8-877420537409",
 								"playlistitems",
-								"0d06eeb0-3597-48b9-bfbf-a80b9eeb85f5",
+								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
 								"order"
 							]
 						},
@@ -971,6 +971,120 @@
 								"playlists",
 								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
 								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all favorited playlist items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/favorites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"ead248b0-853f-4f23-88d8-877420537409",
+								"favorites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all archived playlist items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/archived",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"ead248b0-853f-4f23-88d8-877420537409",
+								"archived"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change playlist item archived status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/archivedat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlistitems",
+								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
+								"archivedat"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change playlist item favorited status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"favoritedAt\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/favoritedat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlistitems",
+								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
+								"favoritedat"
 							]
 						}
 					},
