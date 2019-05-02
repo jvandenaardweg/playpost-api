@@ -95,6 +95,70 @@ export const findAllFavoritedItems = async (req: Request, res: Response) => {
   return res.json(favoritedPlaylistItems);
 };
 
+export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId, playlistItemId } = req.params;
+  const { favoritedAt } = req.body;
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const { error } = joi.validate({ playlistId, playlistItemId }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const playlistItem = await playlistItemRepository.findOne(playlistItemId, { relations: ['user'] });
+
+  if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+
+  if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+
+  if (favoritedAt === null) {
+    // If it's already removed
+    if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your favorites. We do not update it.' });
+
+    await playlistItemRepository.update(playlistItemId, { favoritedAt: null });
+    return res.json({ message: 'Playlist item is removed to your favorites!' });
+  }
+
+  await playlistItemRepository.update(playlistItemId, { favoritedAt: new Date() });
+  return res.json({ message: 'Playlist item is added to your favorites!' });
+
+};
+
+export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { playlistId, playlistItemId } = req.params;
+  const { archivedAt } = req.body;
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const { error } = joi.validate({ playlistId, playlistItemId }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const playlistItem = await playlistItemRepository.findOne(playlistItemId, { relations: ['user'] });
+
+  if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+
+  if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+
+  if (archivedAt === null) {
+    // If it's already removed
+    if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your archive. We do not update it.' });
+
+    await playlistItemRepository.update(playlistItemId, { archivedAt: null });
+    return res.json({ message: 'Playlist item is removed to your archive!' });
+  }
+
+  await playlistItemRepository.update(playlistItemId, { archivedAt: new Date() });
+  return res.json({ message: 'Playlist item is added to your archive!' });
+};
+
+
 export const findAllArchivedItems = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId } = req.params;
