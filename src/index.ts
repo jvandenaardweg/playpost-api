@@ -129,7 +129,6 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
   app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
   app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
-  // app.post('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.createPlaylistItemByArticleId);
   app.post('/v1/playlists/:playlistId/articles', IS_PROTECTED, playlistsController.createPlaylistItemByArticleUrl);
   app.delete('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.deletePlaylistItem);
 

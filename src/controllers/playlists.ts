@@ -100,8 +100,6 @@ export const putPlaylists = async (req: Request, res: Response) => {
   return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
 };
 
-// TODO: maybe only add the article URL and return a success or fail
-// Then, after that's done, crawl the article
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { playlistId } = req.params;
@@ -175,7 +173,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // The found article ID or the newly created article ID
   const articleId = (article) ? article.id : createdArticle.id;
 
-  // TODO: Set correct "order"
   const playlistItemToCreate = await playlistItemRepository.create({
     article: {
       id: articleId
@@ -185,71 +182,17 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     },
     user: {
       id: userId
-    }
+    },
+    order: 0
   });
 
   const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
 
-  return res.json(createdPlaylistItem);
-
-};
-
-export const createPlaylistItemByArticleId = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-
-  const { playlistId, articleId } = req.params;
-
-  const playlistItemRepository = getRepository(PlaylistItem);
-  const playlistRepository = getRepository(Playlist);
-  const articleRepository = getRepository(Article);
-
-  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
-  const playlist = await playlistRepository.findOne(playlistId, { relations: ['user'] });
-
-  if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
-
-  if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
-
-  const article = await articleRepository.findOne(articleId);
-
-  if (!article) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_NOT_FOUND });
-
-  const playlistItem = await playlistItemRepository.findOne({
-    user: {
-      id: userId
-    },
-    article: {
-      id: articleId
-    },
-    playlist: {
-      id: playlistId
-    }
-  });
-
-  if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
-
-  // TODO: Set correct "order"
-  const playlistItemToCreate = await playlistItemRepository.create({
-    article: {
-      id: articleId
-    },
-    playlist: {
-      id: playlistId
-    },
-    user: {
-      id: userId
-    }
-  });
-
-  const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+  // Move the newly created playlistItem to the first position and re-order all the other playlist items
+  await reOrderPlaylistItem(createdPlaylistItem.id, 1, 0, createdPlaylistItem.playlist.id, userId);
 
   return res.json(createdPlaylistItem);
+
 };
 
 /**
@@ -270,8 +213,6 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   const newOrderNumber = parseInt(order, 10); // Convert string to integer, so we can compare
 
-  if (!newOrderNumber) return res.status(400).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_INVALID });
-
   const playlistItemRepository = getRepository(PlaylistItem);
 
   // Find the playlistItem of the current user to verify he can do this action
@@ -289,14 +230,30 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
+  const allPlaylistPlaylistItems = await playlistItemRepository.find({
+    where: {
+      playlist: {
+        id: playlistId
+      }
+    },
+    order: {
+      order: 'ASC'
+    }
+  });
+
+  // Restrict ordering when the newOrderNumber is greater than the last
+  const lastPlaylistItem = allPlaylistPlaylistItems[allPlaylistPlaylistItems.length - 1];
+  if (newOrderNumber > lastPlaylistItem.order) {
+    return res.status(400).json({ message: 'You cannot use this order number, as it is beyond the last playlist item\'s order number.' });
+  }
+
   const currentOrderNumber = playlistItem.order;
-  const move = (newOrderNumber > currentOrderNumber) ? 'down' : 'up';
 
   // The order is the same, just return success, no need to update the database for this
   if (currentOrderNumber === newOrderNumber) return res.status(200).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL });
 
   // Re-order all the playlist items in the playlistId of the logged in user
-  await reOrderPlaylistItem(playlistItemId, newOrderNumber, currentOrderNumber, playlistId, userId, move);
+  await reOrderPlaylistItem(playlistItemId, newOrderNumber, currentOrderNumber, playlistId, userId);
 
   return res.json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_SUCCESS });
 };
@@ -339,11 +296,13 @@ export const reOrderPlaylistItem = async (
   newOrderNumber: number,
   currentOrderNumber: number,
   playlistId: string,
-  userId: string,
-  move: string
+  userId: string
 ) => {
   return getManager().transaction(async (transactionalEntityManager) => {
+    const move = (newOrderNumber > currentOrderNumber) ? 'down' : 'up';
+
     // Helpful: https://blogs.wayne.edu/web/2017/03/13/updating-a-database-display-order-with-drag-and-drop-in-sql/
+
     // Move the playlistItem out of the normal ordering temporary, this creates a gap
     await transactionalEntityManager.createQueryBuilder()
     .update(PlaylistItem)
@@ -355,7 +314,8 @@ export const reOrderPlaylistItem = async (
 
     // Move all other playlistItem's to their new position...
     if (move === 'up') {
-      // If we move the item up, we need to increment the order of all the items above the newOrderNumber
+      // If we move the item up, we need to increment the order of all the items above the newOrderNumber,
+      // but below or equal to the currentOrderNumber
       await transactionalEntityManager.createQueryBuilder()
       .update(PlaylistItem)
       .set({ order: () => '"order" + 1' })
@@ -365,7 +325,8 @@ export const reOrderPlaylistItem = async (
       .andWhere('"playlistId" = :playlistId', { playlistId })
       .execute();
     } else {
-      // If we move the item down, we need to decrement the order of all the items below the newOrderNumber
+      // If we move the item down, we need to decrement the order of all the items below the newOrderNumber,
+      // but below or equal to the newOrderNumber
       await transactionalEntityManager.createQueryBuilder()
       .update(PlaylistItem)
       .set({ order: () => '"order" - 1' })
