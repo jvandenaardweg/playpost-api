@@ -67,7 +67,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+  // Fetch the article with the SSML column (which is hidden by default)
+  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
 
   if (!article) {
     const message = 'Article does not exist.';
@@ -100,8 +101,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
       // Fetch the full article details
       await updateArticleToFull(articleId);
 
-      // Get the updated article
-      article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+      // Get the updated article with the SSML column
+      article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
     } catch (err) {
       const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
 
