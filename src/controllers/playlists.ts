@@ -97,18 +97,18 @@ export const findAllFavoritedItems = async (req: Request, res: Response) => {
 
 export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, playlistItemId } = req.params;
+  const { playlistId, articleId } = req.params;
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId, playlistItemId }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId'));
+  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
     return res.status(400).json({ message: messageDetails });
   }
 
-  const playlistItem = await playlistItemRepository.findOne(playlistItemId, { relations: ['user'] });
+  const playlistItem = await playlistItemRepository.findOne({ where: { article: { id: articleId } }, relations: ['user'] });
 
   if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
 
@@ -118,29 +118,29 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your favorites. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItemId, { favoritedAt: null });
+    await playlistItemRepository.update(playlistItem.id, { favoritedAt: null });
     return res.json({ message: 'Playlist item is removed to your favorites!' });
   }
 
-  await playlistItemRepository.update(playlistItemId, { favoritedAt: new Date() });
+  await playlistItemRepository.update(playlistItem.id, { favoritedAt: new Date() });
   return res.json({ message: 'Playlist item is added to your favorites!' });
 
 };
 
 export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, playlistItemId } = req.params;
+  const { playlistId, articleId } = req.params;
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId, playlistItemId }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId'));
+  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
     return res.status(400).json({ message: messageDetails });
   }
 
-  const playlistItem = await playlistItemRepository.findOne(playlistItemId, { relations: ['user'] });
+  const playlistItem = await playlistItemRepository.findOne({ where: { article: { id: articleId } }, relations: ['user'] });
 
   if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
 
@@ -150,11 +150,11 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your archive. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItemId, { archivedAt: null });
+    await playlistItemRepository.update(playlistItem.id, { archivedAt: null });
     return res.json({ message: 'Playlist item is removed to your archive!' });
   }
 
-  await playlistItemRepository.update(playlistItemId, { archivedAt: new Date() });
+  await playlistItemRepository.update(playlistItem.id, { archivedAt: new Date() });
   return res.json({ message: 'Playlist item is added to your archive!' });
 };
 
@@ -325,10 +325,10 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
  */
 export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, playlistItemId } = req.params;
+  const { playlistId, articleId } = req.params;
   const { order } = req.body;
 
-  const { error } = joi.validate({ playlistId, playlistItemId, order }, playlistInputValidationSchema.requiredKeys('playlistId', 'playlistItemId', 'order'));
+  const { error } = joi.validate({ playlistId, articleId, order }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId', 'order'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -340,10 +340,12 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
 
   // Find the playlistItem of the current user to verify he can do this action
-  const playlistItem = await playlistItemRepository.findOne(playlistItemId, {
+  const playlistItem = await playlistItemRepository.findOne({
     relations: ['user'],
     where: {
-      id: playlistItemId,
+      article: {
+        id: articleId
+      },
       playlist: {
         id: playlistId
       }
@@ -379,7 +381,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   }
 
   // Re-order all the playlist items in the playlistId of the logged in user
-  await reOrderPlaylistItem(playlistItemId, newOrderNumber, currentOrderNumber, playlistId, userId);
+  await reOrderPlaylistItem(playlistItem.id, newOrderNumber, currentOrderNumber, playlistId, userId);
 
   return res.json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_SUCCESS });
 };
