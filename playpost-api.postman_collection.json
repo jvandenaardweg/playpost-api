@@ -156,61 +156,6 @@
 					"response": []
 				},
 				{
-					"name": "Get all created playlists",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
-								"exec": [
-									"pm.test(\"Should NOT have a password field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.password).to.be.undefined;",
-									"});",
-									"",
-									"pm.test(\"Should have an email field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.email).to.be.string;",
-									"});",
-									"",
-									"pm.test(\"Should have an id field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.be.string;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "",
-								"type": "text",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/playlists",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"playlists"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Get all created articles",
 					"event": [
 						{
@@ -523,37 +468,6 @@
 					"response": []
 				},
 				{
-					"name": "Delete article from playlist",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/articles/1/playlist",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"articles",
-								"1",
-								"playlist"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Delete article (admin only)",
 					"request": {
 						"method": "DELETE",
@@ -785,7 +699,7 @@
 			]
 		},
 		{
-			"name": "Playlists",
+			"name": "Playlist",
 			"item": [
 				{
 					"name": "Change order in playlist",
@@ -804,14 +718,13 @@
 							"raw": "{\n\t\"order\": \"1\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/articles/a1233b1d-c78b-47bc-96ab-0e09c9891896/order",
+							"raw": "{{baseUrl}}/v1/playlist/articles/a1233b1d-c78b-47bc-96ab-0e09c9891896/order",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlist",
 								"articles",
 								"a1233b1d-c78b-47bc-96ab-0e09c9891896",
 								"order"
@@ -822,7 +735,7 @@
 					"response": []
 				},
 				{
-					"name": "Get playlist by id",
+					"name": "Get all playlist items",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -831,90 +744,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/aee50e0c-037f-4346-9a28-abe8044220e0",
+							"raw": "{{baseUrl}}/v1/playlist",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"aee50e0c-037f-4346-9a28-abe8044220e0"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get all playlists",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlists",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlists"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a playlist",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Example\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlists",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlists"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add article to playlist",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlists",
-								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
-								"articles",
-								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
+								"playlist"
 							]
 						}
 					},
@@ -930,16 +766,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles/6b420071-d7fe-4951-89fe-4220aadcfd6e",
+							"raw": "{{baseUrl}}/v1/playlist/articles/ae1abeaf-e412-4419-8331-91db4c3edd22",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"playlist",
 								"articles",
-								"6b420071-d7fe-4951-89fe-4220aadcfd6e"
+								"ae1abeaf-e412-4419-8331-91db4c3edd22"
 							]
 						}
 					},
@@ -986,14 +821,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/favorites",
+							"raw": "{{baseUrl}}/v1/playlist/favorites",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlist",
 								"favorites"
 							]
 						}
@@ -1010,14 +844,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/archived",
+							"raw": "{{baseUrl}}/v1/playlist/archived",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlist",
 								"archived"
 							]
 						}
@@ -1041,14 +874,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/articles/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/archivedat",
+							"raw": "{{baseUrl}}/v1/playlist/articles/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/archivedat",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"ead248b0-853f-4f23-88d8-877420537409",
+								"playlist",
 								"articles",
 								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
 								"archivedat"
@@ -1074,15 +906,14 @@
 							"raw": "{\n\t\"favoritedAt\": null\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/article/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/favoritedat",
+							"raw": "{{baseUrl}}/v1/playlist/articles/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/favoritedat",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"ead248b0-853f-4f23-88d8-877420537409",
-								"article",
+								"playlist",
+								"articles",
 								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
 								"favoritedat"
 							]
@@ -1316,46 +1147,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "test",
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "X-Goog-Api-Key",
-						"value": "AIzaSyCa09kAmDwBmuFghCLpaSU9tty-nYrotyI",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"input\": {\n    \t\"ssml\": \"<speak><p>test</p></speak>\"\n\t},\n\t\"voice\": {\n    \t\"languageCode\": \"en-US\",\n    \t\"name\": \"en-US-Wavenet-D\"\n\t},\n\t\"audioConfig\": {\n\t\t\"audioEncoding\": \"MP3\"\n\t}\n}"
-				},
-				"url": {
-					"raw": "https://texttospeech.googleapis.com/v1/text:synthesize",
-					"protocol": "https",
-					"host": [
-						"texttospeech",
-						"googleapis",
-						"com"
-					],
-					"path": [
-						"v1",
-						"text:synthesize"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {
