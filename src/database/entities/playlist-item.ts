@@ -6,7 +6,7 @@ import { User } from './user';
 @Entity({ orderBy: {
   order: 'ASC'
 }})
-@Unique(['article']) // Don't allow articles that are already in the user's playlist
+@Unique(['article', 'user']) // Don't allow articles that are already in the user's playlist
 @Index(['user', 'favoritedAt', 'archivedAt'])
 export class PlaylistItem {
 
