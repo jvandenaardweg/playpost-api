@@ -2,7 +2,6 @@ import { ConnectionOptions } from 'typeorm';
 
 import { User } from './entities/user';
 import { Article } from './entities/article';
-import { Playlist } from './entities/playlist';
 import { PlaylistItem } from './entities/playlist-item';
 import { Audiofile } from './entities/audiofile';
 import { Voice } from './entities/voice';
@@ -25,7 +24,6 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
     synchronize: (process.env.NODE_ENV === 'production') ? false : true, // Sync changes directly when in dev
     entities: [
       User,
-      Playlist,
       PlaylistItem,
       Article,
       Audiofile,

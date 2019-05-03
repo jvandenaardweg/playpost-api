@@ -804,7 +804,7 @@
 							"raw": "{\n\t\"order\": \"1\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/order",
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/articles/a1233b1d-c78b-47bc-96ab-0e09c9891896/order",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -812,8 +812,8 @@
 								"v1",
 								"playlists",
 								"ead248b0-853f-4f23-88d8-877420537409",
-								"playlistitems",
-								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
+								"articles",
+								"a1233b1d-c78b-47bc-96ab-0e09c9891896",
 								"order"
 							]
 						},
@@ -1041,7 +1041,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/archivedat",
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/articles/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/archivedat",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1049,7 +1049,7 @@
 								"v1",
 								"playlists",
 								"ead248b0-853f-4f23-88d8-877420537409",
-								"playlistitems",
+								"articles",
 								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
 								"archivedat"
 							]
@@ -1074,7 +1074,7 @@
 							"raw": "{\n\t\"favoritedAt\": null\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/playlistitems/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/favoritedat",
+							"raw": "{{baseUrl}}/v1/playlists/ead248b0-853f-4f23-88d8-877420537409/article/84ae75e3-a99c-4db0-a2e0-0bd32d42734e/favoritedat",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1082,11 +1082,12 @@
 								"v1",
 								"playlists",
 								"ead248b0-853f-4f23-88d8-877420537409",
-								"playlistitems",
+								"article",
 								"84ae75e3-a99c-4db0-a2e0-0bd32d42734e",
 								"favoritedat"
 							]
-						}
+						},
+						"description": "To set an playlist item as favorite just run the patch URL. To remove a playlist item from the favorites, just run the patch URL with \"favoritedAt\": null"
 					},
 					"response": []
 				}

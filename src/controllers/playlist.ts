@@ -1,87 +1,41 @@
 import { Request, Response } from 'express';
-import { Playlist } from '../database/entities/playlist';
 import { playlistInputValidationSchema } from '../database/validators';
-import { getRepository, getManager, Not, MoreThan } from 'typeorm';
+import { getRepository, getManager, MoreThan } from 'typeorm';
 import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article } from '../database/entities/article';
 
 import { getNormalizedUrl } from '../utils/string';
 
-const MESSAGE_PLAYLISTS_NO_ACCESS = 'You do not have access to this endpoint.';
-const MESSAGE_PLAYLISTS_NOT_FOUND = 'Playlist does not exist. You should create one first.';
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
-const MESSAGE_PLAYLISTS_DEFAULT_EXISTS = 'There is already a Default playlist for you. We cannot create another one.';
-const MESSAGE_PLAYLISTS_NAME_EXISTS = 'There is already a playlist with this name. We cannot create another one. Choose a different name.';
-const MESSAGE_PLAYLISTS_ARTICLE_NOT_FOUND = 'Article does not exist';
-const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given playlist item does not exist.';
+const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given article does not exist in your playlist.';
 const MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST = 'You already have this article in your playlist!';
-const MESSAGE_PLAYLISTS_UPDATE_ORDER_INVALID = 'The given order needs to be 1 or higher.';
 const MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL = 'The given order is the same. We do not update the order.';
 const MESSAGE_PLAYLISTS_UPDATE_ORDER_SUCCESS = 'Successfully updated the order of your playlist!';
 
-export const findAllPlaylists = async (req: Request, res: Response) => {
-  const userEmail = req.user.email;
-  const playlistRepository = getRepository(Playlist);
+export const findAllPlaylistItems = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const playlistItemRepository = getRepository(PlaylistItem);
 
-  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS });
-
-  const playlists = await playlistRepository.find({ relations: ['playlistItems'] });
-
-  // Sort by createdAt on playlistItems
-  // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
-  const sortedPlaylist = playlists.map((playlist) => {
-    playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
-    return playlist;
+  const playlistItems = await playlistItemRepository.find({
+    relations: ['user'],
+    where: {
+      user: {
+        id: userId
+      }
+    }
   });
 
-  return res.json(sortedPlaylist);
-};
-
-export const findPlaylistById = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const { playlistId } = req.params;
-  const playlistRepository = getRepository(Playlist);
-
-  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
-  const playlist = await playlistRepository.findOne(playlistId, { relations: ['playlistItems', 'user'] });
-
-  if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
-  if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
-
-  // Manually sort the array
-  // TypeORM does not have a build in method to sort relations: https://github.com/typeorm/typeorm/issues/2620
-  if (playlist.playlistItems.length) {
-    // playlist.playlistItems.sort((a: any, b: any) => b.createdAt - a.createdAt);
-    playlist.playlistItems.sort((a: any, b: any) => a.order - b.order);
-  }
-
-  return res.json(playlist);
+  return res.json(playlistItems);
 };
 
 export const findAllFavoritedItems = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
   const favoritedPlaylistItems = await playlistItemRepository.find({
+    relations: ['user'],
     where: {
-      playlist: {
-        id: playlistId
-      },
       user: {
         id: userId
       },
@@ -97,22 +51,30 @@ export const findAllFavoritedItems = async (req: Request, res: Response) => {
 
 export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, articleId } = req.params;
+  const { articleId } = req.params;
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
+  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
     return res.status(400).json({ message: messageDetails });
   }
 
-  const playlistItem = await playlistItemRepository.findOne({ where: { article: { id: articleId } }, relations: ['user'] });
+  const playlistItem = await playlistItemRepository.findOne({
+    relations: ['user'],
+    where: {
+      article: {
+        id: articleId
+      },
+      user: {
+        id: userId
+      }
+    }
+  });
 
   if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
-
-  if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
   if (favoritedAt === null) {
     // If it's already removed
@@ -129,22 +91,30 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
 
 export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, articleId } = req.params;
+  const { articleId } = req.params;
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
+  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
     return res.status(400).json({ message: messageDetails });
   }
 
-  const playlistItem = await playlistItemRepository.findOne({ where: { article: { id: articleId } }, relations: ['user'] });
+  const playlistItem = await playlistItemRepository.findOne({
+    relations: ['user'],
+    where: {
+      article: {
+        id: articleId
+      },
+      user: {
+        id: userId
+      }
+    },
+  });
 
   if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
-
-  if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
 
   if (archivedAt === null) {
     // If it's already removed
@@ -158,24 +128,13 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
   return res.json({ message: 'Playlist item is added to your archive!' });
 };
 
-
 export const findAllArchivedItems = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId }, playlistInputValidationSchema.requiredKeys('playlistId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
   const archivedPlaylistItems = await playlistItemRepository.find({
+    relations: ['user'],
     where: {
-      playlist: {
-        id: playlistId
-      },
       user: {
         id: userId
       },
@@ -189,51 +148,14 @@ export const findAllArchivedItems = async (req: Request, res: Response) => {
   return res.json(archivedPlaylistItems);
 };
 
-export const createPlaylist = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const { name } = req.body;
-  const playlistRepository = getRepository(Playlist);
-
-  const { error } = joi.validate({ userId, name }, playlistInputValidationSchema.requiredKeys('userId', 'name'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
-
-  const playlist = await playlistRepository.findOne({ name, user: { id: userId } });
-
-  if (playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NAME_EXISTS });
-
-  const playlistToCreate = await playlistRepository.create({
-    name,
-    user: {
-      id: userId
-    }
-  });
-
-  const createdPlaylist = await playlistRepository.save(playlistToCreate);
-
-  return res.json(createdPlaylist);
-};
-
-export const putPlaylists = async (req: Request, res: Response) => {
-  const { url } = req.body;
-  // First, check to see if we already have the article details
-  // Else, crawl the article page and add it to the database
-  return res.json({ message: 'update playlist, probably changing the order of articles for user ID: X' });
-};
-
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId } = req.params;
   const { articleUrl } = req.body;
 
   const playlistItemRepository = getRepository(PlaylistItem);
-  const playlistRepository = getRepository(Playlist);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ playlistId, articleUrl }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleUrl'));
+  const { error } = joi.validate({ articleUrl }, playlistInputValidationSchema.requiredKeys('articleUrl'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -248,14 +170,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // By doing it this way, we keep this method very quick and responsive for our user
   const normalizedUrl = getNormalizedUrl(articleUrl);
 
-  // Get the playlist to check if it exists
-  const playlist = await playlistRepository.findOne(playlistId, { relations: ['user'] });
-
-  if (!playlist) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NOT_FOUND });
-
-  // Check if the user is the owner of that playlist
-  if (playlist.user.id !== userId) return res.status(403).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
-
   // Find the article by "url" OR "canonicalUrl"
   const article = await articleRepository.findOne({
     where: [
@@ -267,14 +181,14 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // If there's an article, check if that one already exists in the user's playlist
   if (article) {
     const playlistItem = await playlistItemRepository.findOne({
-      playlist: {
-        id: playlistId
-      },
-      user: {
-        id: userId
-      },
-      article: {
-        id: article.id
+      relations: ['user'],
+      where: {
+        user: {
+          id: userId
+        },
+        article: {
+          id: article.id
+        }
       }
     });
 
@@ -301,9 +215,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     article: {
       id: articleId
     },
-    playlist: {
-      id: playlistId
-    },
     user: {
       id: userId
     },
@@ -313,7 +224,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
 
   // Move the newly created playlistItem to the first position and re-order all the other playlist items
-  await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, createdPlaylistItem.playlist.id, userId);
+  await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, userId);
 
   return res.json(createdPlaylistItem);
 
@@ -325,10 +236,10 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
  */
 export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, articleId } = req.params;
+  const { articleId } = req.params;
   const { order } = req.body;
 
-  const { error } = joi.validate({ playlistId, articleId, order }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId', 'order'));
+  const { error } = joi.validate({ articleId, order }, playlistInputValidationSchema.requiredKeys('articleId', 'order'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -346,8 +257,8 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
       article: {
         id: articleId
       },
-      playlist: {
-        id: playlistId
+      user: {
+        id: userId
       }
     }
   });
@@ -363,9 +274,10 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   // Get all the playlistItems, so we can determine the maximum order number
   const allPlaylistPlaylistItems = await playlistItemRepository.find({
+    relations: ['user'],
     where: {
-      playlist: {
-        id: playlistId
+      user: {
+        id: userId
       }
     },
     order: {
@@ -381,17 +293,17 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   }
 
   // Re-order all the playlist items in the playlistId of the logged in user
-  await reOrderPlaylistItem(playlistItem.id, newOrderNumber, currentOrderNumber, playlistId, userId);
+  await reOrderPlaylistItem(playlistItem.id, newOrderNumber, currentOrderNumber, userId);
 
   return res.json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_SUCCESS });
 };
 
 export const deletePlaylistItem = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { playlistId, articleId } = req.params;
+  const { articleId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ playlistId, articleId }, playlistInputValidationSchema.requiredKeys('playlistId', 'articleId'));
+  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -399,14 +311,14 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   }
 
   const playlistItem = await playlistItemRepository.findOne({
-    playlist: {
-      id: playlistId
-    },
-    article: {
-      id: articleId
-    },
-    user: {
-      id: userId
+    relations: ['user'],
+    where: {
+      article: {
+        id: articleId
+      },
+      user: {
+        id: userId
+      }
     }
   });
 
@@ -423,7 +335,6 @@ export const reOrderPlaylistItem = async (
   playlistItemId: string,
   newOrderNumber: number,
   currentOrderNumber: number,
-  playlistId: string,
   userId: string
 ) => {
   return getManager().transaction(async (transactionalEntityManager) => {
@@ -437,7 +348,6 @@ export const reOrderPlaylistItem = async (
     .set({ order: -1 })
     .where('"id" = :id', { id: playlistItemId })
     .andWhere('"userId" = :userId', { userId })
-    .andWhere('"playlistId" = :playlistId', { playlistId })
     .execute();
 
     // Move all other playlistItem's to their new position...
@@ -450,7 +360,6 @@ export const reOrderPlaylistItem = async (
       .where('"order" >= :newOrderNumber', { newOrderNumber })
       .andWhere('"order" < :currentOrderNumber', { currentOrderNumber })
       .andWhere('"userId" = :userId', { userId })
-      .andWhere('"playlistId" = :playlistId', { playlistId })
       .execute();
     } else {
       // If we move the item down, we need to decrement the order of all the items below the newOrderNumber,
@@ -461,7 +370,6 @@ export const reOrderPlaylistItem = async (
       .where('"order" > :currentOrderNumber', { currentOrderNumber })
       .andWhere('"order" <= :newOrderNumber', { newOrderNumber })
       .andWhere('"userId" = :userId', { userId })
-      .andWhere('"playlistId" = :playlistId', { playlistId })
       .execute();
     }
 
@@ -472,7 +380,6 @@ export const reOrderPlaylistItem = async (
     .set({ order: newOrderNumber })
     .where('id = :id', { id: playlistItemId })
     .andWhere('"userId" = :userId', { userId })
-    .andWhere('"playlistId" = :playlistId', { playlistId })
     .execute();
   });
 };

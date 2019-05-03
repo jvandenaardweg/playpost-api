@@ -14,7 +14,7 @@ import ExpressBrute from 'express-brute';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
-import * as playlistsController from './controllers/playlists';
+import * as playlistController from './controllers/playlist';
 import * as usersController from './controllers/users';
 import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
@@ -118,7 +118,6 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
   // app.get('/v1/me/logout', IS_PROTECTED, meController.logout);
-  app.get('/v1/me/playlists', IS_PROTECTED, meController.findAllPlaylists);
   app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
   app.get('/v1/me/audiofiles', IS_PROTECTED, meController.findAllAudiofiles);
 
@@ -127,22 +126,17 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
-  // Playlists => /v1/playlists
-  app.get('/v1/playlists', IS_PROTECTED, playlistsController.findAllPlaylists);
-  app.get('/v1/playlists/:playlistId/favorites', IS_PROTECTED, playlistsController.findAllFavoritedItems);
-  app.get('/v1/playlists/:playlistId/archived', IS_PROTECTED, playlistsController.findAllArchivedItems);
-  app.post('/v1/playlists', IS_PROTECTED, playlistsController.createPlaylist);
-  app.get('/v1/playlists/:playlistId', IS_PROTECTED, playlistsController.findPlaylistById);
-  app.post('/v1/playlists/:playlistId/articles', IS_PROTECTED, playlistsController.createPlaylistItemByArticleUrl);
-  app.delete('/v1/playlists/:playlistId/articles/:articleId', IS_PROTECTED, playlistsController.deletePlaylistItem);
-
-  // Playlist Items => /v1/playlist/:playlistId/articles
-  app.patch('/v1/playlists/:playlistId/articles/:articleId/order', IS_PROTECTED, playlistsController.patchPlaylistItemOrder);
-  app.patch('/v1/playlists/:playlistId/articles/:articleId/favoritedat', IS_PROTECTED, playlistsController.patchPlaylistItemFavoritedAt);
-  app.patch('/v1/playlists/:playlistId/articles/:articleId/archivedat', IS_PROTECTED, playlistsController.patchPlaylistItemArchivedAt);
+  // Playlists => /v1/playlist
+  app.get('/v1/playlist', IS_PROTECTED, playlistController.findAllPlaylistItems);
+  app.get('/v1/playlist/favorites', IS_PROTECTED, playlistController.findAllFavoritedItems);
+  app.get('/v1/playlist/archived', IS_PROTECTED, playlistController.findAllArchivedItems);
+  app.post('/v1/playlist/articles', IS_PROTECTED, playlistController.createPlaylistItemByArticleUrl);
+  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED, playlistController.deletePlaylistItem);
+  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED, playlistController.patchPlaylistItemOrder);
+  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED, playlistController.patchPlaylistItemFavoritedAt);
+  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED, playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
-  // app.post('/v1/articles', IS_PROTECTED, articlesController.createArticle);
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
   app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);

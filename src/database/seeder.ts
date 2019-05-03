@@ -4,7 +4,6 @@ import { connectionOptions } from './connection-options';
 
 import { articles } from './seeds/article';
 import { users } from './seeds/user';
-import { playlists } from './seeds/playlist';
 
 /**
  * Seeds the database with example users used for development.
@@ -22,16 +21,6 @@ const seedUsers = async (databaseConnection: Connection) => {
 const seedArticles = async (databaseConnection: Connection) => {
   const promises = articles.map((article: any) => {
     return databaseConnection.createQueryBuilder().insert().into('article').values(article).execute();
-  });
-  return Promise.all(promises);
-};
-
-/**
- * Seeds the database with example playlists used for development.
- */
-const seedPlaylists = async (databaseConnection: Connection) => {
-  const promises = playlists.map((playlist: any) => {
-    return databaseConnection.createQueryBuilder().insert().into('playlist').values(playlist).execute();
   });
   return Promise.all(promises);
 };

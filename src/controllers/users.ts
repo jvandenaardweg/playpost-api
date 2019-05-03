@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import { getRepository, getConnection } from 'typeorm';
+import { getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
 import { hashPassword, routeIsProtected } from './auth';
-import { Playlist } from '../database/entities/playlist';
 import joi from 'joi';
 
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
@@ -16,7 +15,6 @@ export const createUser = [
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const userRepository = getRepository(User);
-    const playlistRepository = getRepository(Playlist);
 
     const { error } = joi.validate({ email, password }, userInputValidationSchema.requiredKeys('email', 'password'));
 
@@ -37,25 +35,9 @@ export const createUser = [
     const validationResult = await validateInput(User, userToCreate);
     if (validationResult.errors.length) return res.status(400).json(validationResult);
 
-    // Use a transaction to create the user and the default playlist
-    const createdUser = await getConnection().transaction(async (transactionalEntityManager) => {
-      // Create the user
-      const newUserToSave = await userRepository.create(userToCreate);
-      const createdUser = await transactionalEntityManager.save(newUserToSave);
-
-      // Create de default playlist
-      const defaultPlaylistToCreate = await playlistRepository.create({
-        name: 'Default',
-        user: {
-          id: createdUser.id
-        }
-      });
-
-      await transactionalEntityManager.save(defaultPlaylistToCreate);
-
-      return createdUser;
-
-    });
+    // Create the user
+    const newUserToSave = await userRepository.create(userToCreate);
+    const createdUser = await userRepository.save(newUserToSave);
 
     // Get the created user and return it
     const user = await userRepository.findOne(createdUser.id);

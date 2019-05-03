@@ -1,9 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove, getRepository } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
-import { Playlist } from './playlist';
 import { PlaylistItem } from './playlist-item';
 
 import { redisClientPub } from '../../cache';
@@ -42,10 +41,6 @@ export class User {
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
   @JoinColumn()
   playlistItems: PlaylistItem[];
-
-  @OneToMany(type => Playlist, playlist => playlist.user)
-  @JoinColumn()
-  playlists: Playlist[];
 
   @CreateDateColumn()
   createdAt: Date;

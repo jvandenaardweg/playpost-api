@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
-import { getRepository, UpdateResult, getManager } from 'typeorm';
+import { getRepository, UpdateResult } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
@@ -206,7 +206,14 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
 
     // Get all playlist items that use the wrong article ID
     // This is probably just one item, the newly article added to a playlist by a user
-    const playlistItems = await playlistItemRepository.find({ relations: ['user', 'playlist'], where: { article: { id: duplicateArticleId } } });
+    const playlistItems = await playlistItemRepository.find({
+      relations: ['user'],
+      where: {
+        article: {
+          id: duplicateArticleId
+        }
+      }
+    });
 
     console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
@@ -217,10 +224,17 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     // Add a new playlistItem using the existing article ID
     for (const playlistItem of playlistItems) {
       const userId = playlistItem.user.id;
-      const playlistId = playlistItem.playlist.id;
 
       // Check if articleId already exists in playlistId
-      const userPlaylistItems = await playlistItemRepository.find({ user: { id: userId }, playlist: { id: playlistId } });
+      const userPlaylistItems = await playlistItemRepository.find({
+        relations: ['user'],
+        where: {
+          user: {
+            id: userId
+          }
+        }
+      });
+
       const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
 
       if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
@@ -228,9 +242,6 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
       } else {
         // Create the new playlist item using the existing article ID
         const playlistItemToCreate = await playlistItemRepository.create({
-          playlist: {
-            id: playlistId
-          },
           user: {
             id: userId
           },
