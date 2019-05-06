@@ -142,6 +142,13 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(articleUrl);
 
+  // Set minimum required data for the article to update
+  // As without this data, we can do nothing
+  // TODO: make re-usable with line 203
+  if (!ssml || !text || !html || !language || !title || !currentUrl || !description) {
+    return res.status(400).json({ message: 'The information we got from crawling the page was not enough. We cannot update the article.' });
+  }
+
   await articleRepository.update(article.id, {
     title,
     ssml,
@@ -192,6 +199,7 @@ export const updateArticleToFull = async (articleId: string): Promise<UpdateResu
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
+  // TODO: make re-usable with line 148
   if (!ssml || !text || !html || !language || !title || !currentUrl || !description) {
     throw new Error('The information we got from crawling the page was not enough. We cannot update the article.');
   }
