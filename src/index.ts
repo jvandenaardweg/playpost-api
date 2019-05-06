@@ -138,6 +138,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   // /v1/articles
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
+  app.put('/v1/articles/:articleId/sync', IS_PROTECTED, articlesController.syncArticleWithSource);
   app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
   app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);

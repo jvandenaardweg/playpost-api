@@ -2,7 +2,8 @@ import joi from 'joi';
 import { join } from 'path';
 
 export const articleInputValidationSchema = joi.object().keys({
-  articleUrl: joi.string().uri()
+  articleUrl: joi.string().uri(),
+  articleId: joi.string().uuid(),
 });
 
 export const audiofileInputValidationSchema = joi.object().keys({

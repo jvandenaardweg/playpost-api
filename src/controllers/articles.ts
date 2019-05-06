@@ -4,7 +4,7 @@ import { getRepository, UpdateResult } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
-import { audiofileInputValidationSchema } from '../database/validators';
+import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
 import { PlaylistItem } from '../database/entities/playlist-item';
 
 export const findArticleById = async (req: Request, res: Response) => {
@@ -118,6 +118,49 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     title,
     siteName
   };
+};
+
+/**
+ * Syncs the article in our database with the data found at the source URL
+ */
+export const syncArticleWithSource = async (req: Request, res: Response) => {
+  const articleRepository = getRepository(Article);
+  const { articleId } = req.params;
+
+  const { error } = joi.validate({ articleId }, articleInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const article = await articleRepository.findOne(articleId);
+
+  if (!article) throw new Error('Cannot update article, because the article is not found.');
+
+  const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
+
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(articleUrl);
+
+  await articleRepository.update(article.id, {
+    title,
+    ssml,
+    text,
+    html,
+    readingTime,
+    description,
+    imageUrl,
+    authorName,
+    canonicalUrl: currentUrl,
+    status: ArticleStatus.FINISHED,
+    languageCode: language,
+    sourceName: siteName
+  });
+
+  const updatedArticle = await articleRepository.findOne(articleId);
+
+  return res.json(updatedArticle);
+
 };
 
 export const updateArticleStatus = async (articleId: string, status: ArticleStatus) => {
