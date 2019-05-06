@@ -9,6 +9,8 @@ import joi from 'joi';
 
 const { JWT_SECRET } = process.env;
 
+if (!JWT_SECRET) throw new Error('Please set the JWT_SECRET environment variable.');
+
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
 

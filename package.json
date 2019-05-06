@@ -33,7 +33,8 @@
     "typeorm:migration:run": "typeorm migration:run",
     "upgrade-interactive": "npm-check --update",
     "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
-    "addvoices": "ts-node src/addVoices.ts"
+    "addvoices": "ts-node src/addVoices.ts",
+    "tsc:watch": "tsc -p ./ --noEmit -w"
   },
   "repository": {
     "type": "git",

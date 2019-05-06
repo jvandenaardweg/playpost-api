@@ -1,5 +1,5 @@
 require('dotenv').config();
-import AWS, { Polly } from 'aws-sdk';
+import { Polly } from 'aws-sdk';
 import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
 import LocaleCode from 'locale-code';
@@ -43,12 +43,12 @@ export const addAllAWSVoices = async () => {
     if (foundVoice) {
       console.log(`AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
-      const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
-      const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
-
-      if (!countryCode || !languageName) {
+      if (!voiceLanguageCode) {
         console.log(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
       } else {
+        const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+        const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
+
         const voiceToCreate = await voiceRepository.create({
           countryCode,
           languageName,

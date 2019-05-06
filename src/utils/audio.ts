@@ -13,7 +13,9 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
     const metaData = await musicMetadata.parseFile(audioFilePath, { duration: true });
     const durationInSeconds = metaData.format.duration;
     console.log(`Got audiofile duration: ${durationInSeconds} seconds.`);
-    return durationInSeconds;
+
+    // If duration is "undefined", we just return 0
+    return durationInSeconds || 0;
   } catch (err) {
     throw err;
   }

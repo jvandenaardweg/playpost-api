@@ -10,6 +10,8 @@ import LocaleCode from 'locale-code';
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 
+if (!DEFAULT_BUCKET_NAME) throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.');
+
 const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
 const DEFAULT_VOICE_PREVIEWS_BASE_PATH = 'voices';
 

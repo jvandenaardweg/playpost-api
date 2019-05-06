@@ -35,7 +35,7 @@ const bruteforce = new ExpressBrute(bruteStore, {
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
   },
-  handleStoreError: (err) => console.log(err)
+  handleStoreError: (err: any) => console.log(err)
 });
 
 const rateLimiter = new ExpressRateLimit({

@@ -4,7 +4,6 @@ import textToSpeech from '@google-cloud/text-to-speech';
 import appRootPath from 'app-root-path';
 import { getRepository } from 'typeorm';
 import LocaleCode from 'locale-code';
-import nodeFetch from 'node-fetch';
 
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 import { getGoogleCloudCredentials } from '../utils/credentials';

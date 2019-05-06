@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
-import { getRepository, UpdateResult } from 'typeorm';
+import { getRepository } from 'typeorm';
 import joi from 'joi';
 
 import { Article, ArticleStatus } from '../database/entities/article';
@@ -77,17 +77,17 @@ export const deleteById = async (req: Request, res: Response) => {
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  let ssml = null;
-  let text = null;
-  let html = null;
-  let readingTime = null;
-  let imageUrl = null;
-  let authorName = null;
-  let description = null;
-  let currentUrl = null;
-  let language = null;
-  let title = null;
-  let siteName = null;
+  let ssml = undefined;
+  let text = undefined;
+  let html = undefined;
+  let readingTime = undefined;
+  let imageUrl = undefined;
+  let authorName = undefined;
+  let description = undefined;
+  let currentUrl = undefined;
+  let language = undefined;
+  let title = undefined;
+  let siteName = undefined;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -99,11 +99,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
-  if (response.siteName) {
-    siteName = response.siteName;
-  } else {
-    siteName = response.hostName;
-  }
+  if (response.siteName) siteName = response.siteName || response.hostName || undefined;
 
   return  {
     ssml,
@@ -185,11 +181,13 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
  * Takes the articleId and crawls the article URL to fetch the full article contents
  * This is a long running process and is done after the creation of a new article
  */
-export const updateArticleToFull = async (articleId: string): Promise<UpdateResult> => {
+export const updateArticleToFull = async (articleId: string) => {
   const articleRepository = getRepository(Article);
 
   // Get the article details from the database
   const articleToUpdate = await articleRepository.findOne(articleId);
+
+  if (!articleToUpdate) throw new Error('Could not find article.');
 
   // Do a request to the crawler, requesting data from the page
   // This might take a few seconds to resolve, as the crawler parses the whole page
@@ -248,64 +246,66 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
   });
 
   // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (existingArticle && existingArticle.id !== articleToUpdate.id && existingArticle.status === ArticleStatus.FINISHED) {
-    const duplicateArticleId = articleToUpdate.id;
-    const existingArticleId = existingArticle.id;
+  if (!existingArticle || existingArticle.id !== articleToUpdate.id || existingArticle.status === ArticleStatus.FINISHED) {
+    return false;
+  }
 
-    console.log(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
-    console.log(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+  const duplicateArticleId = articleToUpdate.id;
+  const existingArticleId = existingArticle.id;
 
-    // Get all playlist items that use the wrong article ID
-    // This is probably just one item, the newly article added to a playlist by a user
-    const playlistItems = await playlistItemRepository.find({
+  console.log(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
+  console.log(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+
+  // Get all playlist items that use the wrong article ID
+  // This is probably just one item, the newly article added to a playlist by a user
+  const playlistItems = await playlistItemRepository.find({
+    relations: ['user'],
+    where: {
+      article: {
+        id: duplicateArticleId
+      }
+    }
+  });
+
+  console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+
+  // Remove the duplicate article, so we free up the unique constraints in the playlist
+  await articleRepository.remove(articleToUpdate);
+  console.log(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
+
+  // Add a new playlistItem using the existing article ID
+  for (const playlistItem of playlistItems) {
+    const userId = playlistItem.user.id;
+
+    // Check if articleId already exists in playlistId
+    const userPlaylistItems = await playlistItemRepository.find({
       relations: ['user'],
       where: {
-        article: {
-          id: duplicateArticleId
+        user: {
+          id: userId
         }
       }
     });
 
-    console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+    const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
 
-    // Remove the duplicate article, so we free up the unique constraints in the playlist
-    await articleRepository.remove(articleToUpdate);
-    console.log(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
-
-    // Add a new playlistItem using the existing article ID
-    for (const playlistItem of playlistItems) {
-      const userId = playlistItem.user.id;
-
-      // Check if articleId already exists in playlistId
-      const userPlaylistItems = await playlistItemRepository.find({
-        relations: ['user'],
-        where: {
-          user: {
-            id: userId
-          }
+    if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
+      console.log(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
+    } else {
+      // Create the new playlist item using the existing article ID
+      const playlistItemToCreate = await playlistItemRepository.create({
+        user: {
+          id: userId
+        },
+        article: {
+          id: existingArticleId
         }
       });
 
-      const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
-
-      if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
-        console.log(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
-      } else {
-        // Create the new playlist item using the existing article ID
-        const playlistItemToCreate = await playlistItemRepository.create({
-          user: {
-            id: userId
-          },
-          article: {
-            id: existingArticleId
-          }
-        });
-
-        const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-        console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
-      }
+      const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+      console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
     }
-  } else {
-    return false;
   }
+
+  return true;
 };
