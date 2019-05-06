@@ -68,7 +68,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   }
 
   // Fetch the article with the SSML column (which is hidden by default)
-  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
+  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
     const message = 'Article does not exist.';
