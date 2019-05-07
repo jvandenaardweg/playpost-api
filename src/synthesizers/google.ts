@@ -134,7 +134,7 @@ export const googleSSMLToSpeech = (
 
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-    console.log(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.voice.languageCode}' speech using '${ssmlPartSynthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
+    logger.info(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.voice.languageCode}' speech using '${ssmlPartSynthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
 
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
@@ -149,7 +149,7 @@ export const googleSSMLToSpeech = (
       return fsExtra.writeFile(tempLocalAudiofilePath, response.audioContent, 'binary', (writeFileError) => {
         if (writeFileError) return reject(writeFileError);
 
-        console.log(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
+        logger.info(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
         return resolve(tempLocalAudiofilePath);
       });
     });

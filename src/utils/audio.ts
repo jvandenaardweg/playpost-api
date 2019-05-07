@@ -3,20 +3,23 @@ import fluentFfmpeg from 'fluent-ffmpeg';
 import ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as musicMetadata from 'music-metadata';
 
+import { logger } from '../utils';
+
 fluentFfmpeg.setFfmpegPath(ffmpeg.path);
 
 /* eslint-disable no-console */
 export const getAudioFileDurationInSeconds = async (audioFilePath: string): Promise<number> => {
-  console.log('Get audiofile duration in seconds...');
+  logger.info('Audio Util (Duration): Get audiofile duration in seconds...');
 
   try {
     const metaData = await musicMetadata.parseFile(audioFilePath, { duration: true });
     const durationInSeconds = metaData.format.duration;
-    console.log(`Got audiofile duration: ${durationInSeconds} seconds.`);
+    logger.info(`Audio Util (Duration): Got audiofile duration: ${durationInSeconds} seconds.`);
 
     // If duration is "undefined", we just return 0
     return durationInSeconds || 0;
   } catch (err) {
+    logger.info('Audio Util (Duration): Failed to get audiofile duration.', audioFilePath);
     throw err;
   }
 };
@@ -27,6 +30,8 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
 export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: string, encoding: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const hrstart = process.hrtime();
+
+    logger.info(`Audio Util (Concat): Combining ${audioFiles.length} audiofiles to one audio file...`);
 
     const tempPath = `${appRootPath}/temp`;
     let audioCodec = 'libmp3lame';
@@ -41,9 +46,11 @@ export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: 
       outputPath = `${tempPath}/${tempFilePath}`;
     }
 
-    if (!audioFiles.length) reject(new Error('No audiofiles given to concat.'));
-
-    console.log(`Combining ${audioFiles.length} audio files to one audio file...`);
+    if (!audioFiles.length) {
+      const errorMessage = 'No audiofiles given to concat.';
+      logger.error('Audio Util (Concat): ', errorMessage);
+      reject(new Error(errorMessage));
+    }
 
     return fluentFfmpeg()
     .format(format)
@@ -51,14 +58,20 @@ export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: 
     .input(`concat:${audioFiles.join('|')}`)
     .outputOptions('-acodec copy')
     .save(outputPath)
-    .on('error', (err: any) => reject(err))
+    .on('error', (err: any) => {
+      logger.error('Audio Util (Concat): Concat failed using ffmpeg:', err);
+      return reject(err);
+    })
     .on('end', () => {
       const hrend = process.hrtime(hrstart);
-      console.info('Execution time (hr) of concatAudioFiles(): %ds %dms', hrend[0], hrend[1] / 1000000);
+      const ds = hrend[0];
+      const dms = hrend[1] / 1000000;
+      logger.info('Audio Util (Concat): Concat success!');
+      logger.info(`Audio Util (Concat): Execution time: ${ds} ${dms}ms`);
       return resolve(outputPath);
     })
     .on('codecData', (data) => {
-      console.log('codecData', data);
+      logger.info('Audio Util (Concat): Data:', data);
     });
   });
 

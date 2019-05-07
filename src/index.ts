@@ -145,7 +145,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
 
   // v1/audiofiles
-  app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
+  app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.findAllAudiofiles);
   app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById); // Admin only
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 

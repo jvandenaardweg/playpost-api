@@ -6,6 +6,7 @@ import { User } from './user';
 import * as storage from '../../storage/google-cloud';
 
 import { ColumnNumericTransformer } from '../utils';
+import { logger } from '../../utils';
 
 // encoding formats supported by Google and AWS Polly
 export enum AudiofileMimeType {
@@ -60,7 +61,7 @@ export class Audiofile {
   // https://github.com/typeorm/typeorm/issues/1137#issuecomment-345653493
   @AfterRemove()
   async afterRemove() {
-    console.log(`Audiofile entity: AfterRemove(): Deleting audiofile from storage bucket "${this.bucket}" filename "${this.filename}".`);
+    logger.info('Database Entity (User):', '@AfterRemove():', `Deleting audiofile from storage bucket "${this.bucket}" filename "${this.filename}"...`);
     await storage.deleteFile(this.filename);
   }
 }

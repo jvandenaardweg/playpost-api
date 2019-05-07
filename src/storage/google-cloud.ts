@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
+import { Storage, UploadResponse, File, DeleteFileResponse } from '@google-cloud/storage';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';

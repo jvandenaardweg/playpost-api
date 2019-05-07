@@ -1,4 +1,5 @@
 import pollySsmlSplit from 'polly-ssml-split';
+import { logger } from '../utils';
 
 export const GOOGLE_CHARACTER_LIMIT = 5000;
 export const AWS_CHARACTER_LIMIT = 3000;
@@ -11,6 +12,8 @@ interface SsmlSplitOptions {
 /* eslint-disable no-console */
 
 export const getSSMLParts = (ssml: string, optionsOverwrite?: SsmlSplitOptions) => {
+  const loggerPrefix = 'SSML (Util):';
+
   const defaultOptions: SsmlSplitOptions = {
     softLimit: AWS_CHARACTER_LIMIT, // MIN length of a single batch of split text
     hardLimit: GOOGLE_CHARACTER_LIMIT, // MAX length of a single batch of split text
@@ -25,17 +28,17 @@ export const getSSMLParts = (ssml: string, optionsOverwrite?: SsmlSplitOptions) 
 
   pollySsmlSplit.configure(options);
 
-  if (process.env.NODE_ENV !== 'test') {
-    console.log('Splitting SSML content into different parts using options: ', options);
-  }
+  logger.info(loggerPrefix, 'Splitting SSML content into different parts using options: ', options);
 
   const ssmlParts: string[] = pollySsmlSplit.split(ssml);
 
-  if (!ssmlParts || !ssmlParts.length) throw new Error('Got no SSML parts.');
-
-  if (process.env.NODE_ENV !== 'test') {
-    console.log(`Got ${ssmlParts.length} SSML parts.`);
+  if (!ssmlParts || !ssmlParts.length) {
+    const errorMessage = 'Got no SSML parts.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
   }
+
+  logger.info(loggerPrefix, `Successfully splitted the SSML into ${ssmlParts.length} SSML parts.`);
 
   return ssmlParts;
 };

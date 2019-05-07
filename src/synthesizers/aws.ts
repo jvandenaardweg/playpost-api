@@ -93,6 +93,8 @@ export const awsSSMLToSpeech = (
   storageUploadPath: string
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
+    const loggerPrefix = 'AWS SSML Part To Speech:';
+
     // Create a copy of the synthesizerOptions before giving it to the synthesizeSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
     const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
@@ -111,22 +113,30 @@ export const awsSSMLToSpeech = (
 
     const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-    console.log(`AWS Polly: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.LanguageCode}' speech using '${ssmlPartSynthesizerOptions.VoiceId}' at: ${tempLocalAudiofilePath}`);
-
     // Make sure the path exists, if not, we create it
     fsExtra.ensureFileSync(tempLocalAudiofilePath);
 
+    // tslint:disable max-line-length
+    logger.info(loggerPrefix, 'Synthesizing:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
+
     // Performs the Text-to-Speech request
     return client.synthesizeSpeech(ssmlPartSynthesizerOptions, (err, response) => {
-      if (err) return reject(err);
+      if (err) {
+        logger.error(loggerPrefix, 'Synthesizing failed for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
+        logger.error(err);
+        return reject(err);
+      }
 
-      if (!response) return reject(new Error('AWS Polly: Received no response from synthesizeSpeech()'));
+      logger.info(loggerPrefix, 'Received synthesized audio for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
 
       // Write the binary audio content to a local file
       return fsExtra.writeFile(tempLocalAudiofilePath, response.AudioStream, 'binary', (writeFileError) => {
-        if (writeFileError) return reject(writeFileError);
+        if (writeFileError) {
+          logger.error(loggerPrefix, `Writing temporary file for synthesized SSML part ${index} failed.`, writeFileError);
+          return reject(writeFileError);
+        }
 
-        console.log(`AWS Polly: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
+        logger.info(loggerPrefix, `Finished part ${index}. Wrote file to: `, tempLocalAudiofilePath);
         return resolve(tempLocalAudiofilePath);
       });
     });
@@ -144,6 +154,9 @@ export const awsSSMLPartsToSpeech = async (
   storageUploadPath: string
 ) => {
   const promises: Promise<string>[] = [];
+  const loggerPrefix = 'AWS SSML Parts To Speech:';
+
+  logger.info(loggerPrefix, 'Starting...');
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
     // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
@@ -152,9 +165,13 @@ export const awsSSMLPartsToSpeech = async (
     promises.push(awsSSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 
+  logger.info(loggerPrefix, 'Waiting for all SSML part promises to resolve...');
+
   const tempLocalAudiofilePaths = await Promise.all(promises);
 
   tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
+
+  logger.info(loggerPrefix, 'All SSML part promises resolved. Returning temporary local audiofile paths:', tempLocalAudiofilePaths);
 
   return tempLocalAudiofilePaths;
 };
