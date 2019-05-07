@@ -23,8 +23,9 @@ import * as voicesController from './controllers/voices';
 
 import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
+import { logger } from './utils';
 
-/* eslint-disable no-console */
+logger.info('App init: Setting up...');
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
@@ -35,7 +36,9 @@ const bruteforce = new ExpressBrute(bruteStore, {
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
   },
-  handleStoreError: (err: any) => console.log(err)
+  handleStoreError: (err: any) => {
+    logger.error('Express Brute Store error: ', err);
+  }
 });
 
 const rateLimiter = new ExpressRateLimit({
@@ -47,11 +50,11 @@ const rateLimiter = new ExpressRateLimit({
 
 const defaultConnection = connectionOptions('default');
 
-console.log('App init:', 'Connecting with database...');
+logger.info('App init:', 'Connecting with database...');
 
 // Create a connection with the database
 createConnection(defaultConnection).then(async (connection: any) => {
-  console.log('App init:', 'Connected with database', connection.options.url);
+  logger.info('App init:', 'Connected with database', connection.options.url);
 
   const app: express.Application = express();
 
@@ -91,6 +94,8 @@ createConnection(defaultConnection).then(async (connection: any) => {
     // The request handler must be the first middleware on the app
     app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
     app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+
+    logger.info('App init:', 'Sentry configured.');
   }
 
   // Use passport authentication
@@ -166,20 +171,20 @@ createConnection(defaultConnection).then(async (connection: any) => {
             scope.setUser({ id, email });
           });
 
-          console.log(`Error for user ID "${id}", email: "${email}"`);
+          logger.error(`Error for user ID "${id}", email: "${email}"`, err);
         }
 
         // Capture the error for us to see in Sentry
         // Do not capture Unauthorized errors
         if (err.message !== 'Unauthorized') {
+          logger.error('Uncaught error', err);
           Sentry.captureException(err);
         }
 
       }
 
       if (process.env.NODE_ENV !== 'test') {
-        console.log(`Error on route: ${req.method} ${req.url} "${err.message}"`);
-        console.error(err);
+        logger.error(`Error on route: ${req.method} ${req.url} "${err.message}"`);
       }
 
       if (err.message === 'Unauthorized') {
@@ -197,5 +202,8 @@ createConnection(defaultConnection).then(async (connection: any) => {
     return next(err);
   });
 
-  app.listen(PORT, () => console.log(`App init: Listening on port ${PORT}!`));
+  app.listen(PORT, () => {
+    logger.info(`App init: Listening on port ${PORT}.`);
+    logger.info('App init: Ready!');
+  });
 });
