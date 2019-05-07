@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
     "importHelpers": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "isolatedModules": false, // was: true
+    "isolatedModules": false,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
@@ -20,7 +21,7 @@
     "lib": ["es5", "es6"],
     "moduleResolution": "node",
     "noEmit": true,
-    // "strict": true,
+    "outDir": "dist",
     "target": "es5",
     "module": "commonjs",
     "skipLibCheck": true, // Fix conflict with node types: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/16825
@@ -32,5 +33,5 @@
   "include": [
     "src/**/*",
   ],
-  "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts", "dist"]
+  "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts"]
 }
