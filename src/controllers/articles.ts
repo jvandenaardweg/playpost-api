@@ -77,17 +77,17 @@ export const deleteById = async (req: Request, res: Response) => {
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  let ssml = undefined;
-  let text = undefined;
-  let html = undefined;
-  let readingTime = undefined;
-  let imageUrl = undefined;
-  let authorName = undefined;
-  let description = undefined;
-  let currentUrl = undefined;
-  let language = undefined;
-  let title = undefined;
-  let siteName = undefined;
+  let ssml = '';
+  let text = '';
+  let html = '';
+  let readingTime = 0;
+  let imageUrl = '';
+  let authorName = '';
+  let description = '';
+  let currentUrl = '';
+  let language = '';
+  let title = '';
+  let siteName = '';
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -99,7 +99,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
-  if (response.siteName) siteName = response.siteName || response.hostName || undefined;
+  if (response.siteName) siteName = response.siteName || response.hostName || '';
 
   return  {
     ssml,
