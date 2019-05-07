@@ -62,11 +62,16 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
 
+  // Use a rate limiter to limit api calls per second
   app.use(rateLimiter);
 
+  // Return real response time inside the headers, for debugging slow connections
   app.use(responseTime());
+
+  // Compress the output
   app.use(compression());
 
+  // Setup Sentry error tracking
   if (process.env.NODE_ENV === 'production') {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
@@ -88,17 +93,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
     app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
   }
 
-  // app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  // app.use('/v1/', apiLimiter);
-
   // Use passport authentication
   app.use(passport.initialize());
   require('./config/passport')(passport);
 
   // Make express allow JSON payload bodies
-  app.use(bodyParser.json({
-    limit: '10kb' // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
-  }));
+  // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
+  app.use(bodyParser.json({ limit: '10kb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // API Endpoints
