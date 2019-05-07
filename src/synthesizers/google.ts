@@ -8,6 +8,7 @@ import LocaleCode from 'locale-code';
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { SynthesizerType } from './index';
+import { logger } from '../utils/logger';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
@@ -43,14 +44,23 @@ export interface TextToSpeechVoice {
 }
 
 export const getAllGoogleVoices = async () => {
-  const [result] = await client.listVoices({});
-  const voices: TextToSpeechVoice[] = result.voices;
-  return voices;
+  try {
+    logger.info('Google Text To Speech: Getting all Google Text To Speech voices from the API...');
+    const [result] = await client.listVoices({});
+    const voices: TextToSpeechVoice[] = result.voices;
+    logger.info(`Google Text To Speech: Got ${voices.length} voices from the API...`);
+    return voices;
+  } catch (err) {
+    logger.error('Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
+    throw err;
+  }
 };
 
 export const addAllGoogleVoices = async () => {
-  console.log('Google Text To Speech: Checking if we need to add new voices to the database...');
+  logger.info('Google Text To Speech: Checking if we need to add new voices to the database...');
+
   const voiceRepository = getRepository(Voice);
+
   const voices = await getAllGoogleVoices();
 
   for (const voice of voices) {
@@ -62,31 +72,37 @@ export const addAllGoogleVoices = async () => {
     const foundVoice = await voiceRepository.findOne({ name: voiceName });
 
     if (foundVoice) {
-      console.log(`Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+      logger.warn(`Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
       const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
       const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
       if (!countryCode || !languageName) {
-        console.log(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+        logger.warn(`Google Text To Speech: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
       } else {
-        const voiceToCreate = await voiceRepository.create({
-          countryCode,
-          languageName,
-          languageCode: voiceLanguageCode,
-          name: voiceName,
-          gender: voiceGender,
-          synthesizer: Synthesizer.GOOGLE,
-          naturalSampleRateHertz: voiceNaturalSampleRateHertz
-        });
+        try {
+          const voiceToCreate = await voiceRepository.create({
+            countryCode,
+            languageName,
+            languageCode: voiceLanguageCode,
+            name: voiceName,
+            gender: voiceGender,
+            synthesizer: Synthesizer.GOOGLE,
+            naturalSampleRateHertz: voiceNaturalSampleRateHertz
+          });
 
-        const createdVoice = await voiceRepository.save(voiceToCreate);
+          const createdVoice = await voiceRepository.save(voiceToCreate);
 
-        console.log('Google Text To Speech: Added new voice to database: ', createdVoice.name);
+          logger.info('Google Text To Speech: Added new voice to database: ', createdVoice.name);
+        } catch (err) {
+          logger.error('Google Text To Speech: Failed to create the voice in the database', err);
+          throw err;
+        }
       }
-
     }
   }
+
+  return voices;
 };
 
 export const googleSSMLToSpeech = (

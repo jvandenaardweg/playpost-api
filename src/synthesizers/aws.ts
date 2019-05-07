@@ -8,6 +8,7 @@ import { getRepository } from 'typeorm';
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 
 import { SynthesizerType } from './index';
+import { logger } from '../utils/logger';
 
 // Create an Polly client
 const client = new Polly({
@@ -19,16 +20,20 @@ export interface AWSSynthesizerOptions extends Polly.Types.SynthesizeSpeechInput
 
 export const getAllAWSVoices = async (): Promise<Polly.Voice[]> => {
   return new Promise((resolve, reject) => {
+    logger.info('AWS Polly: Getting all AWS Polly voices from the API...');
+
     client.describeVoices({}, (err, data) => {
       if (err) return reject(err);
       if (!data.Voices) return reject('No voices found.');
+
+      logger.info(`AWS Polly: Got ${data.Voices.length} voices from the API...`);
       return resolve(data.Voices);
     });
   });
 };
 
 export const addAllAWSVoices = async () => {
-  console.log('AWS Polly: Checking if we need to add new voices to the database...');
+  logger.info('AWS Polly: Checking if we need to add new voices to the database...');
   const voiceRepository = getRepository(Voice);
 
   const voices = await getAllAWSVoices();
@@ -41,31 +46,43 @@ export const addAllAWSVoices = async () => {
     const foundVoice = await voiceRepository.findOne({ name: voiceName });
 
     if (foundVoice) {
-      console.log(`AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+      logger.info(`AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
       if (!voiceLanguageCode) {
-        console.log(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+        logger.info(`AWS Polly: Got no LanguageCode for ${voiceName}. We don't add it to the database.`);
       } else {
         const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
         const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
-        const voiceToCreate = await voiceRepository.create({
-          countryCode,
-          languageName,
-          languageCode: voiceLanguageCode,
-          name: voiceName,
-          label: voiceName,
-          gender: voiceGender,
-          synthesizer: Synthesizer.AWS
-        });
+        if (!countryCode || !languageName) {
+          logger.info(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+        } else {
 
-        const createdVoice = await voiceRepository.save(voiceToCreate);
+          try {
+            const voiceToCreate = await voiceRepository.create({
+              countryCode,
+              languageName,
+              languageCode: voiceLanguageCode,
+              name: voiceName,
+              label: voiceName,
+              gender: voiceGender,
+              synthesizer: Synthesizer.AWS
+            });
 
-        console.log('AWS Polly: Added new voice to database: ', createdVoice.name);
+            const createdVoice = await voiceRepository.save(voiceToCreate);
+
+            logger.info('AWS Polly: Added new voice to database: ', createdVoice.name);
+          } catch (err) {
+            logger.error('AWS Polly: Failed to create the voice in the database', err);
+            throw err;
+          }
+        }
       }
     }
   }
-}
+
+  return voices;
+};
 
 export const awsSSMLToSpeech = (
   index: number,
