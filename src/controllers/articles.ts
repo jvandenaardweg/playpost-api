@@ -132,7 +132,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) throw new Error('Cannot update article, because the article is not found.');
+  if (!article) return res.status(400).json({ message: 'Cannot sync article, because the article is not found.' });
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
 
