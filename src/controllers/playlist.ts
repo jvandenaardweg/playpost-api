@@ -80,7 +80,7 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your favorites. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItem.id, { favoritedAt: null });
+    await playlistItemRepository.update(playlistItem.id, { favoritedAt: '' });
     return res.json({ message: 'Playlist item is removed to your favorites!' });
   }
 
@@ -120,7 +120,7 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your archive. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItem.id, { archivedAt: null });
+    await playlistItemRepository.update(playlistItem.id, { archivedAt: '' });
     return res.json({ message: 'Playlist item is removed to your archive!' });
   }
 
@@ -152,6 +152,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const userId = req.user.id;
   const { articleUrl } = req.body;
 
+  let articleId = '';
+
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
@@ -161,8 +163,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
     return res.status(400).json({ message: messageDetails });
   }
-
-  let createdArticle: Article;
 
   // Normalize the URL
   // IMPORTANT: the normalized URL could still be different than the canonicalUrl in the database
@@ -180,6 +180,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   // If there's an article, check if that one already exists in the user's playlist
   if (article) {
+    articleId = article.id;
+
     const playlistItem = await playlistItemRepository.findOne({
       relations: ['user'],
       where: {
@@ -193,11 +195,10 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
-  }
+  } else {
 
-  // If we do not have an article yet, create one in the database...
-  // ...so our crawler tries to fetch the article in the background
-  if (!article) {
+    // If we do not have an article yet, create one in the database...
+    // ...so our crawler tries to fetch the article in the background
     const articleToCreate = await articleRepository.create({
       url: normalizedUrl,
       user: {
@@ -205,11 +206,12 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       }
     });
 
-    createdArticle = await articleRepository.save(articleToCreate);
-  }
+    const createdArticle = await articleRepository.save(articleToCreate);
 
-  // The found article ID or the newly created article ID
-  const articleId = (article) ? article.id : createdArticle.id;
+    if (!createdArticle) return res.status(400).json({ message: 'test' });
+
+    articleId = createdArticle.id;
+  }
 
   const playlistItemToCreate = await playlistItemRepository.create({
     article: {

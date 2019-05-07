@@ -35,7 +35,7 @@ const bruteforce = new ExpressBrute(bruteStore, {
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
   },
-  handleStoreError: (err) => console.log(err)
+  handleStoreError: (err: any) => console.log(err)
 });
 
 const rateLimiter = new ExpressRateLimit({
@@ -62,11 +62,16 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
 
+  // Use a rate limiter to limit api calls per second
   app.use(rateLimiter);
 
+  // Return real response time inside the headers, for debugging slow connections
   app.use(responseTime());
+
+  // Compress the output
   app.use(compression());
 
+  // Setup Sentry error tracking
   if (process.env.NODE_ENV === 'production') {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
@@ -88,17 +93,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
     app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
   }
 
-  // app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  // app.use('/v1/', apiLimiter);
-
   // Use passport authentication
   app.use(passport.initialize());
   require('./config/passport')(passport);
 
   // Make express allow JSON payload bodies
-  app.use(bodyParser.json({
-    limit: '10kb' // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
-  }));
+  // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
+  app.use(bodyParser.json({ limit: '10kb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // API Endpoints
@@ -112,18 +113,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // Protected
 
   // v1/users
-  app.get('/v1/users', usersController.findAllUsers);
-  app.delete('/v1/users/:userId', usersController.deleteUser);
+  app.get('/v1/users', usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', usersController.deleteUser); // Admin only
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
-  // app.get('/v1/me/logout', IS_PROTECTED, meController.logout);
-  app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
-  app.get('/v1/me/audiofiles', IS_PROTECTED, meController.findAllAudiofiles);
-
   app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
-
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
   // Playlists => /v1/playlist
@@ -139,13 +135,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // /v1/articles
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
   app.put('/v1/articles/:articleId/sync', IS_PROTECTED, articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
+  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById); // Admin only
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
   app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
 
   // v1/audiofiles
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
-  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
+  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById); // Admin only
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices

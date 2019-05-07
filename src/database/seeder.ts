@@ -2,7 +2,7 @@ require('dotenv').config();
 import { createConnection, Connection } from 'typeorm';
 import { connectionOptions } from './connection-options';
 
-import { articles } from './seeds/article';
+// import { articles } from './seeds/article';
 import { users } from './seeds/user';
 
 /**
@@ -18,12 +18,12 @@ const seedUsers = async (databaseConnection: Connection) => {
 /**
  * Seeds the database with example articles used for development.
  */
-const seedArticles = async (databaseConnection: Connection) => {
-  const promises = articles.map((article: any) => {
-    return databaseConnection.createQueryBuilder().insert().into('article').values(article).execute();
-  });
-  return Promise.all(promises);
-};
+// const seedArticles = async (databaseConnection: Connection) => {
+//   const promises = articles.map((article: any) => {
+//     return databaseConnection.createQueryBuilder().insert().into('article').values(article).execute();
+//   });
+//   return Promise.all(promises);
+// };
 
 (async() => {
   const databaseConnection: Connection = await createConnection(connectionOptions());

@@ -6,8 +6,8 @@ import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
 
 import { SynthesizerEncoding } from '../synthesizers';
-import { googleSSMLToSpeech, GoogleSynthesizerOptions } from '../synthesizers/google';
-import { awsSSMLToSpeech, AWSSynthesizerOptions } from '../synthesizers/aws';
+import { googleSSMLToSpeech } from '../synthesizers/google';
+import { awsSSMLToSpeech } from '../synthesizers/aws';
 
 import * as storage from '../storage/google-cloud';
 
@@ -54,7 +54,6 @@ export const findAllActiveFreeVoices = async (req: Request, res: Response) => {
 };
 
 export const createVoicePreview = async (req: Request, res: Response) => {
-  let updatedVoice: Voice;
   let localAudiofilePath: string = '';
   let audioEncoding: SynthesizerEncoding;
   let mimeType: AudiofileMimeType;
@@ -76,7 +75,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
     mimeType = AudiofileMimeType.WAV;
 
     // Step 1: Prepare the config
-    const synthesizerOptions: GoogleSynthesizerOptions = {
+    const synthesizerOptions = {
       audioConfig: {
         audioEncoding
       },
@@ -100,14 +99,12 @@ export const createVoicePreview = async (req: Request, res: Response) => {
       voice.id
     );
 
-  }
-
-  if (voice.synthesizer === 'AWS') {
+  } else if (voice.synthesizer === 'AWS') {
     audioEncoding = SynthesizerEncoding.AWS_MP3;
     mimeType = AudiofileMimeType.MP3;
 
     // Step 1: Prepare the config
-    const synthesizerOptions: AWSSynthesizerOptions = {
+    const synthesizerOptions = {
       VoiceId: voice.name,
       LanguageCode: voice.languageCode,
       OutputFormat: audioEncoding,
@@ -125,6 +122,8 @@ export const createVoicePreview = async (req: Request, res: Response) => {
       voice.id
     );
 
+  } else {
+    return res.status(400).json({ message: 'Synthesizer could not be found.' });
   }
 
   // Step 3: Get the length of the audiofile
@@ -148,7 +147,9 @@ export const createVoicePreview = async (req: Request, res: Response) => {
     exampleAudioUrl: publicFileUrl
   });
 
-  updatedVoice = await voiceRepository.findOne(voice.id);
+  const updatedVoice = await voiceRepository.findOne(voice.id);
+
+  if (!updatedVoice) return res.status(400).json({ message: 'Voice not found.' });
 
   return res.json(updatedVoice);
 };

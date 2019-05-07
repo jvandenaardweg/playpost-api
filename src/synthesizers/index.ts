@@ -57,6 +57,8 @@ export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesi
   if (mimeType === 'audio/opus') {
     return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_OGG_OPUS : null;
   }
+
+  return null;
 };
 
 /**
@@ -66,7 +68,7 @@ export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesi
 export const synthesizeArticleToAudiofile = async (voice: Voice, article: Article, audiofile: Audiofile, mimeType: AudiofileMimeType): Promise<Audiofile> => {
   const hrstart = process.hrtime();
 
-  let createdAudiofile: Audiofile = null;
+  let createdAudiofile: Audiofile;
 
   const articleId = article.id;
   const ssml = article.ssml;
@@ -158,7 +160,7 @@ const synthesizeUsingAWS = async (
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
-  audiofile.languageCode = synthesizerOptions.LanguageCode;
+  audiofile.languageCode = synthesizerOptions.LanguageCode || 'en-US'; // TODO: fix this ugly fallback
 
   return audiofile;
 };

@@ -10,7 +10,7 @@ import { Voice } from '../database/entities/voice';
 
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
-import { updateArticleToFull } from '../controllers/articles';
+// import { updateArticleToFull } from '../controllers/articles';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -41,7 +41,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const hrstart = process.hrtime();
 
-  let article: Article = null;
+  let article: Article | undefined;
 
   const userId = req.user.id;
   const { articleId } = req.params as RequestParams;
@@ -86,7 +86,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
       scope.setExtra('articleId', articleId);
-      scope.setExtra('languageCode', article.languageCode);
+      scope.setExtra('languageCode', article && article.languageCode);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -96,25 +96,25 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // If there is not SSML data, try to generate it on-demand
   // Usually the SSML data is generated after insertion of an article in the database
   // But if for some reason that didn't work, try it again here.
-  if (!article.ssml) {
-    try {
-      // Fetch the full article details
-      await updateArticleToFull(articleId);
+  // if (!article.ssml) {
+  //   try {
+  //     // Fetch the full article details
+  //     await updateArticleToFull(articleId);
 
-      // Get the updated article with the SSML column
-      article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
-    } catch (err) {
-      const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
+  //     // Get the updated article with the SSML column
+  //     article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
+  //   } catch (err) {
+  //     const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
 
-      Sentry.withScope((scope) => {
-        scope.setExtra('userId', userId);
-        scope.setExtra('articleId', articleId);
-        Sentry.captureMessage(message, Sentry.Severity.Info);
-      });
+  //     Sentry.withScope((scope) => {
+  //       scope.setExtra('userId', userId);
+  //       scope.setExtra('articleId', articleId);
+  //       Sentry.captureMessage(message, Sentry.Severity.Info);
+  //     });
 
-      return res.status(400).json({ message });
-    }
-  }
+  //     return res.status(400).json({ message });
+  //   }
+  // }
 
   if (!article.ssml) {
     const message = 'Article has no SSML data. We cannot generate an audiofile.';

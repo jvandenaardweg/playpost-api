@@ -19,24 +19,6 @@ export const findCurrentUser = async (req: Request, res: Response) => {
   return res.json(user);
 };
 
-export const findAllArticles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const userRepository = getRepository(User);
-
-  const { articles } = await userRepository.findOne(userId, { relations: ['articles'] });
-
-  return res.json(articles);
-};
-
-export const findAllAudiofiles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const userRepository = getRepository(User);
-
-  const { audiofiles } = await userRepository.findOne(userId, { relations: ['audiofiles'] });
-
-  return res.json(audiofiles);
-};
-
 export const updateEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   const userId = req.user.id;
@@ -89,6 +71,8 @@ export const deleteCurrentUser = async (req: Request, res: Response) => {
   }
 
   const user = await userRepository.findOne(userId);
+
+  if (!user) return res.status(400).json({ message: 'User not found!' });
 
   await userRepository.remove(user);
 

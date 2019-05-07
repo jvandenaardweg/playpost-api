@@ -8,9 +8,9 @@
     "npm": "6.5.0"
   },
   "scripts": {
-    "dev": "npm run dev:database && concurrently \"npm run dev:nodemon\" \"npm run dev:worker\"",
-    "dev:nodemon": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' --transpile-only src/index.ts",
-    "dev:worker": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' --transpile-only src/worker.ts",
+    "dev": "npm run dev:database && npm run dev:worker && npm run dev:index",
+    "dev:index": "ts-node-dev --respawn --transpileOnly src/index.ts --ignore-watch src/worker.ts",
+    "dev:worker": "ts-node-dev --respawn --transpileOnly src/worker.ts --ignore-watch src/index.ts &",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
     "typeorm:seed": "ts-node src/database/seeder.ts",
@@ -33,7 +33,8 @@
     "typeorm:migration:run": "typeorm migration:run",
     "upgrade-interactive": "npm-check --update",
     "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
-    "addvoices": "ts-node src/addVoices.ts"
+    "addvoices": "ts-node src/addVoices.ts",
+    "tsc:watch": "tsc -p ./ --noEmit -w"
   },
   "repository": {
     "type": "git",
@@ -122,10 +123,11 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.13.0",
     "jest": "^24.7.1",
-    "nodemon": "^1.19.0",
     "npm-check": "^5.9.0",
+    "npm-run-all": "^4.1.5",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
+    "ts-node-dev": "^1.0.0-pre.35",
     "tsc-watch": "^2.1.2",
     "tslint": "^5.16.0",
     "tslint-config-airbnb": "^5.11.1",

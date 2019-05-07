@@ -1,5 +1,4 @@
 import joi from 'joi';
-import { join } from 'path';
 
 export const articleInputValidationSchema = joi.object().keys({
   articleUrl: joi.string().uri(),
