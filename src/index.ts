@@ -112,18 +112,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // Protected
 
   // v1/users
-  app.get('/v1/users', usersController.findAllUsers);
-  app.delete('/v1/users/:userId', usersController.deleteUser);
+  app.get('/v1/users', usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', usersController.deleteUser); // Admin only
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
-  // app.get('/v1/me/logout', IS_PROTECTED, meController.logout);
-  app.get('/v1/me/articles', IS_PROTECTED, meController.findAllArticles);
-  app.get('/v1/me/audiofiles', IS_PROTECTED, meController.findAllAudiofiles);
-
   app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
-
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
   // Playlists => /v1/playlist
@@ -139,13 +134,13 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // /v1/articles
   app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
   app.put('/v1/articles/:articleId/sync', IS_PROTECTED, articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById);
+  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById); // Admin only
   app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
   app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
 
   // v1/audiofiles
   app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.getAll);
-  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById);
+  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById); // Admin only
   app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices

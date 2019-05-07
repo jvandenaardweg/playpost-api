@@ -4,8 +4,6 @@ import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { hashPassword } from './auth';
-import { Article } from '../database/entities/article';
-import { Audiofile } from '../database/entities/audiofile';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -19,36 +17,6 @@ export const findCurrentUser = async (req: Request, res: Response) => {
   if (!user) return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND });
 
   return res.json(user);
-};
-
-export const findAllArticles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const articleRepository = getRepository(Article);
-
-  const articles = await articleRepository.find({
-    where: {
-      user: {
-        id: userId
-      }
-    }
-  });
-
-  return res.json(articles);
-};
-
-export const findAllAudiofiles = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const audiofileRepository = getRepository(Audiofile);
-
-  const audiofiles = await audiofileRepository.findOne({
-    where: {
-      user: {
-        id: userId
-      }
-    }
-  });
-
-  return res.json(audiofiles);
 };
 
 export const updateEmail = async (req: Request, res: Response) => {
