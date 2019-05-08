@@ -15,8 +15,6 @@ import { awsSSMLPartsToSpeech, AWSSynthesizerOptions } from './aws';
 import { Polly } from 'aws-sdk';
 import { logger } from '../utils';
 
-/* eslint-disable no-console */
-
 export type SynthesizerType = 'article' | 'preview';
 export type SynthesizerAudioEncodingTypes = GoogleAudioEncodingType & Polly.OutputFormat;
 
