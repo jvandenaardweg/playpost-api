@@ -7,6 +7,7 @@ import { PlaylistItem } from './playlist-item';
 import { redisClientPub } from '../../cache';
 
 import { ColumnNumericTransformer } from '../utils';
+import { logger } from '../../utils';
 
 export enum ArticleStatus {
   CRAWLING = 'crawling',
@@ -94,7 +95,7 @@ export class Article extends BaseEntity {
   @AfterInsert()
   afterInsert() {
     // Should get the full article details, like ssml, text and html
-    console.log('Should get the full article details, like ssml, text and html');
+    logger.info('Database Entity (Article):', '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
     redisClientPub.publish('FETCH_FULL_ARTICLE', this.id);
   }
 }

@@ -1,11 +1,12 @@
 require('dotenv').config();
-import { Storage, UploadResponse, GetFilesOptions, File, DeleteFileResponse } from '@google-cloud/storage';
+import { Storage, UploadResponse, File, DeleteFileResponse } from '@google-cloud/storage';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
 
 import LocaleCode from 'locale-code';
+import { logger } from '../utils';
 
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
@@ -14,8 +15,6 @@ if (!DEFAULT_BUCKET_NAME) throw new Error('Please set the GOOGLE_CLOUD_STORAGE_B
 
 const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
 const DEFAULT_VOICE_PREVIEWS_BASE_PATH = 'voices';
-
-/* eslint-disable no-console */
 
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
   const { name } = file.metadata;
@@ -53,7 +52,7 @@ export const uploadArticleAudioFile = async (
 
   const destination = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${storageUploadPath}.${extension}`;
 
-  console.log(`Google Cloud Storage: Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
+  logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Uploading file "${concatinatedLocalAudiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
 
   try {
     // Uploads a local file to the bucket
@@ -81,16 +80,17 @@ export const uploadArticleAudioFile = async (
       }
     });
 
-    console.log('Google Cloud Storage: Uploaded file!', uploadResponse[0].metadata.name);
+    logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Uploaded file!`, uploadResponse[0].metadata.name);
 
     return uploadResponse;
   } catch (err) {
-    console.log('Google Cloud Storage: Failed to upload.');
-    console.error(err);
-    throw new Error(err);
+    logger.error(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Failed to upload.`, err);
+    throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
-    console.info('Execution time (hr) of uploadFile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+    const ds = hrend[0];
+    const dms = hrend[1] / 1000000;
+    logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Execution time (hr) of uploadFile(): ${ds} ${dms}ms`);
   }
 };
 
@@ -118,9 +118,9 @@ export const uploadVoicePreviewAudiofile = async (
 
   const destination = `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${uploadPath}.${extension}`;
 
-  console.log(`Google Cloud Storage: Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
-
   try {
+    logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
+
     // Uploads a local file to the bucket
     const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
       destination,
@@ -139,51 +139,31 @@ export const uploadVoicePreviewAudiofile = async (
       }
     });
 
-    console.log('Google Cloud Storage: Uploaded file!', uploadResponse[0].metadata.name);
+    logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Uploaded file!`, uploadResponse[0].metadata.name);
 
     return uploadResponse;
   } catch (err) {
-    console.log('Google Cloud Storage: Failed to upload.');
-    console.error(err);
-    throw new Error(err);
+    logger.error(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Failed to upload.`, err);
+    throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
-    console.info('Execution time (hr) of uploadFile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+    const ds = hrend[0];
+    const dms = hrend[1] / 1000000;
+    logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Execution time (hr) of uploadFile(): ${ds} ${dms}ms`);
   }
-};
-
-export const listFiles = async () => {
-  // Lists files in the bucket
-  const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles();
-
-  console.log('Google Cloud Storage, listFiles()');
-
-  files.forEach((file: File) => console.log(file.name));
-};
-
-export const listFilesByPrefix = async (prefix: string, delimiter?: string) => {
-  const options: GetFilesOptions = {
-    prefix
-  };
-
-  if (delimiter) {
-    options.delimiter = delimiter;
-  }
-
-  console.log('Google Cloud Storage, listFilesByPrefix()');
-
-  // Lists files in the bucket, filtered by a prefix
-  const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles(options);
-
-  return files;
 };
 
 export const deleteFile = async (filename: string) => {
-  console.log(`Google Cloud Storage: Deleting file "${filename}"...`);
+  try {
+    logger.info(`Google Cloud Storage (Delete File): Deleting file "${filename}"...`);
 
-  const deleteFileResponse: DeleteFileResponse = await storage.bucket(DEFAULT_BUCKET_NAME).file(filename).delete();
+    const deleteFileResponse: DeleteFileResponse = await storage.bucket(DEFAULT_BUCKET_NAME).file(filename).delete();
 
-  console.log(`Google Cloud Storage: Successfully deleted file "${filename}"!`);
+    logger.info(`Google Cloud Storage (Delete File): Successfully deleted file "${filename}"!`);
 
-  return deleteFileResponse;
+    return deleteFileResponse;
+  } catch (err) {
+    logger.error(`Google Cloud Storage (Delete File): Failed to delete file "${filename}"!`, err);
+    throw err;
+  }
 };

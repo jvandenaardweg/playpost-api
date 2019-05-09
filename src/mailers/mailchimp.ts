@@ -1,6 +1,7 @@
 require('dotenv').config();
 import nodeFetch from 'node-fetch';
 import md5 from 'md5';
+import { logger } from '../utils';
 
 const { MAILCHIMP_LIST_ID, MAILCHIMP_API_KEY } = process.env;
 
@@ -20,14 +21,16 @@ const headers = {
  * Reference: https://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/#create-post_lists_list_id_members
  */
 export const addEmailToMailchimpList = async (emailAddress: string) => {
-  const payload = {
-    email_address: emailAddress,
-    status: 'subscribed'
-  };
-
-  const payloadStringified = JSON.stringify(payload);
-
   try {
+    logger.info(`Mailchimp: Adding ${emailAddress} to list "${MAILCHIMP_LIST_ID}"...`);
+
+    const payload = {
+      email_address: emailAddress,
+      status: 'subscribed'
+    };
+
+    const payloadStringified = JSON.stringify(payload);
+
     const response = await nodeFetch(MAILCHIMP_API_LIST_MEMBERS_URL, {
       headers,
       method: 'POST',
@@ -35,10 +38,10 @@ export const addEmailToMailchimpList = async (emailAddress: string) => {
     })
     .then(response => response.json());
 
-    console.log(`Mailchimp: Added ${emailAddress} to list "${MAILCHIMP_LIST_ID}".`);
+    logger.info(`Mailchimp: Successfully added ${emailAddress} to list "${MAILCHIMP_LIST_ID}".`);
     return response;
   } catch (err) {
-    console.log(`Mailchimp: Error while adding e-mail address "${emailAddress}" to list ${MAILCHIMP_LIST_ID}.`);
+    logger.error(`Mailchimp: Error while adding "${emailAddress}" to list ${MAILCHIMP_LIST_ID}.`);
     throw err;
   }
 };
@@ -49,18 +52,20 @@ export const addEmailToMailchimpList = async (emailAddress: string) => {
  * Reference: https://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/#%20
  */
 export const removeEmailToMailchimpList = async (emailAddress: string) => {
-  const subscriberHash = md5(emailAddress.toLowerCase());
-
   try {
+    logger.info(`Mailchimp: Deleting ${emailAddress} from list "${MAILCHIMP_LIST_ID}"...`);
+
+    const subscriberHash = md5(emailAddress.toLowerCase());
+
     const response = await nodeFetch(`${MAILCHIMP_API_LIST_MEMBERS_URL}/${subscriberHash}`, {
       headers,
       method: 'DELETE'
     });
 
-    console.log(`Mailchimp: Deleted ${emailAddress} from list "${MAILCHIMP_LIST_ID}".`);
+    logger.info(`Mailchimp: Successfully deleted ${emailAddress} from list "${MAILCHIMP_LIST_ID}".`);
     return response;
   } catch (err) {
-    console.log(`Mailchimp: Error while deleting e-mail address "${emailAddress}" from list ${MAILCHIMP_LIST_ID}.`);
+    logger.error(`Mailchimp: Error while deleting "${emailAddress}" from list ${MAILCHIMP_LIST_ID}.`);
     throw err;
   }
 };

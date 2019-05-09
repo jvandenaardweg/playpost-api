@@ -32,7 +32,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   if (!user) return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
 
-  const isValidPassword = await bcryptjs.compare(password, user.password);
+  const isValidPassword = await comparePassword(password, user.password);
 
   // TODO: Log tries for security
   if (!isValidPassword) return res.status(400).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
@@ -59,6 +59,13 @@ export const generateJWTToken = (id: string, email: string): string => {
  */
 export const hashPassword = (password: string): Promise<string> => {
   return bcryptjs.hash(password, 10);
+};
+
+/**
+ * Compares a plain text password with a hashed one. Returns true if they match.
+ */
+export const comparePassword = (password: string, hashedPassword: string) => {
+  return bcryptjs.compare(password, hashedPassword);
 };
 
 export const routeIsProtected = passport.authenticate('jwt', { session: false, failWithError: true });

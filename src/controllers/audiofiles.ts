@@ -5,11 +5,12 @@ import uuid from 'uuid';
 import * as Sentry from '@sentry/node';
 
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
-import { Article } from '../database/entities/article';
+import { Article, ArticleStatus } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
 
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
+import { logger } from '../utils';
 // import { updateArticleToFull } from '../controllers/articles';
 
 export const findById = async (req: Request, res: Response) => {
@@ -29,6 +30,10 @@ export const findById = async (req: Request, res: Response) => {
   return res.json(audiofile);
 };
 
+/**
+ * Create's an audiofile using the article's SSML.
+ *
+ */
 export const createAudiofile = async (req: Request, res: Response) => {
   interface RequestBody {
     mimeType: AudiofileMimeType;
@@ -40,6 +45,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
   }
 
   const hrstart = process.hrtime();
+
+  const loggerPrefix = 'Create Audiofile:';
 
   let article: Article | undefined;
 
@@ -64,19 +71,21 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
 
-  // Fetch the article with the SSML column (which is hidden by default)
+  // Fetch the article (with SSML)
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
-    const message = 'Article does not exist.';
+    const message = `Article does not exist, cannot create audio.`;
 
     Sentry.withScope((scope) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
 
@@ -90,34 +99,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
 
-  // If there is not SSML data, try to generate it on-demand
-  // Usually the SSML data is generated after insertion of an article in the database
-  // But if for some reason that didn't work, try it again here.
-  // if (!article.ssml) {
-  //   try {
-  //     // Fetch the full article details
-  //     await updateArticleToFull(articleId);
-
-  //     // Get the updated article with the SSML column
-  //     article = await articleRepository.findOne(articleId, { relations: ['audiofiles'], select: ['ssml'] });
-  //   } catch (err) {
-  //     const message = 'Could not update the article to include SSML data. We cannot generate an audiofile.';
-
-  //     Sentry.withScope((scope) => {
-  //       scope.setExtra('userId', userId);
-  //       scope.setExtra('articleId', articleId);
-  //       Sentry.captureMessage(message, Sentry.Severity.Info);
-  //     });
-
-  //     return res.status(400).json({ message });
-  //   }
-  // }
-
-  if (!article.ssml) {
-    const message = 'Article has no SSML data. We cannot generate an audiofile.';
+  if (article.status !== ArticleStatus.FINISHED) {
+    const message = `The given article is not processed successfully. Current status: ${article.status}. We cannot generate audio for this article.`;
 
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
@@ -125,6 +112,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  if (!article.ssml) {
+    const message = 'Article has no SSML data. We cannot generate audio for this article.';
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
 
@@ -138,10 +139,11 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message, id: article.audiofiles[0].id });
   }
 
-  // Get the voice
+  // Get the voice we want to use for the synthesizer
   const voice = await voiceRepository.findOne(voiceId);
 
   if (!voice) {
@@ -154,12 +156,15 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
+    logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
 
   // Manually generate a UUID.
   // So we can use this ID to upload a file to storage, before we insert it into the database.
   const audiofileId = uuid.v4();
+
+  logger.info(loggerPrefix, 'Creating audiofile placeholder...');
 
   // Prepare the audiofile
   const audiofile = await audiofileRepository.create({
@@ -175,16 +180,26 @@ export const createAudiofile = async (req: Request, res: Response) => {
     }
   });
 
-  // Synthesize and return an uploaded audiofile for use to use in the database
+  logger.info(loggerPrefix, `Created audiofile placeholder using ID: ${audiofile.id}`);
+
+  logger.info(loggerPrefix, 'Now synthesizing the article\'s SSML...');
+
+  // // Synthesize and return an uploaded audiofile for use to use in the database
   const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, mimeType);
+
+  logger.info(loggerPrefix, 'Successfully synthesized the article\'s SSML!');
+
+  logger.info(loggerPrefix, 'Saving the audiofile in the database...');
 
   // Then save it in the database
   const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
 
-  console.log('Created audiofile: ', createdAudiofile.id);
+  logger.info(loggerPrefix, 'Saved the audiofile in the database! Audiofile ID:', createdAudiofile.id);
 
   const hrend = process.hrtime(hrstart);
-  console.info('Execution time (hr) of createAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+  const ds = hrend[0];
+  const dms = hrend[1] / 1000000;
+  logger.info(loggerPrefix, `Execution time: ${ds} ${dms}ms`);
 
   return res.json(createdAudiofile);
 };
@@ -193,7 +208,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
  * Gets all the audiofiles from the database.
  * This endpoint is not visible for other users.
  */
-export const getAll = async (req: Request, res: Response) => {
+export const findAllAudiofiles = async (req: Request, res: Response) => {
   const userEmail = req.user.email;
   const audiofileRepository = getRepository(Audiofile);
 

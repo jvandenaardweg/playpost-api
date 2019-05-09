@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "importHelpers": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -12,7 +12,7 @@
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    "noImplicitAny": true,
+    // "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     "stripInternal": true,
@@ -32,6 +32,7 @@
   },
   "include": [
     "src/**/*",
+    "src/typings"
   ],
   "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts"]
 }

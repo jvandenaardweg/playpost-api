@@ -6,6 +6,7 @@ import joi from 'joi';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
 import { PlaylistItem } from '../database/entities/playlist-item';
+import { logger } from '../utils';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -77,17 +78,17 @@ export const deleteById = async (req: Request, res: Response) => {
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  let ssml = undefined;
-  let text = undefined;
-  let html = undefined;
-  let readingTime = undefined;
-  let imageUrl = undefined;
-  let authorName = undefined;
-  let description = undefined;
-  let currentUrl = undefined;
-  let language = undefined;
-  let title = undefined;
-  let siteName = undefined;
+  let ssml = '';
+  let text = '';
+  let html = '';
+  let readingTime = 0;
+  let imageUrl = '';
+  let authorName = '';
+  let description = '';
+  let currentUrl = '';
+  let language = '';
+  let title = '';
+  let siteName = '';
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -99,7 +100,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
-  if (response.siteName) siteName = response.siteName || response.hostName || undefined;
+  if (response.siteName) siteName = response.siteName || response.hostName || '';
 
   return  {
     ssml,
@@ -206,7 +207,7 @@ export const updateArticleToFull = async (articleId: string) => {
   if (articleToUpdate.status !== ArticleStatus.FINISHED) {
     const isEnforced = await enforceUniqueArticle(articleToUpdate, currentUrl);
     if (isEnforced) {
-      console.log('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
+      logger.info('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
       return;
     }
   }
@@ -253,8 +254,8 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
   const duplicateArticleId = articleToUpdate.id;
   const existingArticleId = existingArticle.id;
 
-  console.log(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
-  console.log(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+  logger.info(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
+  logger.info(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
 
   // Get all playlist items that use the wrong article ID
   // This is probably just one item, the newly article added to a playlist by a user
@@ -267,11 +268,11 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     }
   });
 
-  console.log(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+  logger.info(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
   // Remove the duplicate article, so we free up the unique constraints in the playlist
   await articleRepository.remove(articleToUpdate);
-  console.log(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
+  logger.info(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
 
   // Add a new playlistItem using the existing article ID
   for (const playlistItem of playlistItems) {
@@ -290,7 +291,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
 
     if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
-      console.log(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
+      logger.info(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
     } else {
       // Create the new playlist item using the existing article ID
       const playlistItemToCreate = await playlistItemRepository.create({
@@ -303,7 +304,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
       });
 
       const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-      console.log(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      logger.info(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
     }
   }
 

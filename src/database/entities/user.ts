@@ -6,6 +6,7 @@ import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
 import { redisClientPub } from '../../cache';
+import { logger } from '../../utils';
 
 @Entity()
 export class User {
@@ -52,7 +53,7 @@ export class User {
   async afterInsert() {
     // Don't add our integration test account to Mailchimp
     if (!this.email.includes('integrationtest-1337')) {
-      console.log('User @AfterInsert()', `Adding "${this.email}" to Mailchimp list.`);
+      logger.info('Database Entity (User):', '@AfterInsert():', `Adding "${this.email}" to Mailchimp list.`);
       redisClientPub.publish('ADD_TO_MAILCHIMP_LIST', this.email);
     }
   }
@@ -61,7 +62,7 @@ export class User {
   async afterRemove() {
     // Do not run for our integration test user
     if (!this.email.includes('integrationtest-1337')) {
-      console.log('User @AfterRemove()', `Remove "${this.email}" from Mailchimp list.`);
+      logger.info('Database Entity (User):', '@AfterRemove():', `Remove "${this.email}" from Mailchimp list.`);
       redisClientPub.publish('REMOVE_FROM_MAILCHIMP_LIST', this.email);
     }
   }

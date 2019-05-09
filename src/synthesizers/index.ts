@@ -13,8 +13,7 @@ import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
 import { googleSSMLPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
 import { awsSSMLPartsToSpeech, AWSSynthesizerOptions } from './aws';
 import { Polly } from 'aws-sdk';
-
-/* eslint-disable no-console */
+import { logger } from '../utils';
 
 export type SynthesizerType = 'article' | 'preview';
 export type SynthesizerAudioEncodingTypes = GoogleAudioEncodingType & Polly.OutputFormat;
@@ -67,6 +66,9 @@ export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesi
  */
 export const synthesizeArticleToAudiofile = async (voice: Voice, article: Article, audiofile: Audiofile, mimeType: AudiofileMimeType): Promise<Audiofile> => {
   const hrstart = process.hrtime();
+  const loggerPrefix = 'Synthesize Article To Audiofile:';
+
+  logger.info(loggerPrefix, 'Starting...');
 
   let createdAudiofile: Audiofile;
 
@@ -76,21 +78,30 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   const storageUploadPath = `${articleId}/audiofiles/${audiofileId}`;
   const encodingParameter = mimeTypeToEncoderParameter(mimeType, voice.synthesizer);
 
-  if (!encodingParameter) throw new Error(`${voice.synthesizer} does not support ${mimeType}.`);
-  if (!articleId || typeof articleId !== 'string') throw new Error('articleId (string) is not given to synthesizeArticleToAudiofile.');
-  if (!ssml) throw new Error('ssml (string) is not given to synthesizeArticleToAudiofile.');
-  if (!audiofileId) throw new Error('audiofileId (string) is not given to synthesizeArticleToAudiofile.');
+  if (!encodingParameter) {
+    const errorMessage = `Synthesizer "${voice.synthesizer}" does not support mimeType: ${mimeType}`;
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
 
   if (voice.synthesizer === 'Google') {
+    logger.info(loggerPrefix, 'Starting Google Synthesizing...');
     createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
+    logger.info(loggerPrefix, 'Finished Google Synthesizing.');
   } else if (voice.synthesizer === 'AWS') {
+    logger.info(loggerPrefix, 'Starting AWS Polly Synthesizing...');
     createdAudiofile = await synthesizeUsingAWS(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
+    logger.info(loggerPrefix, 'Finished AWS Polly Synthesizing.');
   } else {
-    throw new Error('Synthesizer not supported. Please use Google or AWS.');
+    const errorMessage = 'Synthesizer not supported. Please use Google or AWS.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
   }
 
   const hrend = process.hrtime(hrstart);
-  console.info('Execution time (hr) of synthesizeArticleToAudiofile(): %ds %dms', hrend[0], hrend[1] / 1000000);
+  logger.info(loggerPrefix, 'Execution time:', hrend[0], hrend[1] / 1000000);
+
+  logger.info(loggerPrefix, 'Ended. Returning the created audiofile.');
 
   // Return the audiofile with the correct properties, so it can be saved in the database
   return createdAudiofile;
@@ -105,11 +116,17 @@ const synthesizeUsingAWS = async (
   encodingParameter: SynthesizerEncoding,
   storageUploadPath: string
 ) => {
+  const loggerPrefix = 'Synthesize Using AWS:';
+
+  logger.info(loggerPrefix, 'Starting...');
+
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
     softLimit: AWS_CHARACTER_LIMIT - 1000,
     hardLimit: AWS_CHARACTER_LIMIT
   });
+
+  logger.info(loggerPrefix, `Received ${ssmlParts.length} SSML parts to be used for the synthesizer.`);
 
   const synthesizerOptions: AWSSynthesizerOptions = {
     OutputFormat: encodingParameter,
@@ -118,6 +135,8 @@ const synthesizeUsingAWS = async (
     TextType: 'ssml',
     Text: ''  // We fill this later
   };
+
+  logger.info(loggerPrefix, 'Synthesize using these default synthsizer options:', synthesizerOptions);
 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
   const localAudiofilePaths = await awsSSMLPartsToSpeech(
@@ -128,6 +147,8 @@ const synthesizeUsingAWS = async (
     storageUploadPath
   );
 
+  logger.info(loggerPrefix, 'Received local audiofile paths:', localAudiofilePaths);
+
   // Step 3: Combine multiple audiofiles into one
   const concatinatedLocalAudiofilePath = await concatAudioFiles(
     localAudiofilePaths,
@@ -135,8 +156,14 @@ const synthesizeUsingAWS = async (
     encodingParameter
   );
 
+  logger.info(loggerPrefix, 'Received concatinated audiofile path:', concatinatedLocalAudiofilePath);
+
   // Step 4: Get the length of the audiofile
   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
+
+  logger.info(loggerPrefix, 'Received audiofile duration in seconds:', audiofileLength);
+
+  logger.info(loggerPrefix, 'Uploading the local audiofile to our storage...');
 
   // Step 5: Upload the one mp3 file to Google Cloud Storage
   const uploadResponse = await storage.uploadArticleAudioFile(
@@ -149,11 +176,18 @@ const synthesizeUsingAWS = async (
     audiofileLength
   );
 
+  logger.info(loggerPrefix, 'Audiofile successfully uploaded to our storage!');
+
   // Step 6: Delete the local file, we don't need it anymore
-  await fsExtra.remove(`${appRootPath}/temp/${article.id}`);
+  const pathToRemove = `${appRootPath}/temp/${article.id}`;
+  await fsExtra.remove(pathToRemove);
+
+  logger.info(loggerPrefix, 'Removed temp audiofiles:', pathToRemove);
 
   // Step 7: Create a publicfile URL our users can use
   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
+
+  logger.info(loggerPrefix, 'Got public file URL from our storage to be used for our users:', publicFileUrl);
 
   // Step 8: Return the audiofile properties needed for database insertion
   audiofile.url = publicFileUrl;
@@ -161,6 +195,8 @@ const synthesizeUsingAWS = async (
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
   audiofile.languageCode = synthesizerOptions.LanguageCode || 'en-US'; // TODO: fix this ugly fallback
+
+  logger.info(loggerPrefix, 'Finished! Returning the created audiofile.');
 
   return audiofile;
 };
