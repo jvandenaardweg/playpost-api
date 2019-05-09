@@ -418,7 +418,7 @@ export const reOrderPlaylistItem = async (
   userId: string
 ) => {
   return getManager().transaction(async (transactionalEntityManager) => {
-    const move = (newOrderNumber > currentOrderNumber) ? 'down' : 'up';
+    const move = (currentOrderNumber > newOrderNumber) ? 'up' : 'down';
 
     // Helpful: https://blogs.wayne.edu/web/2017/03/13/updating-a-database-display-order-with-drag-and-drop-in-sql/
 
@@ -426,7 +426,7 @@ export const reOrderPlaylistItem = async (
     await transactionalEntityManager.createQueryBuilder()
     .update(PlaylistItem)
     .set({ order: -1 })
-    .where('"id" = :id', { id: playlistItemId })
+    .where('"id" = :playlistItemId', { playlistItemId })
     .andWhere('"userId" = :userId', { userId })
     .execute();
 
