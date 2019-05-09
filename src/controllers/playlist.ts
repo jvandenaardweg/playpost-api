@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { playlistInputValidationSchema } from '../database/validators';
-import { getRepository, getManager, MoreThan } from 'typeorm';
+import { getRepository, getManager, MoreThan, Not } from 'typeorm';
 import joi from 'joi';
 import { PlaylistItem } from '../database/entities/playlist-item';
-import { Article } from '../database/entities/article';
+import { Article, ArticleStatus } from '../database/entities/article';
 
 import { getNormalizedUrl } from '../utils/string';
+import { logger } from '../utils';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
 const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given article does not exist in your playlist.';
@@ -304,11 +305,13 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { articleId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
+  const articleRepository = getRepository(Article);
 
   const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    logger.error('Delete Playlist Item', messageDetails);
     return res.status(400).json({ message: messageDetails });
   }
 
@@ -324,9 +327,41 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     }
   });
 
-  if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  if (!playlistItem) {
+    logger.error('Delete Playlist Item', MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  }
 
-  await playlistItemRepository.remove(playlistItem);
+  try {
+    logger.info('Delete Playlist Item', `Deleting playlist item ID "${playlistItem.id}"...`);
+    await playlistItemRepository.remove(playlistItem);
+    logger.info('Delete Playlist Item', 'Successfully deleted playlist item!');
+  } catch (err) {
+    const errorMessage = `Failed to delete playlist item ID "${playlistItem}"`;
+    logger.error('Delete Playlist Item', errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
+
+  // Check if the playlistItem has a failed or processing article
+  // If so, we delete it
+  const failedArticle = await articleRepository.findOne({
+    where: {
+      id: playlistItem.article.id,
+      status: Not(ArticleStatus.FINISHED)
+    }
+  });
+
+  if (failedArticle) {
+    try {
+      logger.info('Delete Playlist Item', `Playlist Item has an unfinished article. Deleting that article ID "${failedArticle.id}"...`);
+      await articleRepository.remove(failedArticle);
+      logger.info('Delete Playlist Item', 'Successfully deleted article ID!');
+    } catch (err) {
+      const errorMessage = 'Failed to delete the article attached to the deleted playlist item.';
+      logger.error('Delete Playlist Item', errorMessage);
+      return res.status(400).json({ message: errorMessage });
+    }
+  }
 
   // TODO: re-order items to fill in the gap?
 
