@@ -227,7 +227,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
 
   // Move the newly created playlistItem to the first position and re-order all the other playlist items
-  await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, userId);
+  // await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, userId);
+  await reOrderPlaylistItems(userId);
 
   return res.json(createdPlaylistItem);
 
@@ -363,9 +364,51 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     }
   }
 
-  // TODO: re-order items to fill in the gap?
+  await reOrderPlaylistItems(userId);
 
   return res.json({ message: 'Playlist item is removed!' });
+};
+
+/**
+ * Method to re-order existing playlist items.
+ * This is a simple, not optimized version. As we run a UPDATE command for every playlist item
+ * TODO: try to find a way to update using one SQL command
+ *
+ * @param userId
+ */
+export const reOrderPlaylistItems = async (userId: string) => {
+  logger.info('Re-order Playlist Items', `Re-ordering playlist for user ID: "${userId}".`);
+
+  const playlistItemRepository = getRepository(PlaylistItem);
+
+  const userPlaylistItems = await playlistItemRepository.find({
+    relations: ['user'],
+    where: {
+      user: {
+        id: userId
+      }
+    },
+    order: {
+      order: 'ASC'
+    }
+  });
+
+  if (!userPlaylistItems.length) {
+    logger.log('Re-order Playlist Items', `No playlist items to re-order for user ID: "${userId}".`);
+    return userPlaylistItems;
+  }
+
+  const playlistItemIds = userPlaylistItems.map(playlistItem => playlistItem.id);
+
+  return getManager().transaction(async (transactionalEntityManager) => {
+    playlistItemIds.forEach(async (playlistItemId, index) => {
+      await transactionalEntityManager.update(PlaylistItem, playlistItemId, {
+        order: index
+      });
+    });
+
+    logger.info('Re-order Playlist Items', 'Successfully re-ordered!');
+  });
 };
 
 export const reOrderPlaylistItem = async (
