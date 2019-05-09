@@ -7,7 +7,7 @@ import { User } from './user';
   order: 'ASC'
 }})
 @Unique(['article', 'user']) // Don't allow articles that are already in the user's playlist
-@Index(['user', 'article', 'favoritedAt', 'archivedAt'])
+@Index(['user', 'article', 'favoritedAt', 'archivedAt', 'order'])
 export class PlaylistItem {
 
   @PrimaryGeneratedColumn('uuid')
