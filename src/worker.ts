@@ -64,7 +64,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
           }
 
           await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
-          logger.info('Worker process set status to failed: ', channel, articleId);
+          logger.error('Worker process set status to failed: ', channel, articleId);
         } finally {
           logger.info('Worker process ended: ', channel, articleId);
         }

@@ -171,7 +171,10 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) throw new Error('Cannot update article status, because the article is not found.');
+  if (!article) {
+    logger.warn(`Cannot update article status of article ID "${articleId}", because the article is not found.`);
+    return;
+  }
 
   const updatedArticle = await articleRepository.update(article.id, { status });
 
@@ -205,8 +208,8 @@ export const updateArticleToFull = async (articleId: string) => {
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
   if (articleToUpdate.status !== ArticleStatus.FINISHED) {
-    const isEnforced = await enforceUniqueArticle(articleToUpdate, currentUrl);
-    if (isEnforced) {
+    const shouldNotUpdate = await enforceUniqueArticle(articleToUpdate, currentUrl);
+    if (shouldNotUpdate) {
       logger.info('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
       return;
     }
@@ -237,6 +240,9 @@ export const updateArticleToFull = async (articleId: string) => {
 const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string) => {
   const articleRepository = getRepository(Article);
   const playlistItemRepository = getRepository(PlaylistItem);
+  const loggerPrefix = 'Enforce Unique Article: ';
+
+  logger.info(loggerPrefix, 'Starting...');
 
   // Find any existing article using the currentUrl, which is the "canonicalUrl" we get from the crawler
   const existingArticle = await articleRepository.findOne({
@@ -246,26 +252,31 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     ]
   });
 
-  // If there's no existing article, don't enforce
+  // If there's no existing article, don't enforce.
+  // The script can just update the "articleToUpdate" to full
   if (!existingArticle) {
-    return false;
-  }
-
-  // Don't enfoce when the existing article and article to update is the same article
-  if (existingArticle.id === articleToUpdate.id) {
-    return false;
-  }
-
-  // Don't enforce when existing article status is finished
-  if (existingArticle.status === ArticleStatus.FINISHED) {
+    logger.info(loggerPrefix, 'Did not find an existing article. So we don\'t have to enforce anything. Article can be added as new.');
     return false;
   }
 
   const duplicateArticleId = articleToUpdate.id;
   const existingArticleId = existingArticle.id;
 
-  logger.info(`Enforce Unique Article: Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
-  logger.info(`Enforce Unique Article: We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
+  logger.info(loggerPrefix, `Found an existing article ID "${existingArticleId}" using the URL we got from the crawler: ${currentUrl}`);
+
+  // Don't continue when the existing article and article to update is the same article
+  if (existingArticle.id === articleToUpdate.id) {
+    logger.info(loggerPrefix, 'The existing article ID is the same as the article to update. We do nothing.');
+    return true;
+  }
+
+  // Don't continue when the existing article status is finished
+  if (existingArticle.status === ArticleStatus.FINISHED) {
+    logger.info(loggerPrefix, 'The existing article status is already finished. We do nothing.');
+    return true;
+  }
+
+  logger.info(loggerPrefix, `(enforcing) We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
 
   // Get all playlist items that use the wrong article ID
   // This is probably just one item, the newly article added to a playlist by a user
@@ -278,11 +289,11 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     }
   });
 
-  logger.info(`Enforce Unique Article: Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
+  logger.info(loggerPrefix, `(enforcing) Found ${playlistItems.length} playlist items with the duplicate article ID "${duplicateArticleId}".`);
 
   // Remove the duplicate article, so we free up the unique constraints in the playlist
   await articleRepository.remove(articleToUpdate);
-  logger.info(`Enforce Unique Article: Removed duplicate article ID: ${duplicateArticleId}`);
+  logger.info(loggerPrefix, `(enforcing) Removed duplicate article ID: ${duplicateArticleId}`);
 
   // Add a new playlistItem using the existing article ID
   for (const playlistItem of playlistItems) {
@@ -301,7 +312,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
 
     if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
-      logger.info(`Enforce Unique Article: User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
+      logger.info(loggerPrefix, `(enforcing) User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
     } else {
       // Create the new playlist item using the existing article ID
       const playlistItemToCreate = await playlistItemRepository.create({
@@ -314,7 +325,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
       });
 
       const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
-      logger.info(`Enforce Unique Article: Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
+      logger.info(loggerPrefix, `(enforcing) Created playlistItem "${createdPlaylistItem.id}" with article ID "${existingArticleId}".`);
     }
   }
 
