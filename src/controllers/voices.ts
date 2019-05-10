@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, getConnection } from 'typeorm';
 import fsExtra from 'fs-extra';
 
 import { Voice } from '../database/entities/voice';
@@ -12,11 +12,17 @@ import { awsSSMLToSpeech } from '../synthesizers/aws';
 import * as storage from '../storage/google-cloud';
 
 import { getAudioFileDurationInSeconds } from '../utils/audio';
+import { CACHE_ONE_DAY } from '../constants/cache';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
 
-  const voices = await voiceRepository.find();
+  const voices = await voiceRepository.find({
+    cache: {
+      id: 'voices_all',
+      milliseconds: CACHE_ONE_DAY
+    }
+  });
 
   return res.json(voices);
 };
@@ -25,7 +31,13 @@ export const findAllActive = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
 
   const activeVoices = await voiceRepository.find({
-    isActive: true
+    where: {
+      isActive: true,
+    },
+    cache: {
+      id: 'voices_active',
+      milliseconds: CACHE_ONE_DAY
+    }
   });
 
   return res.json(activeVoices);
@@ -35,8 +47,14 @@ export const findAllActivePremiumVoices = async (req: Request, res: Response) =>
   const voiceRepository = getRepository(Voice);
 
   const activePremiumVoices = await voiceRepository.find({
-    isPremium: true,
-    isActive: true
+    where: {
+      isPremium: true,
+      isActive: true
+    },
+    cache: {
+      id: 'voices_active_premium',
+      milliseconds: CACHE_ONE_DAY
+    }
   });
 
   return res.json(activePremiumVoices);
@@ -46,8 +64,14 @@ export const findAllActiveFreeVoices = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
 
   const activeFreeVoices = await voiceRepository.find({
-    isPremium: false,
-    isActive: true
+    where: {
+      isPremium: false,
+      isActive: true
+    },
+    cache: {
+      id: 'voices_active_free',
+      milliseconds: CACHE_ONE_DAY
+    }
   });
 
   return res.json(activeFreeVoices);
@@ -146,6 +170,10 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   await voiceRepository.update(voice.id, {
     exampleAudioUrl: publicFileUrl
   });
+
+  // When we have updated a voice, remove all related caches
+  const cache = await getConnection('default').queryResultCache;
+  if (cache) await cache.remove(['voices_all', 'voices_active', 'voices_active_free', 'voices_active_premium']);
 
   const updatedVoice = await voiceRepository.findOne(voice.id);
 
