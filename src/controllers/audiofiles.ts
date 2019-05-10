@@ -79,9 +79,39 @@ export const createAudiofile = async (req: Request, res: Response) => {
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   if (!article) {
-    const message = `Article does not exist, cannot create audio.`;
+    const message = 'Article does not exist, cannot create audio.';
 
     Sentry.withScope((scope) => {
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  if (article.status !== ArticleStatus.FINISHED) {
+    const message = `The given article is not processed successfully. Current status: ${article.status}. We cannot generate audio for this article.`;
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  // If the readingTime is greater then 30 minutes (1800 seconds)
+  // We just shown an error we cannot create audio for this
+  const readingTimeLimit = (30 * 60); // 30 minutes, 1800 seconds
+  if (article.readingTime > readingTimeLimit) {
+    const message = `The article is longer then ${readingTimeLimit} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimit} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('readingTime', article && article.readingTime);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -96,19 +126,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setExtra('userId', userId);
       scope.setExtra('articleId', articleId);
       scope.setExtra('languageCode', article && article.languageCode);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
-    });
-
-    logger.error(loggerPrefix, message);
-    return res.status(400).json({ message });
-  }
-
-  if (article.status !== ArticleStatus.FINISHED) {
-    const message = `The given article is not processed successfully. Current status: ${article.status}. We cannot generate audio for this article.`;
-
-    Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
