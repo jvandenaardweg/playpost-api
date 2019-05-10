@@ -49,7 +49,13 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
         try {
           await articlesController.updateArticleStatus(articleId, ArticleStatus.CRAWLING);
-          await articlesController.updateArticleToFull(articleId);
+          const updatedArticle = await articlesController.updateArticleToFull(articleId);
+
+          // If there's no updated article, we probably "enforced" unique articles
+          if (!updatedArticle) {
+            return logger.info('Worker process ended without update: ', channel, articleId);
+          }
+
           logger.info('Worker process success: ', channel, articleId);
         } catch (err) {
           logger.error('Worker process failed: ', channel, articleId, err);
