@@ -20,7 +20,7 @@ describe('auth controller', () => {
       const token = generateJWTToken('1');
 
       expect(typeof token).toBe('string');
-      expect(token.length).toBe(169);
+      expect(token.length).toBe(117);
     });
   });
 
