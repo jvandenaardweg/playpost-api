@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
 import joi from 'joi';
+import urlParse from 'url-parse';
 
 import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
@@ -100,7 +101,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
-  if (response.siteName) siteName = response.siteName || response.hostName || '';
+  if (response.siteName) siteName = response.siteName || response.hostName || urlParse(currentUrl).hostname;
 
   return  {
     ssml,
