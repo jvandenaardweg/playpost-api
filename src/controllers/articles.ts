@@ -271,12 +271,6 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     return true;
   }
 
-  // Don't continue when the existing article status is finished
-  if (existingArticle.status === ArticleStatus.FINISHED) {
-    logger.info(loggerPrefix, 'The existing article status is already finished. We do nothing.');
-    return true;
-  }
-
   logger.info(loggerPrefix, `(enforcing) We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
 
   // Get all playlist items that use the wrong article ID
