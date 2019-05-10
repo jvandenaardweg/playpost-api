@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, Not } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { hashPassword } from './auth';
+import { logger } from '../utils';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -23,6 +24,7 @@ export const updateEmail = async (req: Request, res: Response) => {
   const { email } = req.body;
   const userId = req.user.id;
   const userRepository = getRepository(User);
+  const loggerPrefix = 'User Update E-mail: ';
 
   const { error } = joi.validate({ email, userId }, userInputValidationSchema.requiredKeys('email', 'userId'));
 
@@ -31,7 +33,29 @@ export const updateEmail = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  await userRepository.update(userId, { email });
+  const emailAddressNormalized = email.toLowerCase();
+
+  logger.info(loggerPrefix, `Try updating for user ID "${userId}"...`);
+
+  const existingUser = await userRepository.findOne({
+    where: {
+      email: emailAddressNormalized,
+      user: {
+        id: Not(userId)
+      }
+    }
+  });
+
+  if (existingUser) {
+    logger.info(loggerPrefix, `User ID "${userId}" tried to update his e-mail address, but it\s already in use by an other user.`);
+    return res.status(400).json({ message: 'This e-mail address is already in use by an other user.' });
+  }
+
+  logger.info(loggerPrefix, `User ID "${userId}" is allowed to update to this e-mail address. Updating now...`);
+
+  await userRepository.update(userId, { email: emailAddressNormalized });
+
+  logger.info(loggerPrefix, 'Updated!');
 
   const updatedUser = await userRepository.findOne(userId);
 

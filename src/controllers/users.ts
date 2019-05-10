@@ -23,13 +23,14 @@ export const createUser = [
       return res.status(400).json({ message: messageDetails });
     }
 
-    const existingUser = await userRepository.findOne({ email });
+    const emailAddressNormalized = email.toLowerCase();
+    const existingUser = await userRepository.findOne({ email: emailAddressNormalized });
 
     if (existingUser) return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS });
 
     const hashedPassword = await hashPassword(password);
 
-    const userToCreate = { email, password: hashedPassword };
+    const userToCreate = { email: emailAddressNormalized, password: hashedPassword };
 
     // Validate the input
     const validationResult = await validateInput(User, userToCreate);
