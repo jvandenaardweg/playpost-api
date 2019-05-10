@@ -267,8 +267,8 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
 
   // Don't continue when the existing article and article to update is the same article
   if (existingArticle.id === articleToUpdate.id) {
-    logger.info(loggerPrefix, 'The existing article ID is the same as the article to update. We do nothing.');
-    return true;
+    logger.info(loggerPrefix, 'The existing article ID is the same as the article to update. Article can be updated.');
+    return false;
   }
 
   logger.info(loggerPrefix, `(enforcing) We replace current playlistItems with the existing article ID and remove this duplicate article ID "${duplicateArticleId}".`);
