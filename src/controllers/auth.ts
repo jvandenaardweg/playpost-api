@@ -58,7 +58,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   // We use the e-mail in the token as an extra way to get some easy context during debugging
   // For example, we can use the email in Sentry to maybe contact the user
-  const token = generateJWTToken(user.id, user.email);
+  const token = generateJWTToken(user.id);
 
   logger.info(loggerPrefix, `Generated token using user ID "${user.id}" and user email "${user.email}".`);
 
@@ -68,8 +68,8 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 /**
  * Creates and reurns a JWT token using a user ID and e-mail address.
  */
-export const generateJWTToken = (id: string, email: string): string => {
-  return jsonwebtoken.sign({ id, email }, JWT_SECRET);
+export const generateJWTToken = (id: string): string => {
+  return jsonwebtoken.sign({ id }, JWT_SECRET);
 };
 
 /**

@@ -17,7 +17,7 @@ describe('auth controller', () => {
   describe('generateJWTToken()', () => {
 
     it('Should give a JWT token.', () => {
-      const token = generateJWTToken('1', 'jordyvandenaardweg@gmail.com');
+      const token = generateJWTToken('1');
 
       expect(typeof token).toBe('string');
       expect(token.length).toBe(169);
