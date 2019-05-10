@@ -17,7 +17,8 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
     cache: {
       type: 'ioredis',
       options: {
-        url: process.env.REDIS_URL
+        url: process.env.REDIS_URL,
+        ssl: (process.env.NODE_ENV === 'production') ? true : false // For Heroku
       }
     },
     logging: (process.env.NODE_ENV === 'production') ? ['error'] : ['error'], // Complete logging in dev, only errors in production
