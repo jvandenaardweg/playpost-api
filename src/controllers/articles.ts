@@ -79,17 +79,17 @@ export const deleteById = async (req: Request, res: Response) => {
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  let ssml = '';
-  let text = '';
-  let html = '';
-  let readingTime = 0;
-  let imageUrl = '';
-  let authorName = '';
-  let description = '';
-  let currentUrl = '';
-  let language = '';
-  let title = '';
-  let siteName = '';
+  let ssml: string | null = null;
+  let text: string | null = null;
+  let html: string | null = null;
+  let readingTime: number | null = null;
+  let imageUrl: string | null = null;
+  let authorName: string | null = null;
+  let description: string | null = null;
+  let currentUrl: string | null = null;
+  let language: string | null = null;
+  let title: string | null = null;
+  let siteName: string | null = null;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -101,7 +101,13 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
-  if (response.siteName) siteName = response.siteName || response.hostName || urlParse(currentUrl).hostname;
+  if (response.siteName) {
+    if (currentUrl) {
+      siteName = urlParse(currentUrl).hostname;
+    } else {
+      siteName = response.siteName || response.hostName;
+    }
+  }
 
   return  {
     ssml,
