@@ -246,8 +246,18 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
     ]
   });
 
-  // If the article already exists, don't update the newly article, but use the existingArticle.id and replace the current playlist item's with that ID
-  if (!existingArticle || existingArticle.id !== articleToUpdate.id || existingArticle.status === ArticleStatus.FINISHED) {
+  // If there's no existing article, don't enforce
+  if (!existingArticle) {
+    return false;
+  }
+
+  // Don't enfoce when the existing article and article to update is the same article
+  if (existingArticle.id === articleToUpdate.id) {
+    return false;
+  }
+
+  // Don't enforce when existing article status is finished
+  if (existingArticle.status === ArticleStatus.FINISHED) {
     return false;
   }
 
