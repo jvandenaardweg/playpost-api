@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository, Not } from 'typeorm';
+import { getRepository } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
@@ -39,14 +39,11 @@ export const updateEmail = async (req: Request, res: Response) => {
 
   const existingUser = await userRepository.findOne({
     where: {
-      email: emailAddressNormalized,
-      user: {
-        id: Not(userId)
-      }
+      email: emailAddressNormalized
     }
   });
 
-  if (existingUser) {
+  if (existingUser && existingUser.id !== userId) {
     logger.info(loggerPrefix, `User ID "${userId}" tried to update his e-mail address, but it\s already in use by an other user.`);
     return res.status(400).json({ message: 'This e-mail address is already in use by an other user.' });
   }
@@ -59,7 +56,9 @@ export const updateEmail = async (req: Request, res: Response) => {
 
   const updatedUser = await userRepository.findOne(userId);
 
-  return res.json(updatedUser);
+  if (!updatedUser) return res.status(400).json({ message: 'Could not find your user details after updating the e-mail address.' });
+
+  return res.json({ updatedUser });
 };
 
 export const updatePassword = async (req: Request, res: Response) => {
