@@ -187,6 +187,7 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
  * This is a long running process and is done after the creation of a new article
  */
 export const updateArticleToFull = async (articleId: string) => {
+  const loggerPrefix = 'Update Article To Full: ';
   const articleRepository = getRepository(Article);
 
   // Get the article details from the database
@@ -211,10 +212,12 @@ export const updateArticleToFull = async (articleId: string) => {
   if (articleToUpdate.status !== ArticleStatus.FINISHED) {
     const shouldNotUpdate = await enforceUniqueArticle(articleToUpdate, currentUrl);
     if (shouldNotUpdate) {
-      logger.info('Update Article To Full: Article already exists. We don\'t update it with data from the crawler.');
+      logger.info(loggerPrefix, 'Article already exists. We don\'t update it with data from the crawler.');
       return;
     }
   }
+
+  logger.info(loggerPrefix, 'Updating article with crawler data...');
 
   const updatedArticle = await articleRepository.update(articleToUpdate.id, {
     title,
@@ -230,6 +233,8 @@ export const updateArticleToFull = async (articleId: string) => {
     languageCode: language,
     sourceName: siteName
   });
+
+  logger.info(loggerPrefix, 'Updated article with crawler data!');
 
   return updatedArticle;
 };
