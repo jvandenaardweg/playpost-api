@@ -394,7 +394,7 @@ export const reOrderPlaylistItems = async (userId: string) => {
   });
 
   if (!userPlaylistItems.length) {
-    logger.log('Re-order Playlist Items', `No playlist items to re-order for user ID: "${userId}".`);
+    logger.info('Re-order Playlist Items', `No playlist items to re-order for user ID: "${userId}".`);
     return userPlaylistItems;
   }
 
