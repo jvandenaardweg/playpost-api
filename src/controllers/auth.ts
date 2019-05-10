@@ -28,7 +28,8 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const user = await userRepository.findOne({ email }, { select: ['id', 'email', 'password'] });
+  const emailAddressNormalized = email.toLowerCase();
+  const user = await userRepository.findOne({ email: emailAddressNormalized }, { select: ['id', 'email', 'password'] });
 
   if (!user) return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
 

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove, BeforeInsert } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
 
 import { Article } from './article';
@@ -48,6 +48,11 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @BeforeInsert()
+  lowercaseEmail() {
+    this.email = this.email.toLowerCase();
+  }
 
   @AfterInsert()
   async afterInsert() {
