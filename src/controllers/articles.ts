@@ -79,17 +79,17 @@ export const deleteById = async (req: Request, res: Response) => {
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
 
-  let ssml: string | null = null;
-  let text: string | null = null;
-  let html: string | null = null;
-  let readingTime: number | null = null;
-  let imageUrl: string | null = null;
-  let authorName: string | null = null;
-  let description: string | null = null;
-  let currentUrl: string | null = null;
-  let language: string | null = null;
-  let title: string | null = null;
-  let siteName: string | null = null;
+  let ssml: string | undefined = undefined;
+  let text: string | undefined = undefined;
+  let html: string | undefined = undefined;
+  let readingTime: number | undefined = undefined;
+  let imageUrl: string | undefined = undefined;
+  let authorName: string | undefined = undefined;
+  let description: string | undefined = undefined;
+  let currentUrl: string | undefined = undefined;
+  let language: string | undefined = undefined;
+  let title: string | undefined = undefined;
+  let siteName: string | undefined = undefined;
 
   if (response.ssml) ssml = response.ssml;
   if (response.cleanText) text = response.cleanText;
@@ -101,12 +101,13 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
   if (response.currentUrl) currentUrl = response.currentUrl;
   if (response.language) language = response.language;
   if (response.title) title = response.title;
+
   if (response.siteName) {
-    if (currentUrl) {
-      siteName = urlParse(currentUrl).hostname;
-    } else {
-      siteName = response.siteName || response.hostName;
-    }
+    siteName = response.siteName;
+  } else if (response.hostName) {
+    siteName = response.hostName;
+  } else if (currentUrl) {
+    siteName = urlParse(currentUrl).hostname;
   }
 
   return  {
