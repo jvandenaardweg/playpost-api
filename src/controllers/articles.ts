@@ -77,7 +77,10 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/fast?url=${articleUrl}`).then(response => response.json());
+  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
+
+  // Fast crawler has troubles with this URL:
+  // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
   // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
 
   let ssml: string | undefined = undefined;
