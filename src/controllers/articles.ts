@@ -77,37 +77,50 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
+  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/fast?url=${articleUrl}`).then(response => response.json());
+  // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
 
   let ssml: string | undefined = undefined;
   let text: string | undefined = undefined;
   let html: string | undefined = undefined;
+  let url: string = '';
+  let documentHtml: string | undefined = undefined;
   let readingTime: number | undefined = undefined;
   let imageUrl: string | undefined = undefined;
   let authorName: string | undefined = undefined;
   let description: string | undefined = undefined;
-  let currentUrl: string | undefined = undefined;
+  let canonicalUrl: string | undefined = undefined;
   let language: string | undefined = undefined;
   let title: string | undefined = undefined;
   let siteName: string | undefined = undefined;
 
   if (response.ssml) ssml = response.ssml;
-  if (response.cleanText) text = response.cleanText;
-  if (response.html) html = response.html;
+  if (response.articleText) text = response.articleText;
+  if (response.articleHTML) html = response.articleHTML;
+  if (response.completeHTML) documentHtml = response.completeHTML;
   if (response.readingTimeInSeconds) readingTime = response.readingTimeInSeconds;
   if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
   if (response.metadata && response.metadata.author) authorName = response.metadata.author;
   if (response.description) description = response.description;
-  if (response.currentUrl) currentUrl = response.currentUrl;
+
+  if (response.canonicalUrl) {
+    canonicalUrl = response.canonicalUrl;
+  } else if (response.metadata.url) {
+    canonicalUrl = response.metadata.url || undefined;
+  }
+
   if (response.language) language = response.language;
   if (response.title) title = response.title;
+  if (response.url) url = response.url;
 
   if (response.siteName) {
     siteName = response.siteName;
   } else if (response.hostName) {
     siteName = response.hostName;
-  } else if (currentUrl) {
-    siteName = urlParse(currentUrl).hostname;
+  } else if (response.canonicalUrl) {
+    siteName = urlParse(response.canonicalUrl).hostname;
+  } else if (response.url) {
+    siteName = urlParse(response.url).hostname;
   }
 
   return  {
@@ -118,10 +131,12 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     imageUrl,
     authorName,
     description,
-    currentUrl,
+    url,
+    canonicalUrl,
     language,
     title,
-    siteName
+    siteName,
+    documentHtml
   };
 };
 
@@ -145,25 +160,30 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(articleUrl);
+  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName } = await fetchFullArticleContents(articleUrl);
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
   // TODO: make re-usable with line 203
-  if (!ssml || !text || !html || !language || !title || !currentUrl || !description) {
-    return res.status(400).json({ message: 'The information we got from crawling the page was not enough. We cannot update the article.' });
-  }
+  if (!ssml) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing ssml.' });
+  if (!text) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing text.' });
+  if (!html) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing html.' });
+  if (!documentHtml) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing documentHtml.' });
+  if (!language) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing language.' });
+  if (!title) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing title.' });
+  if (!description) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing description.' });
 
   await articleRepository.update(article.id, {
     title,
     ssml,
     text,
     html,
+    documentHtml,
     readingTime,
     description,
     imageUrl,
     authorName,
-    canonicalUrl: currentUrl,
+    canonicalUrl,
     status: ArticleStatus.FINISHED,
     languageCode: language,
     sourceName: siteName
@@ -206,14 +226,20 @@ export const updateArticleToFull = async (articleId: string) => {
   // This might take a few seconds to resolve, as the crawler parses the whole page
   // Takes around 5 seconds for new websites
   // About 2 seconds for already visited websites
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, currentUrl, language, title, siteName } = await fetchFullArticleContents(articleToUpdate.url);
+  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleToUpdate.url);
+
+  const currentUrl = canonicalUrl || url;
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
-  // TODO: make re-usable with line 148
-  if (!ssml || !text || !html || !language || !title || !currentUrl || !description) {
-    throw new Error('The information we got from crawling the page was not enough. We cannot update the article.');
-  }
+  // TODO: make re-usable with line 203
+  if (!ssml) throw new Error('The information we got from crawling the page was not enough. Missing ssml.');
+  if (!text) throw new Error('The information we got from crawling the page was not enough. Missing text.');
+  if (!html) throw new Error('The information we got from crawling the page was not enough. Missing html.');
+  if (!documentHtml) throw new Error('The information we got from crawling the page was not enough. Missing documentHtml.');
+  if (!language) throw new Error('The information we got from crawling the page was not enough. Missing language.');
+  if (!title) throw new Error('The information we got from crawling the page was not enough. Missing title.');
+  if (!description) throw new Error('The information we got from crawling the page was not enough. Missing description.');
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
   if (articleToUpdate.status !== ArticleStatus.FINISHED) {
