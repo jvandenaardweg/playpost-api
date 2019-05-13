@@ -163,7 +163,9 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
 
-  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName } = await fetchFullArticleContents(articleUrl);
+  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
+
+  const currentUrl = canonicalUrl || url;
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
@@ -186,7 +188,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     description,
     imageUrl,
     authorName,
-    canonicalUrl,
+    canonicalUrl: currentUrl,
     status: ArticleStatus.FINISHED,
     languageCode: language,
     sourceName: siteName
@@ -260,6 +262,7 @@ export const updateArticleToFull = async (articleId: string) => {
     ssml,
     text,
     html,
+    documentHtml,
     readingTime,
     description,
     imageUrl,
