@@ -84,6 +84,12 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
     throw new Error(errorMessage);
   }
 
+  if (!ssml) {
+    const errorMessage = 'Synthesizer dit not get any SSML to synthesize.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
+
   if (voice.synthesizer === 'Google') {
     logger.info(loggerPrefix, 'Starting Google Synthesizing...');
     createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
