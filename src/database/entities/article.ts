@@ -67,14 +67,14 @@ export class Article extends BaseEntity {
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
   documentHtml: string;
 
-  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
+  @Column('text', { nullable: true, select: true }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
   html: string;
 
   @Column('text', { nullable: true, select: true }) // Awalys send ssml for now, fixes a big in audiofile creation
   // Be aware: we don't send the SSML to the user. If you need it, use in your find query { select: ['ssml'] }
   ssml: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { nullable: true, select: false })
   text: string;
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
