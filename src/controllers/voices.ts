@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository, getConnection } from 'typeorm';
 import fsExtra from 'fs-extra';
+import joi from 'joi';
 
 import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
@@ -13,6 +14,7 @@ import * as storage from '../storage/google-cloud';
 
 import { getAudioFileDurationInSeconds } from '../utils/audio';
 import { CACHE_ONE_DAY } from '../constants/cache';
+import { voiceInputValidationSchema } from '../database/validators';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
@@ -180,4 +182,37 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   if (!updatedVoice) return res.status(400).json({ message: 'Voice not found.' });
 
   return res.json(updatedVoice);
+};
+
+export const deleteVoicePreview = async (req: Request, res: Response) => {
+  const userEmail = req.user.email;
+  const { voiceId }: { voiceId: string } = req.params;
+  const voiceRepository = getRepository(Voice);
+
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+
+  const { error } = joi.validate({ voiceId }, voiceInputValidationSchema.requiredKeys('voiceId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const voice = await voiceRepository.findOne(voiceId);
+
+  if (!voice) return res.status(400).json({ message: 'Voice not found!' });
+
+  if (!voice.exampleAudioUrl) return res.status(400).json({ message: 'This voice has no voice preview. Nothing to be deleted!' });
+
+  // First, delete the file from our storage
+  const response = await storage.deleteVoicePreview(voiceId);
+
+  if (!response) return res.status(400).json({ message: 'Failed to delete the voice preview from our storage platform. Please try again.' });
+
+  // Then, delete the URL from the voice in the database
+  await voiceRepository.update(voiceId, {
+    exampleAudioUrl: undefined
+  });
+
+  return res.json({ message: 'Voice preview is deleted!' });
 };

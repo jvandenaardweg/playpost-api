@@ -167,3 +167,28 @@ export const deleteFile = async (filename: string) => {
     throw err;
   }
 };
+
+export const deleteVoicePreview = async (voiceId: string) => {
+  const loggerPrefix = 'Google Cloud Storage (Delete Voice Preview):';
+  const prefix = `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${voiceId}`;
+
+  try {
+    logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
+    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+
+    if (!files.length) {
+      logger.warn(loggerPrefix, `No files found for: "${prefix}"...`);
+      return true;
+    }
+
+    const filename = files[0].name;
+    logger.info(loggerPrefix, `Found: "${filename}". Deleting...`);
+
+    const response = await deleteFile(filename);
+    logger.info(loggerPrefix, `Successfully deleted: "${filename}"...`);
+    return response;
+  } catch (err) {
+    logger.error(loggerPrefix, `Error while voice preview for voice ID: "${voiceId}"...`, err);
+    throw err;
+  }
+}

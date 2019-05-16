@@ -32,3 +32,8 @@ export const userInputValidationSchema = joi.object().keys({
   email: joi.string().email({ minDomainAtoms: 2 }),
   password: joi.string(),
 });
+
+export const voiceInputValidationSchema = joi.object().keys({
+  id: joi.string().uuid(),
+  voiceId: joi.string().uuid()
+});
