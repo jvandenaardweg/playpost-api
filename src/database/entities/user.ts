@@ -24,9 +24,6 @@ export class User {
   password: string;
 
   @Column({ nullable: true })
-  onboardedAt: Date;
-
-  @Column({ nullable: true })
   authenticatedAt: Date;
 
   @Column({ nullable: true })
