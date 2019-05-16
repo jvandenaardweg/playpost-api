@@ -43,9 +43,6 @@ export class Voice {
   @Column({ nullable: false }) // US
   countryCode: string;
 
-  @Column({ nullable: false }) // English
-  languageName: string;
-
   @Column({ nullable: false, unique: true }) // en-US-Wavenet-D
   name: string;
 

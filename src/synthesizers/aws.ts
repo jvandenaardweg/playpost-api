@@ -52,16 +52,14 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
         logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceName}. We don't add it to the database.`);
       } else {
         const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
-        const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
-        if (!countryCode || !languageName) {
-          logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+        if (!countryCode) {
+          logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
         } else {
 
           try {
             const voiceToCreate = await voiceRepository.create({
               countryCode,
-              languageName,
               languageCode: voiceLanguageCode,
               name: voiceName,
               label: voiceName,

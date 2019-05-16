@@ -75,15 +75,13 @@ export const addAllGoogleVoices = async (loggerPrefix: string) => {
       logger.warn(loggerPrefix, `Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
       const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
-      const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
-      if (!countryCode || !languageName) {
-        logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+      if (!countryCode) {
+        logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
       } else {
         try {
           const voiceToCreate = await voiceRepository.create({
             countryCode,
-            languageName,
             languageCode: voiceLanguageCode,
             name: voiceName,
             gender: voiceGender,
