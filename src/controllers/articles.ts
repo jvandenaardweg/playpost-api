@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import joi from 'joi';
 import urlParse from 'url-parse';
 
+import * as storage from '../storage/google-cloud';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
 import { PlaylistItem } from '../database/entities/playlist-item';
@@ -72,6 +73,8 @@ export const deleteById = async (req: Request, res: Response) => {
   if (!article) return res.status(400).json({ message: 'Article not found.' });
 
   await articleRepository.remove(article);
+
+  await storage.deleteAllArticleAudiofiles(articleId);
 
   return res.json({ message: 'Article is deleted!' });
 };
