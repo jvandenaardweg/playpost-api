@@ -43,25 +43,25 @@ export interface TextToSpeechVoice {
   naturalSampleRateHertz: number;
 }
 
-export const getAllGoogleVoices = async () => {
+export const getAllGoogleVoices = async (loggerPrefix: string) => {
   try {
-    logger.info('Google Text To Speech: Getting all Google Text To Speech voices from the API...');
+    logger.info(loggerPrefix, 'Google Text To Speech: Getting all Google Text To Speech voices from the API...');
     const [result] = await client.listVoices({});
     const voices: TextToSpeechVoice[] = result.voices;
-    logger.info(`Google Text To Speech: Got ${voices.length} voices from the API...`);
+    logger.info(loggerPrefix, `Google Text To Speech: Got ${voices.length} voices from the API...`);
     return voices;
   } catch (err) {
-    logger.error('Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
+    logger.error(loggerPrefix, 'Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
     throw err;
   }
 };
 
-export const addAllGoogleVoices = async () => {
-  logger.info('Google Text To Speech: Checking if we need to add new voices to the database...');
+export const addAllGoogleVoices = async (loggerPrefix: string) => {
+  logger.info(loggerPrefix, 'Google Text To Speech: Checking if we need to add new voices to the database...');
 
   const voiceRepository = getRepository(Voice);
 
-  const voices = await getAllGoogleVoices();
+  const voices = await getAllGoogleVoices(loggerPrefix);
 
   for (const voice of voices) {
     const voiceName = voice.name;
@@ -72,13 +72,13 @@ export const addAllGoogleVoices = async () => {
     const foundVoice = await voiceRepository.findOne({ name: voiceName });
 
     if (foundVoice) {
-      logger.warn(`Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+      logger.warn(loggerPrefix, `Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
       const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
       const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
       if (!countryCode || !languageName) {
-        logger.warn(`Google Text To Speech: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+        logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
       } else {
         try {
           const voiceToCreate = await voiceRepository.create({
@@ -93,9 +93,9 @@ export const addAllGoogleVoices = async () => {
 
           const createdVoice = await voiceRepository.save(voiceToCreate);
 
-          logger.info('Google Text To Speech: Added new voice to database: ', createdVoice.name);
+          logger.info(loggerPrefix, 'Google Text To Speech: Added new voice to database: ', createdVoice.name);
         } catch (err) {
-          logger.error('Google Text To Speech: Failed to create the voice in the database', err);
+          logger.error(loggerPrefix, 'Google Text To Speech: Failed to create the voice in the database', err);
           throw err;
         }
       }

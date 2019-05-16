@@ -32,8 +32,8 @@ export const getAllAWSVoices = async (): Promise<Polly.Voice[]> => {
   });
 };
 
-export const addAllAWSVoices = async () => {
-  logger.info('AWS Polly: Checking if we need to add new voices to the database...');
+export const addAllAWSVoices = async (loggerPrefix: string) => {
+  logger.info(loggerPrefix, 'AWS Polly: Checking if we need to add new voices to the database...');
   const voiceRepository = getRepository(Voice);
 
   const voices = await getAllAWSVoices();
@@ -46,16 +46,16 @@ export const addAllAWSVoices = async () => {
     const foundVoice = await voiceRepository.findOne({ name: voiceName });
 
     if (foundVoice) {
-      logger.info(`AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+      logger.info(loggerPrefix, `AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
     } else {
       if (!voiceLanguageCode) {
-        logger.info(`AWS Polly: Got no LanguageCode for ${voiceName}. We don't add it to the database.`);
+        logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceName}. We don't add it to the database.`);
       } else {
         const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
         const languageName = LocaleCode.getLanguageName(voiceLanguageCode);
 
         if (!countryCode || !languageName) {
-          logger.info(`AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
+          logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode or languageName for ${voiceName}. We don't add it to the database.`);
         } else {
 
           try {
@@ -71,9 +71,9 @@ export const addAllAWSVoices = async () => {
 
             const createdVoice = await voiceRepository.save(voiceToCreate);
 
-            logger.info('AWS Polly: Added new voice to database: ', createdVoice.name);
+            logger.info(loggerPrefix, 'AWS Polly: Added new voice to database: ', createdVoice.name);
           } catch (err) {
-            logger.error('AWS Polly: Failed to create the voice in the database', err);
+            logger.error(loggerPrefix, 'AWS Polly: Failed to create the voice in the database', err);
             throw err;
           }
         }

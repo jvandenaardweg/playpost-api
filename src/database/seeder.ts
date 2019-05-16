@@ -1,36 +1,111 @@
 require('dotenv').config();
-import { createConnection, Connection } from 'typeorm';
+import { createConnection, getRepository, IsNull } from 'typeorm';
+
 import { connectionOptions } from './connection-options';
+import { Language } from './entities/language';
+import { Voice } from './entities/voice';
+import languages from './seeds/languages';
 
-// import { articles } from './seeds/article';
-import { users } from './seeds/user';
+import { addAllGoogleVoices } from '../synthesizers/google';
+import { addAllAWSVoices } from '../synthesizers/aws';
 
-/**
- * Seeds the database with example users used for development.
- */
-const seedUsers = async (databaseConnection: Connection) => {
-  const promises = users.map((user: any) => {
-    return databaseConnection.createQueryBuilder().insert().into('user').values(user).execute();
-  });
-  return Promise.all(promises);
+import { logger } from '../utils/logger';
+
+const seedLanguages = async () => {
+  const loggerPrefix = 'Seeding Languages:';
+  const languageRepository = getRepository(Language);
+
+  try {
+    logger.info(loggerPrefix, 'Adding languages to the database...');
+
+    const languageCodes = Object.keys(languages);
+
+    for (const languageCode of languageCodes) {
+      const language = languages[languageCode];
+
+      logger.info(loggerPrefix, 'Trying to add:', languageCode, language.name, language.native, '...');
+
+      const existingLanguage = await languageRepository.findOne({
+        languageCode
+      });
+
+      if (existingLanguage) {
+        logger.warn(loggerPrefix, 'Language already exists, we do not add this:', languageCode, language.name, language.native, '...');
+      } else {
+        // Create the languages
+        const languageToCreate = await languageRepository.create({
+          languageCode,
+          name: language.name,
+          nativeName: language.native
+        });
+
+        await languageRepository.save(languageToCreate);
+
+        logger.info(loggerPrefix, 'Successfully added:', languageCode, language.name, language.native);
+      }
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done!');
+  }
 };
 
-/**
- * Seeds the database with example articles used for development.
- */
-// const seedArticles = async (databaseConnection: Connection) => {
-//   const promises = articles.map((article: any) => {
-//     return databaseConnection.createQueryBuilder().insert().into('article').values(article).execute();
-//   });
-//   return Promise.all(promises);
-// };
+const seedVoices = async () => {
+  const loggerPrefix = 'Seeding Voices:';
+  const voiceRepository = getRepository(Voice);
+  const languageRepository = getRepository(Language);
+
+  try {
+    logger.info(loggerPrefix, 'Checking for new voices at Google and AWS...');
+    await addAllGoogleVoices(loggerPrefix);
+    await addAllAWSVoices(loggerPrefix);
+
+    logger.info(loggerPrefix, 'Checking which voices are not connected to a language yet...');
+
+    const voicesWithoutLanguage = await voiceRepository.find({
+      language: IsNull()
+    });
+
+    logger.info(loggerPrefix, `Found ${voicesWithoutLanguage.length} voices without a language connected.`);
+
+    voicesWithoutLanguage.forEach(async (voice) => {
+      let languageCode = voice.languageCode.split('-')[0]; // "en-US" => "en", "nl-NL" => "nl"
+
+      // It seems that Google uses "nb" for Norwegian Bokmål, we just connect that to "Norwegian"
+      if (languageCode === 'nb') {
+        languageCode = 'no';
+      }
+
+      logger.info(loggerPrefix, `Connecting languageCode "${languageCode}" to voice ID "${voice.id}"...`);
+
+      const language = await languageRepository.findOne({ languageCode });
+
+      await voiceRepository.update(voice.id, { language });
+
+      logger.info(loggerPrefix, `Successfully connected languageCode "${languageCode}" to voice ID "${voice.id}"!`);
+    });
+
+    logger.info(loggerPrefix, 'Done!');
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'We close.');
+  }
+};
 
 (async() => {
-  const databaseConnection: Connection = await createConnection(connectionOptions());
+  await createConnection(connectionOptions());
 
   // Run the seeders
-  await seedUsers(databaseConnection);
 
-  // await seedArticles(databaseConnection);
-  // await seedPlaylists(databaseConnection);
+  // Insert the world's languages
+  // We don't use them all, but insert them for completeness sake
+  await seedLanguages();
+
+  // After we insert the languages, we can seed the voices
+  // The voices are fetched from the Google and AWS API's, so they require the API keys to be set in this project
+  await seedVoices();
 })();

@@ -20,6 +20,7 @@ export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
 
   const voices = await voiceRepository.find({
+    relations: ['language'],
     cache: {
       id: 'voices_all',
       milliseconds: CACHE_ONE_DAY

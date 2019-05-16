@@ -5,6 +5,8 @@ import { Article } from './entities/article';
 import { PlaylistItem } from './entities/playlist-item';
 import { Audiofile } from './entities/audiofile';
 import { Voice } from './entities/voice';
+import { Language } from './entities/language';
+import { UserVoiceSetting } from './entities/user-voice-setting';
 
 export const connectionOptions = (name = 'default'): ConnectionOptions => {
   return {
@@ -25,7 +27,9 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
       PlaylistItem,
       Article,
       Audiofile,
-      Voice
+      Voice,
+      Language,
+      UserVoiceSetting
     ],
     migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
     dropSchema: false,

@@ -20,6 +20,7 @@ import * as authController from './controllers/auth';
 import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 import * as voicesController from './controllers/voices';
+import * as languagesController from './controllers/languages';
 
 import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
@@ -156,6 +157,10 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/voices/active', IS_PROTECTED, voicesController.findAllActive);
   app.get('/v1/voices/active/free', IS_PROTECTED, voicesController.findAllActiveFreeVoices);
   app.get('/v1/voices/active/premium', IS_PROTECTED, voicesController.findAllActivePremiumVoices);
+
+  // v1/languages
+  app.get('/v1/languages', IS_PROTECTED, languagesController.findAll);
+  app.get('/v1/languages/active', IS_PROTECTED, languagesController.findAllActive);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

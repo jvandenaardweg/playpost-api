@@ -7,6 +7,7 @@ import { PlaylistItem } from './playlist-item';
 
 import { redisClientPub } from '../../cache';
 import { logger } from '../../utils';
+import { UserVoiceSetting } from './user-voice-setting';
 
 @Entity()
 export class User {
@@ -42,6 +43,10 @@ export class User {
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
   @JoinColumn()
   playlistItems: PlaylistItem[];
+
+  @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
+  @JoinColumn()
+  voiceSettings: UserVoiceSetting[];
 
   @CreateDateColumn()
   createdAt: Date;

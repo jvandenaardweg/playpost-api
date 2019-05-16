@@ -38,6 +38,12 @@ MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
 7. Restore the db: `docker exec -i "playpost-api-postgres" pg_restore -C --clean --no-acl --no-owner -U "playpostapi" -d "d5sgoa8nt7dnim" < "dump/database.dump"`
 8. The local server should be available at http://localhost:3000
 
+## Seeding an empty database
+Some parts of the database are required to be filled in before starting. The `language` and `voice` table need data.
+1. Make sure you've done the setup steps above.
+1. Run `npm run typeorm:seed`
+3. The `language` and `voice` table should be filled now with default data
+
 ## Production database changes
 Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see `migrationsRun` in `./src/index.ts`.
 
