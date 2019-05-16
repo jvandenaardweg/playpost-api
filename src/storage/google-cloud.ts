@@ -14,6 +14,7 @@ const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 if (!DEFAULT_BUCKET_NAME) throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.');
 
 const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
+const DEFAULT_AUDIOFILES_BASE_PATH = 'articles';
 const DEFAULT_VOICE_PREVIEWS_BASE_PATH = 'voices';
 
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
@@ -168,6 +169,13 @@ export const deleteFile = async (filename: string) => {
   }
 };
 
+/**
+ * Deletes a voice preview file from our Google Cloud Storage.
+ * The method will first search the bucket by prefix. If it finds any files, it will delete the first one.
+ * Because we just have one voice preview per voice.
+ *
+ * @param voiceId
+ */
 export const deleteVoicePreview = async (voiceId: string) => {
   const loggerPrefix = 'Google Cloud Storage (Delete Voice Preview):';
   const prefix = `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${voiceId}`;
@@ -177,8 +185,8 @@ export const deleteVoicePreview = async (voiceId: string) => {
     const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
 
     if (!files.length) {
-      logger.warn(loggerPrefix, `No files found for: "${prefix}"...`);
-      return true;
+      logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
+      throw new Error(`${loggerPrefix} No files found to be deleted.`);
     }
 
     const filename = files[0].name;
@@ -188,7 +196,81 @@ export const deleteVoicePreview = async (voiceId: string) => {
     logger.info(loggerPrefix, `Successfully deleted: "${filename}"...`);
     return response;
   } catch (err) {
-    logger.error(loggerPrefix, `Error while voice preview for voice ID: "${voiceId}"...`, err);
+    logger.error(loggerPrefix, `Error while deleting voice preview: "${prefix}"...`, err);
     throw err;
   }
-}
+};
+
+
+/**
+ * Deletes an article's audiofile from our Google Cloud Storage.
+ * The method will first search the bucket by prefix. If it finds any files, it will delete the first one.
+ * Because we just have one voice preview per voice.
+ *
+ * @param articleId
+ * @param audiofileId
+ */
+export const deleteAudiofile = async (articleId: string, audiofileId: string) => {
+  const loggerPrefix = 'Google Cloud Storage (Delete Audiofile):';
+  const prefix = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${articleId}/${DEFAULT_AUDIOFILES_BASE_PATH}/${audiofileId}`;
+
+  try {
+    logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
+    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+
+    if (!files.length) {
+      logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
+      throw new Error(`${loggerPrefix} No files found to be deleted.`);
+    }
+
+    const filename = files[0].name;
+    logger.info(loggerPrefix, `Found: "${filename}". Deleting...`);
+
+    const response = await deleteFile(filename);
+    logger.info(loggerPrefix, `Successfully deleted: "${filename}"...`);
+    return response;
+  } catch (err) {
+    logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
+    throw err;
+  }
+};
+
+/**
+ * Deletes all the article's audiofiles from our Google Cloud Storage.
+ * The method will first search the bucket by prefix. Then, it will delete all those results.
+ * Because we just have one voice preview per voice.
+ *
+ * @param articleId
+ */
+export const deleteAllArticleAudiofiles = async (articleId: string) => {
+  const loggerPrefix = 'Google Cloud Storage (Delete All Article Audiofiles):';
+  const prefix = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${articleId}`;
+
+  if (!articleId) return new Error(`${loggerPrefix} articleId parameter is required for deleting an article's audiofiles.`);
+
+  try {
+    logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
+    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+
+    if (!files.length) {
+      logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
+      throw new Error(`${loggerPrefix} No files found to be deleted.`);
+    }
+
+    // Create delete file promises for each file
+    const promises = files.map((file) => {
+      logger.info(loggerPrefix, `Found: "${file.name}". Deleting...`);
+      return deleteFile(file.name);
+    });
+
+    // Delete all the files
+    const responses = await Promise.all(promises);
+
+    logger.info(loggerPrefix, 'Successfully deleted all files!');
+
+    return responses;
+  } catch (err) {
+    logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
+    throw err;
+  }
+};

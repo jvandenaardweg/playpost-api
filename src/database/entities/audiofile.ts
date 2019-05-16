@@ -1,12 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, Index, AfterRemove } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, Index } from 'typeorm';
 import { IsUUID } from 'class-validator';
 import { Article } from './article';
 import { Voice } from './voice';
 import { User } from './user';
-import * as storage from '../../storage/google-cloud';
 
 import { ColumnNumericTransformer } from '../utils';
-import { logger } from '../../utils';
 
 // encoding formats supported by Google and AWS Polly
 export enum AudiofileMimeType {
@@ -57,11 +55,4 @@ export class Audiofile {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  // https://github.com/typeorm/typeorm/issues/1137#issuecomment-345653493
-  @AfterRemove()
-  async afterRemove() {
-    logger.info('Database Entity (User):', '@AfterRemove():', `Deleting audiofile from storage bucket "${this.bucket}" filename "${this.filename}"...`);
-    await storage.deleteFile(this.filename);
-  }
 }

@@ -4,6 +4,8 @@ import joi from 'joi';
 import uuid from 'uuid';
 import * as Sentry from '@sentry/node';
 
+import * as storage from '../storage/google-cloud';
+
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
@@ -272,7 +274,11 @@ export const deleteById = async (req: Request, res: Response) => {
 
   if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
 
+  // Delete from the database
   await audiofileRepository.remove(audiofile);
+
+  // Delete audiofile from our storage
+  await storage.deleteAudiofile(audiofile.article.id, audiofile.id);
 
   return res.json({ message: 'Audiofile is deleted!' });
 };
