@@ -89,11 +89,19 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
 
   // tslint:disable max-line-length
-  const previewSsml = '<speak><p>This is a voice preview to demonstrate how it sounds. I will read to you a paragraph taken from Wikipedia\'s Earth page.</p><p>Earth is the third planet from the Sun and the only astronomical object known to harbor life. According to radiometric dating and other sources of evidence, Earth formed over 4.5 billion years ago. Earth\'s gravity interacts with other objects in space, especially the Sun and the Moon, Earth\'s only natural satellite. Earth revolves around the Sun in 365.26 days, a period known as an Earth year. During this time, Earth rotates about its axis about 366.26 times.</p><p>Thanks for listening.</p></speak>';
+  const ssml = {
+    English: '<speak><p>This is a voice preview to demonstrate how it sounds.</p><p>I will read to you a paragraph taken from Wikipedia\'s Earth page.</p><p>Earth is the third planet from the Sun and the only astronomical object known to harbor life. According to radiometric dating and other sources of evidence, Earth formed over 4.5 billion years ago. Earth\'s gravity interacts with other objects in space, especially the Sun and the Moon, Earth\'s only natural satellite. Earth revolves around the Sun in 365.26 days, a period known as an Earth year. During this time, Earth rotates about its axis about 366.26 times.</p><p>Thanks for listening.</p></speak>',
+    Dutch: '<speak><p>Dit is een voorbeeld van een stem om te laten horen hoe het klinkt.</p><p>Ik zal nu een alinea voorlezen die is overgenomen van een Wikipedia pagina.</p><p>De Aarde (soms de wereld of Terra genoemd) is vanaf de Zon gerekend de derde planeet van ons zonnestelsel. Hierin behoort ze tot de naar haar genoemde "aardse planeten", waarvan ze zowel qua massa als qua volume de grootste is.</p><p>Op de Aarde komt leven voor: ze is de woonplaats van miljoenen soorten organismen.</p><p>Of ze daarin alleen staat is onduidelijk, maar in de rest van het heelal zijn tot nog toe nergens sporen van leven, nu of in het verleden, gevonden.</p><p>Radiometrische dateringen hebben uitgewezen dat de Aarde 4,57 miljard jaar geleden is ontstaan en het leven maximaal 1 miljard jaar daarna.</p></speak>'
+  };
 
   const voice = await voiceRepository.findOne(voiceId);
 
   if (!voice) return res.status(400).json({ message: 'Voice not found, cannot create preview.' });
+
+  // Get the correct SSML based on the language
+  const previewSsml = ssml[voice.languageName];
+
+  if (!previewSsml) res.status(400).json({ message: 'Cannot create a voice preview, because there is no SSML for this language.' });
 
   if (!['Google', 'AWS'].includes(voice.synthesizer)) res.status(400).json({ message: 'Voice synthesizer not supported.' });
 
