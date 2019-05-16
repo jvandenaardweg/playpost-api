@@ -204,15 +204,13 @@ export const deleteVoicePreview = async (req: Request, res: Response) => {
 
   if (!voice.exampleAudioUrl) return res.status(400).json({ message: 'This voice has no voice preview. Nothing to be deleted!' });
 
-  // First, delete the file from our storage
-  const response = await storage.deleteVoicePreview(voiceId);
-
-  if (!response) return res.status(400).json({ message: 'Failed to delete the voice preview from our storage platform. Please try again.' });
-
-  // Then, delete the URL from the voice in the database
+  // Delete the URL from the voice in the database
   await voiceRepository.update(voiceId, {
     exampleAudioUrl: undefined
   });
+
+  // Dlete the file from our storage
+  await storage.deleteVoicePreview(voiceId);
 
   return res.json({ message: 'Voice preview is deleted!' });
 };
