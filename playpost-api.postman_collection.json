@@ -65,97 +65,6 @@
 					"response": []
 				},
 				{
-					"name": "Update email",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/email",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"email"
-							]
-						},
-						"description": "Allow the user to change his e-mail address and password."
-					},
-					"response": []
-				},
-				{
-					"name": "Update password",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"password\": \"demo\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/password",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"password"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete account",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me"
-							]
-						},
-						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
-					},
-					"response": []
-				},
-				{
 					"name": "Get all created articles",
 					"event": [
 						{
@@ -262,6 +171,97 @@
 								"audiofiles"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update email",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"email"
+							]
+						},
+						"description": "Allow the user to change his e-mail address and password."
+					},
+					"response": []
+				},
+				{
+					"name": "Update password",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me"
+							]
+						},
+						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
 					},
 					"response": []
 				}
@@ -497,31 +497,11 @@
 						"description": "Completely deletes an article from the database, including all the referencies for the users (archives, playlists, favorites) and audiofiles. Normal users should not have access to this endpoint."
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Users",
-			"item": [
+				},
 				{
-					"name": "Create a user",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
+					"name": "Sync article data with article at source",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -532,22 +512,28 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/users",
+							"raw": "{{baseUrl}}/v1/articles/b09c61b5-cdc4-4490-a420-1e1d0e88e209/sync",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"users"
+								"articles",
+								"b09c61b5-cdc4-4490-a420-1e1d0e88e209",
+								"sync"
 							]
-						},
-						"description": "Allows a new user to create an account."
+						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
 				{
 					"name": "Get all users (admin only)",
 					"event": [
@@ -599,6 +585,51 @@
 								"users"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "221a092c-9d9c-4633-a48b-c3e8ac64199f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						},
+						"description": "Allows a new user to create an account."
 					},
 					"response": []
 				},
@@ -702,39 +733,6 @@
 			"name": "Playlist",
 			"item": [
 				{
-					"name": "Change order in playlist",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"order\": \"1\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlist/articles/a1233b1d-c78b-47bc-96ab-0e09c9891896/order",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlist",
-								"articles",
-								"a1233b1d-c78b-47bc-96ab-0e09c9891896",
-								"order"
-							]
-						},
-						"description": "Change the order of the playlist by sending the article ID that changed in order. The endpoint will correctly order the other articles in the playlist. It returns the new ordered playlist."
-					},
-					"response": []
-				},
-				{
 					"name": "Get all playlist items",
 					"request": {
 						"method": "GET",
@@ -751,61 +749,6 @@
 							"path": [
 								"v1",
 								"playlist"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete article from playlist",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlist/articles/ae1abeaf-e412-4419-8331-91db4c3edd22",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlist",
-								"articles",
-								"ae1abeaf-e412-4419-8331-91db4c3edd22"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add article to playlist by url",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\",\n\t\"encoding\": \"OGG_OPUS\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"playlists",
-								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
-								"articles"
 							]
 						}
 					},
@@ -854,6 +797,70 @@
 								"archived"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add article to playlist by url",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\",\n\t\"encoding\": \"OGG_OPUS\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlists",
+								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change order in playlist",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"order\": \"1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlist/articles/a1233b1d-c78b-47bc-96ab-0e09c9891896/order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlist",
+								"articles",
+								"a1233b1d-c78b-47bc-96ab-0e09c9891896",
+								"order"
+							]
+						},
+						"description": "Change the order of the playlist by sending the article ID that changed in order. The endpoint will correctly order the other articles in the playlist. It returns the new ordered playlist."
 					},
 					"response": []
 				},
@@ -919,6 +926,30 @@
 							]
 						},
 						"description": "To set an playlist item as favorite just run the patch URL. To remove a playlist item from the favorites, just run the patch URL with \"favoritedAt\": null"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article from playlist",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/playlist/articles/ae1abeaf-e412-4419-8331-91db4c3edd22",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"playlist",
+								"articles",
+								"ae1abeaf-e412-4419-8331-91db4c3edd22"
+							]
+						}
 					},
 					"response": []
 				}
@@ -1140,6 +1171,37 @@
 								"v1",
 								"voices",
 								"d2ede165-9dc0-4969-af8c-f4ff3716da53",
+								"preview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete voice preview by ID (admin only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/voices/d4c0973c-5a36-4950-afe1-3e2224592c20/preview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"voices",
+								"d4c0973c-5a36-4950-afe1-3e2224592c20",
 								"preview"
 							]
 						}
