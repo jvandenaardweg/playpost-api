@@ -99,7 +99,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
   if (!voice) return res.status(400).json({ message: 'Voice not found, cannot create preview.' });
 
   // Get the correct SSML based on the language
-  const previewSsml = ssml[voice.languageName];
+  const previewSsml = ssml[voice.language.name];
 
   if (!previewSsml) res.status(400).json({ message: 'Cannot create a voice preview, because there is no SSML for this language.' });
 
