@@ -14,7 +14,7 @@ const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 if (!DEFAULT_BUCKET_NAME) throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.');
 
 const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
-const DEFAULT_AUDIOFILES_BASE_PATH = 'articles';
+const DEFAULT_AUDIOFILES_BASE_PATH = 'audiofiles';
 const DEFAULT_VOICE_PREVIEWS_BASE_PATH = 'voices';
 
 export const getPublicFileUrlFromFileMetaData = (file: File) => {
@@ -176,8 +176,15 @@ export const deleteFile = async (filename: string) => {
  *
  * @param voiceId
  */
-export const deleteVoicePreview = async (voiceId: string) => {
+export const deleteVoicePreview = async (voiceId?: string) => {
   const loggerPrefix = 'Google Cloud Storage (Delete Voice Preview):';
+
+  if (!voiceId) {
+    const errorMessage = 'The voiceId parameter is required to delete the voice preview from storage.';
+    logger.error(loggerPrefix, errorMessage);
+    return new Error(errorMessage);
+  }
+
   const prefix = `${DEFAULT_VOICE_PREVIEWS_BASE_PATH}/${voiceId}`;
 
   try {
@@ -210,8 +217,15 @@ export const deleteVoicePreview = async (voiceId: string) => {
  * @param articleId
  * @param audiofileId
  */
-export const deleteAudiofile = async (articleId: string, audiofileId: string) => {
+export const deleteAudiofile = async (articleId?: string, audiofileId?: string) => {
   const loggerPrefix = 'Google Cloud Storage (Delete Audiofile):';
+
+  if (!articleId && !audiofileId) {
+    const errorMessage = 'Both the articleId and audiofileId parameters are required to delete the audiofile from storage.';
+    logger.error(loggerPrefix, errorMessage);
+    return new Error(errorMessage);
+  }
+
   const prefix = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${articleId}/${DEFAULT_AUDIOFILES_BASE_PATH}/${audiofileId}`;
 
   try {
@@ -242,8 +256,15 @@ export const deleteAudiofile = async (articleId: string, audiofileId: string) =>
  *
  * @param articleId
  */
-export const deleteAllArticleAudiofiles = async (articleId: string) => {
+export const deleteAllArticleAudiofiles = async (articleId?: string) => {
   const loggerPrefix = 'Google Cloud Storage (Delete All Article Audiofiles):';
+
+  if (!articleId) {
+    const errorMessage = 'articleId parameter is required to delete all the audiofiles for this article from storage.';
+    logger.error(loggerPrefix, errorMessage);
+    return new Error(errorMessage);
+  }
+
   const prefix = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${articleId}`;
 
   if (!articleId) return new Error(`${loggerPrefix} articleId parameter is required for deleting an article's audiofiles.`);

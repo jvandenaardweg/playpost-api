@@ -270,15 +270,17 @@ export const deleteById = async (req: Request, res: Response) => {
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 
-  const audiofile = await audiofileRepository.findOne(audiofileId);
+  const audiofile = await audiofileRepository.findOne(audiofileId, { relations: ['article'] });
 
   if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
+
+  const articleId = audiofile.article.id;
 
   // Delete from the database
   await audiofileRepository.remove(audiofile);
 
   // Delete audiofile from our storage
-  await storage.deleteAudiofile(audiofile.article.id, audiofile.id);
+  await storage.deleteAudiofile(articleId, audiofileId);
 
   return res.json({ message: 'Audiofile is deleted!' });
 };
