@@ -112,7 +112,7 @@ export const deleteCurrentUser = async (req: Request, res: Response) => {
  * @param res
  */
 export const createSelectedVoice = async (req: Request, res: Response) => {
-  const loggerPrefix = 'User Create Selected Voice:';
+  const loggerPrefix = 'User Create Selected Voice Setting:';
   const userId: string = req.user.id;
   const { voiceId }: { voiceId: string } = req.body;
   const userRepository = getRepository(User);
@@ -126,6 +126,8 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     logger.error(loggerPrefix, messageDetails);
     return res.status(400).json({ message: messageDetails });
   }
+
+  logger.info(loggerPrefix, 'Setting default voice...');
 
   // Get the user with his voice settings
   const user = await userRepository.findOne(userId, { relations: ['voiceSettings'] });
@@ -190,6 +192,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
       await userVoiceSettingRepository.save(userVoiceSettingToCreate);
     }
 
+    logger.info(loggerPrefix, 'Done!');
     return res.status(200).json({ message: 'Voice set!' });
   } catch (err) {
     const errorMessage = 'An unexpected error happened while setting this voice as a default for this language.';
