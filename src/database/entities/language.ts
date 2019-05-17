@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateCol
 import { IsUUID, IsDate } from 'class-validator';
 import { Voice } from './voice';
 import { Article } from './article';
+import { Audiofile } from './audiofile';
 
 @Entity()
 @Unique(['name', 'languageCode']) // Only one unique languageCode and name combination
@@ -29,6 +30,9 @@ export class Language {
 
   @OneToMany(type => Article, article => article.language, { onDelete: 'NO ACTION' }) // On delete of a Article, do nothing, so don't delete the language
   articles: Article[];
+
+  @OneToMany(type => Audiofile, audiofile => audiofile.language, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, do nothing, so don't delete the language
+  audiofiles: Audiofile[];
 
   @CreateDateColumn()
   @IsDate()
