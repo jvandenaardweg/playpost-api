@@ -9,7 +9,7 @@ import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
-import { Language } from 'database/entities/language';
+import { Language } from '../database/entities/language';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;

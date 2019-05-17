@@ -14,7 +14,6 @@ import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
-import { Language } from '../database/entities/language';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -61,7 +60,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
   const audiofileRepository = getRepository(Audiofile);
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
-  const languageRepository = getRepository(Language);
 
   const { error } = joi.validate({ articleId, userId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'mimeType'));
 
@@ -208,7 +206,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       isLanguageDefault: true,
       isActive: true,
       language: {
-        id: language.id
+        id: articleLanguage.id
       }
     });
 
