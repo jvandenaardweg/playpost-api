@@ -151,6 +151,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
  * Syncs the article in our database with the data found at the source URL
  */
 export const syncArticleWithSource = async (req: Request, res: Response) => {
+  const loggerPrefix = 'Sync Article With Source:';
+
   const articleRepository = getRepository(Article);
   const languageRepository = getRepository(Language);
   const { articleId } = req.params;
@@ -164,11 +166,17 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) return res.status(400).json({ message: 'Cannot sync article, because the article is not found.' });
+  if (!article) {
+    const errorMessage = 'Cannot sync article, because the article is not found.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
 
   const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
+
+  logger.info(loggerPrefix, 'Got data from crawler.');
 
   const currentUrl = canonicalUrl || url;
 
@@ -183,10 +191,20 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   if (!title) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing title.' });
   if (!description) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing description.' });
 
+  logger.info(loggerPrefix, 'Getting the language from our database...');
+
   // Find the language in our database, so can can connect it to the article
   const foundLanguage = await languageRepository.findOne({
     languageCode: language
   });
+
+  if (!foundLanguage) {
+    logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
+  } else {
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+  }
+
+  logger.info(loggerPrefix, 'Updating article ID:', article.id);
 
   await articleRepository.update(article.id, {
     title,
@@ -231,17 +249,26 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
 export const updateArticleToFull = async (articleId: string) => {
   const loggerPrefix = 'Update Article To Full: ';
   const articleRepository = getRepository(Article);
+  const languageRepository = getRepository(Language);
 
   // Get the article details from the database
   const articleToUpdate = await articleRepository.findOne(articleId);
 
-  if (!articleToUpdate) throw new Error('Could not find article.');
+  if (!articleToUpdate) {
+    const errorMessage = 'Could not find article.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  logger.info(loggerPrefix, 'Fetching full article contents...');
 
   // Do a request to the crawler, requesting data from the page
   // This might take a few seconds to resolve, as the crawler parses the whole page
   // Takes around 5 seconds for new websites
   // About 2 seconds for already visited websites
   const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleToUpdate.url);
+
+  logger.info(loggerPrefix, 'Successfully fetched full article contents!');
 
   const currentUrl = canonicalUrl || url;
 
@@ -267,6 +294,19 @@ export const updateArticleToFull = async (articleId: string) => {
 
   logger.info(loggerPrefix, 'Updating article with crawler data...');
 
+  // Find the language in our database, so can can connect it to the article
+  const foundLanguage = await languageRepository.findOne({
+    languageCode: language
+  });
+
+  if (!foundLanguage) {
+    logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
+  } else {
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+  }
+
+  logger.info(loggerPrefix, 'Updating article ID:', articleToUpdate.id);
+
   const updatedArticle = await articleRepository.update(articleToUpdate.id, {
     title,
     ssml,
@@ -279,7 +319,7 @@ export const updateArticleToFull = async (articleId: string) => {
     authorName,
     canonicalUrl: currentUrl, // We add a canonicalUrl, this one could be different than "url", but should point to the same article
     status: ArticleStatus.FINISHED,
-    languageCode: language,
+    language: foundLanguage,
     sourceName: siteName
   });
 
