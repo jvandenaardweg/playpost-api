@@ -8,6 +8,7 @@ import { redisClientPub } from '../../cache';
 
 import { ColumnNumericTransformer } from '../utils';
 import { logger } from '../../utils';
+import { Language } from './language';
 
 export enum ArticleStatus {
   CRAWLING = 'crawling',
@@ -79,6 +80,9 @@ export class Article extends BaseEntity {
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
   user: User;
+
+  @ManyToOne(type => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
+  language: Language;
 
   @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
   audiofiles: Audiofile[];

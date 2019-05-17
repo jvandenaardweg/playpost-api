@@ -9,6 +9,7 @@ import { Article, ArticleStatus } from '../database/entities/article';
 import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
+import { Language } from 'database/entities/language';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -151,6 +152,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
  */
 export const syncArticleWithSource = async (req: Request, res: Response) => {
   const articleRepository = getRepository(Article);
+  const languageRepository = getRepository(Language);
   const { articleId } = req.params;
 
   const { error } = joi.validate({ articleId }, articleInputValidationSchema.requiredKeys('articleId'));
@@ -181,6 +183,11 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   if (!title) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing title.' });
   if (!description) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing description.' });
 
+  // Find the language in our database, so can can connect it to the article
+  const foundLanguage = await languageRepository.findOne({
+    languageCode: language
+  });
+
   await articleRepository.update(article.id, {
     title,
     ssml,
@@ -193,7 +200,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     authorName,
     canonicalUrl: currentUrl,
     status: ArticleStatus.FINISHED,
-    languageCode: language,
+    language: foundLanguage,
     sourceName: siteName
   });
 

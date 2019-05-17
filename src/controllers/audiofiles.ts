@@ -126,13 +126,16 @@ export const createAudiofile = async (req: Request, res: Response) => {
   }
 
   // Check if the language is supported
-  if (article.languageCode !== 'en') {
-    const message = `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}`;
+  const articleLanguage = article && article.language;
+  const articleLanguageCode = articleLanguage && articleLanguage.languageCode;
+
+  if (articleLanguageCode !== 'en') {
+    const message = `We currently only handle English articles. Your article seems to have the language: ${articleLanguageCode}`;
 
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
       scope.setExtra('articleId', articleId);
-      scope.setExtra('languageCode', article && article.languageCode);
+      scope.setExtra('languageCode', articleLanguageCode);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -170,14 +173,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   logger.info(loggerPrefix, 'Determining what voice to use for this article...');
 
-  // Get the article's language
-  const language = await languageRepository.findOne({
-    languageCode: article.languageCode,
-    isActive: true
-  });
-
-  if (!language) {
-    const errorMessage = `Could not determine the language using article language code: ${article.languageCode}`;
+  if (!articleLanguageCode) {
+    const errorMessage = `Could not determine the language using article language code: ${articleLanguageCode}`;
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
@@ -188,7 +185,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       id: userId
     },
     language: {
-      id: language.id
+      id: articleLanguage.id
     }
   });
 
@@ -216,7 +213,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     if (!voice) {
-      const errorMessage = `Could not get the active default voice for language: ${article.languageCode}`;
+      const errorMessage = `Could not get the active default voice for language: ${articleLanguageCode}`;
       logger.error(loggerPrefix, errorMessage);
       return res.status(400).json({ message: errorMessage });
     }
