@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index, OneToMany, ManyToOne, Unique } from 'typeorm';
 import { IsUUID } from 'class-validator';
 
 import { Audiofile } from './audiofile';
@@ -30,6 +30,7 @@ export enum AudioProfile {
 }
 
 @Entity()
+@Unique(['isLanguageDefault', 'language'])
 @Index(['languageCode', 'isActive', 'isPremium'])
 export class Voice {
 
@@ -73,6 +74,9 @@ export class Voice {
   @Column({ nullable: false, default: true }) // Determine if this voice requires a subscription within the app
   isPremium: boolean;
 
+  @Column({ nullable: true, default: null }) // Determine if this voice is the default for the language
+  isLanguageDefault: boolean;
+
   @Column({ nullable: true }) // A URL to an audiofile with an example
   exampleAudioUrl: string;
 
@@ -85,6 +89,8 @@ export class Voice {
   @OneToMany(type => Audiofile, audiofile => audiofile.voice, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, don't remove the voice
   audiofiles: Audiofile[];
 
-  @ManyToOne(type => Language, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of an Language, restrict the deletion if there's a voice using that language.
+  @ManyToOne(type => Language, { nullable: true, onDelete: 'RESTRICT', eager: true })
+  // On delete of an Language, restrict the deletion if there's a voice using that language.
+  // eager: true is needed so our app can determine the correct language for a voice
   language: Language;
 }

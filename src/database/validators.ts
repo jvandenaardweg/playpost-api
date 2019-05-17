@@ -37,3 +37,9 @@ export const voiceInputValidationSchema = joi.object().keys({
   id: joi.string().uuid(),
   voiceId: joi.string().uuid()
 });
+
+export const userVoiceSettingValidationSchema = joi.object().keys({
+  id: joi.string().uuid(),
+  voiceId: joi.string().uuid(),
+  languageId: joi.string().uuid()
+});

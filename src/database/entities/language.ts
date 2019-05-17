@@ -3,7 +3,7 @@ import { IsUUID, IsDate } from 'class-validator';
 import { Voice } from './voice';
 
 @Entity()
-@Unique(['name', 'languageCode']) // Only one unique languageCode
+@Unique(['name', 'languageCode']) // Only one unique languageCode and name combination
 @Index(['languageCode', 'isActive'])
 export class Language {
 

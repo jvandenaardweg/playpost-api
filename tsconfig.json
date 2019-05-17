@@ -2,8 +2,8 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "importHelpers": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true, // typeOrm requirement
+    "experimentalDecorators": true, // typeOrm requirement
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -18,7 +18,7 @@
     "stripInternal": true,
     "strictNullChecks": true,
     "downlevelIteration": true,
-    "lib": ["es5", "es6"],
+    "lib": ["es5", "es6"], // es6 = typeOrm requirement
     "moduleResolution": "node",
     "noEmit": true,
     "outDir": "dist",

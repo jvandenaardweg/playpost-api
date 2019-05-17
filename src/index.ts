@@ -126,6 +126,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
   app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
+  app.post('/v1/me/voices', IS_PROTECTED, meController.createSelectedVoice); // Setting the default voice per language for the user
   app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
 
   // Playlists => /v1/playlist

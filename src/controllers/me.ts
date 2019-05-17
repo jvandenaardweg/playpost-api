@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
-import { userInputValidationSchema } from '../database/validators';
+import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
 import { hashPassword } from './auth';
 import { logger } from '../utils';
+import { UserVoiceSetting } from '../database/entities/user-voice-setting';
+import { Voice } from '../database/entities/voice';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -100,4 +102,99 @@ export const deleteCurrentUser = async (req: Request, res: Response) => {
   await userRepository.remove(user);
 
   return res.json({ message: MESSAGE_ME_DELETED });
+};
+
+/**
+ * Method where the user can set a default voice per language.
+ * This default voice will then be used for articles with the same language.
+ *
+ * @param req
+ * @param res
+ */
+export const createSelectedVoice = async (req: Request, res: Response) => {
+  const loggerPrefix = 'User Create Selected Voice:';
+  const userId: string = req.user.id;
+  const { voiceId }: { voiceId: string } = req.body;
+  const userRepository = getRepository(User);
+  const userVoiceSettingRepository = getRepository(UserVoiceSetting);
+  const voiceRepository = getRepository(Voice);
+
+  const { error } = joi.validate({ voiceId }, userVoiceSettingValidationSchema.requiredKeys('voiceId'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    logger.error(loggerPrefix, messageDetails);
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  // Get the user with his voice settings
+  const user = await userRepository.findOne(userId, { relations: ['voiceSettings'] });
+  if (!user) {
+    const errorMessage = 'No user found.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
+
+  // Check if the voice exists and is active
+  const voice = await voiceRepository.findOne(voiceId, { where: { isActive: true } });
+  if (!voice) {
+    const errorMessage = 'Voice not found or voice is not active.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
+
+  // Ok, the voice and language exists and can be used
+  // Now set this voice as a default for this language for the user, overwriting existing setting for the language
+  const voiceLanguageId = voice.language.id;
+
+  try {
+    // Get the current setting for the voice's language, so we can determine if we need to update it, or create a new setting
+    const currentVoiceSetting = await userVoiceSettingRepository.findOne({
+      user: {
+        id: userId
+      },
+      language: {
+        id: voiceLanguageId
+      }
+    });
+
+    // If there's already a setting for the same language, just update the voice in that setting
+    // Essentially enforcing the unique constraint
+    if (currentVoiceSetting) {
+      // Only update when there's a change in voice
+      if (currentVoiceSetting.voice.id === voiceId) {
+        // Just return a success
+        return res.status(200).json({ message: 'Voice did not change. No need to update.' });
+      }
+
+      // Just update the voice, as the language from the voice is the same as the setting we already have
+      await userVoiceSettingRepository.update(currentVoiceSetting.id, {
+        voice: {
+          id: voiceId
+        }
+      });
+    } else {
+      // Create a new setting
+      const userVoiceSettingToCreate = await userVoiceSettingRepository.create({
+        language: {
+          id: voiceLanguageId
+        },
+        voice: {
+          id: voiceId
+        },
+        user: {
+          id: userId
+        }
+      });
+
+      await userVoiceSettingRepository.save(userVoiceSettingToCreate);
+    }
+
+    return res.status(200).json({ message: 'Voice set!' });
+  } catch (err) {
+    const errorMessage = 'An unexpected error happened while setting this voice as a default for this language.';
+    logger.error(loggerPrefix, errorMessage, err);
+    return res.status(400).json({ message: errorMessage });
+  }
+
 };
