@@ -13,7 +13,8 @@ import { Voice } from '../database/entities/voice';
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
-// import { updateArticleToFull } from '../controllers/articles';
+import { UserVoiceSetting } from '../database/entities/user-voice-setting';
+import { Language } from '../database/entities/language';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -54,13 +55,15 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const userId = req.user.id;
   const { articleId } = req.params as RequestParams;
-  const { mimeType, voiceId } = req.body as RequestBody;
+  const { mimeType } = req.body as RequestBody;
 
   const articleRepository = getRepository(Article);
   const voiceRepository = getRepository(Voice);
   const audiofileRepository = getRepository(Audiofile);
+  const userVoiceSettingRepository = getRepository(UserVoiceSetting);
+  const languageRepository = getRepository(Language);
 
-  const { error } = joi.validate({ articleId, userId, voiceId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'voiceId', 'mimeType'));
+  const { error } = joi.validate({ articleId, userId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'mimeType'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -69,7 +72,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setExtra('userId', userId);
       scope.setExtra('articleId', articleId);
       scope.setExtra('mimeType', mimeType);
-      scope.setExtra('voiceId', voiceId);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
@@ -80,6 +82,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // Fetch the article (with SSML)
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
+  // Check if article exists
   if (!article) {
     const message = 'Article does not exist, cannot create audio.';
 
@@ -91,6 +94,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
+  // Check if article status is correct to create audiofiles for
   if (article.status !== ArticleStatus.FINISHED) {
     const message = `The given article is not processed successfully. Current status: ${article.status}. We cannot generate audio for this article.`;
 
@@ -121,6 +125,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
+  // Check if the language is supported
   if (article.languageCode !== 'en') {
     const message = `We currently only handle English articles. Your article seems to have the language: ${article.languageCode}`;
 
@@ -135,6 +140,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
+  // Check if the article has any SSML
   if (!article.ssml) {
     const message = 'Article has no SSML data. We cannot generate audio for this article.';
 
@@ -162,8 +168,59 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message, id: article.audiofiles[0].id });
   }
 
-  // Get the voice we want to use for the synthesizer
-  const voice = await voiceRepository.findOne(voiceId);
+  logger.info(loggerPrefix, 'Determining what voice to use for this article...');
+
+  // Get the article's language
+  const language = await languageRepository.findOne({
+    languageCode: article.languageCode,
+    isActive: true
+  });
+
+  if (!language) {
+    const errorMessage = `Could not determine the language using article language code: ${article.languageCode}`;
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
+
+  // Check if the user has a voice set for this article's language
+  const userVoiceSetting = await userVoiceSettingRepository.findOne({
+    user: {
+      id: userId
+    },
+    language: {
+      id: language.id
+    }
+  });
+
+  let voice = userVoiceSetting && userVoiceSetting.voice;
+
+  // Check if the voice or language is active
+  // We only create audiofiles for languages and voices that are active
+  if (userVoiceSetting && (!userVoiceSetting.voice.isActive || !userVoiceSetting.language.isActive)) {
+    const errorMessage = 'The chosen voice or voice language is not active. We cannot create audio for this.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
+
+  // If there's no voice set, get the default voice for this language
+  if (!userVoiceSetting) {
+    logger.info(loggerPrefix, 'User has no voice set for this language, we fallback to the default one...');
+
+    // Get the default voice for the language
+    voice = await voiceRepository.findOne({
+      isLanguageDefault: true,
+      isActive: true,
+      language: {
+        id: language.id
+      }
+    });
+
+    if (!voice) {
+      const errorMessage = `Could not get the active default voice for language: ${article.languageCode}`;
+      logger.error(loggerPrefix, errorMessage);
+      return res.status(400).json({ message: errorMessage });
+    }
+  }
 
   if (!voice) {
     const message = 'The given voice to be used to create the audio cannot be found.';
@@ -171,13 +228,15 @@ export const createAudiofile = async (req: Request, res: Response) => {
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
       scope.setExtra('articleId', articleId);
-      scope.setExtra('voiceId', voiceId);
+      scope.setExtra('voiceId', voice && voice.id);
       Sentry.captureMessage(message, Sentry.Severity.Info);
     });
 
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
+
+  logger.info(loggerPrefix, 'Using voice:', voice.id);
 
   // Manually generate a UUID.
   // So we can use this ID to upload a file to storage, before we insert it into the database.
