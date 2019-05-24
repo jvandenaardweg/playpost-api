@@ -16,7 +16,7 @@ export const createUser = [
     const { email, password } = req.body;
     const userRepository = getRepository(User);
 
-    const { error } = joi.validate({ email, password }, userInputValidationSchema.requiredKeys('email', 'password'));
+    const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
