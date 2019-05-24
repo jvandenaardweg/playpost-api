@@ -7,9 +7,10 @@ import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
-import { redisClientPub } from '../../cache';
+// import { redisClientPub } from '../../cache';
 import { logger } from '../../utils';
 import { UserVoiceSetting } from './user-voice-setting';
+import { removeEmailToMailchimpList, addEmailToMailchimpList } from '../../mailers/mailchimp';
 
 const { JWT_SECRET } = process.env;
 
@@ -61,20 +62,34 @@ export class User {
   }
 
   @AfterInsert()
-  afterInsert() {
+  async afterInsert() {
+    const loggerPrefix = 'Database Entity (User): @AfterInsert():';
+
     // Don't add our integration test account to Mailchimp
     if (!this.email.includes('integrationtest-1337')) {
-      logger.info('Database Entity (User):', '@AfterInsert():', `Adding "${this.email}" to Mailchimp list.`);
-      redisClientPub.publish('ADD_TO_MAILCHIMP_LIST', this.email);
+      try {
+        logger.info(loggerPrefix, `Adding "${this.email}" to Mailchimp list.`);
+        await addEmailToMailchimpList(this.email);
+      } catch (err) {
+        logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
+        throw err;
+      }
     }
   }
 
   @AfterRemove()
   async afterRemove() {
+    const loggerPrefix = 'Database Entity (User): @AfterRemove():';
+
     // Do not run for our integration test user
     if (!this.email.includes('integrationtest-1337')) {
-      logger.info('Database Entity (User):', '@AfterRemove():', `Remove "${this.email}" from Mailchimp list.`);
-      redisClientPub.publish('REMOVE_FROM_MAILCHIMP_LIST', this.email);
+      try {
+        logger.info(loggerPrefix, `Removing "${this.email}" from Mailchimp list.`);
+        await removeEmailToMailchimpList(this.email);
+      } catch (err) {
+        logger.error(loggerPrefix, `Failed to remove ${this.email} from Mailchimp list.`, err);
+        throw err;
+      }
     }
   }
 
