@@ -46,10 +46,6 @@
 								"disabled": true
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/me",
 							"host": [
@@ -61,116 +57,6 @@
 							]
 						},
 						"description": "Gets basic account details of the current user. It excludes the password."
-					},
-					"response": []
-				},
-				{
-					"name": "Get all created articles",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
-								"exec": [
-									"pm.test(\"Should NOT have a password field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.password).to.be.undefined;",
-									"});",
-									"",
-									"pm.test(\"Should have an email field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.email).to.be.string;",
-									"});",
-									"",
-									"pm.test(\"Should have an id field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.be.string;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/articles",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"articles"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get all created audiofiles",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
-								"exec": [
-									"pm.test(\"Should NOT have a password field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.password).to.be.undefined;",
-									"});",
-									"",
-									"pm.test(\"Should have an email field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.email).to.be.string;",
-									"});",
-									"",
-									"pm.test(\"Should have an id field\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.be.string;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{baseUrl}}/v1/me/audiofiles",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"me",
-								"audiofiles"
-							]
-						}
 					},
 					"response": []
 				},
@@ -262,6 +148,68 @@
 							]
 						},
 						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
+					},
+					"response": []
+				},
+				{
+					"name": "Set default voice for language",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"voiceId\": \"d4c0973c-5a36-4950-afe1-3e2224592c20\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/voices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"voices"
+							]
+						},
+						"description": "Allows the current user to set a default voice per language. If none are given, the \"isLanguageDefault\" will determine the default voice to use per language."
 					},
 					"response": []
 				}
@@ -449,17 +397,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"mimeType\": \"audio/mpeg\",\n\t\"voiceId\": \"d2ede165-9dc0-4969-af8c-f4ff3716da53\"\n}"
+							"raw": "{\n\t\"mimeType\": \"audio/mpeg\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/articles/b13a3868-d161-4463-b6eb-b1f0942788ea/audiofiles",
+							"raw": "{{baseUrl}}/v1/articles/7b69a3e5-e6b7-4bfd-8e7c-07e644da34f9/audiofiles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"articles",
-								"b13a3868-d161-4463-b6eb-b1f0942788ea",
+								"7b69a3e5-e6b7-4bfd-8e7c-07e644da34f9",
 								"audiofiles"
 							]
 						},
@@ -737,10 +685,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlist",
 							"host": [
@@ -759,10 +703,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlist/favorites",
 							"host": [
@@ -782,10 +722,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlist/archived",
 							"host": [
@@ -934,10 +870,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/playlist/articles/ae1abeaf-e412-4419-8331-91db4c3edd22",
 							"host": [
@@ -985,10 +917,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/audiofiles/asdsadsadasda",
 							"host": [
@@ -1008,10 +936,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/audiofiles",
 							"host": [
@@ -1030,10 +954,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/audiofiles/511c4082-8a57-4b5a-8073-3865f4a6d55c",
 							"host": [
@@ -1058,10 +978,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/voices",
 							"host": [
@@ -1080,10 +996,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/voices/active/free",
 							"host": [
@@ -1104,10 +1016,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/voices/active/premium",
 							"host": [
@@ -1128,10 +1036,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/voices/active",
 							"host": [
@@ -1218,10 +1122,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/languages",
 							"host": [
@@ -1240,10 +1140,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/languages/active",
 							"host": [
