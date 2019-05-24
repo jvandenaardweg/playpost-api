@@ -35,7 +35,7 @@ const bruteStore = new ExpressBrute.MemoryStore();
 const bruteforce = new ExpressBrute(bruteStore, {
   freeRetries: 3,
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
-    return res.json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
+    return res.status(400).json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
   },
   handleStoreError: (err: any) => {
     logger.error('Express Brute Store error: ', err);
@@ -45,8 +45,11 @@ const bruteforce = new ExpressBrute(bruteStore, {
 const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 60, // 60 requests allowed per minute, 1 per second
-  message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
+  max: (process.env.NODE_ENV === 'production') ? 60 : 9999, // 60 requests allowed per minute, 1 per second
+  handler: (req, res, next) => {
+    // Send JSON so we can read the message
+    return res.status(429).json({ message:'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.' });
+  }
 });
 
 const defaultConnection = connectionOptions('default');
