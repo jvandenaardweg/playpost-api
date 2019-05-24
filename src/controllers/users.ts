@@ -37,10 +37,13 @@ export const createUser = [
     if (validationResult.errors.length) return res.status(400).json(validationResult);
 
     // Create the user
+    // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
     const newUserToSave = await userRepository.create(userToCreate);
     const createdUser = await userRepository.save(newUserToSave);
 
     // Get the created user and return it
+    // Important: don't return the createdUser, as this contains the hashed password
+    // Our findOne method exclude sensitive fields, like the password
     const user = await userRepository.findOne(createdUser.id);
 
     return res.json(user);
