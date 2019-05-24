@@ -15,7 +15,10 @@ const expressRateLimitRedisStore = new RateLimitRedis({
 // Subscriber client, listening for messages
 redisClientSub.on('ready', () => {
   logger.info('Redis Client Sub:', 'Connection successful!');
+
   redisClientSub.subscribe('FETCH_FULL_ARTICLE');
+  redisClientSub.subscribe('ADD_TO_MAILCHIMP_LIST');
+  redisClientSub.subscribe('REMOVE_FROM_MAILCHIMP_LIST');
 });
 redisClientSub.on('error', (error) => {
   logger.error('Redis Client Sub:', 'Error', error.code, error.message);

@@ -57,7 +57,7 @@ export class User {
   }
 
   @AfterInsert()
-  async afterInsert() {
+  afterInsert() {
     // Don't add our integration test account to Mailchimp
     if (!this.email.includes('integrationtest-1337')) {
       logger.info('Database Entity (User):', '@AfterInsert():', `Adding "${this.email}" to Mailchimp list.`);
