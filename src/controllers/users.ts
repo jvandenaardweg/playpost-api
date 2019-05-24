@@ -3,7 +3,7 @@ import { getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
-import { hashPassword, routeIsProtected } from './auth';
+import { routeIsProtected } from './auth';
 import joi from 'joi';
 
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
@@ -23,12 +23,12 @@ export const createUser = [
       return res.status(400).json({ message: messageDetails });
     }
 
-    const emailAddressNormalized = email.toLowerCase();
+    const emailAddressNormalized = User.normalizeEmail(email);
     const existingUser = await userRepository.findOne({ email: emailAddressNormalized });
 
     if (existingUser) return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS });
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await User.hashPassword(password);
 
     const userToCreate = { email: emailAddressNormalized, password: hashedPassword };
 

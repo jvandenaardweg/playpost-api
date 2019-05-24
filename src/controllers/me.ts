@@ -35,7 +35,7 @@ export const updateEmail = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const emailAddressNormalized = email.toLowerCase();
+  const emailAddressNormalized = User.normalizeEmail(email);
 
   logger.info(loggerPrefix, `Try updating for user ID "${userId}"...`);
 

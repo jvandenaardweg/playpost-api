@@ -1,9 +1,9 @@
-import { generateJWTToken, hashPassword, comparePassword } from '../auth';
+import { User } from '../user';
 
 const examplePassword = 'test';
 const examplePasswordHash = '$2a$10$mGMoLtaQRp.7BCB5X0Tu3.Uf6N9Ne46r6brPEEExBtlAU4GojhI/q';
 
-describe('auth controller', () => {
+describe('user entity', () => {
 
   // describe('getAuthenticationToken()', () => {
 
@@ -17,7 +17,7 @@ describe('auth controller', () => {
   describe('generateJWTToken()', () => {
 
     it('Should give a JWT token.', () => {
-      const token = generateJWTToken('1');
+      const token = User.generateJWTToken('1');
 
       expect(typeof token).toBe('string');
       expect(token.length).toBe(117);
@@ -27,7 +27,7 @@ describe('auth controller', () => {
   describe('hashPassword()', () => {
 
     it('Should give a encrypted password hash.', async () => {
-      const hash = await hashPassword(examplePassword);
+      const hash = await User.hashPassword(examplePassword);
 
       expect(typeof hash).toBe('string');
       expect(hash.length).toBe(60);
@@ -37,15 +37,24 @@ describe('auth controller', () => {
   describe('comparePassword()', () => {
 
     it('Should give return true if password hash matches with plain text one.', async () => {
-      const result = await comparePassword(examplePassword, examplePasswordHash);
+      const result = await User.comparePassword(examplePassword, examplePasswordHash);
 
       expect(result).toBe(true);
     });
 
     it('Should give return false if password hash does not match with plain text one.', async () => {
-      const result = await comparePassword('invalid', examplePasswordHash);
+      const result = await User.comparePassword('invalid', examplePasswordHash);
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('normalizeEmail()', () => {
+
+    it('Should correctly normalize an e-mail address.', async () => {
+      const result = await User.normalizeEmail('JoRdyvandenAardweg@gmail.com');
+
+      expect(result).toBe('jordyvandenaardweg@gmail.com');
     });
   });
 
