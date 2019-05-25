@@ -16,12 +16,25 @@ inAppPurchase.config({
 });
 
 /**
- * Returns all available subscriptions
+ * Returns all subscriptions
  */
 export const findAll = async (req: Request, res: Response) => {
   const subscriptionRepository = getRepository(Subscription);
 
   const subscriptions = await subscriptionRepository.find();
+
+  return res.json(subscriptions);
+};
+
+/**
+ * Returns all available/active subscriptions
+ */
+export const findAllActive = async (req: Request, res: Response) => {
+  const subscriptionRepository = getRepository(Subscription);
+
+  const subscriptions = await subscriptionRepository.find({
+    isActive: true
+  });
 
   return res.json(subscriptions);
 };

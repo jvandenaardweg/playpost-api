@@ -4,8 +4,9 @@ import { createConnection, getRepository, IsNull } from 'typeorm';
 import { connectionOptions } from './connection-options';
 import { Language } from './entities/language';
 import { Voice } from './entities/voice';
-import { Subscription, SubscriptionCurrency, SubscriptionDuration, SubscriptionService } from './entities/subscription';
+import { Subscription } from './entities/subscription';
 import languages from './seeds/languages';
+import subscriptions from './seeds/subscriptions';
 
 import { addAllGoogleVoices } from '../synthesizers/google';
 import { addAllAWSVoices } from '../synthesizers/aws';
@@ -71,7 +72,7 @@ const seedVoices = async () => {
 
     logger.info(loggerPrefix, `Found ${voicesWithoutLanguage.length} voices without a language connected.`);
 
-    voicesWithoutLanguage.forEach(async (voice) => {
+    for (const voice of voicesWithoutLanguage) {
       let languageCode = voice.languageCode.split('-')[0]; // "en-US" => "en", "nl-NL" => "nl"
 
       // It seems that Google uses "nb" for Norwegian Bokmål, we just connect that to "Norwegian"
@@ -86,7 +87,7 @@ const seedVoices = async () => {
       await voiceRepository.update(voice.id, { language });
 
       logger.info(loggerPrefix, `Successfully connected languageCode "${languageCode}" to voice ID "${voice.id}"!`);
-    });
+    }
 
     logger.info(loggerPrefix, 'Successfully seeded!');
   } catch (err) {
@@ -105,17 +106,18 @@ const seedSubscriptions = async () => {
   try {
     logger.info(loggerPrefix, 'Creating subscriptions...');
 
-    const subscriptionToCreate = await subscriptionRepository.create({
-      productId: 'premium',
-      name: 'Premium',
-      description: 'Monthly Subscription',
-      price: 3.99,
-      currency: SubscriptionCurrency.EURO,
-      duration: SubscriptionDuration.ONE_MONTH,
-      service: SubscriptionService.APPLE
-    });
+    for (const subscription of subscriptions) {
+      const foundSubscription = await subscriptionRepository.findOne({ productId: subscription.productId });
 
-    await subscriptionRepository.save(subscriptionToCreate);
+      if (foundSubscription) {
+        logger.warn(loggerPrefix, `Subscription with productId ${subscription.productId} already exists. We don't add it again`)
+      } else {
+        logger.info(loggerPrefix, 'Creating subscription:', subscription.name);
+        const subscriptionToCreate = await subscriptionRepository.create(subscription);
+        await subscriptionRepository.save(subscriptionToCreate);
+        logger.info(loggerPrefix, 'Successfully created subscription:', subscription.name);
+      }
+    }
 
     logger.info(loggerPrefix, 'Successfully seeded!');
   } catch (err) {
