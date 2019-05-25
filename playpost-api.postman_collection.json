@@ -1155,6 +1155,91 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "Create and validate purchase",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"receipt\": \"test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/subscriptions/d6e4dbde-8abd-4b85-94a5-037ccffcc352",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"subscriptions",
+								"d6e4dbde-8abd-4b85-94a5-037ccffcc352"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/subscriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
