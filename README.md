@@ -78,3 +78,15 @@ Make sure the correct release environment variables are available, run in your o
 
 ## Get all available voices
 To get all the available voices from our synthesizing service run `npm run addvoices`. This will do a call to our sythesizer service and puts all the correct voice data in the database. You can run this script once in a while to make sure we always have the correct voices.
+
+
+# Subscriptions
+
+## How to add a new subscription?
+1. Create the subscription in iTunes Connect. Make it available.
+2. Remember the `Product ID` and the `Price` in euro's or dollars
+3. Add a new row inside the `subscription` table in the database, using the data from iTunes Connect
+4. To activate it for users to use, make `isActive` `true`. If you don't want it to be available for your users yet, set `isActive` as `false`
+4. Save it
+
+A new subscription is now available. For it to work, you need to implement that inside the app.
