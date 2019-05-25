@@ -14,7 +14,7 @@ export const findCurrentUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
 
-  const user = await userRepository.findOne(userId, { relations: ['voiceSettings', 'subscriptionPurchases'] });
+  const user = await userRepository.findOne(userId, { relations: ['voiceSettings', 'subscriptions'] });
 
   if (!user) return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND });
 

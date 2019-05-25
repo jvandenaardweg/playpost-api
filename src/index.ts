@@ -168,7 +168,8 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/languages/active', IS_PROTECTED, languagesController.findAllActive);
 
   // v1/subscriptions
-  app.post('/v1/subscriptions', IS_PROTECTED, subscriptionsController.createAndValidatePurchase);
+  app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
+  app.post('/v1/subscriptions/:subscriptionId', IS_PROTECTED, subscriptionsController.createAndValidatePurchase);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

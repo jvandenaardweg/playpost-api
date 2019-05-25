@@ -4,6 +4,7 @@ import { createConnection, getRepository, IsNull } from 'typeorm';
 import { connectionOptions } from './connection-options';
 import { Language } from './entities/language';
 import { Voice } from './entities/voice';
+import { Subscription, SubscriptionCurrency, SubscriptionDuration, SubscriptionService } from './entities/subscription';
 import languages from './seeds/languages';
 
 import { addAllGoogleVoices } from '../synthesizers/google';
@@ -87,12 +88,41 @@ const seedVoices = async () => {
       logger.info(loggerPrefix, `Successfully connected languageCode "${languageCode}" to voice ID "${voice.id}"!`);
     });
 
-    logger.info(loggerPrefix, 'Done!');
+    logger.info(loggerPrefix, 'Successfully seeded!');
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
   } finally {
-    logger.info(loggerPrefix, 'We close.');
+    logger.info(loggerPrefix, 'Done.');
+  }
+};
+
+const seedSubscriptions = async () => {
+  const loggerPrefix = 'Seeding Subscriptions:';
+
+  const subscriptionRepository = getRepository(Subscription);
+
+  try {
+    logger.info(loggerPrefix, 'Creating subscriptions...');
+
+    const subscriptionToCreate = await subscriptionRepository.create({
+      productId: 'premium',
+      name: 'Premium',
+      description: 'Monthly Subscription',
+      price: 3.99,
+      currency: SubscriptionCurrency.EURO,
+      duration: SubscriptionDuration.ONE_MONTH,
+      service: SubscriptionService.APPLE
+    });
+
+    await subscriptionRepository.save(subscriptionToCreate);
+
+    logger.info(loggerPrefix, 'Successfully seeded!');
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
   }
 };
 
@@ -108,4 +138,9 @@ const seedVoices = async () => {
   // After we insert the languages, we can seed the voices
   // The voices are fetched from the Google and AWS API's, so they require the API keys to be set in this project
   await seedVoices();
+
+  // Create some subscriptions our app uses
+  await seedSubscriptions();
+
+  process.exit();
 })();

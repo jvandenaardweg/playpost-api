@@ -4,7 +4,8 @@ import { subscriptionPurchaseValidationSchema } from '../database/validators';
 import joi from 'joi';
 import { logger } from '../utils';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
-import { PurchaseStatus, SubscriptionPurchase, PurchaseService } from '../database/entities/subscription-purchase';
+import { PurchaseStatus, UserSubscription } from '../database/entities/user-subscription';
+import { Subscription } from '../database/entities/subscription';
 
 const { NODE_ENV, APPLE_SUBSCRIPTION_KEY_ID } = process.env;
 
@@ -14,23 +15,40 @@ inAppPurchase.config({
   verbose: true // Output debug logs to stdout stream
 });
 
-interface RequestBody {
-  receipt: Receipt;
-}
+/**
+ * Returns all available subscriptions
+ */
+export const findAll = async (req: Request, res: Response) => {
+  const subscriptionRepository = getRepository(Subscription);
+
+  const subscriptions = await subscriptionRepository.find();
+
+  return res.json(subscriptions);
+};
 
 /**
  * A method to validate the purchase receipt from our users with Apple/Google servers
  */
 export const createAndValidatePurchase = async (req: Request, res: Response) => {
+  interface RequestBody {
+    receipt: Receipt;
+  }
+
+  interface RequestParams {
+    subscriptionId: string;
+  }
+
   const loggerPrefix = 'Create And Validate Purchase: ';
   const { receipt } = req.body as RequestBody;
+  const { subscriptionId } = req.params as RequestParams;
   const userId = req.user.id;
-  const subscriptionPurchaseRepository = getRepository(SubscriptionPurchase);
+  const userSubscriptionRepository = getRepository(UserSubscription);
+  const subscriptionRepository = getRepository(Subscription);
 
   let validationResponse: inAppPurchase.ValidationResponse;
   let purchaseData: inAppPurchase.PurchasedItem[] | null;
 
-  const { error } = joi.validate({ receipt }, subscriptionPurchaseValidationSchema.requiredKeys('receipt'));
+  const { error } = joi.validate({ receipt, subscriptionId }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'subscriptionId'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -39,8 +57,16 @@ export const createAndValidatePurchase = async (req: Request, res: Response) => 
 
   logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
+  logger.info(loggerPrefix, `Checking if subscription exists: ${subscriptionId}`);
+
+  // First, check if the subscription exists
+  const subscription = await subscriptionRepository.findOne(subscriptionId);
+  if (!subscription) return res.status(400).json({ message: 'Subscription could not be found.' });
+
+  logger.info(loggerPrefix, 'Subscription exists! We continue...');
+
   try {
-    logger.info(loggerPrefix, 'Setup...');
+    logger.info(loggerPrefix, 'Setup In App Purchase service...');
 
     await inAppPurchase.setup();
 
@@ -126,21 +152,23 @@ export const createAndValidatePurchase = async (req: Request, res: Response) => 
       quantity: purchase.quantity,
       transactionId: purchase.transactionId,
       transactionReceipt: receipt.toString(),
-      service: PurchaseService.APPLE,
       isTrial: purchase.isTrial,
       user: {
         id: userId
+      },
+      subscription: {
+        id: subscriptionId
       }
     };
 
     logger.info(loggerPrefix, 'Creating database entry, using:', subscriptionPurchase);
 
-    const subscriptionPurchaseToCreate = await subscriptionPurchaseRepository.create(subscriptionPurchase);
-    await subscriptionPurchaseRepository.save(subscriptionPurchaseToCreate);
+    const subscriptionPurchaseToCreate = await userSubscriptionRepository.create(subscriptionPurchase);
+    await userSubscriptionRepository.save(subscriptionPurchaseToCreate);
 
     logger.info(loggerPrefix, 'Created database entry!');
 
-    const createdSubscriptionPurchase = await subscriptionPurchaseRepository.findOne(subscriptionPurchaseToCreate.id)
+    const createdSubscriptionPurchase = await userSubscriptionRepository.findOne(subscriptionPurchaseToCreate.id)
 
     logger.info(loggerPrefix, 'Finished! Returning database entry...');
 

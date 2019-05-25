@@ -1,11 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from 'typeorm';
 import { IsUUID } from 'class-validator';
 import { User } from './user';
-
-export enum PurchaseService {
-  APPLE = 'apple',
-  GOOGLE = 'google'
-}
+import { Subscription } from './subscription';
 
 export enum PurchaseStatus {
   CANCELED = 'canceled',
@@ -15,7 +11,7 @@ export enum PurchaseStatus {
 
 @Entity()
 @Index(['user', 'productId', 'transactionId'])
-export class SubscriptionPurchase {
+export class UserSubscription {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -42,13 +38,14 @@ export class SubscriptionPurchase {
   @Column({ nullable: false, default: false })
   isTrial: boolean;
 
-  @Column({ type: 'enum', enum: PurchaseService, nullable: false })
-  service: PurchaseService;
-
   @Column({ type: 'enum', enum: PurchaseStatus, nullable: false })
   status: PurchaseStatus;
 
   @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL', eager: true })
   // When we delete a user, we keep their purchase history, so we can keep track of purchases
   user: User;
+
+  @ManyToOne(type => Subscription, { onDelete: 'RESTRICT', eager: true })
+  // When we try to delete a Subscription, prevent that from happening
+  subscription: Subscription;
 }

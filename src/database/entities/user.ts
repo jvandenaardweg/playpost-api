@@ -11,7 +11,7 @@ import { PlaylistItem } from './playlist-item';
 import { logger } from '../../utils';
 import { UserVoiceSetting } from './user-voice-setting';
 import { removeEmailToMailchimpList, addEmailToMailchimpList } from '../../mailers/mailchimp';
-import { SubscriptionPurchase } from './subscription-purchase';
+import { UserSubscription } from './user-subscription';
 
 const { JWT_SECRET } = process.env;
 
@@ -47,8 +47,8 @@ export class User {
   @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
   voiceSettings: UserVoiceSetting[];
 
-  @OneToMany(type => SubscriptionPurchase, subscriptionPurchase => subscriptionPurchase.user)
-  subscriptionPurchases: SubscriptionPurchase[];
+  @OneToMany(type => UserSubscription, subscriptionPurchase => subscriptionPurchase.user)
+  subscriptions: UserSubscription[];
 
   @CreateDateColumn()
   createdAt: Date;
