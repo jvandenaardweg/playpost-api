@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from 'typeorm';
-import { IsUUID } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IsUUID, IsDate } from 'class-validator';
 import { User } from './user';
 import { Subscription } from './subscription';
 
@@ -48,4 +48,12 @@ export class UserSubscription {
   @ManyToOne(type => Subscription, { onDelete: 'RESTRICT', eager: true })
   // When we try to delete a Subscription, prevent that from happening
   subscription: Subscription;
+
+  @CreateDateColumn()
+  @IsDate()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  @IsDate()
+  updatedAt: Date;
 }
