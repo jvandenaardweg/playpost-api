@@ -3,7 +3,6 @@ import { getRepository } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
-import { hashPassword } from './auth';
 import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
@@ -75,7 +74,7 @@ export const updatePassword = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = await User.hashPassword(password);
 
   await userRepository.update(userId, { password: hashedPassword });
 
