@@ -121,9 +121,11 @@ export const createAndValidatePurchase = async (req: Request, res: Response) => 
     logger.info(loggerPrefix, 'Got purchase:', purchase);
 
     // Returns a boolean true if a canceled receipt is validated.
+    // TODO: return to the user the subscription is canceled?
     const isCanceled = await inAppPurchase.isCanceled(purchase);
 
     // Returns a boolean true if a expired receipt is validated.
+    // TODO: return to the user the subscription is expired?
     const isExpired = await inAppPurchase.isExpired(purchase);
 
     let status = PurchaseStatus.ACTIVE;
