@@ -16,6 +16,10 @@ export const audiofileInputValidationSchema = joi.object().keys({
   mimeType: joi.string()
 });
 
+export const subscriptionPurchaseValidationSchema = joi.object().keys({
+  receipt: joi.string()
+});
+
 export const playlistInputValidationSchema = joi.object().keys({
   userId: joi.string().uuid(),
   playlistId: joi.string().uuid(),

@@ -21,6 +21,7 @@ import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 import * as voicesController from './controllers/voices';
 import * as languagesController from './controllers/languages';
+import * as subscriptionsController from './controllers/subscriptions';
 
 import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
@@ -166,6 +167,9 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.get('/v1/languages', IS_PROTECTED, languagesController.findAll);
   app.get('/v1/languages/active', IS_PROTECTED, languagesController.findAllActive);
 
+  // v1/subscriptions
+  app.post('/v1/subscriptions', IS_PROTECTED, subscriptionsController.createAndValidatePurchase);
+
   // Catch all
   app.all('*', catchAllController.catchAll);
 
@@ -205,7 +209,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
       // Return a general error to the user
       return res.status(500).json({
-        message: 'An unexpected error occurred. Please try again or contact us when this happens again.'
+        message: (err && err.message) ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
       });
     }
 

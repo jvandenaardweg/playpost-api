@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, JoinColumn, AfterRemove, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, AfterRemove, BeforeInsert } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
@@ -11,6 +11,7 @@ import { PlaylistItem } from './playlist-item';
 import { logger } from '../../utils';
 import { UserVoiceSetting } from './user-voice-setting';
 import { removeEmailToMailchimpList, addEmailToMailchimpList } from '../../mailers/mailchimp';
+import { SubscriptionPurchase } from './subscription-purchase';
 
 const { JWT_SECRET } = process.env;
 
@@ -35,20 +36,19 @@ export class User {
   activatedAt: Date;
 
   @OneToMany(type => Article, article => article.user)
-  @JoinColumn()
   articles: Article[];
 
   @OneToMany(type => Audiofile, audiofile => audiofile.user)
-  @JoinColumn()
   audiofiles: Audiofile[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
-  @JoinColumn()
   playlistItems: PlaylistItem[];
 
   @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
-  @JoinColumn()
   voiceSettings: UserVoiceSetting[];
+
+  @OneToMany(type => SubscriptionPurchase, subscriptionPurchase => subscriptionPurchase.user)
+  subscriptionPurchases: SubscriptionPurchase[];
 
   @CreateDateColumn()
   createdAt: Date;
