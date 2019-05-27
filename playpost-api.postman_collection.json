@@ -1190,7 +1190,7 @@
 					"response": []
 				},
 				{
-					"name": "Get all subscriptions",
+					"name": "Get all active subscriptions",
 					"event": [
 						{
 							"listen": "test",
@@ -1227,13 +1227,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/subscriptions",
+							"raw": "{{baseUrl}}/v1/subscriptions/active",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"subscriptions"
+								"subscriptions",
+								"active"
 							]
 						}
 					},
