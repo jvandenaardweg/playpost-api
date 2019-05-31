@@ -59,7 +59,7 @@
     "@types/pino": "^5.8.7",
     "@types/url-parse": "^1.4.3",
     "app-root-path": "^2.2.1",
-    "aws-sdk": "^2.463.0",
+    "aws-sdk": "^2.466.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "class-validator": "^0.9.1",
@@ -93,7 +93,7 @@
     "rate-limit-redis": "^1.6.0",
     "reflect-metadata": "^0.1.13",
     "response-time": "^2.3.2",
-    "ts-loader": "^6.0.1",
+    "ts-loader": "^6.0.2",
     "typeorm": "^0.2.17",
     "typescript-tslint-plugin": "^0.4.0",
     "url-parse": "^1.4.7",
@@ -113,12 +113,12 @@
     "@types/fluent-ffmpeg": "^2.1.9",
     "@types/fs-extra": "^7.0.0",
     "@types/helmet": "0.0.43",
-    "@types/ioredis": "^4.0.10",
+    "@types/ioredis": "^4.0.11",
     "@types/jest": "^24.0.13",
     "@types/joi": "^14.3.3",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/md5": "^2.1.33",
-    "@types/node": "^12.0.2",
+    "@types/node": "^12.0.4",
     "@types/node-fetch": "^2.3.4",
     "@types/passport": "^1.0.0",
     "@types/passport-jwt": "^3.0.1",
@@ -138,8 +138,8 @@
     "ts-node": "^8.2.0",
     "ts-node-dev": "^1.0.0-pre.35",
     "tsc-watch": "^2.2.1",
-    "tslint": "^5.16.0",
+    "tslint": "^5.17.0",
     "tslint-config-airbnb": "^5.11.1",
-    "typescript": "^3.4.5"
+    "typescript": "^3.5.1"
   }
 }
