@@ -21,7 +21,7 @@ import * as articlesController from './controllers/articles';
 import * as catchAllController from './controllers/catch-all';
 import * as voicesController from './controllers/voices';
 import * as languagesController from './controllers/languages';
-import * as subscriptionsController from './controllers/subscriptions';
+import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 
 import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
@@ -109,7 +109,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   // Make express allow JSON payload bodies
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
-  app.use(bodyParser.json({ limit: '10kb' }));
+  app.use(bodyParser.json({ limit: '500kb' })); // We upped the limit because an Apple receipt string is a bit large
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // API Endpoints
@@ -169,8 +169,8 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
-  app.get('/v1/subscriptions/active', IS_PROTECTED, subscriptionsController.findAllActive);
-  app.post('/v1/subscriptions/:subscriptionId', IS_PROTECTED, subscriptionsController.createAndValidatePurchase);
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
+  app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateSubscriptionPurchase);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

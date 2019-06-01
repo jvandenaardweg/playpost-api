@@ -7,8 +7,8 @@ import { Audiofile } from './entities/audiofile';
 import { Voice } from './entities/voice';
 import { Language } from './entities/language';
 import { UserVoiceSetting } from './entities/user-voice-setting';
-import { UserSubscription } from './entities/user-subscription';
-import { Subscription } from './entities/subscription';
+import { UserInAppSubscription } from './entities/user-in-app-subscription';
+import { InAppSubscription } from './entities/in-app-subscription';
 
 export const connectionOptions = (name = 'default'): ConnectionOptions => {
   return {
@@ -32,8 +32,8 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
       Voice,
       Language,
       UserVoiceSetting,
-      UserSubscription,
-      Subscription
+      UserInAppSubscription,
+      InAppSubscription
     ],
     migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
     dropSchema: false,

@@ -4,9 +4,9 @@ import { createConnection, getRepository, IsNull } from 'typeorm';
 import { connectionOptions } from './connection-options';
 import { Language } from './entities/language';
 import { Voice } from './entities/voice';
-import { Subscription } from './entities/subscription';
+import { InAppSubscription } from './entities/in-app-subscription';
 import languages from './seeds/languages';
-import subscriptions from './seeds/subscriptions';
+import inAppSubscriptions from './seeds/in-app-subscriptions';
 
 import { addAllGoogleVoices } from '../synthesizers/google';
 import { addAllAWSVoices } from '../synthesizers/aws';
@@ -98,24 +98,24 @@ const seedVoices = async () => {
   }
 };
 
-const seedSubscriptions = async () => {
-  const loggerPrefix = 'Seeding Subscriptions:';
+const seedInAppSubscriptions = async () => {
+  const loggerPrefix = 'Seeding In-App Subscriptions:';
 
-  const subscriptionRepository = getRepository(Subscription);
+  const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
   try {
     logger.info(loggerPrefix, 'Creating subscriptions...');
 
-    for (const subscription of subscriptions) {
-      const foundSubscription = await subscriptionRepository.findOne({ productId: subscription.productId });
+    for (const inAppSubscription of inAppSubscriptions) {
+      const foundSubscription = await inAppSubscriptionRepository.findOne({ productId: inAppSubscription.productId });
 
       if (foundSubscription) {
-        logger.warn(loggerPrefix, `Subscription with productId ${subscription.productId} already exists. We don't add it again`)
+        logger.warn(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} already exists. We don't add it again`)
       } else {
-        logger.info(loggerPrefix, 'Creating subscription:', subscription.name);
-        const subscriptionToCreate = await subscriptionRepository.create(subscription);
-        await subscriptionRepository.save(subscriptionToCreate);
-        logger.info(loggerPrefix, 'Successfully created subscription:', subscription.name);
+        logger.info(loggerPrefix, 'Creating subscription:', inAppSubscription.name);
+        const subscriptionToCreate = await inAppSubscriptionRepository.create(inAppSubscription);
+        await inAppSubscriptionRepository.save(subscriptionToCreate);
+        logger.info(loggerPrefix, 'Successfully created subscription:', inAppSubscription.name);
       }
     }
 
@@ -142,7 +142,7 @@ const seedSubscriptions = async () => {
   await seedVoices();
 
   // Create some subscriptions our app uses
-  await seedSubscriptions();
+  await seedInAppSubscriptions();
 
   process.exit();
 })();

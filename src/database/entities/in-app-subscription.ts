@@ -3,12 +3,12 @@ import { IsUUID, IsDate } from 'class-validator';
 
 import { ColumnNumericTransformer } from '../utils';
 
-export enum SubscriptionService {
+export enum InAppSubscriptionService {
   APPLE = 'apple',
   GOOGLE = 'google'
 }
 
-export enum SubscriptionDuration {
+export enum InAppSubscriptionDuration {
   ONE_WEEK = '1w',
   ONE_MONTH = '1m',
   TWO_MONTHS = '2m',
@@ -17,14 +17,14 @@ export enum SubscriptionDuration {
   ONE_YEAR = '1y',
 }
 
-export enum SubscriptionCurrency {
+export enum InAppSubscriptionCurrency {
   DOLLAR = 'usd',
   EURO = 'eur'
 }
 
 @Entity()
 @Index(['productId', 'isActive'])
-export class Subscription {
+export class InAppSubscription {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -42,14 +42,14 @@ export class Subscription {
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer() }) // 3.99
   price: number;
 
-  @Column({ type: 'enum', enum: SubscriptionCurrency, nullable: false })
-  currency: SubscriptionCurrency;
+  @Column({ type: 'enum', enum: InAppSubscriptionCurrency, nullable: false })
+  currency: InAppSubscriptionCurrency;
 
-  @Column({ type: 'enum', enum: SubscriptionDuration, nullable: false })
-  duration: SubscriptionDuration;
+  @Column({ type: 'enum', enum: InAppSubscriptionDuration, nullable: false })
+  duration: InAppSubscriptionDuration;
 
-  @Column({ type: 'enum', enum: SubscriptionService, nullable: false })
-  service: SubscriptionService;
+  @Column({ type: 'enum', enum: InAppSubscriptionService, nullable: false })
+  service: InAppSubscriptionService;
 
   @Column({ nullable: false, default: false })
   isActive: boolean;

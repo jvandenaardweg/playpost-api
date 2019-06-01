@@ -90,3 +90,12 @@ To get all the available voices from our synthesizing service run `npm run addvo
 4. Save it
 
 A new subscription is now available. For it to work, you need to implement that inside the app.
+
+## Apple auto-renewable subscriptions
+https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Subscriptions.html#//apple_ref/doc/uid/TP40008267-CH7-SW13
+
+The behavior of auto-renewable subscriptions differs between the testing environment and the production environment.
+
+In the testing environment, subscription renewals happen at an accelerated rate, and auto-renewable subscriptions renew a maximum of six times per day. This enables you to test how your app handles a subscription renewal, a subscription lapse, and a subscription history that includes gaps.
+
+Because of the accelerated expiration and renewal rates, a subscription can expire before the system tries to renew the subscription, leaving a small lapse in the subscription period. Such lapses are also possible in production for a variety of reasons—make sure your app handles them correctly.

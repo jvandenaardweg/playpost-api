@@ -18,7 +18,7 @@ export const audiofileInputValidationSchema = joi.object().keys({
 
 export const subscriptionPurchaseValidationSchema = joi.object().keys({
   receipt: joi.string(),
-  subscriptionId: joi.string().uuid()
+  inAppSubscriptionId: joi.string().uuid()
 });
 
 export const playlistInputValidationSchema = joi.object().keys({
