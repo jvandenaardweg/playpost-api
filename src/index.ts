@@ -170,7 +170,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
-  app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateSubscriptionPurchase);
+  app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   // Catch all
   app.all('*', catchAllController.catchAll);

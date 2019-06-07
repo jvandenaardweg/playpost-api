@@ -42,7 +42,7 @@ export const findAllActive = async (req: Request, res: Response) => {
 /**
  * A method to validate the purchase receipt from our users with Apple/Google servers
  */
-export const validateSubscriptionPurchase = async (req: Request, res: Response) => {
+export const validateInAppSubscriptionReceipt = async (req: Request, res: Response) => {
   interface RequestBody {
     receipt: Receipt;
   }
@@ -51,10 +51,10 @@ export const validateSubscriptionPurchase = async (req: Request, res: Response) 
     inAppSubscriptionId: string;
   }
 
-  const loggerPrefix = 'Create And Validate Purchase: ';
+  const loggerPrefix = 'Create And Validate In App Subscription: ';
   const { receipt } = req.body as RequestBody;
   const { inAppSubscriptionId } = req.params as RequestParams;
-  const userId = req.user.id;
+  const { id: userId } = req.user;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
@@ -124,7 +124,9 @@ export const validateSubscriptionPurchase = async (req: Request, res: Response) 
     purchaseData = await inAppPurchase.getPurchaseData(validationResponse, options);
 
     if (!purchaseData || !purchaseData.length) {
-      return res.status(400).json({ message: 'No purchase data received. Probably because the subscription is expired or canceled.' });
+      const message = 'No purchase data received. Probably because the subscription is expired or canceled.';
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
 
     logger.info(loggerPrefix, 'Got purchase data:', purchaseData);
@@ -134,15 +136,15 @@ export const validateSubscriptionPurchase = async (req: Request, res: Response) 
     logger.info(loggerPrefix, 'Got purchase:', purchase);
 
     if (purchase.productId !== subscription.productId) {
-      return res.status(400).json({ message: 'The productId in the purchase data does not match the productId in the subscription. So this transaction is not valid.' });
+      const message = 'The productId in the purchase data does not match the productId in the subscription. So this transaction is not valid.';
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
 
     // Returns a boolean true if a canceled receipt is validated.
-    // TODO: return to the user the subscription is canceled?
     const isCanceled = await inAppPurchase.isCanceled(purchase);
 
     // Returns a boolean true if a expired receipt is validated.
-    // TODO: return to the user the subscription is expired?
     const isExpired = await inAppPurchase.isExpired(purchase);
 
     let status = InAppSubscriptionStatus.ACTIVE;
@@ -159,12 +161,16 @@ export const validateSubscriptionPurchase = async (req: Request, res: Response) 
 
     // @ts-ignore
     if (!validationResponse.latest_receipt) {
-      return res.status(400).json({ message: 'The validation response did not return the latest_receipt.' });
+      const message = 'The validation response did not return the latest_receipt.';
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
 
     // @ts-ignore
     if (!validationResponse.environment) {
-      return res.status(400).json({ message: 'The validation response did not return the environment.' });
+      const message = 'The validation response did not return the environment.';
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
 
     // @ts-ignore
@@ -191,6 +197,8 @@ export const validateSubscriptionPurchase = async (req: Request, res: Response) 
       latestReceipt,
       environment,
       renewedAt,
+      isExpired,
+      isCanceled,
       latestTransactionId: purchase.transactionId,
       originalTransactionId: purchase.originalTransactionId,
       isTrial: purchase.isTrial,

@@ -45,6 +45,12 @@ export class UserInAppSubscription {
   @Column({ nullable: false, default: false })
   isTrial: boolean;
 
+  @Column({ nullable: false })
+  isCanceled: boolean;
+
+  @Column({ nullable: false })
+  isExpired: boolean;
+
   @Column({ type: 'enum', enum: InAppSubscriptionStatus, nullable: false })
   status: InAppSubscriptionStatus;
 
