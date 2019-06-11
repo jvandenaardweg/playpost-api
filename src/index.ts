@@ -43,7 +43,7 @@ const bruteforce = new ExpressBrute(bruteStore, {
   }
 });
 
-const rateLimiter = ExpressRateLimit({
+const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
   max: (process.env.NODE_ENV === 'production') ? 60 : 9999, // 60 requests allowed per minute, 1 per second
