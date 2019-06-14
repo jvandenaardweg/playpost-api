@@ -81,7 +81,7 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your favorites. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItem.id, { favoritedAt: '' });
+    await playlistItemRepository.update(playlistItem.id, { favoritedAt: undefined });
     return res.json({ message: 'Playlist item is removed to your favorites!' });
   }
 
@@ -121,7 +121,7 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
     // If it's already removed
     if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your archive. We do not update it.' });
 
-    await playlistItemRepository.update(playlistItem.id, { archivedAt: '' });
+    await playlistItemRepository.update(playlistItem.id, { archivedAt: undefined });
     return res.json({ message: 'Playlist item is removed to your archive!' });
   }
 
