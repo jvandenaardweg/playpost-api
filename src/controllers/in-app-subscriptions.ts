@@ -117,7 +117,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
     const isValid = await inAppPurchase.isValidated(validationResponse);
 
     if (!isValid) {
-      return res.status(400).json({ message: 'The given receipt validation response is not valid.' });
+      throw new Error('The given receipt validation response is not valid.');
     }
 
     // validatedData contains sandbox: true/false for Apple and Amazon
@@ -126,7 +126,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
     if (!purchaseData || !purchaseData.length) {
       const message = 'No purchase data received. Probably because the subscription is expired or canceled.';
       logger.error(loggerPrefix, message);
-      return res.status(400).json({ message });
+      throw new Error(message);
     }
 
     logger.info(loggerPrefix, 'Got purchase data:', purchaseData);
@@ -134,12 +134,6 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
     const purchase = purchaseData[0];
 
     logger.info(loggerPrefix, 'Got purchase:', purchase);
-
-    if (purchase.productId !== subscription.productId) {
-      const message = 'The productId in the purchase data does not match the productId in the subscription. So this transaction is not valid.';
-      logger.error(loggerPrefix, message);
-      return res.status(400).json({ message });
-    }
 
     // Returns a boolean true if a canceled receipt is validated.
     const isCanceled = await inAppPurchase.isCanceled(purchase);
@@ -163,14 +157,14 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
     if (!validationResponse.latest_receipt) {
       const message = 'The validation response did not return the latest_receipt.';
       logger.error(loggerPrefix, message);
-      return res.status(400).json({ message });
+      throw new Error(message);
     }
 
     // @ts-ignore
     if (!validationResponse.environment) {
       const message = 'The validation response did not return the environment.';
       logger.error(loggerPrefix, message);
-      return res.status(400).json({ message });
+      throw new Error(message);
     }
 
     // @ts-ignore
@@ -210,14 +204,31 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
       }
     };
 
-    const existingUserInAppSubscription = await userInAppSubscriptionRepository.findOne({ where: {
-      originalTransactionId: purchase.originalTransactionId,
-      user: {
-        id: userId
-      }
-    }});
+    // Check if there's already a subscription in the database
+    // If so, we just update it
+    // If not, we create a new one
+    // 1 user has 1 row of this in the database
+    const existingUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
+      where: {
+        originalTransactionId: purchase.originalTransactionId
+      },
+      relations: ['user']
+    });
 
     let userInAppSubscriptionId = '';
+
+    // If there's already a transaction, but the user is different
+    // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
+    if (existingUserInAppSubscription && existingUserInAppSubscription.user.id !== userId) {
+      logger.info(
+        loggerPrefix,
+        'Transaction already exists in the database, but it is from a different user.',
+        `Transaction user: "${existingUserInAppSubscription.user.id}"`,
+        `Logged in user: "${userId}"`
+      );
+
+      logger.info(loggerPrefix, `We update the user of the transaction to: "${userId}".`);
+    }
 
     if (existingUserInAppSubscription) {
       // Update
@@ -242,9 +253,9 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     return res.json({ ...foundInAppSubscriptionPurchase });
   } catch (err) {
-    const errorMessage = 'Error happened while getting the purchase data.';
-    logger.error(loggerPrefix, errorMessage, err);
-    return res.status(500).json({ message: errorMessage });
+    const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
   }
 };
 
@@ -263,40 +274,62 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
  *
  *
  */
-export const processSubscriptionUpdate = async (req: Request, res: Response) => {
-  // {
-  //   "auto_renew_status": 0, 
-  //   "status": 21006,
-  //   "cancellation_date": "2018-04-18 06:18:23 Etc/GMT",
-  //   "auto_renew_product_id": "com.busuu.app.subs12month_FT_jan_18",
-  //   "cancellation_reason": "0",
-  //   "latest_expired_receipt_info": {
-  //      "original_purchase_date_pst": "2018-04-02 04:46:01 America/Los_Angeles",
-  //      "cancellation_date_ms": "1528331233000",
-  //      "quantity": "1",
-  //      "cancellation_reason": "0",
-  //      "unique_vendor_identifier": "***",
-  //      "bvrs": "2",
-  //      "expires_date_formatted": "2019-04-16 18:46:01 Etc/GMT",
-  //      "is_in_intro_offer_period": "false",
-  //      "purchase_date_ms": "1523904361000",
-  //      "expires_date_formatted_pst": "2019-04-16 11:46:01 America/Los_Angeles",
-  //      "is_trial_period": "false",
-  //      "item_id": "***",
-  //      "unique_identifier": "***",
-  //      "original_transaction_id": "***",
-  //      "expires_date": "1555440361000",
-  //      "app_item_id": "***",
-  //      "transaction_id": "***",
-  //      "web_order_line_item_id": "***",
-  //      "original_purchase_date": "2018-04-09 18:46:01 Etc/GMT",
-  //      "cancellation_date": "2018-04-18 06:18:23 Etc/GMT",
-  //      "product_id": "com.busuu.app.subs12month_FT_jan_18",
-  //      "purchase_date": "2018-04-16 18:46:01 Etc/GMT",
-  //      "purchase_date_pst": "2018-04-16 11:46:01 America/Los_Angeles",
-  //      "cancellation_date_pst": "2018-04-17 23:18:23 America/Los_Angeles",
-  //      "bid": "com.busuu.english.app",
-  //      "original_purchase_date_ms": "1523299561000"
-  //   }...
-  //  }
+export const processSubscriptionStatusUpdate = async (req: Request, res: Response) => {
+  /* tslint:disable max-line-length */
+  // https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Subscriptions.html#//apple_ref/doc/uid/TP40008267-CH7-SW13
+  const statusUpdateRequest: StatusUpdateRequest = req.body;
+
+  console.log('Should process this:', statusUpdateRequest);
+  console.log('Should update subscription originalTransactionId: ', statusUpdateRequest.original_transaction_id);
+
+  // TODO: only send OK when we have processed the status update
+  // TODO: alarm maintainer when processing error happens
+  return res.status(400).json({ message: 'Not ok, send again!' });
+  // return res.status(200).json({ message: 'OK!' });
+
+  interface StatusUpdateRequest {
+    environment: 'Sandbox' | 'PROD'; // Specifies whether the notification is for a sandbox or a production environment
+    notification_type: 'INITIAL_BUY' | 'CANCEL' | 'RENEWAL' | 'INTERACTIVE_RENEWAL' | 'DID_CHANGE_RENEWAL_PREF'; // Describes the kind of event that triggered the notification. // https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Subscriptions.html#//apple_ref/doc/uid/TP40008267-CH7-SW16
+    password: string; // This value is the same as the shared secret you POST when validating receipts.
+    original_transaction_id: string; // This value is the same as the Original Transaction Identifier in the receipt. You can use this value to relate multiple iOS 6-style transaction receipts for an individual customer’s subscription.
+    cancellation_date?: string; // The time and date that a transaction was cancelled by Apple customer support. Posted only if the notification_type is CANCEL
+    web_order_line_item_id?: string; // The primary key for identifying a subscription purchase. Posted only if the notification_type is CANCEL.
+    latest_receipt?: string; // The base-64 encoded transaction receipt for the most recent renewal transaction. Posted only if the notification_type is RENEWAL or INTERACTIVE_RENEWAL, and only if the renewal is successful.
+    latest_receipt_info?: ReceiptDetails; // The JSON representation of the receipt for the most recent renewal. Posted only if renewal is successful. Not posted for notification_type CANCEL.
+    latest_expired_receipt?: string; // The base-64 encoded transaction receipt for the most recent renewal transaction. Posted only if the subscription expired.
+    latest_expired_receipt_info?: ReceiptDetails; // The JSON representation of the receipt for the most recent renewal transaction. Posted only if the notification_type is RENEWAL or CANCEL or if renewal failed and subscription expired.
+    auto_renew_status: boolean; // A Boolean value indicated by strings “true” or “false”. This is the same as the auto renew status in the receipt.
+    auto_renew_adam_id: string; // The current renewal preference for the auto-renewable subscription. This is the Apple ID of the product.
+    auto_renew_product_id: string; // This is the same as the Subscription Auto Renew Preference in the receipt.
+    expiration_intent?: number; // This is the same as the Subscription Expiration Intent in the receipt. Posted only if notification_type is RENEWAL or INTERACTIVE_RENEWAL.
+  }
+
+  interface ReceiptDetails {
+    original_purchase_date_pst: string;
+    cancellation_date_ms: string | number;
+    quantity: string | number;
+    cancellation_reason: string | number;
+    unique_vendor_identifier: string;
+    bvrs: string | number;
+    expires_date_formatted: string;
+    is_in_intro_offer_period: boolean;
+    purchase_date_ms: string | number;
+    expires_date_formatted_pst: string;
+    is_trial_period: boolean;
+    item_id: string;
+    unique_identifier: string;
+    original_transaction_id: string;
+    expires_date: string | number;
+    app_item_id: string;
+    transaction_id: string;
+    web_order_line_item_id: string;
+    original_purchase_date: string;
+    cancellation_date: string;
+    product_id: string;
+    purchase_date: string;
+    purchase_date_pst: string;
+    cancellation_date_pst: string;
+    bid: string;
+    original_purchase_date_ms: string | number;
+  }
 }
