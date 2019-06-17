@@ -190,6 +190,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
   app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', (req, res) => {

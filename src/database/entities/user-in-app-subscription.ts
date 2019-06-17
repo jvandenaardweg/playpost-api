@@ -31,7 +31,7 @@ export class UserInAppSubscription {
 
   @Column({ nullable: true })
   @IsDate()
-  endedAt: Date; // expires date
+  expiresAt: Date; // expires date
 
   @Column({ nullable: true, unique: true })
   latestTransactionId: string; // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)

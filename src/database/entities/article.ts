@@ -7,7 +7,7 @@ import { PlaylistItem } from './playlist-item';
 
 import { ColumnNumericTransformer } from '../utils';
 import { logger } from '../../utils';
-import * as PubSub  from '../../pubsub';
+import * as ArticlesPubSub  from '../../pubsub/articles';
 import { Language } from './language';
 
 export enum ArticleStatus {
@@ -101,6 +101,6 @@ export class Article extends BaseEntity {
     // Should get the full article details, like ssml, text and html
     logger.info('Database Entity (Article):', '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
 
-    PubSub.publishCrawlFullArticle(this.id, this.url);
+    ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
   }
 }
