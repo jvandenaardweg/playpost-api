@@ -1,4 +1,22 @@
 require('dotenv').config();
+
+import { getGoogleCloudCredentials } from './utils/credentials';
+
+// Attach stackdriver on our Heroku environments
+if (
+  process.env.HEROKU_SLUG_COMMIT &&
+  process.env.NODE_ENV &&
+  ['production', 'staging'].includes(process.env.NODE_ENV)
+) {
+  require('@google-cloud/debug-agent').start({
+    ...getGoogleCloudCredentials(),
+    serviceContext: {
+      service: 'API',
+      version: process.env.HEROKU_SLUG_COMMIT
+    }
+  });
+}
+
 import { createConnection } from 'typeorm';
 import * as Sentry from '@sentry/node';
 import * as Integrations from '@sentry/integrations';

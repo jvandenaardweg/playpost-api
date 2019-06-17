@@ -50,6 +50,7 @@
   "homepage": "https://github.com/jvandenaardweg/playpost-api#readme",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.18",
+    "@google-cloud/debug-agent": "^4.0.0",
     "@google-cloud/storage": "^2.5.0",
     "@google-cloud/text-to-speech": "^1.1.0",
     "@sentry/cli": "^1.44.3",
