@@ -1,13 +1,13 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
+
 import { User } from './user';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
-import { redisClientPub } from '../../cache';
-
 import { ColumnNumericTransformer } from '../utils';
 import { logger } from '../../utils';
+import * as PubSub  from '../../pubsub';
 import { Language } from './language';
 
 export enum ArticleStatus {
@@ -100,6 +100,7 @@ export class Article extends BaseEntity {
   afterInsert() {
     // Should get the full article details, like ssml, text and html
     logger.info('Database Entity (Article):', '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
-    redisClientPub.publish('FETCH_FULL_ARTICLE', this.id);
+
+    PubSub.publishCrawlFullArticle(this.id, this.url);
   }
 }

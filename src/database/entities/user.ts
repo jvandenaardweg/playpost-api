@@ -7,7 +7,6 @@ import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
-// import { redisClientPub } from '../../cache';
 import { logger } from '../../utils';
 import { UserVoiceSetting } from './user-voice-setting';
 import { removeEmailToMailchimpList, addEmailToMailchimpList } from '../../mailers/mailchimp';
