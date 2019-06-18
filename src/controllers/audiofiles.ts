@@ -63,7 +63,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
   const userRepository = getCustomRepository(UserRepository);
 
-  const readingTimeLimit = (30 * 60); // 30 minutes
+  const readingTimeLimitAllAccountsInSeconds = (30 * 60); // 30 minutes
   const readingTimeLimitFreeAccountsInSeconds = (5 * 60); // 5 minutes
 
   const { error } = joi.validate({ articleId, userId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'mimeType'));
@@ -81,6 +81,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
+
+  const userIsSubscribed = await userRepository.findIsSubscribed(userId);
 
   // Fetch the article (with SSML)
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
@@ -113,9 +115,24 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // If the readingTime is greater then 30 minutes (1800 seconds)
   // We just shown an error we cannot create audio for this
+  if (article.readingTime > readingTimeLimitAllAccountsInSeconds) {
+    const message = `The article is longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimit} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
 
-  if (article.readingTime > readingTimeLimit) {
-    const message = `The article is longer then ${readingTimeLimit} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimit} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
+    Sentry.withScope((scope) => {
+      scope.setExtra('userId', userId);
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('readingTime', article && article.readingTime);
+      Sentry.captureMessage(message, Sentry.Severity.Info);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  // If the user is not subscribed, and the readingtime is greater then our free limit
+  // Show a message to the user he needs to upgrade
+  if (!userIsSubscribed && article.readingTime > readingTimeLimitFreeAccountsInSeconds) {
+    const message = `This article is more than ${readingTimeLimitFreeAccountsInSeconds / 60} minutes to listen to, which is the limit for free accounts. To listen to long articles, please upgrade to our Premium subscription plan.`;
 
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
@@ -180,9 +197,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   let voice = userVoiceSetting && userVoiceSetting.voice;
 
-
-  const userIsSubscribed = await userRepository.findIsSubscribed(userId);
-
   // Check if the user is subscribed when it is a Premium voice
   if (userVoiceSetting && userVoiceSetting.voice.isPremium) {
     // Show an API message when the user is not subscribed anymore
@@ -193,14 +207,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       logger.error(loggerPrefix, errorMessage);
       return res.status(400).json({ message: errorMessage });
     }
-  }
-
-  // If the user is not subscribed, and the readingtime is greater then our free limit
-  // Show a message to the user he needs to upgrade
-  if (!userIsSubscribed && article.readingTime > readingTimeLimitFreeAccountsInSeconds) {
-    const errorMessage = `This article is more than ${readingTimeLimitFreeAccountsInSeconds / 60} minutes to listen to, which is the limit for free accounts. To listen to long articles, please upgrade to our Premium subscription plan.`;
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
   }
 
   // Check if the voice or language is active
@@ -244,6 +250,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
+
+  // Passed all checks. We can now start generating an audiofile for this user...
 
   logger.info(loggerPrefix, 'Start generating audio using voice:', voice.id);
 
