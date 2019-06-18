@@ -115,7 +115,6 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
   const loggerPrefix = 'User Create Selected Voice Setting:';
   const userId: string = req.user.id;
   const { voiceId }: { voiceId: string } = req.body;
-  const userRepository = getRepository(User);
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
   const voiceRepository = getRepository(Voice);
 
@@ -129,27 +128,21 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
 
   logger.info(loggerPrefix, 'Setting default voice...');
 
-  // Get the user with his voice settings
-  const user = await userRepository.findOne(userId, { relations: ['voiceSettings'] });
-  if (!user) {
-    const errorMessage = 'No user found.';
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
-  }
-
-  // Check if the voice exists and is active
-  const voice = await voiceRepository.findOne(voiceId, { where: { isActive: true } });
-  if (!voice) {
-    const errorMessage = 'Voice not found or voice is not active.';
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
-  }
-
-  // Ok, the voice and language exists and can be used
-  // Now set this voice as a default for this language for the user, overwriting existing setting for the language
-  const voiceLanguageId = voice.language.id;
-
   try {
+
+     // Check if the voice exists and is active
+    const voice = await voiceRepository.findOne(voiceId, { where: { isActive: true } });
+
+    if (!voice) {
+      const errorMessage = 'Voice not found or voice is not active.';
+      logger.error(loggerPrefix, errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // Ok, the voice and language exists and can be used
+    // Now set this voice as a default for this language for the user, overwriting existing setting for the language
+    const voiceLanguageId = voice.language.id;
+
     // Get the current setting for the voice's language, so we can determine if we need to update it, or create a new setting
     const currentVoiceSetting = await userVoiceSettingRepository.findOne({
       user: {
@@ -200,5 +193,4 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
-
 };

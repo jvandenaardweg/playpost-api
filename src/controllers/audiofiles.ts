@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository, } from 'typeorm';
+import { getRepository, getCustomRepository, } from 'typeorm';
 import joi from 'joi';
 import uuid from 'uuid';
 import * as Sentry from '@sentry/node';
@@ -14,6 +14,7 @@ import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
+import { UserRepository } from '../database/repositories/user';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -60,6 +61,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
   const audiofileRepository = getRepository(Audiofile);
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
+  const userRepository = getCustomRepository(UserRepository);
 
   const { error } = joi.validate({ articleId, userId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'mimeType'));
 
@@ -127,20 +129,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const articleLanguage = article && article.language;
   const articleLanguageCode = articleLanguage && articleLanguage.languageCode;
 
-  if (articleLanguageCode !== 'en') {
-    const message = `We currently only handle English articles. Your article seems to have the language: ${articleLanguageCode}`;
-
-    Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      scope.setExtra('languageCode', articleLanguageCode);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
-    });
-
-    logger.error(loggerPrefix, message);
-    return res.status(400).json({ message });
-  }
-
   // Check if the article has any SSML
   if (!article.ssml) {
     const message = 'Article has no SSML data. We cannot generate audio for this article.';
@@ -189,6 +177,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   let voice = userVoiceSetting && userVoiceSetting.voice;
 
+  // Check if the user is subscribed when it is a Premium voice
+  if (userVoiceSetting && userVoiceSetting.voice.isPremium) {
+    const userIsSubscribed = await userRepository.findIsSubscribed(userId);
+
+    // Show an API message when the user is not subscribed anymore
+    // So he cannot use this Premium voice anymore
+    if (!userIsSubscribed) {
+      const languageName = (article.language) ? article.language.name : 'Unknown';
+      const errorMessage = `You do not have an active subscription to use this Premium voice. Please upgrade or choose a different voice for this ${languageName} article.`;
+      logger.error(loggerPrefix, errorMessage);
+      return res.status(400).json({ message: errorMessage });
+    }
+  }
+
   // Check if the voice or language is active
   // We only create audiofiles for languages and voices that are active
   if (userVoiceSetting && (!userVoiceSetting.voice.isActive || !userVoiceSetting.language.isActive)) {
@@ -231,53 +233,59 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  logger.info(loggerPrefix, 'Using voice:', voice.id);
+  logger.info(loggerPrefix, 'Start generating audio using voice:', voice.id);
 
-  // Manually generate a UUID.
-  // So we can use this ID to upload a file to storage, before we insert it into the database.
-  const audiofileId = uuid.v4();
+  try {
+    // Manually generate a UUID.
+    // So we can use this ID to upload a file to storage, before we insert it into the database.
+    const audiofileId = uuid.v4();
 
-  logger.info(loggerPrefix, 'Creating audiofile placeholder...');
+    logger.info(loggerPrefix, 'Creating audiofile placeholder...');
 
-  // Prepare the audiofile
-  const audiofile = await audiofileRepository.create({
-    id: audiofileId,
-    article: {
-      id: articleId
-    },
-    user: {
-      id: userId
-    },
-    voice: {
-      id: voice.id
-    },
-    language: {
-      id: articleLanguage.id
-    }
-  });
+    // Prepare the audiofile
+    const audiofile = await audiofileRepository.create({
+      id: audiofileId,
+      article: {
+        id: articleId
+      },
+      user: {
+        id: userId
+      },
+      voice: {
+        id: voice.id
+      },
+      language: {
+        id: articleLanguage.id
+      }
+    });
 
-  logger.info(loggerPrefix, `Created audiofile placeholder using ID: ${audiofile.id}`);
+    logger.info(loggerPrefix, `Created audiofile placeholder using ID: ${audiofile.id}`);
 
-  logger.info(loggerPrefix, 'Now synthesizing the article\'s SSML...');
+    logger.info(loggerPrefix, 'Now synthesizing the article\'s SSML...');
 
-  // // Synthesize and return an uploaded audiofile for use to use in the database
-  const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, mimeType);
+    // // Synthesize and return an uploaded audiofile for use to use in the database
+    const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, mimeType);
 
-  logger.info(loggerPrefix, 'Successfully synthesized the article\'s SSML!');
+    logger.info(loggerPrefix, 'Successfully synthesized the article\'s SSML!');
 
-  logger.info(loggerPrefix, 'Saving the audiofile in the database...');
+    logger.info(loggerPrefix, 'Saving the audiofile in the database...');
 
-  // Then save it in the database
-  const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
+    // Then save it in the database
+    const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
 
-  logger.info(loggerPrefix, 'Saved the audiofile in the database! Audiofile ID:', createdAudiofile.id);
+    logger.info(loggerPrefix, 'Saved the audiofile in the database! Audiofile ID:', createdAudiofile.id);
 
-  const hrend = process.hrtime(hrstart);
-  const ds = hrend[0];
-  const dms = hrend[1] / 1000000;
-  logger.info(loggerPrefix, `Execution time: ${ds} ${dms}ms`);
+    const hrend = process.hrtime(hrstart);
+    const ds = hrend[0];
+    const dms = hrend[1] / 1000000;
+    logger.info(loggerPrefix, `Execution time: ${ds} ${dms}ms`);
 
-  return res.json(createdAudiofile);
+    return res.json(createdAudiofile);
+  } catch (err) {
+    const errorMessage = (err && err.message) ? err.message : 'An unknown error happenend while generating the audio for this article.';
+    Sentry.captureException(err)
+    return res.status(500).json({ message: errorMessage });
+  }
 };
 
 /**
