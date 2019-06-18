@@ -116,7 +116,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // If the readingTime is greater then 30 minutes (1800 seconds)
   // We just shown an error we cannot create audio for this
   if (article.readingTime > readingTimeLimitAllAccountsInSeconds) {
-    const message = `The article is longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimit} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
+    const message = `The article is longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
 
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);
