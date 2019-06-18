@@ -7,6 +7,7 @@ import { Article, ArticleStatus } from '../database/entities/article';
 
 import { getNormalizedUrl } from '../utils/string';
 import { logger } from '../utils';
+import { Sentry } from '../error-reporter';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
 const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given article does not exist in your playlist.';
@@ -340,6 +341,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   } catch (err) {
     const errorMessage = `Failed to delete playlist item ID "${playlistItem}"`;
     logger.error('Delete Playlist Item', errorMessage);
+    Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
 
@@ -360,6 +362,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     } catch (err) {
       const errorMessage = 'Failed to delete the article attached to the deleted playlist item.';
       logger.error('Delete Playlist Item', errorMessage);
+      Sentry.captureException(err);
       return res.status(400).json({ message: errorMessage });
     }
   }

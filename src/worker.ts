@@ -1,7 +1,7 @@
 require('dotenv').config();
 import { createConnection } from 'typeorm';
-import * as Sentry from '@sentry/node';
-import * as Integrations from '@sentry/integrations';
+
+import { Sentry } from './error-reporter';
 
 import { connectionOptions } from './database/connection-options';
 
@@ -11,24 +11,12 @@ import { listenCrawlFullArticle } from './pubsub/articles';
 
 logger.info('Worker init: Setting up...');
 
-if (process.env.NODE_ENV === 'production') {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: 'production',
-    release: process.env.HEROKU_SLUG_COMMIT,
-    integrations: [
-      new Integrations.RewriteFrames({
-        root: __dirname,
-      })
-    ],
-  });
+Sentry.configureScope((scope) => {
+  scope.setExtra('process', 'worker');
+});
 
-  Sentry.configureScope((scope) => {
-    scope.setExtra('process', 'worker');
-  });
+logger.info('Worker init: Sentry configured.');
 
-  logger.info('Worker init: Sentry configured.');
-}
 
 logger.info('Worker init: Connecting with database...');
 
@@ -46,9 +34,6 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
   } catch (err) {
     logger.error('Worker: Captured an uncaught error', err);
-
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.captureException(err);
-    }
+    Sentry.captureException(err);
   }
 });

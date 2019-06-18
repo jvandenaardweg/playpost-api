@@ -7,6 +7,7 @@ import { AppleSubscriptionNotificationRequestBody } from '../typings';
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { logger } from '../utils';
+import { Sentry } from '../error-reporter';
 
 const {
   GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS
@@ -112,6 +113,7 @@ const handleMessage = async (message: Message) => {
     const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while processing this notification.';
 
     logger.error(loggerPrefix, errorMessage);
+    Sentry.captureException(err);
 
     logger.info(loggerPrefix, 'Retry...');
     message.nack(reDeliverDelayInSeconds); // re-deliver, so we can retry.
@@ -127,6 +129,8 @@ const handleInitialBuySubscriptionEvent = async (notification: AppleSubscription
     'Store the latest_receipt on your server as a token to verify the user’s subscription status at any time, by validating it with the App Store.'
   );
 
+  // When we receive the initial buy event, we just need to make sure the transaction is in our database
+  // Normally, this is done when the user purchases a subscription. But in the event of an error, this event is a backup.
   const latestReceipt = notification.latest_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 

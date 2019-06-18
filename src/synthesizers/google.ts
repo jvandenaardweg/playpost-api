@@ -9,6 +9,7 @@ import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { SynthesizerType } from './index';
 import { logger } from '../utils/logger';
+import { Sentry } from '../error-reporter';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
@@ -52,6 +53,7 @@ export const getAllGoogleVoices = async (loggerPrefix: string) => {
     return voices;
   } catch (err) {
     logger.error(loggerPrefix, 'Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
+    Sentry.captureException(err);
     throw err;
   }
 };
@@ -94,6 +96,7 @@ export const addAllGoogleVoices = async (loggerPrefix: string) => {
           logger.info(loggerPrefix, 'Google Text To Speech: Added new voice to database: ', createdVoice.name);
         } catch (err) {
           logger.error(loggerPrefix, 'Google Text To Speech: Failed to create the voice in the database', err);
+          Sentry.captureException(err);
           throw err;
         }
       }

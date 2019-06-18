@@ -25,11 +25,11 @@ import passport from 'passport';
 import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
-import * as Sentry from '@sentry/node';
-import * as Integrations from '@sentry/integrations';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
 import ExpressBrute from 'express-brute';
+
+import { Sentry } from './error-reporter';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
@@ -99,28 +99,12 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.use(compression());
 
   // Setup Sentry error tracking
-  if (process.env.NODE_ENV === 'production') {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-      environment: 'production',
-      release: process.env.HEROKU_SLUG_COMMIT,
-      integrations: [
-        new Integrations.RewriteFrames({
-          root: __dirname,
-        })
-      ]
-    });
+  Sentry.configureScope((scope) => {
+    scope.setExtra('process', 'web');
+  });
 
-    Sentry.configureScope((scope) => {
-      scope.setExtra('process', 'web');
-    });
-
-    // The request handler must be the first middleware on the app
-    app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
-    app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
-
-    logger.info('App init:', 'Sentry configured.');
-  }
+  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
+  app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
   // Use passport authentication
   app.use(passport.initialize());

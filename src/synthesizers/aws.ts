@@ -9,6 +9,7 @@ import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 
 import { SynthesizerType } from './index';
 import { logger } from '../utils/logger';
+import { Sentry } from '../error-reporter';
 
 // Create an Polly client
 const client = new Polly({
@@ -72,6 +73,7 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
             logger.info(loggerPrefix, 'AWS Polly: Added new voice to database: ', createdVoice.name);
           } catch (err) {
             logger.error(loggerPrefix, 'AWS Polly: Failed to create the voice in the database', err);
+            Sentry.captureException(err);
             throw err;
           }
         }

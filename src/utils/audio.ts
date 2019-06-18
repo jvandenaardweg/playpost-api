@@ -4,6 +4,7 @@ import ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as musicMetadata from 'music-metadata';
 
 import { logger } from '../utils';
+import { Sentry } from '../error-reporter';
 
 fluentFfmpeg.setFfmpegPath(ffmpeg.path);
 
@@ -20,6 +21,7 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
     return durationInSeconds || 0;
   } catch (err) {
     logger.info('Audio Util (Duration): Failed to get audiofile duration.', audioFilePath);
+    Sentry.captureException(err);
     throw err;
   }
 };

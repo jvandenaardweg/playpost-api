@@ -3,8 +3,8 @@ require('dotenv').config();
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 import { PubSub, Message } from '@google-cloud/pubsub';
-import * as Sentry from '@sentry/node';
-import * as Integrations from '@sentry/integrations';
+
+import { Sentry } from '../error-reporter';
 
 import { CrawlFullArticleData } from '../typings';
 
@@ -16,23 +16,6 @@ const {
   GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE,
   GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE
 } = process.env;
-
-if (process.env.NODE_ENV === 'production') {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: 'production',
-    release: process.env.HEROKU_SLUG_COMMIT,
-    integrations: [
-      new Integrations.RewriteFrames({
-        root: __dirname,
-      })
-    ],
-  });
-
-  Sentry.configureScope((scope) => {
-    scope.setExtra('process', 'worker');
-  });
-}
 
 export const listenCrawlFullArticle = () => {
   const loggerPrefix = 'Google PubSub Worker (Crawl Full Article):';
@@ -98,14 +81,12 @@ export const listenCrawlFullArticle = () => {
     } catch (err) {
       logger.error(loggerPrefix, 'Worker process failed: ', articleId, err);
 
-      if (process.env.NODE_ENV === 'production') {
-        Sentry.withScope((scope) => {
-          scope.setExtra('articleId', articleId);
-          scope.setLevel(Sentry.Severity.Critical);
-          Sentry.captureMessage('Failed to fully fetch an article.');
-          Sentry.captureException(err);
-        });
-      }
+      Sentry.withScope((scope) => {
+        scope.setExtra('articleId', articleId);
+        scope.setLevel(Sentry.Severity.Critical);
+        Sentry.captureMessage('Failed to fully fetch an article.');
+        Sentry.captureException(err);
+      });
 
       await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
       logger.error(loggerPrefix, 'Worker process set status to failed: ', articleId);
@@ -129,16 +110,21 @@ export const listenCrawlFullArticle = () => {
  * @param articleUrl
  */
 export async function publishCrawlFullArticle(articleId: string, articleUrl: string) {
-  const pubsub = new PubSub(getGoogleCloudCredentials());
+  try {
+    const pubsub = new PubSub(getGoogleCloudCredentials());
 
-  if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) throw new Error('Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.');
+    if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) throw new Error('Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.');
 
-  const buffer = Buffer.from(JSON.stringify({
-    articleId,
-    articleUrl
-  }));
+    const buffer = Buffer.from(JSON.stringify({
+      articleId,
+      articleUrl
+    }));
 
-  const result = await pubsub.topic(GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE).publish(buffer);
+    const result = await pubsub.topic(GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE).publish(buffer);
 
-  return result;
+    return result;
+  } catch (err) {
+    Sentry.captureException(err);
+    return err;
+  }
 }

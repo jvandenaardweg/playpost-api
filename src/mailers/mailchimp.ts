@@ -2,6 +2,7 @@ require('dotenv').config();
 import nodeFetch from 'node-fetch';
 import md5 from 'md5';
 import { logger } from '../utils';
+import { Sentry } from '../error-reporter';
 
 const { MAILCHIMP_LIST_ID, MAILCHIMP_API_KEY } = process.env;
 
@@ -42,6 +43,7 @@ export const addEmailToMailchimpList = async (emailAddress: string) => {
     return response;
   } catch (err) {
     logger.error(`Mailchimp: Error while adding "${emailAddress}" to list ${MAILCHIMP_LIST_ID}.`);
+    Sentry.captureException(err);
     throw err;
   }
 };
@@ -66,6 +68,7 @@ export const removeEmailToMailchimpList = async (emailAddress: string) => {
     return response;
   } catch (err) {
     logger.error(`Mailchimp: Error while deleting "${emailAddress}" from list ${MAILCHIMP_LIST_ID}.`);
+    Sentry.captureException(err);
     throw err;
   }
 };

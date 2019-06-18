@@ -6,6 +6,7 @@ import { logger } from '../utils';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import { InAppSubscriptionStatus, UserInAppSubscription, InAppSubscriptionEnvironment } from '../database/entities/user-in-app-subscription';
 import { InAppSubscription } from '../database/entities/in-app-subscription';
+import { Sentry } from '../error-reporter';
 
 const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
 
@@ -84,6 +85,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'An unknown error happened while syncing expired subscriptions.';
     logger.error(loggerPrefix, errorMessage);
+    Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
 };
@@ -136,6 +138,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
+    Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
 };
@@ -203,6 +206,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
+    Sentry.captureException(err);
     throw new Error(errorMessage);
   }
 };
@@ -333,9 +337,9 @@ export const validateReceipt = async (receipt: Receipt, userId: string, inAppSub
 
     return userInAppSubscriptionData;
   } catch (err) {
-    logger.error(err);
     const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
+    Sentry.captureException(err);
     throw new Error(errorMessage);
   }
 };

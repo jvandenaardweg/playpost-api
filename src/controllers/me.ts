@@ -6,6 +6,7 @@ import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../
 import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
+import { Sentry } from '../error-reporter';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -196,6 +197,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
   } catch (err) {
     const errorMessage = 'An unexpected error happened while setting this voice as a default for this language.';
     logger.error(loggerPrefix, errorMessage, err);
+    Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
 

@@ -12,6 +12,7 @@ import { addAllGoogleVoices } from '../synthesizers/google';
 import { addAllAWSVoices } from '../synthesizers/aws';
 
 import { logger } from '../utils/logger';
+import { Sentry } from '../error-reporter';
 
 const seedLanguages = async () => {
   const loggerPrefix = 'Seeding Languages:';
@@ -129,20 +130,25 @@ const seedInAppSubscriptions = async () => {
 };
 
 (async() => {
-  await createConnection(connectionOptions());
+  try {
+    await createConnection(connectionOptions());
 
-  // Run the seeders
+    // Run the seeders
 
-  // Insert the world's languages
-  // We don't use them all, but insert them for completeness sake
-  await seedLanguages();
+    // Insert the world's languages
+    // We don't use them all, but insert them for completeness sake
+    await seedLanguages();
 
-  // After we insert the languages, we can seed the voices
-  // The voices are fetched from the Google and AWS API's, so they require the API keys to be set in this project
-  await seedVoices();
+    // After we insert the languages, we can seed the voices
+    // The voices are fetched from the Google and AWS API's, so they require the API keys to be set in this project
+    await seedVoices();
 
-  // Create some subscriptions our app uses
-  await seedInAppSubscriptions();
+    // Create some subscriptions our app uses
+    await seedInAppSubscriptions();
+  } catch (err) {
+    Sentry.captureException(err);
+  } finally {
+    process.exit();
+  }
 
-  process.exit();
 })();

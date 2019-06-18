@@ -7,6 +7,7 @@ import { AudiofileMimeType } from '../database/entities/audiofile';
 
 import LocaleCode from 'locale-code';
 import { logger } from '../utils';
+import { Sentry } from '../error-reporter';
 
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
@@ -86,6 +87,7 @@ export const uploadArticleAudioFile = async (
     return uploadResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Failed to upload.`, err);
+    Sentry.captureException(err);
     throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
@@ -145,6 +147,7 @@ export const uploadVoicePreviewAudiofile = async (
     return uploadResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Failed to upload.`, err);
+    Sentry.captureException(err);
     throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
@@ -165,6 +168,7 @@ export const deleteFile = async (filename: string) => {
     return deleteFileResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Delete File): Failed to delete file "${filename}"!`, err);
+    Sentry.captureException(err);
     throw err;
   }
 };
@@ -204,6 +208,7 @@ export const deleteVoicePreview = async (voiceId?: string) => {
     return response;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting voice preview: "${prefix}"...`, err);
+    Sentry.captureException(err);
     throw err;
   }
 };
@@ -245,6 +250,7 @@ export const deleteAudiofile = async (articleId?: string, audiofileId?: string) 
     return response;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
+    Sentry.captureException(err);
     throw err;
   }
 };
@@ -292,6 +298,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
     return responses;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
+    Sentry.captureException(err);
     throw err;
   }
 };
