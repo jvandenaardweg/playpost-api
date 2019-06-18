@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, getCustomRepository } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
@@ -7,6 +7,7 @@ import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
 import { Sentry } from '../error-reporter';
+import { UserRepository } from '../database/repositories/user';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -117,6 +118,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
   const { voiceId }: { voiceId: string } = req.body;
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
   const voiceRepository = getRepository(Voice);
+  const userRepository = getCustomRepository(UserRepository);
 
   const { error } = joi.validate({ voiceId }, userVoiceSettingValidationSchema.requiredKeys('voiceId'));
 
@@ -136,6 +138,16 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     if (!voice) {
       const errorMessage = 'Voice not found or voice is not active.';
       logger.error(loggerPrefix, errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const userIsSubscribed = await userRepository.findIsSubscribed(userId);
+
+    // If a user is not subscribed, but tries to change to a premium voice
+    // Notify the user he cannot do this
+    if (!userIsSubscribed && voice.isPremium) {
+      const errorMessage = 'It appears you do not have an active Premium subscription to use this voice. If you want to use this voice, please upgrade to a Premium subscription.';
+      logger.warn(loggerPrefix, errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -188,7 +200,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Done!');
     return res.status(200).json({ message: 'Voice set!' });
   } catch (err) {
-    const errorMessage = 'An unexpected error happened while setting this voice as a default for this language.';
+    const errorMessage = (err && err.message) ? err.message : 'An unexpected error happened while setting this voice as a default for this language.';
     logger.error(loggerPrefix, errorMessage, err);
     Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
