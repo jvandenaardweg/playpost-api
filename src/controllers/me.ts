@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository, getCustomRepository } from 'typeorm';
+import { getRepository, getCustomRepository, getConnection } from 'typeorm';
 import joi from 'joi';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
@@ -8,6 +8,7 @@ import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
 import { Sentry } from '../error-reporter';
 import { UserRepository } from '../database/repositories/user';
+import * as cacheKeys from '../cache/keys';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -57,6 +58,10 @@ export const updateEmail = async (req: Request, res: Response) => {
 
   logger.info(loggerPrefix, 'Updated!');
 
+  // Remove the JWT verification cache as the user updated data
+  const cache = await getConnection('default').queryResultCache;
+  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+
   const updatedUser = await userRepository.findOne(userId);
 
   if (!updatedUser) return res.status(400).json({ message: 'Could not find your user details after updating the e-mail address.' });
@@ -80,6 +85,10 @@ export const updatePassword = async (req: Request, res: Response) => {
 
   await userRepository.update(userId, { password: hashedPassword });
 
+  // Remove the JWT verification cache as the user updated data
+  const cache = await getConnection('default').queryResultCache;
+  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+
   const updatedUser = await userRepository.findOne(userId);
 
   return res.json(updatedUser);
@@ -101,6 +110,10 @@ export const deleteCurrentUser = async (req: Request, res: Response) => {
   if (!user) return res.status(400).json({ message: 'User not found!' });
 
   await userRepository.remove(user);
+
+  // Remove the JWT verification cache as the user is not there anymore
+  const cache = await getConnection('default').queryResultCache;
+  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
 
   return res.json({ message: MESSAGE_ME_DELETED });
 };

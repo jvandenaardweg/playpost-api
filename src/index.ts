@@ -214,7 +214,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
       if (err.message === 'Unauthorized') {
         return res.status(401).json({
-          message: 'You are not logged in. Please log in to the app and try again.'
+          message: 'You are not logged or your access token is expired/invalid. Please log in to the app and try again.'
         });
       }
 
