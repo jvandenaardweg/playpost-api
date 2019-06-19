@@ -31,7 +31,7 @@ export enum AudioProfile {
 
 @Entity()
 @Unique(['isLanguageDefault', 'language'])
-@Index(['languageCode', 'isActive', 'isPremium'])
+@Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality'])
 export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
@@ -73,6 +73,9 @@ export class Voice {
 
   @Column({ nullable: false, default: true }) // Determine if this voice requires a subscription within the app
   isPremium: boolean;
+
+  @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
+  isHighestQuality: boolean;
 
   @Column({ nullable: true, default: null }) // Determine if this voice is the default for the language
   isLanguageDefault: boolean;
