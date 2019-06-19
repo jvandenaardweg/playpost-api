@@ -45,7 +45,7 @@ export class Audiofile {
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;
 
-  @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL' }) // On delete of an Voices, set this column to null. So the audiofile stays available.
+  @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
   voice: Voice;
 
   @ManyToOne(type => Language, { nullable: true, onDelete: 'RESTRICT' }) // On delete of an Language, restrict deletion if there's an audiofile with this language.
