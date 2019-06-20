@@ -36,9 +36,6 @@ export class Audiofile {
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
   length: number; // Length in seconds
 
-  @Column({ nullable: true })
-  languageCode: string;
-
   @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
   mimeType: AudiofileMimeType;
 
