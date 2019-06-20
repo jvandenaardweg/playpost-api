@@ -84,7 +84,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const userIsSubscribed = await userRepository.findIsSubscribed(userId);
 
-  // Fetch the article (with SSML)
+  // Fetch the article (without SSML)
   article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
   // Check if article exists
@@ -98,6 +98,10 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
+
+  // Seperately get the SSML, as this is hidden from the article entity by default
+  const articleWithSsml = await articleRepository.findOne(articleId, { select: ['ssml'] });
+  article.ssml = (articleWithSsml && articleWithSsml.ssml) ? articleWithSsml.ssml : '';
 
   // Check if article status is correct to create audiofiles for
   if (article.status !== ArticleStatus.FINISHED) {
