@@ -97,10 +97,18 @@ export class Article extends BaseEntity {
   updatedAt: Date;
 
   @AfterInsert()
-  afterInsert() {
-    // Should get the full article details, like ssml, text and html
-    logger.info('Database Entity (Article):', '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
+  async afterInsert() {
+    const loggerPrefix = 'Database Entity (Article):';
 
-    ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+    try {
+      // Should get the full article details, like ssml, text and html
+      logger.info(loggerPrefix, '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
+
+      await ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+    } catch (err) {
+      const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
+      logger.error(loggerPrefix, errorMessage);
+    }
+
   }
 }
