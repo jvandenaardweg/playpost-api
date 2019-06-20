@@ -47,7 +47,7 @@ export class Voice {
   @Column({ nullable: false, unique: true }) // en-US-Wavenet-D
   name: string;
 
-  @Column({ nullable: true }) // John
+  @Column({ nullable: false, unique: true }) // John
   label: string;
 
   @Column({ type: 'enum', enum: Gender, nullable: false }) // MALE or FEMALE

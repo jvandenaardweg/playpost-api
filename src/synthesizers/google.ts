@@ -86,9 +86,11 @@ export const addAllGoogleVoices = async (loggerPrefix: string) => {
             countryCode,
             languageCode: voiceLanguageCode,
             name: voiceName,
+            label: voiceName,
             gender: voiceGender,
             synthesizer: Synthesizer.GOOGLE,
-            naturalSampleRateHertz: voiceNaturalSampleRateHertz
+            naturalSampleRateHertz: voiceNaturalSampleRateHertz,
+            isHighestQuality: (voiceName.toLowerCase().includes('wavenet')) ? true : false
           });
 
           const createdVoice = await voiceRepository.save(voiceToCreate);
