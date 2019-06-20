@@ -5,7 +5,6 @@ import { Voice } from './voice';
 import { User } from './user';
 
 import { ColumnNumericTransformer } from '../utils';
-import { Language } from './language';
 
 // encoding formats supported by Google and AWS Polly
 export enum AudiofileMimeType {
@@ -44,9 +43,6 @@ export class Audiofile {
 
   @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
   voice: Voice;
-
-  @ManyToOne(type => Language, { nullable: true, onDelete: 'RESTRICT' }) // On delete of an Language, restrict deletion if there's an audiofile with this language.
-  language: Language;
 
   @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   user: User;

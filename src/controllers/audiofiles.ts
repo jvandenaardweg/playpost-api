@@ -284,9 +284,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       },
       voice: {
         id: voice.id
-      },
-      language: {
-        id: articleLanguage.id
       }
     });
 
