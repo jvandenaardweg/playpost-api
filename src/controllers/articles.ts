@@ -10,6 +10,7 @@ import { audiofileInputValidationSchema, articleInputValidationSchema } from '..
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
 import { Language } from '../database/entities/language';
+import { URL_CRAWLER } from '../constants/urls';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -81,7 +82,9 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
+  if (!process.env.CRAWLER_URL) throw new Error('Environment variable "CRAWLER_URL" not set.');
+
+  const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
 
   // Fast crawler has troubles with this URL:
   // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
