@@ -59,6 +59,7 @@ export class UserInAppSubscription {
 
   @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
   // When we delete a user, we keep their purchase history, so we can keep track of purchases
+  // User could also be null if we receive purchase events from Apple, but we didnt register a purchase in our database
   user: User;
 
   @ManyToOne(type => InAppSubscription, { onDelete: 'RESTRICT', eager: true })
