@@ -72,7 +72,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       const userId = expiredSubscription.user.id;
       const inAppSubscriptionId = expiredSubscription.inAppSubscription.id;
 
-      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, userId, inAppSubscriptionId);
+      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, inAppSubscriptionId, userId);
 
       logger.info(loggerPrefix, 'Update expired subscription data for');
 
@@ -126,7 +126,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
-    const userInAppSubscriptionData = await validateReceipt(receipt, userId, inAppSubscriptionId);
+    const userInAppSubscriptionData = await validateReceipt(receipt, inAppSubscriptionId, userId);
 
     logger.info(loggerPrefix, 'Got transaction data from validate receipt!');
 
@@ -219,7 +219,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
  *
  * @param receipt
  */
-export const validateReceipt = async (receipt: Receipt, userId: string, inAppSubscriptionId: string): Promise<UserInAppSubscription> => {
+export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: string, userId?: string | null): Promise<UserInAppSubscription> => {
   const sessionId = (typeof receipt === 'string') ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
@@ -314,6 +314,16 @@ export const validateReceipt = async (receipt: Receipt, userId: string, inAppSub
     // @ts-ignore
     const canceledAt = (purchase.cancellationDateMs) ? new Date(parseInt(purchase.cancellationDateMs, 10)).toISOString() : (purchase.cancellationDate) ? purchase.cancellationDate : undefined;
 
+    // Only connect to a user if we have one
+    // This could be empty if we receive events from Apple, but did not created a transaction in our database yet
+    const user = (userId)
+      ? {
+        user: {
+          id: userId
+        }
+      }
+      : undefined;
+
     const userInAppSubscriptionData = await userInAppSubscriptionRepository.create({
       status,
       startedAt,
@@ -327,9 +337,7 @@ export const validateReceipt = async (receipt: Receipt, userId: string, inAppSub
       latestTransactionId: purchase.transactionId,
       originalTransactionId: purchase.originalTransactionId,
       isTrial: purchase.isTrial,
-      user: {
-        id: userId
-      },
+      ...user,
       inAppSubscription: {
         id: inAppSubscriptionId
       }
@@ -367,14 +375,13 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
     throw new Error(`Could not find a user's in app subscription transaction using originalTransactionId: "${originalTransactionId}".`);
   }
 
-  const {
-    user: { id: userId },
-    inAppSubscription: { id: inAppSubscriptionId }
-  } = foundUserInAppSubscription;
+  // User could be empty if we receive notifications from apple
+  const userId = (foundUserInAppSubscription.user) ? foundUserInAppSubscription.user.id : null;
+  const inAppSubscriptionId = foundUserInAppSubscription.inAppSubscription.id;
 
   // Validate the receipt with Apple
   // The result should be that the receipt is active
-  const userInAppSubscriptionData = await validateReceipt(latestReceipt, userId, inAppSubscriptionId);
+  const userInAppSubscriptionData = await validateReceipt(latestReceipt, inAppSubscriptionId, userId);
 
   // Update the subscription for the user
   const result = await updateOrCreateUserInAppSubscription(userInAppSubscriptionData);
