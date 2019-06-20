@@ -10,7 +10,6 @@ import { audiofileInputValidationSchema, articleInputValidationSchema } from '..
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
 import { Language } from '../database/entities/language';
-import { URL_CRAWLER } from '../constants/urls';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
