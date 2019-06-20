@@ -178,7 +178,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   });
 
   // If there's an article, check if that one already exists in the user's playlist
-  if (article) {
+  if (article && article.id) {
     articleId = article.id;
 
     const playlistItem = await playlistItemRepository.findOne({

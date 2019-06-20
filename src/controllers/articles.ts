@@ -168,13 +168,19 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) {
+  if (!article || !article.id) {
     const errorMessage = 'Cannot sync article, because the article is not found.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
+
+  if (!articleUrl) {
+    const errorMessage = 'Cannot sync article, because it has no URLs.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
 
   const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
 
@@ -234,7 +240,7 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) {
+  if (!article || !article.id) {
     logger.warn(`Cannot update article status of article ID "${articleId}", because the article is not found.`);
     return;
   }
