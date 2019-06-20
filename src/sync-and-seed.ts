@@ -29,7 +29,7 @@ const seedLanguages = async () => {
       logger.info(loggerPrefix, 'Trying to add:', languageCode, language.name, language.native, '...');
 
       const existingLanguage = await languageRepository.findOne({
-        languageCode
+        code: languageCode
       });
 
       if (existingLanguage) {
@@ -37,7 +37,7 @@ const seedLanguages = async () => {
       } else {
         // Create the languages
         const languageToCreate = await languageRepository.create({
-          languageCode,
+          code: languageCode,
           name: language.name,
           nativeName: language.native
         });
@@ -83,7 +83,7 @@ const seedVoices = async () => {
 
       logger.info(loggerPrefix, `Connecting languageCode "${languageCode}" to voice ID "${voice.id}"...`);
 
-      const language = await languageRepository.findOne({ languageCode });
+      const language = await languageRepository.findOne({ code: languageCode });
 
       await voiceRepository.update(voice.id, { language });
 

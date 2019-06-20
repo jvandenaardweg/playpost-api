@@ -152,7 +152,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check if the language is supported
   const articleLanguage = article && article.language;
-  const articleLanguageCode = articleLanguage && articleLanguage.languageCode;
+  const articleLanguageCode = articleLanguage && articleLanguage.code;
 
   if (!articleLanguage) {
     const errorMessage = 'Did not receive any language information from the article.';

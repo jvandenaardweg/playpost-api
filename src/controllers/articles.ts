@@ -203,13 +203,13 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   // Find the language in our database, so can can connect it to the article
   const foundLanguage = await languageRepository.findOne({
-    languageCode: language
+    code: language
   });
 
   if (!foundLanguage) {
     logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
   } else {
-    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
   logger.info(loggerPrefix, 'Updating article ID:', article.id);
@@ -304,13 +304,13 @@ export const updateArticleToFull = async (articleId: string) => {
 
   // Find the language in our database, so can can connect it to the article
   const foundLanguage = await languageRepository.findOne({
-    languageCode: language
+    code: language
   });
 
   if (!foundLanguage) {
     logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
   } else {
-    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
   logger.info(loggerPrefix, 'Updating article ID:', articleToUpdate.id);

@@ -4,8 +4,8 @@ import { Voice } from './voice';
 import { Article } from './article';
 
 @Entity()
-@Unique(['name', 'languageCode']) // Only one unique languageCode and name combination
-@Index(['languageCode', 'isActive'])
+@Unique(['name', 'code']) // Only one unique code and name combination
+@Index(['code', 'isActive'])
 export class Language {
 
   @PrimaryGeneratedColumn('uuid')
@@ -19,7 +19,7 @@ export class Language {
   nativeName: string; // French => Français
 
   @Column()
-  languageCode: string; // fr, en, de, nl...
+  code: string; // fr, en, de, nl...
 
   @Column({ default: false })
   isActive: boolean; // to allow languages to be displayed or not
