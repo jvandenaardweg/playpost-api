@@ -3,7 +3,7 @@ import * as Integrations from '@sentry/integrations';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  environment: 'production',
+  environment: process.env.NODE_ENV,
   release: process.env.HEROKU_SLUG_COMMIT,
   integrations: [
     new Integrations.RewriteFrames({
