@@ -16,7 +16,7 @@
     "dev:worker": "ts-node-dev --respawn --transpileOnly src/worker.ts --ignore-watch src/index.ts &",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
-    "typeorm:seed": "ts-node src/database/seeder.ts",
+    "typeorm:seed": "ts-node-dev src/database/seeder.ts",
     "build": "npm run build:typescript:production",
     "build:webpack": "webpack",
     "build:typescript": "npx tsc",
