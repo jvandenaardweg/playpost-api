@@ -43,9 +43,6 @@ export class Article extends BaseEntity {
   status: ArticleStatus;
 
   @Column({ nullable: true })
-  languageCode: string;
-
-  @Column({ nullable: true })
   sourceName: string;
 
   // Not required
