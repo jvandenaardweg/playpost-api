@@ -1119,8 +1119,6 @@ const updateIsHighestQualityForVoices = async () => {
   }
 }
 
-
-
 const seedInAppSubscriptions = async () => {
   const loggerPrefix = 'Seeding In-App Subscriptions:';
 
@@ -1211,14 +1209,18 @@ const createVoicePreviews = async () => {
     // Create some subscriptions our app uses
     await seedInAppSubscriptions();
 
+    // Run the updaters
+
     // Connect labels to our voices, to make sure they are the same on every environment
     await updateVoicesLabel();
 
     // Set default voices for languages
     await updateIsLanguageDefaultForVoices();
 
+    // Set isActive and isPremium for voices
     await updateIsActiveIsPremiumForVoices();
 
+    // Set isHighestQuality for voices
     await updateIsHighestQualityForVoices();
 
     // Creates voice previews for the active voices inside a language
