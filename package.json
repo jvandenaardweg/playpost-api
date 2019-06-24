@@ -17,7 +17,7 @@
     "dev:worker": "ts-node-dev --respawn --transpileOnly src/worker.ts --ignore-watch src/index.ts &",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
-    "database:sync": "ts-node-dev src/sync-and-seed.ts",
+    "database:sync": "ts-node-dev src/database-sync.ts",
     "build": "npm run build:typescript:production",
     "heroku-postbuild": "npm run build",
     "build:webpack": "webpack",
