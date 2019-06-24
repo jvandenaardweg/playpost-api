@@ -1221,6 +1221,8 @@ const createVoicePreviews = async () => {
 
     await updateIsHighestQualityForVoices();
 
+    // Creates voice previews for the active voices inside a language
+    // Important: uses the Text To Speech API's
     await createVoicePreviews();
 
   } catch (err) {
