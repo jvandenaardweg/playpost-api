@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, AfterRemove, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, AfterRemove, BeforeInsert } from 'typeorm';
 import { IsEmail, IsUUID } from 'class-validator';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';

@@ -202,7 +202,7 @@ export const updatePasswordAppRedirect = async (req: Request, res: Response) => 
     resetPasswordToken: string;
   }
 
-  const loggerPrefix = 'Update Password Redirect: ';
+  // const loggerPrefix = 'Update Password Redirect: ';
 
   const { resetPasswordToken } = req.query as RequestQuery;
 
