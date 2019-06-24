@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { getRepository, getConnection } from 'typeorm';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
+import * as cacheKeys from '../cache/keys';
 import { routeIsProtected } from './auth';
 import joi from 'joi';
 
@@ -67,6 +68,10 @@ export const deleteUser = [
     if (!userToDelete) return res.status(400).json({ message: MESSAGE_USER_NOT_FOUND });
 
     await userRepository.remove(userToDelete);
+
+    // Remove the JWT verification cache for faster API responses
+    const cache = await getConnection('default').queryResultCache;
+    if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
 
     return res.json({ message: MESSAGE_USER_DELETED });
   }

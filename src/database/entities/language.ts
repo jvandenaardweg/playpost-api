@@ -2,11 +2,10 @@ import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateCol
 import { IsUUID, IsDate } from 'class-validator';
 import { Voice } from './voice';
 import { Article } from './article';
-import { Audiofile } from './audiofile';
 
 @Entity()
-@Unique(['name', 'languageCode']) // Only one unique languageCode and name combination
-@Index(['languageCode', 'isActive'])
+@Unique(['name', 'code']) // Only one unique code and name combination
+@Index(['code', 'isActive'])
 export class Language {
 
   @PrimaryGeneratedColumn('uuid')
@@ -20,7 +19,7 @@ export class Language {
   nativeName: string; // French => Français
 
   @Column()
-  languageCode: string; // fr, en, de, nl...
+  code: string; // fr, en, de, nl...
 
   @Column({ default: false })
   isActive: boolean; // to allow languages to be displayed or not
@@ -30,9 +29,6 @@ export class Language {
 
   @OneToMany(type => Article, article => article.language, { onDelete: 'NO ACTION' }) // On delete of a Article, do nothing, so don't delete the language
   articles: Article[];
-
-  @OneToMany(type => Audiofile, audiofile => audiofile.language, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, do nothing, so don't delete the language
-  audiofiles: Audiofile[];
 
   @CreateDateColumn()
   @IsDate()

@@ -51,8 +51,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const loggerPrefix = 'Create Audiofile:';
 
-  let article: Article | undefined;
-
   const userId = req.user.id;
   const { articleId } = req.params as RequestParams;
   const { mimeType } = req.body as RequestBody;
@@ -84,8 +82,11 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const userIsSubscribed = await userRepository.findIsSubscribed(userId);
 
-  // Fetch the article (with SSML)
-  article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+  logger.info(loggerPrefix, `User "${userId}" is subscribed?`, userIsSubscribed);
+
+  // Fetch the article (without SSML)
+  // The article is without SSML because we don't want to send the SSML to our users
+  const article = await articleRepository.findOne(articleId);
 
   // Check if article exists
   if (!article) {
@@ -98,6 +99,10 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
+
+  // Seperately get the SSML, as this is hidden from the article entity by default
+  const articleWithSsml = await articleRepository.findOne(articleId, { select: ['id', 'ssml'] });
+  article.ssml = (articleWithSsml && articleWithSsml.ssml) ? articleWithSsml.ssml : '';
 
   // Check if article status is correct to create audiofiles for
   if (article.status !== ArticleStatus.FINISHED) {
@@ -115,7 +120,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // If the readingTime is greater then 30 minutes (1800 seconds)
   // We just shown an error we cannot create audio for this
-  if (article.readingTime > readingTimeLimitAllAccountsInSeconds) {
+  if (article.readingTime && article.readingTime > readingTimeLimitAllAccountsInSeconds) {
     const message = `The article is longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
 
     Sentry.withScope((scope) => {
@@ -131,7 +136,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // If the user is not subscribed, and the readingtime is greater then our free limit
   // Show a message to the user he needs to upgrade
-  if (!userIsSubscribed && article.readingTime > readingTimeLimitFreeAccountsInSeconds) {
+  if (!userIsSubscribed && article.readingTime && article.readingTime > readingTimeLimitFreeAccountsInSeconds) {
     const message = `This article is more than ${readingTimeLimitFreeAccountsInSeconds / 60} minutes to listen to, which is the limit for free accounts. To listen to long articles, please upgrade to our Premium subscription plan.`;
 
     Sentry.withScope((scope) => {
@@ -147,7 +152,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check if the language is supported
   const articleLanguage = article && article.language;
-  const articleLanguageCode = articleLanguage && articleLanguage.languageCode;
+  const articleLanguageCode = articleLanguage && articleLanguage.code;
+
+  if (!articleLanguage) {
+    const errorMessage = 'Did not receive any language information from the article.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
 
   // Check if the article has any SSML
   if (!article.ssml) {
@@ -164,7 +175,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   }
 
   // For now, only allow one audiofile
-  if (article.audiofiles.length) {
+  if (article.audiofiles && article.audiofiles.length) {
     const message = 'Audiofile for this article already exists. In this version we only allow one audio per article.';
 
     Sentry.withScope((scope) => {
@@ -273,9 +284,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       },
       voice: {
         id: voice.id
-      },
-      language: {
-        id: articleLanguage.id
       }
     });
 

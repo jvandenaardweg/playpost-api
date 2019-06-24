@@ -20,7 +20,6 @@ export const findAllPlaylistItems = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
 
   const playlistItems = await playlistItemRepository.find({
-    relations: ['user'],
     where: {
       user: {
         id: userId
@@ -36,7 +35,6 @@ export const findAllFavoritedItems = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
 
   const favoritedPlaylistItems = await playlistItemRepository.find({
-    relations: ['user'],
     where: {
       user: {
         id: userId
@@ -135,7 +133,6 @@ export const findAllArchivedItems = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
 
   const archivedPlaylistItems = await playlistItemRepository.find({
-    relations: ['user'],
     where: {
       user: {
         id: userId
@@ -181,7 +178,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   });
 
   // If there's an article, check if that one already exists in the user's playlist
-  if (article) {
+  if (article && article.id) {
     articleId = article.id;
 
     const playlistItem = await playlistItemRepository.findOne({

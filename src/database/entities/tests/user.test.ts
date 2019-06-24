@@ -14,13 +14,13 @@ describe('user entity', () => {
   //   });
   // });
 
-  describe('generateJWTToken()', () => {
+  describe('generateJWTAccessToken()', () => {
 
     it('Should give a JWT token.', () => {
-      const token = User.generateJWTToken('1');
+      const token = User.generateJWTAccessToken('1', 'test@playpost.app');
 
       expect(typeof token).toBe('string');
-      expect(token.length).toBe(117);
+      expect(token.length).toBe(155);
     });
   });
 

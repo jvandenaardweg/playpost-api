@@ -81,7 +81,9 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
-  const response: PostplayCrawler.Response = await nodeFetch(`https://crawler.playpost.app/v1/crawler?url=${articleUrl}`).then(response => response.json());
+  if (!process.env.CRAWLER_URL) throw new Error('Environment variable "CRAWLER_URL" not set.');
+
+  const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
 
   // Fast crawler has troubles with this URL:
   // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
@@ -166,13 +168,19 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) {
+  if (!article || !article.id) {
     const errorMessage = 'Cannot sync article, because the article is not found.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
   const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
+
+  if (!articleUrl) {
+    const errorMessage = 'Cannot sync article, because it has no URLs.';
+    logger.error(loggerPrefix, errorMessage);
+    return res.status(400).json({ message: errorMessage });
+  }
 
   const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
 
@@ -195,13 +203,13 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   // Find the language in our database, so can can connect it to the article
   const foundLanguage = await languageRepository.findOne({
-    languageCode: language
+    code: language
   });
 
   if (!foundLanguage) {
     logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
   } else {
-    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
   logger.info(loggerPrefix, 'Updating article ID:', article.id);
@@ -232,7 +240,7 @@ export const updateArticleStatus = async (articleId: string, status: ArticleStat
   const articleRepository = getRepository(Article);
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) {
+  if (!article || !article.id) {
     logger.warn(`Cannot update article status of article ID "${articleId}", because the article is not found.`);
     return;
   }
@@ -296,13 +304,13 @@ export const updateArticleToFull = async (articleId: string) => {
 
   // Find the language in our database, so can can connect it to the article
   const foundLanguage = await languageRepository.findOne({
-    languageCode: language
+    code: language
   });
 
   if (!foundLanguage) {
     logger.warn(loggerPrefix, 'No language found for this article using language from crawler:', language);
   } else {
-    logger.info(loggerPrefix, 'Language found:', foundLanguage.languageCode);
+    logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
   logger.info(loggerPrefix, 'Updating article ID:', articleToUpdate.id);

@@ -200,7 +200,6 @@ const synthesizeUsingAWS = async (
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
-  audiofile.languageCode = synthesizerOptions.LanguageCode || 'en-US'; // TODO: fix this ugly fallback
 
   logger.info(loggerPrefix, 'Finished! Returning the created audiofile.');
 
@@ -274,7 +273,6 @@ const synthesizeUsingGoogle = async (
   audiofile.bucket = uploadResponse[0].bucket.name;
   audiofile.filename = uploadResponse[0].name;
   audiofile.length = audiofileLength;
-  audiofile.languageCode = synthesizerOptions.voice.languageCode;
 
   return audiofile;
 };

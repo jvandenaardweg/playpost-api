@@ -43,9 +43,6 @@ export class Article extends BaseEntity {
   status: ArticleStatus;
 
   @Column({ nullable: true })
-  languageCode: string;
-
-  @Column({ nullable: true })
   sourceName: string;
 
   // Not required
@@ -65,17 +62,16 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   isPublic: boolean;
 
-  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
+  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the documentHtml to the user. If you need it, use in your find query { select: ['documentHtml'] }
   documentHtml: string;
 
-  @Column('text', { nullable: true, select: true }) // Be aware: we don't send the HTML to the user. If you need it, use in your find query { select: ['html'] }
+  @Column('text', { nullable: true })
   html: string;
 
-  @Column('text', { nullable: true, select: true }) // Awalys send ssml for now, fixes a big in audiofile creation
-  // Be aware: we don't send the SSML to the user. If you need it, use in your find query { select: ['ssml'] }
+  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the ssml to the user. If you need it, use in your find query { select: ['ssml'] }
   ssml: string;
 
-  @Column('text', { nullable: true, select: true })
+  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['text'] }
   text: string;
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
@@ -97,10 +93,18 @@ export class Article extends BaseEntity {
   updatedAt: Date;
 
   @AfterInsert()
-  afterInsert() {
-    // Should get the full article details, like ssml, text and html
-    logger.info('Database Entity (Article):', '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
+  async afterInsert() {
+    const loggerPrefix = 'Database Entity (Article):';
 
-    ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+    try {
+      // Should get the full article details, like ssml, text and html
+      logger.info(loggerPrefix, '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
+
+      await ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+    } catch (err) {
+      const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
+      logger.error(loggerPrefix, errorMessage);
+    }
+
   }
 }

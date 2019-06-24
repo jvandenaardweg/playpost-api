@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateCol
 import { IsEmail, IsUUID } from 'class-validator';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
+import crypto from 'crypto';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
@@ -102,10 +103,20 @@ export class User {
   /**
    * Creates and reurns a JWT token using a user ID and e-mail address.
    */
-  static generateJWTToken = (id: string): string => {
+  static generateJWTAccessToken = (id: string, email: string): string => {
     if (!JWT_SECRET) throw new Error('Please set the JWT_SECRET environment variable.');
-    return jsonwebtoken.sign({ id }, JWT_SECRET);
+    return jsonwebtoken.sign({ id, email }, JWT_SECRET);
   }
+
+  static generateRandomRefreshToken = (): string => {
+    return crypto.randomBytes(40).toString('hex');
+  }
+
+  static verifyJWTAccessToken = (accessToken: string): object | string => {
+    if (!JWT_SECRET) throw new Error('Please set the JWT_SECRET environment variable.');
+    return jsonwebtoken.verify(accessToken, JWT_SECRET);
+  }
+
 
   /**
   * Compares a plain text password with a hashed one. Returns true if they match.

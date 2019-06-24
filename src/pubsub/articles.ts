@@ -125,6 +125,6 @@ export async function publishCrawlFullArticle(articleId: string, articleUrl: str
     return result;
   } catch (err) {
     Sentry.captureException(err);
-    return err;
+    throw err;
   }
 }
