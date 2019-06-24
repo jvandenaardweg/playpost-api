@@ -12,7 +12,7 @@ import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
 
 import { googleSSMLPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
 import { awsSSMLPartsToSpeech, AWSSynthesizerOptions } from './aws';
-import { Polly } from 'aws-sdk';
+import AWS, { Polly } from 'aws-sdk';
 import { logger } from '../utils';
 
 export type SynthesizerType = 'article' | 'preview';
@@ -26,6 +26,8 @@ export enum SynthesizerEncoding {
   AWS_PCM = 'pcm',
   AWS_OGG_VORBIS = 'ogg_vorbis'
 }
+
+AWS.config.update({ region: process.env.AWS_REGION });
 
 /**
  * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
