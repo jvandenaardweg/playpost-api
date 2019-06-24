@@ -40,29 +40,30 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
   const voices = await getAllAWSVoices();
 
   for (const voice of voices) {
+    const voiceId = voice.Id;
     const voiceName = voice.Name;
     const voiceLanguageCode = voice.LanguageCode;
     const voiceGender = (voice.Gender === 'Male') ? Gender.MALE : Gender.FEMALE;
 
-    const foundVoice = await voiceRepository.findOne({ name: voiceName });
+    const foundVoice = await voiceRepository.findOne({ name: voiceId });
 
     if (foundVoice) {
-      logger.info(loggerPrefix, `AWS Polly: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+      logger.info(loggerPrefix, `AWS Polly: Voice ${voiceId} already present. We don't need to add it (again) to the database.`);
     } else {
       if (!voiceLanguageCode) {
-        logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceName}. We don't add it to the database.`);
+        logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
       } else {
         const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
 
         if (!countryCode) {
-          logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
+          logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`);
         } else {
 
           try {
             const voiceToCreate = await voiceRepository.create({
               countryCode,
               languageCode: voiceLanguageCode,
-              name: voiceName,
+              name: voiceId,
               label: voiceName,
               gender: voiceGender,
               synthesizer: Synthesizer.AWS

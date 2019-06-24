@@ -17,7 +17,6 @@ Sentry.configureScope((scope) => {
 
 logger.info('Worker init: Sentry configured.');
 
-
 logger.info('Worker init: Connecting with database...');
 
 // Listen for the message to fetch the full article.

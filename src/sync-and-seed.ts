@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { createConnection, getRepository, IsNull } from 'typeorm';
+import { createConnection, getRepository, IsNull, getCustomRepository, In } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
 import { Language } from './database/entities/language';
@@ -16,6 +16,7 @@ import { Sentry } from './error-reporter';
 
 
 import voicesData from './database/seeds/voices';
+import { VoiceRepository } from './database/repositories/voice';
 
 const seedLanguages = async () => {
   const loggerPrefix = 'Seeding Languages:';
@@ -1150,6 +1151,46 @@ const seedInAppSubscriptions = async () => {
   }
 };
 
+const createVoicePreviews = async () => {
+  const loggerPrefix = 'Create Voice Previews:';
+  const voiceRepository = getCustomRepository(VoiceRepository);
+  const languageRepository = getRepository(Language);
+
+  try {
+    // Only create voice previews for active languages
+    const supportedLanguages = await languageRepository.find({
+      where: {
+        isActive: true
+      }
+    });
+
+    const languageIds = supportedLanguages.map(language => language.id);
+
+    // Find the voices without an exampleAudioUrl within our active languages
+    const voicesWithoutPreview = await voiceRepository.find({
+      where: {
+        exampleAudioUrl: IsNull(),
+        language: {
+          id: In(languageIds)
+        }
+      }
+    })
+
+    logger.info(loggerPrefix, `Creating voice previews for ${voicesWithoutPreview.length} voices...`);
+
+    for (const voice of voicesWithoutPreview) {
+      const updatedVoice = await voiceRepository.createVoicePreview(voice.id);
+      logger.info(loggerPrefix, `Created voice preview for: ${updatedVoice.name}`)
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
+  }
+
+}
+
 /**
  * This file ensures we have the same basic data on every environment we use
  */
@@ -1180,8 +1221,11 @@ const seedInAppSubscriptions = async () => {
 
     await updateIsHighestQualityForVoices();
 
+    await createVoicePreviews();
+
   } catch (err) {
-    logger.error('Error during run', err);
+    logger.error('Error during run');
+    logger.error(err);
     Sentry.captureException(err);
   } finally {
     process.exit();
