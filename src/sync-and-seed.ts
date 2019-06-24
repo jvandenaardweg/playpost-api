@@ -1089,6 +1089,37 @@ const updateIsActiveIsPremiumForVoices = async () => {
   }
 }
 
+const updateIsHighestQualityForVoices = async () => {
+  const loggerPrefix = 'Update isHighestQuality Voices:';
+  const voiceRepository = getRepository(Voice);
+
+  try {
+
+    const voices = await voiceRepository.find();
+
+    // Do the updates
+    for (const voice of voices) {
+
+      if (voice.synthesizer !== Synthesizer.GOOGLE) {
+        logger.info(loggerPrefix, `"${voice.name}" is not a Google voice, cannot set isHighestQuality to true.`);
+      } else {
+        const isHighestQuality = (voice.name.toLowerCase().includes('wavenet')) ? true : false;
+        await voiceRepository.update(voice.id, { isHighestQuality });
+
+        logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
+      }
+
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
+  }
+}
+
+
+
 const seedInAppSubscriptions = async () => {
   const loggerPrefix = 'Seeding In-App Subscriptions:';
 
@@ -1146,6 +1177,8 @@ const seedInAppSubscriptions = async () => {
     await updateIsLanguageDefaultForVoices();
 
     await updateIsActiveIsPremiumForVoices();
+
+    await updateIsHighestQualityForVoices();
 
   } catch (err) {
     logger.error('Error during run', err);
