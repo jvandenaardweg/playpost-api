@@ -150,6 +150,13 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
   const { originalTransactionId, user: { id: userId } } = userInAppSubscription;
 
   try {
+
+    // If we receive a sandbox subscription on the prod environment, just error
+    // This should only happen for beta users
+    if (userInAppSubscription && userInAppSubscription.environment === InAppSubscriptionEnvironment.SANDBOX && process.env.NODE_ENV === 'production') {
+      throw new Error('The previously purchased subscription is only active on the Sandbox environment. You should use your own Apple ID when purchasing on the Production environment.');
+    }
+
     const existingUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
       where: {
         originalTransactionId
