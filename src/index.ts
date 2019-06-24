@@ -43,7 +43,7 @@ import * as languagesController from './controllers/languages';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 
 import { connectionOptions } from './database/connection-options';
-import { expressRateLimitRedisStore } from './cache';
+import { expressRateLimitRedisStore, expressBruteRedisStore } from './cache';
 import { logger } from './utils';
 
 logger.info('App init: Setting up...');
@@ -71,15 +71,18 @@ if (!process.env.MAILCHIMP_API_KEY) throw new Error('Required environment variab
 if (!process.env.AWS_USER) throw new Error('Required environment variable "AWS_USER" not set.');
 if (!process.env.AWS_ACCESS_KEY_ID) throw new Error('Required environment variable "AWS_ACCESS_KEY_ID" not set.');
 if (!process.env.AWS_SECRET_ACCESS_KEY) throw new Error('Required environment variable "AWS_SECRET_ACCESS_KEY" not set.');
+if (!process.env.AWS_REGION) throw new Error('Required environment variable "AWS_REGION" not set.');
 
 const PORT = process.env.PORT || 3000;
 const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
 
-const bruteStore = new ExpressBrute.MemoryStore();
-const bruteforce = new ExpressBrute(bruteStore, {
-  freeRetries: 3,
+// const bruteStore = new ExpressBrute.MemoryStore();
+const bruteforce = new ExpressBrute(expressBruteRedisStore, {
+  freeRetries: (process.env.NODE_ENV === 'production') ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
+  minWait: (1000 * 60 * 5), // 5 minutes
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
-    return res.status(400).json({ message: `Hold your horses! Too many login requests. Please try again later at: ${nextValidRequestDate}` });
+    logger.warn('Express Brute: ', 'Prevented after 5 tries.');
+    return res.status(400).json({ message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}` });
   },
   handleStoreError: (err: any) => {
     logger.error('Express Brute Store error: ', err);
@@ -92,7 +95,7 @@ const rateLimiter = new ExpressRateLimit({
   max: (process.env.NODE_ENV === 'production') ? 60 : 9999, // 60 requests allowed per minute, 1 per second
   handler: (req, res, next) => {
     // Send JSON so we can read the message
-    return res.status(429).json({ message:'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.' });
+    return res.status(429).json({ message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.' });
   }
 });
 
@@ -144,14 +147,16 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // Public
   // Use expressBrute to increase the delay between each requests
   app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
-  app.post('/v1/auth', authController.getAuthenticationToken);
-  app.post('/v1/users', usersController.createUser);
+  app.post('/v1/auth/reset-password', bruteforce.prevent, authController.getResetPasswordToken);
+  app.post('/v1/auth/update-password', bruteforce.prevent, authController.updatePasswordUsingToken);
+  app.get('/v1/auth/update-password/app-redirect', authController.updatePasswordAppRedirect);
+  app.post('/v1/users', bruteforce.prevent, usersController.createUser);
 
   // Protected
 
   // v1/users
-  app.get('/v1/users', usersController.findAllUsers); // Admin only
-  app.delete('/v1/users/:userId', usersController.deleteUser); // Admin only
+  app.get('/v1/users', IS_PROTECTED, usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUser); // Admin only
 
   // /v1/me
   app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
@@ -198,7 +203,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
   app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
-  app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job
+  app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', (req, res) => {

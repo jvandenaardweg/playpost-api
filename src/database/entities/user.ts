@@ -29,8 +29,17 @@ export class User {
   @Column({ nullable: false, select: false })
   password: string;
 
+  @Column('varchar', { length: 6, nullable: true, select: false })
+  resetPasswordToken: string;
+
   @Column({ nullable: true })
   authenticatedAt: Date;
+
+  @Column({ nullable: true, select: false })
+  requestResetPasswordAt: Date;
+
+  @Column({ nullable: true, select: false })
+  resetPasswordAt: Date;
 
   @Column({ nullable: true })
   activatedAt: Date;
@@ -58,7 +67,7 @@ export class User {
 
   @BeforeInsert()
   lowercaseEmail() {
-    this.email =  this.email.toLowerCase();
+    this.email = this.email.toLowerCase();
   }
 
   @AfterInsert()
@@ -110,6 +119,11 @@ export class User {
 
   static generateRandomRefreshToken = (): string => {
     return crypto.randomBytes(40).toString('hex');
+  }
+
+  static generateRandomResetPasswordToken = (): string => {
+    const length = 6;
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
   }
 
   static verifyJWTAccessToken = (accessToken: string): object | string => {

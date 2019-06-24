@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { Polly } from 'aws-sdk';
+import AWS, { Polly } from 'aws-sdk';
 import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
 import LocaleCode from 'locale-code';
@@ -10,6 +10,8 @@ import { Voice, Gender, Synthesizer } from '../database/entities/voice';
 import { SynthesizerType } from './index';
 import { logger } from '../utils/logger';
 import { Sentry } from '../error-reporter';
+
+AWS.config.update({ region: process.env.AWS_REGION });
 
 // Create an Polly client
 const client = new Polly({
