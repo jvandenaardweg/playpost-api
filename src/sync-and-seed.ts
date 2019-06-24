@@ -14,6 +14,9 @@ import { addAllAWSVoices } from './synthesizers/aws';
 import { logger } from './utils/logger';
 import { Sentry } from './error-reporter';
 
+
+import voicesData from './database/seeds/voices';
+
 const seedLanguages = async () => {
   const loggerPrefix = 'Seeding Languages:';
   const languageRepository = getRepository(Language);
@@ -1055,6 +1058,37 @@ const updateIsLanguageDefaultForVoices = async () => {
   }
 }
 
+const updateIsActiveIsPremiumForVoices = async () => {
+  const loggerPrefix = 'Update isActive and isPremium Voices:';
+  const voiceRepository = getRepository(Voice);
+
+  try {
+    // Do the updates
+    for (const voice of voicesData) {
+      logger.info(loggerPrefix, `Update "${voice.name}" to set isActive isPremium.`);
+
+      const updatedColumns = {
+        isActive: voice.isActive,
+        isPremium: voice.isPremium
+      };
+
+      await voiceRepository.update(
+        {
+          name: voice.name
+        },
+        updatedColumns
+      );
+
+      logger.info(loggerPrefix, `Updated "${voice.name}" with: ${JSON.stringify(updatedColumns)}`);
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
+  }
+}
+
 const seedInAppSubscriptions = async () => {
   const loggerPrefix = 'Seeding In-App Subscriptions:';
 
@@ -1111,7 +1145,10 @@ const seedInAppSubscriptions = async () => {
     // Set default voices for languages
     await updateIsLanguageDefaultForVoices();
 
+    await updateIsActiveIsPremiumForVoices();
+
   } catch (err) {
+    logger.error('Error during run', err);
     Sentry.captureException(err);
   } finally {
     process.exit();
