@@ -39,7 +39,7 @@ export class InAppSubscription {
   @Column({ nullable: false }) // "Premium features"
   description: string;
 
-  @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer() }) // 3.99
+  @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer() }) // 4.99
   price: number;
 
   @Column({ type: 'enum', enum: InAppSubscriptionCurrency, nullable: false })
