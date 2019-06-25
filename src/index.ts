@@ -149,7 +149,6 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
   app.post('/v1/auth/reset-password', bruteforce.prevent, authController.getResetPasswordToken);
   app.post('/v1/auth/update-password', bruteforce.prevent, authController.updatePasswordUsingToken);
-  app.get('/v1/auth/update-password/app-redirect', authController.updatePasswordAppRedirect);
   app.post('/v1/users', bruteforce.prevent, usersController.createUser);
 
   // Protected

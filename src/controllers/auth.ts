@@ -101,6 +101,14 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
 
   const { email } = req.body as RequestBody;
 
+  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    logger.error(loggerPrefix, messageDetails);
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const user = await userRepository.findOne({ email }, { select: ['id', 'email'] });
 
   if (!user) {
@@ -169,10 +177,18 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
 
   const { resetPasswordToken, password } = req.body as RequestBody;
 
+  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('resetPasswordToken', 'password'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    logger.error(loggerPrefix, messageDetails);
+    return res.status(400).json({ message: messageDetails });
+  }
+
   const user = await userRepository.findOne({ resetPasswordToken }, { select: ['id', 'resetPasswordToken'] });
 
   if (!user) {
-    const errorMessage = `The user with the password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
+    const errorMessage = `Password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
@@ -188,26 +204,4 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   });
 
   return res.json({ message: 'Your password is updated. You can now login again.' });
-};
-
-/**
- * Method to redirect to user to the App with the resetPasswordToken prefilled
- *
- * @param req
- * @param res
- */
-export const updatePasswordAppRedirect = async (req: Request, res: Response) => {
-  interface RequestQuery {
-    resetPasswordToken: string;
-  }
-
-  // const loggerPrefix = 'Update Password Redirect: ';
-
-  const { resetPasswordToken } = req.query as RequestQuery;
-
-  if (!resetPasswordToken) throw new Error('No resetPasswordToken given.');
-
-  // Temp redirect
-  // Don't perm redirect, because a 302 is not cached. So we can change it later.
-  return res.redirect(302, `playpost://login/update-password/${resetPasswordToken}`);
 };
