@@ -131,7 +131,7 @@ const handleInitialBuySubscriptionEvent = async (notification: AppleSubscription
 
   // When we receive the initial buy event, we just need to make sure the transaction is in our database
   // Normally, this is done when the user purchases a subscription. But in the event of an error, this event is a backup.
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
@@ -179,7 +179,7 @@ const handleCancelSubscriptionEvent = async (notification: AppleSubscriptionNoti
   //   'Successfully canceled the user his subscription in the database.'
   // );
 
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
@@ -195,7 +195,7 @@ const handleRenewalSubscriptionEvent = async (notification: AppleSubscriptionNot
     'Check Subscription Expiration Date to determine the next renewal date and time.'
   );
 
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
@@ -215,7 +215,7 @@ const handleInteractiveRenewalSubscriptionEvent = async (notification: AppleSubs
   // Or purchases a new subscription after the older one expired
   // We can ignore the event for now, as we handle this in the App upon receipt validation
 
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
@@ -231,7 +231,7 @@ const handleDidChangeRenewalPrefSubscriptionEvent = async (notification: AppleSu
     'Current active plan is not affected.'
   );
 
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
@@ -257,7 +257,7 @@ const handleDidChangeRenewalStatusSubscriptionEvent = async (notification: Apple
   // TODO: Update "renewedAt" date in database
   // TODO: test if this works (Purchase in app, then wait)
 
-  const latestReceipt = notification.latest_receipt;
+  const latestReceipt = notification.latest_receipt || notification.latest_expired_receipt;
   const originalTransactionId = notification.latest_receipt_info && notification.latest_receipt_info.original_transaction_id;
 
   await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);

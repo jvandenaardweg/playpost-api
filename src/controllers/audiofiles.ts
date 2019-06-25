@@ -174,9 +174,9 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  // For now, only allow one audiofile
-  if (article.audiofiles && article.audiofiles.length) {
-    const message = 'Audiofile for this article already exists. In this version we only allow one audio per article.';
+  // Only allow one audiofile for free accounts
+  if (!userIsSubscribed && article.audiofiles && article.audiofiles.length) {
+    const message = 'You are on a free account and an audiofile for this article already exists. Please use the available audiofile.';
 
     Sentry.withScope((scope) => {
       scope.setExtra('userId', userId);

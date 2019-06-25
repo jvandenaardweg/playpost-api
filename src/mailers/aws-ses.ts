@@ -3,7 +3,7 @@ import { logger } from '@sentry/utils';
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
-export const sendTransactionalEmail = async (toEmail: string, htmlBody: string) => {
+export const sendTransactionalEmail = async (toEmail: string, title: string, htmlBody: string) => {
   const loggerPrefix = 'AWS SES Send Mail:';
 
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html
@@ -21,12 +21,12 @@ export const sendTransactionalEmail = async (toEmail: string, htmlBody: string) 
         },
         Text: {
           Charset: 'UTF-8',
-          Data: 'TEXT_FORMAT_BODY'
+          Data: ''
         }
       },
       Subject: {
         Charset: 'UTF-8',
-        Data: 'Test email'
+        Data: title
       }
     },
     Source: 'noreply@playpost.app',
