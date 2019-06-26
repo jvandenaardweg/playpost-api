@@ -30,7 +30,7 @@ export const updateEmail = async (req: Request, res: Response) => {
   const userRepository = getRepository(User);
   const loggerPrefix = 'User Update E-mail: ';
 
-  const { error } = joi.validate({ email, userId }, userInputValidationSchema.requiredKeys('email', 'userId'));
+  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -74,7 +74,7 @@ export const updatePassword = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
 
-  const { error } = joi.validate({ password, userId }, userInputValidationSchema.requiredKeys('password', 'userId'));
+  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('password'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -97,13 +97,6 @@ export const updatePassword = async (req: Request, res: Response) => {
 export const deleteCurrentUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const userRepository = getRepository(User);
-
-  const { error } = joi.validate({ userId }, userInputValidationSchema.requiredKeys('userId'));
-
-  if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
-  }
 
   const user = await userRepository.findOne(userId);
 
@@ -133,7 +126,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
   const userRepository = getCustomRepository(UserRepository);
 
-  const { error } = joi.validate({ voiceId }, userVoiceSettingValidationSchema.requiredKeys('voiceId'));
+  const { error } = joi.validate(req.body, userVoiceSettingValidationSchema.requiredKeys('voiceId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

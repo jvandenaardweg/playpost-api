@@ -91,7 +91,7 @@ export const deleteVoicePreview = async (req: Request, res: Response) => {
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
 
-  const { error } = joi.validate({ voiceId }, voiceInputValidationSchema.requiredKeys('voiceId'));
+  const { error } = joi.validate(req.params, voiceInputValidationSchema.requiredKeys('voiceId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

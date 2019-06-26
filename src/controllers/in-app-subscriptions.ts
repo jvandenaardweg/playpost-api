@@ -84,8 +84,14 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
     return res.json({ message: 'Updated!' });
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'An unknown error happened while syncing expired subscriptions.';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
+
     logger.error(loggerPrefix, errorMessage);
-    Sentry.captureException(err);
+
     return res.status(400).json({ message: errorMessage });
   }
 };
@@ -108,7 +114,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   const { id: userId } = req.user;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
-  const { error } = joi.validate({ receipt, inAppSubscriptionId }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'inAppSubscriptionId'));
+  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'inAppSubscriptionId'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -136,10 +142,16 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     return res.json({ ...userInAppSubscriptionResult });
   } catch (err) {
-    const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
-    logger.error(loggerPrefix, errorMessage);
-    Sentry.captureException(err);
-    return res.status(400).json({ message: errorMessage });
+    const message = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
+
+    logger.error(loggerPrefix, message);
+
+    return res.status(400).json({ message });
   }
 };
 
@@ -211,10 +223,15 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     return userInAppSubscriptionResult;
   } catch (err) {
-    const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
-    logger.error(loggerPrefix, errorMessage);
-    Sentry.captureException(err);
-    throw new Error(errorMessage);
+    const message = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+    logger.error(loggerPrefix, message);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
+
+    throw err;
   }
 };
 
@@ -257,6 +274,11 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
         errorMessage = errorObject.message;
       }
     }
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
 
     logger.error(loggerPrefix, errorMessage, err);
     throw new Error(errorMessage);
@@ -354,7 +376,10 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
-    Sentry.captureException(err);
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
     throw new Error(errorMessage);
   }
 };

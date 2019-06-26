@@ -47,8 +47,10 @@ const handleMessage = async (message: Message) => {
 
   const reDeliverDelayInSeconds = 60;
 
+  let notification = {} as AppleSubscriptionNotificationRequestBody;
+
   try {
-    const notification: AppleSubscriptionNotificationRequestBody = JSON.parse(message.data.toString());
+    notification = JSON.parse(message.data.toString());
 
     logger.info(loggerPrefix, 'Received notification:', notification.notification_type);
 
@@ -59,20 +61,24 @@ const handleMessage = async (message: Message) => {
       return message.ack();
     }
 
-
     await handleSubscriptionStatusEvent(notification, message, reDeliverDelayInSeconds, loggerPrefix);
 
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while processing this notification.';
 
+    Sentry.withScope((scope) => {
+      scope.setExtra('message', JSON.parse(message.data.toString()));
+      scope.setExtra('notification', notification);
+      Sentry.captureException(err);
+    });
+
     logger.error(loggerPrefix, errorMessage);
-    Sentry.captureException(err);
 
     logger.info(loggerPrefix, 'Retry...');
     message.nack(reDeliverDelayInSeconds); // re-deliver, so we can retry.
     // TODO: Could possibly result in messages being nack'd all the time, to infinity. Find a way to resolve that later.
   }
-}
+};
 
 /**
  * More about the types of notifications, here:
@@ -90,8 +96,6 @@ const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNoti
     loggerPrefix,
     notification
   );
-
-  Sentry.setExtra('notification', notification);
 
   // If its not an event from our availableEvents, we ignore the message
   if (!availableEvents.includes(notification.notification_type)) {
@@ -180,6 +184,14 @@ const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNoti
     await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
     return message.ack(); // Remove the message from the queue
   } catch (err) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('notification', notification);
+      scope.setExtra('latestReceipt', latestReceipt);
+      scope.setExtra('originalTransactionId', originalTransactionId);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };

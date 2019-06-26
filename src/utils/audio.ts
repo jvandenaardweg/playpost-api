@@ -21,7 +21,13 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
     return durationInSeconds || 0;
   } catch (err) {
     logger.info('Audio Util (Duration): Failed to get audiofile duration.', audioFilePath);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('audioFilePath', audioFilePath);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };

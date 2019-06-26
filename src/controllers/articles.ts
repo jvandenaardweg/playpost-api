@@ -15,7 +15,7 @@ export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -37,7 +37,7 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -60,7 +60,7 @@ export const deleteById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ articleId }, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -81,72 +81,79 @@ export const deleteById = async (req: Request, res: Response) => {
 };
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
+  const loggerPrefix = 'Fetch Full Article Contents:';
   if (!process.env.CRAWLER_URL) throw new Error('Environment variable "CRAWLER_URL" not set.');
 
-  const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
+  try {
+    const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
 
-  // Fast crawler has troubles with this URL:
-  // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
-  // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
+    // Fast crawler has troubles with this URL:
+    // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
+    // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
 
-  let ssml: string | undefined = undefined;
-  let text: string | undefined = undefined;
-  let html: string | undefined = undefined;
-  let url: string = '';
-  let documentHtml: string | undefined = undefined;
-  let readingTime: number | undefined = undefined;
-  let imageUrl: string | undefined = undefined;
-  let authorName: string | undefined = undefined;
-  let description: string | undefined = undefined;
-  let canonicalUrl: string | undefined = undefined;
-  let language: string | undefined = undefined;
-  let title: string | undefined = undefined;
-  let siteName: string | undefined = undefined;
+    let ssml: string | undefined = undefined;
+    let text: string | undefined = undefined;
+    let html: string | undefined = undefined;
+    let url: string = '';
+    let documentHtml: string | undefined = undefined;
+    let readingTime: number | undefined = undefined;
+    let imageUrl: string | undefined = undefined;
+    let authorName: string | undefined = undefined;
+    let description: string | undefined = undefined;
+    let canonicalUrl: string | undefined = undefined;
+    let language: string | undefined = undefined;
+    let title: string | undefined = undefined;
+    let siteName: string | undefined = undefined;
 
-  if (response.ssml) ssml = response.ssml;
-  if (response.articleText) text = response.articleText;
-  if (response.articleHTML) html = response.articleHTML;
-  if (response.completeHTML) documentHtml = response.completeHTML;
-  if (response.readingTimeInSeconds) readingTime = response.readingTimeInSeconds;
-  if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
-  if (response.metadata && response.metadata.author) authorName = response.metadata.author;
-  if (response.description) description = response.description;
+    if (response.ssml) ssml = response.ssml;
+    if (response.articleText) text = response.articleText;
+    if (response.articleHTML) html = response.articleHTML;
+    if (response.completeHTML) documentHtml = response.completeHTML;
+    if (response.readingTimeInSeconds) readingTime = response.readingTimeInSeconds;
+    if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
+    if (response.metadata && response.metadata.author) authorName = response.metadata.author;
+    if (response.description) description = response.description;
 
-  if (response.canonicalUrl) {
-    canonicalUrl = response.canonicalUrl;
-  } else if (response.metadata.url) {
-    canonicalUrl = response.metadata.url || undefined;
+    if (response.canonicalUrl) {
+      canonicalUrl = response.canonicalUrl;
+    } else if (response.metadata.url) {
+      canonicalUrl = response.metadata.url || undefined;
+    }
+
+    if (response.language) language = response.language;
+    if (response.title) title = response.title;
+    if (response.url) url = response.url;
+
+    if (response.siteName) {
+      siteName = response.siteName;
+    } else if (response.hostName) {
+      siteName = response.hostName;
+    } else if (response.canonicalUrl) {
+      siteName = urlParse(response.canonicalUrl).hostname;
+    } else if (response.url) {
+      siteName = urlParse(response.url).hostname;
+    }
+
+    return  {
+      ssml,
+      text,
+      html,
+      readingTime,
+      imageUrl,
+      authorName,
+      description,
+      url,
+      canonicalUrl,
+      language,
+      title,
+      siteName,
+      documentHtml
+    };
+  } catch (err) {
+    const message = (err && err.message) ? err.message : 'Unknown error';
+    logger.error(loggerPrefix, message);
+    throw err;
   }
-
-  if (response.language) language = response.language;
-  if (response.title) title = response.title;
-  if (response.url) url = response.url;
-
-  if (response.siteName) {
-    siteName = response.siteName;
-  } else if (response.hostName) {
-    siteName = response.hostName;
-  } else if (response.canonicalUrl) {
-    siteName = urlParse(response.canonicalUrl).hostname;
-  } else if (response.url) {
-    siteName = urlParse(response.url).hostname;
-  }
-
-  return  {
-    ssml,
-    text,
-    html,
-    readingTime,
-    imageUrl,
-    authorName,
-    description,
-    url,
-    canonicalUrl,
-    language,
-    title,
-    siteName,
-    documentHtml
-  };
 };
 
 /**
@@ -159,7 +166,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
   const { articleId } = req.params;
 
-  const { error } = joi.validate({ articleId }, articleInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate(req.params, articleInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

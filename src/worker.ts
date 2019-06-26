@@ -33,6 +33,11 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
   } catch (err) {
     logger.error('Worker: Captured an uncaught error', err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('connection', connection);
+      Sentry.captureException(err);
+    });
   }
 });
