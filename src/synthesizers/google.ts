@@ -53,7 +53,12 @@ export const getAllGoogleVoices = async (loggerPrefix: string) => {
     return voices;
   } catch (err) {
     logger.error(loggerPrefix, 'Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };
@@ -98,7 +103,15 @@ export const addAllGoogleVoices = async (loggerPrefix: string) => {
           logger.info(loggerPrefix, 'Google Text To Speech: Added new voice to database: ', createdVoice.name);
         } catch (err) {
           logger.error(loggerPrefix, 'Google Text To Speech: Failed to create the voice in the database', err);
-          Sentry.captureException(err);
+
+          Sentry.withScope((scope) => {
+            scope.setLevel(Sentry.Severity.Critical);
+            scope.setExtra('voice', voice);
+            scope.setExtra('foundVoice', foundVoice);
+            scope.setExtra('countryCode', countryCode);
+            Sentry.captureException(err);
+          });
+
           throw err;
         }
       }

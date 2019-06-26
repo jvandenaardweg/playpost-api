@@ -83,8 +83,9 @@ export const listenCrawlFullArticle = () => {
 
       Sentry.withScope((scope) => {
         scope.setExtra('articleId', articleId);
+        scope.setExtra('message', JSON.parse(message.data.toString()));
         scope.setLevel(Sentry.Severity.Critical);
-        Sentry.captureMessage('Failed to fully fetch an article.');
+        Sentry.captureMessage('Failed to fully fetch an article on the worker.');
         Sentry.captureException(err);
       });
 
@@ -94,8 +95,6 @@ export const listenCrawlFullArticle = () => {
       message.nack(reDeliverDelayInSeconds); // re-deliver, so we can retry
       logger.error(loggerPrefix, 'Re-deliver message in seconds:', reDeliverDelayInSeconds);
 
-    } finally {
-      logger.info(loggerPrefix, 'Worker process ended: ', articleId);
     }
   };
 
@@ -124,7 +123,12 @@ export async function publishCrawlFullArticle(articleId: string, articleUrl: str
 
     return result;
   } catch (err) {
-    Sentry.captureException(err);
+    Sentry.withScope((scope) => {
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('articleUrl', articleUrl);
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
     throw err;
   }
 }

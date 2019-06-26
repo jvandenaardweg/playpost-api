@@ -104,6 +104,7 @@ export class Article extends BaseEntity {
     } catch (err) {
       const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
       logger.error(loggerPrefix, errorMessage);
+      throw err;
     }
 
   }

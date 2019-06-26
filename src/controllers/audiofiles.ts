@@ -19,7 +19,7 @@ import { UserRepository } from '../database/repositories/user';
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
-  const { error } = joi.validate({ audiofileId }, audiofileInputValidationSchema.requiredKeys('audiofileId'));
+  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('audiofileId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -64,16 +64,18 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const readingTimeLimitAllAccountsInSeconds = (30 * 60); // 30 minutes
   const readingTimeLimitFreeAccountsInSeconds = (5 * 60); // 5 minutes
 
-  const { error } = joi.validate({ articleId, userId, mimeType }, audiofileInputValidationSchema.requiredKeys('articleId', 'userId', 'mimeType'));
+  const { error } = joi.validate({ ...req.params, ...req.body }, audiofileInputValidationSchema.requiredKeys('articleId', 'mimeType'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      scope.setExtra('mimeType', mimeType);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -93,7 +95,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'Article does not exist, cannot create audio.';
 
     Sentry.withScope((scope) => {
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -109,9 +117,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = `The given article is not processed successfully. Current status: ${article.status}. We cannot generate audio for this article.`;
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -124,10 +136,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = `The article is longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes, which is our limit according to our Terms of Use. We do not create an audiofile for articles longer then ${readingTimeLimitAllAccountsInSeconds / 60} minutes. Please contact us at info@playpost.app if you want this limit to be removed for you.`;
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      scope.setExtra('readingTime', article && article.readingTime);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -140,10 +155,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = `This article is more than ${readingTimeLimitFreeAccountsInSeconds / 60} minutes to listen to, which is the limit for free accounts. To listen to long articles, please upgrade to our Premium subscription plan.`;
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      scope.setExtra('readingTime', article && article.readingTime);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -155,9 +173,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const articleLanguageCode = articleLanguage && articleLanguage.code;
 
   if (!articleLanguage) {
-    const errorMessage = 'Did not receive any language information from the article.';
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
+    const message = 'Did not receive any language information from the article.';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // Check if the article has any SSML
@@ -165,9 +194,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'Article has no SSML data. We cannot generate audio for this article.';
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -179,9 +212,13 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'You are on a free account and an audiofile for this article already exists. Please use the available audiofile.';
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -191,9 +228,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, 'Determining what voice to use for this article...');
 
   if (!articleLanguageCode) {
-    const errorMessage = `Could not determine the language using article language code: ${articleLanguageCode}`;
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
+    const message = `Could not determine the language using article language code: ${articleLanguageCode}`;
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // Check if the user has a voice set for this article's language
@@ -214,18 +262,42 @@ export const createAudiofile = async (req: Request, res: Response) => {
     // So he cannot use this Premium voice anymore
     if (!userIsSubscribed) {
       const languageName = (article.language) ? article.language.name : 'Unknown';
-      const errorMessage = `You do not have an active subscription to use this Premium voice. Please upgrade or choose a different voice for this ${languageName} article.`;
-      logger.error(loggerPrefix, errorMessage);
-      return res.status(400).json({ message: errorMessage });
+      const message = `You do not have an active subscription to use this Premium voice. Please upgrade or choose a different voice for this ${languageName} article.`;
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Error);
+        scope.setExtra('body', req.body);
+        scope.setExtra('params', req.params);
+        scope.setUser(req.user);
+        scope.setExtra('article', article);
+        scope.setExtra('userIsSubscribed', userIsSubscribed);
+        scope.setExtra('userVoiceSetting', userVoiceSetting);
+        Sentry.captureMessage(message);
+      });
+
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
   }
 
   // Check if the voice or language is active
   // We only create audiofiles for languages and voices that are active
   if (userVoiceSetting && (!userVoiceSetting.voice.isActive || !userVoiceSetting.language.isActive)) {
-    const errorMessage = 'The chosen voice or voice language is not active. We cannot create audio for this.';
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
+    const message = 'The chosen voice or voice language is not active. We cannot create audio for this.';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('userVoiceSetting', userVoiceSetting);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // If there's no voice set, get the default voice for this language
@@ -242,9 +314,22 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     if (!voice) {
-      const errorMessage = `Could not get the active default voice for language: ${articleLanguageCode}`;
-      logger.error(loggerPrefix, errorMessage);
-      return res.status(400).json({ message: errorMessage });
+      const message = `Could not get the active default voice for language: ${articleLanguageCode}`;
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Error);
+        scope.setExtra('body', req.body);
+        scope.setExtra('params', req.params);
+        scope.setUser(req.user);
+        scope.setExtra('article', article);
+        scope.setExtra('voice', voice);
+        scope.setExtra('userIsSubscribed', userIsSubscribed);
+        scope.setExtra('userVoiceSetting', userVoiceSetting);
+        Sentry.captureMessage(message);
+      });
+
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
     }
   }
 
@@ -252,10 +337,15 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const message = 'The given voice to be used to create the audio cannot be found.';
 
     Sentry.withScope((scope) => {
-      scope.setExtra('userId', userId);
-      scope.setExtra('articleId', articleId);
-      scope.setExtra('voiceId', voice && voice.id);
-      Sentry.captureMessage(message, Sentry.Severity.Info);
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('voice', voice);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('userVoiceSetting', userVoiceSetting);
+      Sentry.captureMessage(message);
     });
 
     logger.error(loggerPrefix, message);
@@ -311,7 +401,18 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.json(createdAudiofile);
   } catch (err) {
     const errorMessage = (err && err.message) ? err.message : 'An unknown error happenend while generating the audio for this article.';
-    Sentry.captureException(err)
+
+    Sentry.withScope((scope) => {
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('voice', voice);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('userVoiceSetting', userVoiceSetting);
+      Sentry.captureException(err);
+    });
+
     return res.status(500).json({ message: errorMessage });
   }
 };
@@ -338,7 +439,7 @@ export const findAudiofileById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
-  const { error } = joi.validate({ audiofileId }, audiofileInputValidationSchema.requiredKeys('audiofileId'));
+  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('audiofileId'));
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

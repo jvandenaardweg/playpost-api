@@ -76,7 +76,15 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
             logger.info(loggerPrefix, 'AWS Polly: Added new voice to database: ', createdVoice.name);
           } catch (err) {
             logger.error(loggerPrefix, 'AWS Polly: Failed to create the voice in the database', err);
-            Sentry.captureException(err);
+
+            Sentry.withScope((scope) => {
+              scope.setLevel(Sentry.Severity.Critical);
+              scope.setExtra('voice', voice);
+              scope.setExtra('foundVoice', foundVoice);
+              scope.setExtra('countryCode', countryCode);
+              Sentry.captureException(err);
+            });
+
             throw err;
           }
         }

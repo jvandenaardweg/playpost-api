@@ -55,11 +55,19 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate({ ...req.params }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    return res.status(400).json({ message });
   }
 
   const playlistItem = await playlistItemRepository.findOne({
@@ -74,7 +82,17 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
     }
   });
 
-  if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  if (!playlistItem) {
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
+    });
+
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  }
 
   if (favoritedAt === null) {
     // If it's already removed
@@ -95,11 +113,19 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    return res.status(400).json({ message });
   }
 
   const playlistItem = await playlistItemRepository.findOne({
@@ -114,7 +140,17 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
     },
   });
 
-  if (!playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  if (!playlistItem) {
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
+    });
+
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  }
 
   if (archivedAt === null) {
     // If it's already removed
@@ -148,6 +184,7 @@ export const findAllArchivedItems = async (req: Request, res: Response) => {
 };
 
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
+  const loggerPrefix = 'Create Playlist Item By Article URL:';
   const userId = req.user.id;
   const { articleUrl } = req.body;
 
@@ -156,11 +193,21 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ articleUrl }, playlistInputValidationSchema.requiredKeys('articleUrl'));
+  const { error } = joi.validate(req.body, playlistInputValidationSchema.requiredKeys('articleUrl'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // Normalize the URL
@@ -193,7 +240,20 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       }
     });
 
-    if (playlistItem) return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
+    if (playlistItem) {
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Error);
+        scope.setUser(req.user);
+        scope.setExtra('body', req.body);
+        scope.setExtra('params', req.params);
+        scope.setExtra('article', article);
+        scope.setExtra('playlistItem', playlistItem);
+        scope.setExtra('normalizedUrl', normalizedUrl);
+        Sentry.captureMessage(MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST);
+      });
+
+      return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
+    }
   } else {
 
     // If we do not have an article yet, create one in the database...
@@ -206,8 +266,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     const createdArticle = await articleRepository.save(articleToCreate);
-
-    if (!createdArticle) return res.status(400).json({ message: 'test' });
 
     articleId = createdArticle.id;
   }
@@ -241,11 +299,20 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const { order } = req.body;
 
-  const { error } = joi.validate({ articleId, order }, playlistInputValidationSchema.requiredKeys('articleId', 'order'));
+  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'order'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    return res.status(400).json({ message });
   }
 
   const newOrderNumber = parseInt(order, 10); // Convert string to integer, so we can compare
@@ -265,9 +332,33 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
     }
   });
 
-  if (!playlistItem) return res.status(400).json({ message:MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  if (!playlistItem) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      scope.setExtra('newOrderNumber', newOrderNumber);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
+    });
 
-  if (playlistItem.user.id !== userId) return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
+  }
+
+  if (playlistItem.user.id !== userId) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      scope.setExtra('newOrderNumber', newOrderNumber);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST);
+    });
+
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST });
+  }
 
   const currentOrderNumber = playlistItem.order;
 
@@ -291,7 +382,19 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   // Restrict ordering when the newOrderNumber is greater than the last
   if (newOrderNumber > lastPlaylistItem.order) {
-    return res.status(400).json({ message: 'You cannot use this order number, as it is beyond the last playlist item\'s order number.' });
+    const message =  'You cannot use this order number, as it is beyond the last playlist item\'s order number.';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      scope.setExtra('newOrderNumber', newOrderNumber);
+      Sentry.captureMessage(message);
+    });
+
+    return res.status(400).json({ message });
   }
 
   // Re-order all the playlist items in the playlistId of the logged in user
@@ -306,12 +409,21 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate({ articleId }, playlistInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate(req.params, playlistInputValidationSchema.requiredKeys('articleId'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    logger.error('Delete Playlist Item', messageDetails);
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error('Delete Playlist Item', message);
+    return res.status(400).json({ message });
   }
 
   const playlistItem = await playlistItemRepository.findOne({
@@ -327,6 +439,14 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   });
 
   if (!playlistItem) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
+    });
+
     logger.error('Delete Playlist Item', MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
     return res.status(400).json({ message: MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND });
   }
@@ -336,10 +456,20 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     await playlistItemRepository.remove(playlistItem);
     logger.info('Delete Playlist Item', 'Successfully deleted playlist item!');
   } catch (err) {
-    const errorMessage = `Failed to delete playlist item ID "${playlistItem}"`;
-    logger.error('Delete Playlist Item', errorMessage);
-    Sentry.captureException(err);
-    return res.status(400).json({ message: errorMessage });
+    const message = `Failed to delete playlist item ID "${playlistItem}"`;
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('playlistItem', playlistItem);
+      Sentry.captureException(err);
+    });
+
+    logger.error('Delete Playlist Item', message);
+
+    return res.status(400).json({ message });
   }
 
   // Check if the playlistItem has a failed or processing article
@@ -357,10 +487,21 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
       await articleRepository.remove(failedArticle);
       logger.info('Delete Playlist Item', 'Successfully deleted article ID!');
     } catch (err) {
-      const errorMessage = 'Failed to delete the article attached to the deleted playlist item.';
-      logger.error('Delete Playlist Item', errorMessage);
-      Sentry.captureException(err);
-      return res.status(400).json({ message: errorMessage });
+      const message = 'Failed to delete the article attached to the deleted playlist item.';
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Error);
+        scope.setUser(req.user);
+        scope.setExtra('body', req.body);
+        scope.setExtra('params', req.params);
+        scope.setExtra('failedArticle', failedArticle);
+        scope.setExtra('playlistItem', playlistItem);
+        Sentry.captureException(err);
+      });
+
+      logger.error('Delete Playlist Item', message);
+
+      return res.status(400).json({ message });
     }
   }
 

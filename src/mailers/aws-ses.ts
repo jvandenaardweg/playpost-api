@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import { logger } from '@sentry/utils';
+import { Sentry } from '../error-reporter';
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
@@ -43,8 +44,17 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
 
     return result;
   } catch (err) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('toEmail', toEmail);
+      scope.setExtra('title', title);
+      scope.setExtra('htmlBody', htmlBody);
+      Sentry.captureException(err);
+    });
+
     logger.error(loggerPrefix, 'Error happened.');
     logger.error(err);
+
     throw err; // pass it up
   }
 }

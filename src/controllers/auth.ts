@@ -7,6 +7,7 @@ import joi from 'joi';
 import { logger } from '../utils';
 import { UserRepository } from '../database/repositories/user';
 import * as AWSSes from '../mailers/aws-ses';
+import { Sentry } from '../error-reporter';
 
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
@@ -30,9 +31,17 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    logger.error(loggerPrefix, messageDetails);
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   logger.info(loggerPrefix, 'Starting...');
@@ -43,7 +52,15 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const user = await userRepository.findOne({ email: emailAddressNormalized }, { select: ['id', 'email', 'password'] });
 
   if (!user) {
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(MESSAGE_AUTH_USER_NOT_FOUND);
+    });
+
     logger.error(loggerPrefix, MESSAGE_AUTH_USER_NOT_FOUND);
+
     return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
   }
 
@@ -51,7 +68,16 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   // TODO: Log tries for security
   if (!isValidPassword) {
+    Sentry.configureScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(MESSAGE_AUTH_PASSWORD_INCORRECT);
+    });
+
     logger.error(loggerPrefix, MESSAGE_AUTH_PASSWORD_INCORRECT);
+
     return res.status(400).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
   }
 
@@ -104,17 +130,33 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    logger.error(loggerPrefix, messageDetails);
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   const user = await userRepository.findOne({ email }, { select: ['id', 'email'] });
 
   if (!user) {
-    const errorMessage = 'The given e-mail address does not exist. Are you sure you already have an account?';
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
+    const message = 'The given e-mail address does not exist. Are you sure you already have an account?';
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // User exists, generate a random token
@@ -180,17 +222,33 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('resetPasswordToken', 'password'));
 
   if (error) {
-    const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    logger.error(loggerPrefix, messageDetails);
-    return res.status(400).json({ message: messageDetails });
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   const user = await userRepository.findOne({ resetPasswordToken }, { select: ['id', 'resetPasswordToken'] });
 
   if (!user) {
-    const errorMessage = `Password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
-    logger.error(loggerPrefix, errorMessage);
-    return res.status(400).json({ message: errorMessage });
+    const message = `Password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
   }
 
   // Update the password and set the correct date at resetPasswordAt

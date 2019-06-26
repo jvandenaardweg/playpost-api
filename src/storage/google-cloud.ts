@@ -87,7 +87,19 @@ export const uploadArticleAudioFile = async (
     return uploadResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Failed to upload.`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('voice', voice);
+      scope.setExtra('concatinatedLocalAudiofilePath', concatinatedLocalAudiofilePath);
+      scope.setExtra('storageUploadPath', storageUploadPath);
+      scope.setExtra('mimeType', mimeType);
+      scope.setExtra('article', article);
+      scope.setExtra('audiofileId', audiofileId);
+      scope.setExtra('audiofileLength', audiofileLength);
+      Sentry.captureException(err);
+    });
+
     throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
@@ -147,7 +159,16 @@ export const uploadVoicePreviewAudiofile = async (
     return uploadResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Failed to upload.`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('voice', voice);
+      scope.setExtra('audiofilePath', audiofilePath);
+      scope.setExtra('mimeType', mimeType);
+      scope.setExtra('audiofileLength', audiofileLength);
+      Sentry.captureException(err);
+    });
+
     throw err;
   } finally {
     const hrend = process.hrtime(hrstart);
@@ -168,7 +189,13 @@ export const deleteFile = async (filename: string) => {
     return deleteFileResponse;
   } catch (err) {
     logger.error(`Google Cloud Storage (Delete File): Failed to delete file "${filename}"!`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('filename', filename);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };
@@ -208,7 +235,14 @@ export const deleteVoicePreview = async (voiceId?: string) => {
     return response;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting voice preview: "${prefix}"...`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('voiceId', voiceId);
+      scope.setExtra('prefix', prefix);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };
@@ -250,7 +284,15 @@ export const deleteAudiofile = async (articleId?: string, audiofileId?: string) 
     return response;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('audiofileId', audiofileId);
+      scope.setExtra('prefix', prefix);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };
@@ -298,7 +340,14 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
     return responses;
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
-    Sentry.captureException(err);
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('articleId', articleId);
+      scope.setExtra('prefix', prefix);
+      Sentry.captureException(err);
+    });
+
     throw err;
   }
 };
