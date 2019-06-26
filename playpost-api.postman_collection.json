@@ -660,7 +660,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"VVvuBy{42sXr(#h,ReUgE9scutJ6>2\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/auth",
@@ -848,17 +848,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"articleUrl\": \"https://medium.freecodecamp.org/how-to-get-published-in-the-freecodecamp-medium-publication-9b342a22400e\",\n\t\"encoding\": \"OGG_OPUS\"\n}"
+							"raw": "{\n\t\"articleUrl\": \"https://link.medium.com/y0UE4iI5sW\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/v1/playlists/e0119dd2-ded9-457a-a106-3df6e74cdbc8/articles",
+							"raw": "{{baseUrl}}/v1/playlist/articles",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
-								"playlists",
-								"e0119dd2-ded9-457a-a106-3df6e74cdbc8",
+								"playlist",
 								"articles"
 							]
 						}
