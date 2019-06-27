@@ -159,7 +159,8 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
   const loggerPrefix = 'Update Or Create User In-App Subscription: ';
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
 
-  const { originalTransactionId, user: { id: userId } } = userInAppSubscription;
+  const { originalTransactionId } = userInAppSubscription;
+  const userId = (userInAppSubscription.user) ? userInAppSubscription.user.id : null;
 
   try {
 
@@ -199,7 +200,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
-    if (existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
+    if (userId && existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
       logger.info(
         loggerPrefix,
         'Transaction already exists in the database, but it is from a different user.',
