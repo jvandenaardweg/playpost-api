@@ -70,9 +70,9 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
 
     for (const expiredSubscription of expiredSubscriptions) {
       const userId = expiredSubscription.user.id;
-      const inAppSubscriptionId = expiredSubscription.inAppSubscription.id;
+      const productId = expiredSubscription.inAppSubscription.productId;
 
-      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, inAppSubscriptionId, userId);
+      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, productId, userId);
 
       logger.info(loggerPrefix, 'Update expired subscription data for');
 
@@ -101,20 +101,16 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
  */
 export const validateInAppSubscriptionReceipt = async (req: Request, res: Response) => {
   interface RequestBody {
+    productId: string;
     receipt: Receipt;
   }
 
-  interface RequestParams {
-    inAppSubscriptionId: string;
-  }
-
   const loggerPrefix = 'Create And Validate In App Subscription: ';
-  const { receipt } = req.body as RequestBody;
-  const { inAppSubscriptionId } = req.params as RequestParams;
+  const { receipt, productId } = req.body as RequestBody;
   const { id: userId } = req.user;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
-  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'inAppSubscriptionId'));
+  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'productId'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -122,17 +118,17 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   }
 
   try {
-    logger.info(loggerPrefix, `Checking if subscription exists: ${inAppSubscriptionId}`);
+    logger.info(loggerPrefix, `Checking if subscription exists: ${productId}`);
 
     // First, check if the subscription exists
-    const subscription = await inAppSubscriptionRepository.findOne(inAppSubscriptionId, { where: { isActive: true } });
+    const subscription = await inAppSubscriptionRepository.findOne({ productId, isActive: true });
     if (!subscription) throw new Error('An active subscription could not be found.');
 
     logger.info(loggerPrefix, 'Subscription exists! We continue...');
 
     logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
-    const userInAppSubscriptionData = await validateReceipt(receipt, inAppSubscriptionId, userId);
+    const userInAppSubscriptionData = await validateReceipt(receipt, productId, userId);
 
     logger.info(loggerPrefix, 'Got transaction data from validate receipt!');
 
