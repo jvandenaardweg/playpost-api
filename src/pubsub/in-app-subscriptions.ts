@@ -8,7 +8,6 @@ import * as inAppSubscriptionsController from '../controllers/in-app-subscriptio
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { logger } from '../utils';
 import { Sentry } from '../error-reporter';
-
 const {
   GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS
 } = process.env;
@@ -179,9 +178,10 @@ const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNoti
 
   const latestReceipt = getLatestReceipt(notification);
   const originalTransactionId = getOriginalTransactionId(notification);
+  const productId = getProductId(notification);
 
   try {
-    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId);
+    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId);
     return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope((scope) => {
@@ -196,7 +196,7 @@ const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNoti
   }
 };
 
-const getOriginalTransactionId = (notification: AppleSubscriptionNotificationRequestBody) => {
+const getOriginalTransactionId = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
   // expired
   const expiredOriginalTransactionId = notification.latest_expired_receipt_info && notification.latest_expired_receipt_info.original_transaction_id;
 
@@ -209,6 +209,16 @@ const getOriginalTransactionId = (notification: AppleSubscriptionNotificationReq
   return originalTransactionId;
 };
 
-const getLatestReceipt = (notification: AppleSubscriptionNotificationRequestBody) => {
+const getLatestReceipt = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
   return notification.latest_receipt || notification.latest_expired_receipt;
+}
+
+const getProductId = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
+  const expiredReceiptProductId = (notification.latest_expired_receipt_info) ? notification.latest_expired_receipt_info.product_id : undefined;
+  const latestReceiptProductId = (notification.latest_receipt_info) ? notification.latest_receipt_info.product_id : undefined;
+  const autoRenewProductId = (notification.auto_renew_product_id) ? notification.auto_renew_product_id : undefined;
+
+  const productId = latestReceiptProductId || expiredReceiptProductId || autoRenewProductId;
+
+  return productId;
 }

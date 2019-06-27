@@ -5,7 +5,7 @@ import joi from 'joi';
 import { logger } from '../utils';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import { InAppSubscriptionStatus, UserInAppSubscription, InAppSubscriptionEnvironment } from '../database/entities/user-in-app-subscription';
-import { InAppSubscription } from '../database/entities/in-app-subscription';
+import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
 import { Sentry } from '../error-reporter';
 
 const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
@@ -243,10 +243,11 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
  *
  * @param receipt
  */
-export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: string, userId?: string | null): Promise<UserInAppSubscription> => {
+export const validateReceipt = async (receipt: Receipt, productId?: string | null | undefined, userId?: string | null): Promise<UserInAppSubscription> => {
   const sessionId = (typeof receipt === 'string') ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
+  const userInAppSubscriptionRepositinAppSubscriptionRepositoryory = getRepository(InAppSubscription);
 
   // Allow canceled and expired subscriptions in here, so we can properly use a status history inside our database
   // Both options need to remain "false"
@@ -257,6 +258,7 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
 
   let validationResponse: inAppPurchase.ValidationResponse;
   let purchaseData: inAppPurchase.PurchasedItem[] | null;
+  let inAppSubscriptionProductId = productId as string;
 
   try {
     await inAppPurchase.setup();
@@ -323,6 +325,37 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
 
     logger.info(loggerPrefix, 'Got status:', status);
 
+    // Just find a in app subscription if productId is empty
+    // This should never happen.
+    // If it does, log it.
+    if (!productId) {
+      const inAppSubscription = await userInAppSubscriptionRepositinAppSubscriptionRepositoryory.findOne({
+        service: InAppSubscriptionService.APPLE,
+        isActive: true
+      });
+
+      // Fallback to hard coded as a last resort
+      if (!inAppSubscription) {
+        inAppSubscriptionProductId = 'com.aardwegmedia.playpost.premium';
+      }
+
+      inAppSubscriptionProductId = inAppSubscription && inAppSubscription.productId;
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Critical);
+        if (userId) scope.setUser({ id: userId });
+        scope.setExtra('receipt', receipt);
+        scope.setExtra('isValid', isValid);
+        scope.setExtra('isCanceled', isCanceled);
+        scope.setExtra('isExpired', isExpired);
+        scope.setExtra('purchaseData', purchaseData);
+        scope.setExtra('purchase', purchase);
+        scope.setExtra('validationResponse', validationResponse);
+        scope.setExtra('inAppSubscriptionProductId', inAppSubscriptionProductId);
+        Sentry.captureMessage('Just picked a in app subscription not based on a productId.');
+      });
+    }
+
     // @ts-ignore
     const latestReceipt = validationResponse.latest_receipt || receipt;
 
@@ -368,7 +401,7 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
       isTrial: purchase.isTrial,
       ...user,
       inAppSubscription: {
-        id: inAppSubscriptionId
+        id: inAppSubscriptionProductId
       }
     });
 
@@ -384,7 +417,7 @@ export const validateReceipt = async (receipt: Receipt, inAppSubscriptionId: str
   }
 };
 
-export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string, originalTransactionId?: string): Promise<UserInAppSubscription> => {
+export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string, originalTransactionId?: string, productId?: string | null): Promise<UserInAppSubscription> => {
   if (!latestReceipt) {
     throw new Error('latestReceipt not found. Which we need to update our user his subscription status in our database.');
   }
@@ -403,17 +436,16 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
     relations: ['user', 'inAppSubscription']
   });
 
-  if (!foundUserInAppSubscription) {
-    throw new Error(`Could not find a user's in app subscription transaction using originalTransactionId: "${originalTransactionId}".`);
-  }
+  // if (!foundUserInAppSubscription) {
+  //   throw new Error(`Could not find a user's in app subscription transaction using originalTransactionId: "${originalTransactionId}".`);
+  // }
 
   // User could be empty if we receive notifications from apple
-  const userId = (foundUserInAppSubscription.user) ? foundUserInAppSubscription.user.id : null;
-  const inAppSubscriptionId = foundUserInAppSubscription.inAppSubscription.id;
+  const userId = (foundUserInAppSubscription && foundUserInAppSubscription.user) ? foundUserInAppSubscription.user.id : null;
 
   // Validate the receipt with Apple
   // The result should be that the receipt is active
-  const userInAppSubscriptionData = await validateReceipt(latestReceipt, inAppSubscriptionId, userId);
+  const userInAppSubscriptionData = await validateReceipt(latestReceipt, productId, userId);
 
   // Update the subscription for the user
   const result = await updateOrCreateUserInAppSubscription(userInAppSubscriptionData);
