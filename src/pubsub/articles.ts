@@ -79,7 +79,8 @@ export const listenCrawlFullArticle = () => {
 
       logger.info(loggerPrefix, 'Worker process success: ', articleId);
     } catch (err) {
-      logger.error(loggerPrefix, 'Worker process failed: ', articleId, err);
+      logger.error(loggerPrefix, 'Worker process failed: ', articleId);
+      logger.error(err);
 
       Sentry.withScope((scope) => {
         scope.setExtra('articleId', articleId);

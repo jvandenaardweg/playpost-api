@@ -91,6 +91,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
     // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
 
+    if (!response) throw new Error('Dit not receive a response from the crawler.');
+
     let ssml: string | undefined = undefined;
     let text: string | undefined = undefined;
     let html: string | undefined = undefined;
@@ -116,8 +118,8 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
 
     if (response.canonicalUrl) {
       canonicalUrl = response.canonicalUrl;
-    } else if (response.metadata.url) {
-      canonicalUrl = response.metadata.url || undefined;
+    } else if (response.metadata && response.metadata.url) {
+      canonicalUrl = response.metadata.url;
     }
 
     if (response.language) language = response.language;
