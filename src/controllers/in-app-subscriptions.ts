@@ -5,7 +5,7 @@ import joi from 'joi';
 import { logger } from '../utils';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import { InAppSubscriptionStatus, UserInAppSubscription, InAppSubscriptionEnvironment } from '../database/entities/user-in-app-subscription';
-import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
+import { InAppSubscription } from '../database/entities/in-app-subscription';
 import { Sentry } from '../error-reporter';
 
 const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
@@ -249,7 +249,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   const sessionId = (typeof receipt === 'string') ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
-  const userInAppSubscriptionRepositinAppSubscriptionRepositoryory = getRepository(InAppSubscription);
+  const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
   // Allow canceled and expired subscriptions in here, so we can properly use a status history inside our database
   // Both options need to remain "false"
@@ -260,7 +260,6 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
   let validationResponse: inAppPurchase.ValidationResponse;
   let purchaseData: inAppPurchase.PurchasedItem[] | null;
-  let inAppSubscriptionProductId = productId as string | undefined;
 
   try {
     await inAppPurchase.setup();
@@ -327,21 +326,10 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
     logger.info(loggerPrefix, 'Got status:', status);
 
-    // Just find a in app subscription if productId is empty
-    // This should never happen.
-    // If it does, log it.
+    // If we have no productId, we cannot determine for which subscription this is
+    // We error...
     if (!productId) {
-      const inAppSubscription = await userInAppSubscriptionRepositinAppSubscriptionRepositoryory.findOne({
-        service: InAppSubscriptionService.APPLE,
-        isActive: true
-      });
-
-      // Fallback to hard coded as a last resort
-      if (!inAppSubscription) {
-        inAppSubscriptionProductId = 'com.aardwegmedia.playpost.premium';
-      }
-
-      inAppSubscriptionProductId = inAppSubscription && inAppSubscription.productId;
+      const message = 'Cannot process this receipt because the productId is not defined.';
 
       Sentry.withScope((scope) => {
         scope.setLevel(Sentry.Severity.Critical);
@@ -353,9 +341,36 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
         scope.setExtra('purchaseData', purchaseData);
         scope.setExtra('purchase', purchase);
         scope.setExtra('validationResponse', validationResponse);
-        scope.setExtra('inAppSubscriptionProductId', inAppSubscriptionProductId);
-        Sentry.captureMessage('Just picked a in app subscription not based on a productId.');
+        Sentry.captureMessage(message);
       });
+
+      throw new Error(message);
+    }
+
+    // Find the subscription based on the productId
+    const inAppSubscription = await inAppSubscriptionRepository.findOne({
+      productId
+    });
+
+    const inAppSubscriptionId = (inAppSubscription) ? inAppSubscription.id : null;
+
+    if (!inAppSubscriptionId) {
+      const message = 'In-App Subscription ID could not be found.';
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Critical);
+        if (userId) scope.setUser({ id: userId });
+        scope.setExtra('receipt', receipt);
+        scope.setExtra('isValid', isValid);
+        scope.setExtra('isCanceled', isCanceled);
+        scope.setExtra('isExpired', isExpired);
+        scope.setExtra('purchaseData', purchaseData);
+        scope.setExtra('purchase', purchase);
+        scope.setExtra('validationResponse', validationResponse);
+        Sentry.captureMessage(message);
+      });
+
+      throw new Error(message);
     }
 
     // @ts-ignore
@@ -403,7 +418,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       isTrial: purchase.isTrial,
       ...user,
       inAppSubscription: {
-        id: inAppSubscriptionProductId
+        id: inAppSubscriptionId
       }
     });
 
