@@ -258,7 +258,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
   let validationResponse: inAppPurchase.ValidationResponse;
   let purchaseData: inAppPurchase.PurchasedItem[] | null;
-  let inAppSubscriptionProductId = productId as string;
+  let inAppSubscriptionProductId = productId as string | undefined;
 
   try {
     await inAppPurchase.setup();
