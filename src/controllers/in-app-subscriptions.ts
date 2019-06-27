@@ -70,9 +70,9 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
 
     for (const expiredSubscription of expiredSubscriptions) {
       const userId = expiredSubscription.user.id;
-      const inAppSubscriptionId = expiredSubscription.inAppSubscription.id;
+      const productId = expiredSubscription.inAppSubscription.productId;
 
-      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, inAppSubscriptionId, userId);
+      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, productId, userId);
 
       logger.info(loggerPrefix, 'Update expired subscription data for');
 
