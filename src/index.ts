@@ -201,7 +201,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
-  app.post('/v1/in-app-subscriptions/:inAppSubscriptionId/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
   // Endpoint for uptime monitoring
