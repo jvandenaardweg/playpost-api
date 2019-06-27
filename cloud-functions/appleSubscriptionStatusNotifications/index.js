@@ -74,11 +74,13 @@ exports.processNotification = async (req, res) => {
       if (notification.environment === 'Sandbox') {
         const [stagingMessageId, developmentMessageId] = await Promise.all([
           await pubsub.topic(pubSubTopics.staging).publish(buffer),
-          await pubsub.topic(pubSubTopics.development).publish(buffer)
+          await pubsub.topic(pubSubTopics.development).publish(buffer),
+          await pubsub.topic(pubSubTopics.production).publish(buffer), // Also post to production, as the Sandbox environment is also used in the Apple Review of our production app
         ]);
 
         console.log(`Staging: Message ${stagingMessageId} published.`, notification);
         console.log(`Development: Message ${developmentMessageId} published.`, notification);
+        console.log(`Production: Message ${developmentMessageId} published.`, notification);
 
         return res.status(200).json({
           staging: {
@@ -94,6 +96,8 @@ exports.processNotification = async (req, res) => {
 
       // We publish it to Production
       const productionMessageId = await pubsub.topic(pubSubTopics.production).publish(buffer);
+
+      console.log(`Production: Message ${productionMessageId} published.`, notification);
 
       return res.status(200).json({
         production: {
