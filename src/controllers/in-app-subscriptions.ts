@@ -165,9 +165,10 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     // If we receive a sandbox subscription on the prod environment, just error
     // This should only happen for beta users
-    if (userInAppSubscription && userInAppSubscription.environment === InAppSubscriptionEnvironment.SANDBOX && process.env.NODE_ENV === 'production') {
-      throw new Error('The previously purchased subscription is not valid for this environment. You should use your own Apple ID when purchasing.');
-    }
+    // We've disabled below check, because appareantly the Apple Reviewe also uses the Sandbox environment
+    // if (userInAppSubscription && userInAppSubscription.environment === InAppSubscriptionEnvironment.SANDBOX && process.env.NODE_ENV === 'production') {
+    //   throw new Error('The previously purchased subscription is not valid for this environment. You should use your own Apple ID when purchasing.');
+    // }
 
     const existingUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
       where: {
@@ -198,7 +199,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
-    if (existingUserInAppSubscription.user.id !== userId) {
+    if (existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
       logger.info(
         loggerPrefix,
         'Transaction already exists in the database, but it is from a different user.',
