@@ -187,9 +187,9 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
       const inAppSubscriptionPurchaseToCreate = await userInAppSubscriptionRepository.create(userInAppSubscription);
       const savedInAppSubscriptionPurchase = await userInAppSubscriptionRepository.save(inAppSubscriptionPurchaseToCreate);
 
-      logger.info(loggerPrefix, 'Created database entry!');
+      logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
 
-      const userInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(savedInAppSubscriptionPurchase[0].id);
+      const userInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(savedInAppSubscriptionPurchase.id);
 
       if (!userInAppSubscriptionResult) throw new Error('Could not find just added user in app subscription.');
 
