@@ -69,7 +69,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
     if (!expiredSubscriptions.length) return res.status(200).json({ message: 'No active subscriptions found with an expiresAt date greater then the current date. Nothing to update...' });
 
     for (const expiredSubscription of expiredSubscriptions) {
-      const userId = expiredSubscription.user.id;
+      const userId = (expiredSubscription.user) ? expiredSubscription.user.id : null;
       const productId = expiredSubscription.inAppSubscription.productId;
 
       const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, productId, userId);
