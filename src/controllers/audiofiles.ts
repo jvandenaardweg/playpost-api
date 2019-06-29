@@ -352,6 +352,32 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
+  // Check if audiofile for same voice already exists on this article
+  // This generally should not happen, we should prevent this from within the app
+  if (voice && article.audiofiles.length) {
+    const voiceId = voice && voice.id;
+    const existingAudiofileForVoice = article.audiofiles.find(audiofile => audiofile.voice.id === voiceId);
+
+    if (existingAudiofileForVoice) {
+      const message = `An audiofile for this article with the voice "(${voice.label})" already exists. Therefore, we do not create a new audiofile for this article.`;
+
+      Sentry.withScope((scope) => {
+        scope.setLevel(Sentry.Severity.Error);
+        scope.setExtra('body', req.body);
+        scope.setExtra('params', req.params);
+        scope.setUser(req.user);
+        scope.setExtra('article', article);
+        scope.setExtra('voice', voice);
+        scope.setExtra('userIsSubscribed', userIsSubscribed);
+        scope.setExtra('userVoiceSetting', userVoiceSetting);
+        Sentry.captureMessage(message);
+      });
+
+      logger.error(loggerPrefix, message);
+      return res.status(400).json({ message });
+    }
+  }
+
   // Passed all checks. We can now start generating an audiofile for this user...
 
   logger.info(loggerPrefix, 'Start generating audio using voice:', voice.id);
