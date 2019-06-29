@@ -333,6 +333,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     }
   }
 
+  // Check if we have a voice to be used
   if (!voice) {
     const message = 'The given voice to be used to create the audio cannot be found.';
 
@@ -359,7 +360,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const existingAudiofileForVoice = article.audiofiles.find(audiofile => audiofile.voice.id === voiceId);
 
     if (existingAudiofileForVoice) {
-      const message = `An audiofile for this article with the voice "(${voice.label})" already exists. Therefore, we do not create a new audiofile for this article.`;
+      const message = `An audiofile for this article with the voice "${voice.label}" already exists. Therefore, we do not create a new audiofile for this article.`;
 
       Sentry.withScope((scope) => {
         scope.setLevel(Sentry.Severity.Error);
