@@ -1,14 +1,9 @@
-
 require('dotenv').config();
 
 import { getGoogleCloudCredentials } from './utils/credentials';
 
 // Attach stackdriver on our Heroku environments
-if (
-  process.env.HEROKU_SLUG_COMMIT &&
-  process.env.NODE_ENV &&
-  ['production', 'staging'].includes(process.env.NODE_ENV)
-) {
+if (process.env.HEROKU_SLUG_COMMIT && process.env.NODE_ENV && ['production', 'staging', 'test'].includes(process.env.NODE_ENV)) {
   require('@google-cloud/debug-agent').start({
     ...getGoogleCloudCredentials(),
     serviceContext: {
@@ -49,40 +44,91 @@ import { logger } from './utils';
 logger.info('App init: Setting up...');
 
 // Check required env vars
-if (!process.env.NODE_ENV) throw new Error('Required environment variable "NODE_ENV" not set.');
-if (!process.env.GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID) throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID" not set.');
-if (!process.env.GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL) throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL" not set.');
-if (!process.env.GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY) throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY" not set.');
-if (!process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME) throw new Error('Required environment variable "GOOGLE_CLOUD_STORAGE_BUCKET_NAME" not set.');
-if (!process.env.GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) throw new Error('Required environment variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set.');
-if (!process.env.GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) throw new Error('Required environment variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set.');
-if (!process.env.GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) throw new Error('Required environment variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set.');
-if (!process.env.JWT_SECRET) throw new Error('Required environment variable "JWT_SECRET" not set.');
-if (!process.env.DATABASE_URL) throw new Error('Required environment variable "DATABASE_URL" not set.');
-if (!process.env.REDIS_URL) throw new Error('Required environment variable "REDIS_URL" not set.');
-if (!process.env.CRAWLER_URL) throw new Error('Required environment variable "CRAWLER_URL" not set.');
-if (!process.env.SENTRY_DSN) throw new Error('Required environment variable "SENTRY_DSN" not set.');
-if (!process.env.APPLE_IAP_SHARED_SECRET) throw new Error('Required environment variable "APPLE_IAP_SHARED_SECRET" not set.');
-if (!process.env.TYPEORM_URL) throw new Error('Required environment variable "TYPEORM_URL" not set.');
-if (!process.env.TYPEORM_ENTITIES) throw new Error('Required environment variable "TYPEORM_ENTITIES" not set.');
-if (!process.env.TYPEORM_MIGRATIONS) throw new Error('Required environment variable "TYPEORM_MIGRATIONS" not set.');
-if (!process.env.MAILCHIMP_LIST_ID) throw new Error('Required environment variable "MAILCHIMP_LIST_ID" not set.');
-if (!process.env.MAILCHIMP_API_KEY) throw new Error('Required environment variable "MAILCHIMP_API_KEY" not set.');
-if (!process.env.AWS_USER) throw new Error('Required environment variable "AWS_USER" not set.');
-if (!process.env.AWS_ACCESS_KEY_ID) throw new Error('Required environment variable "AWS_ACCESS_KEY_ID" not set.');
-if (!process.env.AWS_SECRET_ACCESS_KEY) throw new Error('Required environment variable "AWS_SECRET_ACCESS_KEY" not set.');
-if (!process.env.AWS_REGION) throw new Error('Required environment variable "AWS_REGION" not set.');
+if (!process.env.NODE_ENV) {
+  throw new Error('Required environment variable "NODE_ENV" not set.');
+}
+if (!process.env.GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID) {
+  throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID" not set.');
+}
+if (!process.env.GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL) {
+  throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL" not set.');
+}
+if (!process.env.GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY) {
+  throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY" not set.');
+}
+if (!process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME) {
+  throw new Error('Required environment variable "GOOGLE_CLOUD_STORAGE_BUCKET_NAME" not set.');
+}
+if (!process.env.GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) {
+  throw new Error('Required environment variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set.');
+}
+if (!process.env.GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) {
+  throw new Error('Required environment variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set.');
+}
+if (!process.env.GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) {
+  throw new Error('Required environment variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set.');
+}
+if (!process.env.JWT_SECRET) {
+  throw new Error('Required environment variable "JWT_SECRET" not set.');
+}
+if (!process.env.DATABASE_URL) {
+  throw new Error('Required environment variable "DATABASE_URL" not set.');
+}
+if (!process.env.REDIS_URL) {
+  throw new Error('Required environment variable "REDIS_URL" not set.');
+}
+if (!process.env.CRAWLER_URL) {
+  throw new Error('Required environment variable "CRAWLER_URL" not set.');
+}
+if (!process.env.SENTRY_DSN) {
+  throw new Error('Required environment variable "SENTRY_DSN" not set.');
+}
+if (!process.env.APPLE_IAP_SHARED_SECRET) {
+  throw new Error('Required environment variable "APPLE_IAP_SHARED_SECRET" not set.');
+}
+if (!process.env.TYPEORM_URL) {
+  throw new Error('Required environment variable "TYPEORM_URL" not set.');
+}
+if (!process.env.TYPEORM_ENTITIES) {
+  throw new Error('Required environment variable "TYPEORM_ENTITIES" not set.');
+}
+if (!process.env.TYPEORM_MIGRATIONS) {
+  throw new Error('Required environment variable "TYPEORM_MIGRATIONS" not set.');
+}
+if (!process.env.MAILCHIMP_LIST_ID) {
+  throw new Error('Required environment variable "MAILCHIMP_LIST_ID" not set.');
+}
+if (!process.env.MAILCHIMP_API_KEY) {
+  throw new Error('Required environment variable "MAILCHIMP_API_KEY" not set.');
+}
+if (!process.env.AWS_USER) {
+  throw new Error('Required environment variable "AWS_USER" not set.');
+}
+if (!process.env.AWS_ACCESS_KEY_ID) {
+  throw new Error('Required environment variable "AWS_ACCESS_KEY_ID" not set.');
+}
+if (!process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error('Required environment variable "AWS_SECRET_ACCESS_KEY" not set.');
+}
+if (!process.env.AWS_REGION) {
+  throw new Error('Required environment variable "AWS_REGION" not set.');
+}
 
 const PORT = process.env.PORT || 3000;
-const IS_PROTECTED = passport.authenticate('jwt', { session: false, failWithError: true });
+const IS_PROTECTED = passport.authenticate('jwt', {
+  session: false,
+  failWithError: true
+});
 
 // const bruteStore = new ExpressBrute.MemoryStore();
 const bruteforce = new ExpressBrute(expressBruteRedisStore, {
-  freeRetries: (process.env.NODE_ENV === 'production') ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
-  minWait: (1000 * 60 * 5), // 5 minutes
+  freeRetries: process.env.NODE_ENV === 'production' ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
+  minWait: 1000 * 60 * 5, // 5 minutes
   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
     logger.warn('Express Brute: ', 'Prevented after 5 tries.');
-    return res.status(400).json({ message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}` });
+    return res.status(400).json({
+      message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
+    });
   },
   handleStoreError: (err: any) => {
     logger.error('Express Brute Store error: ', err);
@@ -92,10 +138,12 @@ const bruteforce = new ExpressBrute(expressBruteRedisStore, {
 const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: (process.env.NODE_ENV === 'production') ? 60 : 9999, // 60 requests allowed per minute, 1 per second
+  max: process.env.NODE_ENV === 'production' ? 60 : 9999, // 60 requests allowed per minute, 1 per second
   handler: (req, res, next) => {
     // Send JSON so we can read the message
-    return res.status(429).json({ message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.' });
+    return res.status(429).json({
+      message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
+    });
   }
 });
 
@@ -111,8 +159,12 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
   // Hardening our server using Helmet
   app.use(helmet());
-  app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"], styleSrc: ["'self'"] } })); // https://helmetjs.github.io/docs/csp/
-  app.use(helmet.noCache());  // https://helmetjs.github.io/docs/nocache/
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: { defaultSrc: ["'self'"], styleSrc: ["'self'"] }
+    })
+  ); // https://helmetjs.github.io/docs/csp/
+  app.use(helmet.noCache()); // https://helmetjs.github.io/docs/nocache/
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
 
@@ -126,7 +178,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
   app.use(compression());
 
   // Setup Sentry error tracking
-  Sentry.configureScope((scope) => {
+  Sentry.configureScope(scope => {
     scope.setExtra('process', 'web');
   });
 
@@ -220,7 +272,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
         if (req.user) {
           const { id, email } = req.user;
 
-          Sentry.configureScope((scope) => {
+          Sentry.configureScope(scope => {
             scope.setUser({ id, email });
           });
 
@@ -233,7 +285,6 @@ createConnection(defaultConnection).then(async (connection: any) => {
           logger.error('Uncaught error', err);
           Sentry.captureException(err);
         }
-
       }
 
       if (process.env.NODE_ENV !== 'test') {
@@ -248,7 +299,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
       // Return a general error to the user
       return res.status(500).json({
-        message: (err && err.message) ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
+        message: err && err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
       });
     }
 

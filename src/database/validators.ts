@@ -2,7 +2,7 @@ import joi from 'joi';
 
 export const articleInputValidationSchema = joi.object().keys({
   articleUrl: joi.string().uri(),
-  articleId: joi.string().uuid(),
+  articleId: joi.string().uuid()
 });
 
 export const audiofileInputValidationSchema = joi.object().keys({
@@ -28,8 +28,13 @@ export const playlistInputValidationSchema = joi.object().keys({
   playlistItemId: joi.string().uuid(),
   articleId: joi.string().uuid(),
   name: joi.string(),
-  order: joi.number().integer().min(0),
-  articleUrl: joi.string().uri()
+  order: joi
+    .number()
+    .integer()
+    .min(0),
+  articleUrl: joi.string().uri(),
+  archivedAt: joi.alternatives().try(joi.string().allow(null)),
+  favoritedAt: joi.alternatives().try(joi.string().allow(null))
 });
 
 export const userInputValidationSchema = joi.object().keys({

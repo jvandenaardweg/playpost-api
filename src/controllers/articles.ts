@@ -22,11 +22,13 @@ export const findArticleById = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+  const article = await articleRepository.findOne(articleId, {
+    relations: ['audiofiles']
+  });
 
   if (!article) {
     return res.status(400).json({
-      message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
+      message: `Could not get the article, bacause article with ID ${articleId} is not found.`
     });
   }
 
@@ -44,11 +46,13 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const article = await articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+  const article = await articleRepository.findOne(articleId, {
+    relations: ['audiofiles']
+  });
 
   if (!article) {
     return res.status(400).json({
-      message: `Could not get the article, bacause article with ID ${articleId} is not found.`,
+      message: `Could not get the article, bacause article with ID ${articleId} is not found.`
     });
   }
 
@@ -67,7 +71,9 @@ export const deleteById = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') {
+    return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  }
 
   const article = await articleRepository.findOne(articleId);
 
@@ -82,16 +88,20 @@ export const deleteById = async (req: Request, res: Response) => {
 
 export const fetchFullArticleContents = async (articleUrl: string) => {
   const loggerPrefix = 'Fetch Full Article Contents:';
-  if (!process.env.CRAWLER_URL) throw new Error('Environment variable "CRAWLER_URL" not set.');
+  if (!process.env.CRAWLER_URL) {
+    throw new Error('Environment variable "CRAWLER_URL" not set.');
+  }
 
   try {
     const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
 
     // Fast crawler has troubles with this URL:
     // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
-    // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-staging.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
+    // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-test.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
 
-    if (!response) throw new Error('Dit not receive a response from the crawler.');
+    if (!response) {
+      throw new Error('Dit not receive a response from the crawler.');
+    }
 
     let ssml: string | undefined = undefined;
     let text: string | undefined = undefined;
@@ -111,9 +121,15 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     if (response.articleText) text = response.articleText;
     if (response.articleHTML) html = response.articleHTML;
     if (response.completeHTML) documentHtml = response.completeHTML;
-    if (response.readingTimeInSeconds) readingTime = response.readingTimeInSeconds;
-    if (response.metadata && response.metadata.image) imageUrl = response.metadata.image;
-    if (response.metadata && response.metadata.author) authorName = response.metadata.author;
+    if (response.readingTimeInSeconds) {
+      readingTime = response.readingTimeInSeconds;
+    }
+    if (response.metadata && response.metadata.image) {
+      imageUrl = response.metadata.image;
+    }
+    if (response.metadata && response.metadata.author) {
+      authorName = response.metadata.author;
+    }
     if (response.description) description = response.description;
 
     if (response.canonicalUrl) {
@@ -136,7 +152,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
       siteName = urlParse(response.url).hostname;
     }
 
-    return  {
+    return {
       ssml,
       text,
       html,
@@ -152,7 +168,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
       documentHtml
     };
   } catch (err) {
-    const message = (err && err.message) ? err.message : 'Unknown error';
+    const message = err && err.message ? err.message : 'Unknown error';
     logger.error(loggerPrefix, message);
     throw err;
   }
@@ -183,7 +199,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const articleUrl = (article.canonicalUrl) ? article.canonicalUrl : article.url;
+  const articleUrl = article.canonicalUrl ? article.canonicalUrl : article.url;
 
   if (!articleUrl) {
     const errorMessage = 'Cannot sync article, because it has no URLs.';
@@ -200,13 +216,41 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
   // TODO: make re-usable with line 203
-  if (!ssml) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing ssml.' });
-  if (!text) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing text.' });
-  if (!html) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing html.' });
-  if (!documentHtml) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing documentHtml.' });
-  if (!language) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing language.' });
-  if (!title) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing title.' });
-  if (!description) return res.status(400).json({ message: 'The information we got from crawling the page was not enough. Missing description.' });
+  if (!ssml) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing ssml.'
+    });
+  }
+  if (!text) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing text.'
+    });
+  }
+  if (!html) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing html.'
+    });
+  }
+  if (!documentHtml) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing documentHtml.'
+    });
+  }
+  if (!language) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing language.'
+    });
+  }
+  if (!title) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing title.'
+    });
+  }
+  if (!description) {
+    return res.status(400).json({
+      message: 'The information we got from crawling the page was not enough. Missing description.'
+    });
+  }
 
   logger.info(loggerPrefix, 'Getting the language from our database...');
 
@@ -242,7 +286,6 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   const updatedArticle = await articleRepository.findOne(articleId);
 
   return res.json(updatedArticle);
-
 };
 
 export const updateArticleStatus = async (articleId: string, status: ArticleStatus) => {
@@ -292,19 +335,33 @@ export const updateArticleToFull = async (articleId: string) => {
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
   // TODO: make re-usable with line 203
-  if (!ssml) throw new Error('The information we got from crawling the page was not enough. Missing ssml.');
-  if (!text) throw new Error('The information we got from crawling the page was not enough. Missing text.');
-  if (!html) throw new Error('The information we got from crawling the page was not enough. Missing html.');
-  if (!documentHtml) throw new Error('The information we got from crawling the page was not enough. Missing documentHtml.');
-  if (!language) throw new Error('The information we got from crawling the page was not enough. Missing language.');
-  if (!title) throw new Error('The information we got from crawling the page was not enough. Missing title.');
-  if (!description) throw new Error('The information we got from crawling the page was not enough. Missing description.');
+  if (!ssml) {
+    throw new Error('The information we got from crawling the page was not enough. Missing ssml.');
+  }
+  if (!text) {
+    throw new Error('The information we got from crawling the page was not enough. Missing text.');
+  }
+  if (!html) {
+    throw new Error('The information we got from crawling the page was not enough. Missing html.');
+  }
+  if (!documentHtml) {
+    throw new Error('The information we got from crawling the page was not enough. Missing documentHtml.');
+  }
+  if (!language) {
+    throw new Error('The information we got from crawling the page was not enough. Missing language.');
+  }
+  if (!title) {
+    throw new Error('The information we got from crawling the page was not enough. Missing title.');
+  }
+  if (!description) {
+    throw new Error('The information we got from crawling the page was not enough. Missing description.');
+  }
 
   // Below is some business logic to ensure we only have 1 article per canonicalUrl in the database
   if (articleToUpdate.status !== ArticleStatus.FINISHED) {
     const shouldNotUpdate = await enforceUniqueArticle(articleToUpdate, currentUrl);
     if (shouldNotUpdate) {
-      logger.info(loggerPrefix, 'Article already exists. We don\'t update it with data from the crawler.');
+      logger.info(loggerPrefix, "Article already exists. We don't update it with data from the crawler.");
       return;
     }
   }
@@ -358,16 +415,13 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
 
   // Find any existing article using the currentUrl, which is the "canonicalUrl" we get from the crawler
   const existingArticle = await articleRepository.findOne({
-    where: [
-      { url: currentUrl },
-      { canonicalUrl: currentUrl }
-    ]
+    where: [{ url: currentUrl }, { canonicalUrl: currentUrl }]
   });
 
   // If there's no existing article, don't enforce.
   // The script can just update the "articleToUpdate" to full
   if (!existingArticle) {
-    logger.info(loggerPrefix, 'Did not find an existing article. So we don\'t have to enforce anything. Article can be added as new.');
+    logger.info(loggerPrefix, "Did not find an existing article. So we don't have to enforce anything. Article can be added as new.");
     return false;
   }
 

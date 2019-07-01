@@ -55,12 +55,12 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ ...req.params }, playlistInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'favoritedAt'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -83,7 +83,7 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
   });
 
   if (!playlistItem) {
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -96,15 +96,22 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
 
   if (favoritedAt === null) {
     // If it's already removed
-    if (playlistItem.favoritedAt === null) return res.json({ message: 'This playlist item is not in your favorites. We do not update it.' });
+    if (playlistItem.favoritedAt === null) {
+      return res.json({
+        message: 'This playlist item is not in your favorites. We do not update it.'
+      });
+    }
 
-    await playlistItemRepository.update(playlistItem.id, { favoritedAt: undefined });
+    await playlistItemRepository.update(playlistItem.id, {
+      favoritedAt: undefined
+    });
     return res.json({ message: 'Playlist item is removed to your favorites!' });
   }
 
-  await playlistItemRepository.update(playlistItem.id, { favoritedAt: new Date() });
+  await playlistItemRepository.update(playlistItem.id, {
+    favoritedAt: new Date()
+  });
   return res.json({ message: 'Playlist item is added to your favorites!' });
-
 };
 
 export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) => {
@@ -113,12 +120,12 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId'));
+  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'archivedAt'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -137,11 +144,11 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
       user: {
         id: userId
       }
-    },
+    }
   });
 
   if (!playlistItem) {
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -154,13 +161,21 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
 
   if (archivedAt === null) {
     // If it's already removed
-    if (playlistItem.archivedAt === null) return res.json({ message: 'This playlist item is not in your archive. We do not update it.' });
+    if (playlistItem.archivedAt === null) {
+      return res.json({
+        message: 'This playlist item is not in your archive. We do not update it.'
+      });
+    }
 
-    await playlistItemRepository.update(playlistItem.id, { archivedAt: undefined });
+    await playlistItemRepository.update(playlistItem.id, {
+      archivedAt: undefined
+    });
     return res.json({ message: 'Playlist item is removed to your archive!' });
   }
 
-  await playlistItemRepository.update(playlistItem.id, { archivedAt: new Date() });
+  await playlistItemRepository.update(playlistItem.id, {
+    archivedAt: new Date()
+  });
   return res.json({ message: 'Playlist item is added to your archive!' });
 };
 
@@ -198,7 +213,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -218,10 +233,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   // Find the article by "url" OR "canonicalUrl"
   const article = await articleRepository.findOne({
-    where: [
-      { url: normalizedUrl },
-      { canonicalUrl: normalizedUrl }
-    ]
+    where: [{ url: normalizedUrl }, { canonicalUrl: normalizedUrl }]
   });
 
   // If there's an article, check if that one already exists in the user's playlist
@@ -241,7 +253,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     if (playlistItem) {
-      Sentry.withScope((scope) => {
+      Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Error);
         scope.setUser(req.user);
         scope.setExtra('body', req.body);
@@ -255,7 +267,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
     }
   } else {
-
     // If we do not have an article yet, create one in the database...
     // ...so our crawler tries to fetch the article in the background
     const articleToCreate = await articleRepository.create({
@@ -287,7 +298,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   await reOrderPlaylistItems(userId);
 
   return res.json(createdPlaylistItem);
-
 };
 
 /**
@@ -304,7 +314,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -333,7 +343,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   });
 
   if (!playlistItem) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -347,7 +357,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   }
 
   if (playlistItem.user.id !== userId) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -363,7 +373,9 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const currentOrderNumber = playlistItem.order;
 
   // The order is the same, just return success, no need to update the database for this
-  if (currentOrderNumber === newOrderNumber) return res.status(200).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL });
+  if (currentOrderNumber === newOrderNumber) {
+    return res.status(200).json({ message: MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL });
+  }
 
   // Get all the playlistItems, so we can determine the maximum order number
   const allPlaylistPlaylistItems = await playlistItemRepository.find({
@@ -382,9 +394,9 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
   // Restrict ordering when the newOrderNumber is greater than the last
   if (newOrderNumber > lastPlaylistItem.order) {
-    const message =  'You cannot use this order number, as it is beyond the last playlist item\'s order number.';
+    const message = "You cannot use this order number, as it is beyond the last playlist item's order number.";
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -414,7 +426,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -439,7 +451,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   });
 
   if (!playlistItem) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -458,7 +470,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   } catch (err) {
     const message = `Failed to delete playlist item ID "${playlistItem}"`;
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(req.user);
       scope.setExtra('body', req.body);
@@ -489,7 +501,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
     } catch (err) {
       const message = 'Failed to delete the article attached to the deleted playlist item.';
 
-      Sentry.withScope((scope) => {
+      Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Error);
         scope.setUser(req.user);
         scope.setExtra('body', req.body);
@@ -541,7 +553,7 @@ export const reOrderPlaylistItems = async (userId: string) => {
 
   const playlistItemIds = userPlaylistItems.map(playlistItem => playlistItem.id);
 
-  return getManager().transaction(async (transactionalEntityManager) => {
+  return getManager().transaction(async transactionalEntityManager => {
     playlistItemIds.forEach(async (playlistItemId, index) => {
       await transactionalEntityManager.update(PlaylistItem, playlistItemId, {
         order: index
@@ -552,55 +564,54 @@ export const reOrderPlaylistItems = async (userId: string) => {
   });
 };
 
-export const reOrderPlaylistItem = async (
-  playlistItemId: string,
-  newOrderNumber: number,
-  currentOrderNumber: number,
-  userId: string
-) => {
-  return getManager().transaction(async (transactionalEntityManager) => {
-    const move = (currentOrderNumber > newOrderNumber) ? 'up' : 'down';
+export const reOrderPlaylistItem = async (playlistItemId: string, newOrderNumber: number, currentOrderNumber: number, userId: string) => {
+  return getManager().transaction(async transactionalEntityManager => {
+    const move = currentOrderNumber > newOrderNumber ? 'up' : 'down';
 
     // Helpful: https://blogs.wayne.edu/web/2017/03/13/updating-a-database-display-order-with-drag-and-drop-in-sql/
 
     // Move the playlistItem out of the normal ordering temporary, this creates a gap
-    await transactionalEntityManager.createQueryBuilder()
-    .update(PlaylistItem)
-    .set({ order: -1 })
-    .where('"id" = :playlistItemId', { playlistItemId })
-    .andWhere('"userId" = :userId', { userId })
-    .execute();
+    await transactionalEntityManager
+      .createQueryBuilder()
+      .update(PlaylistItem)
+      .set({ order: -1 })
+      .where('"id" = :playlistItemId', { playlistItemId })
+      .andWhere('"userId" = :userId', { userId })
+      .execute();
 
     // Move all other playlistItem's to their new position...
     if (move === 'up') {
       // If we move the item up, we need to increment the order of all the items above the newOrderNumber,
       // but below or equal to the currentOrderNumber
-      await transactionalEntityManager.createQueryBuilder()
-      .update(PlaylistItem)
-      .set({ order: () => '"order" + 1' })
-      .where('"order" >= :newOrderNumber', { newOrderNumber })
-      .andWhere('"order" < :currentOrderNumber', { currentOrderNumber })
-      .andWhere('"userId" = :userId', { userId })
-      .execute();
+      await transactionalEntityManager
+        .createQueryBuilder()
+        .update(PlaylistItem)
+        .set({ order: () => '"order" + 1' })
+        .where('"order" >= :newOrderNumber', { newOrderNumber })
+        .andWhere('"order" < :currentOrderNumber', { currentOrderNumber })
+        .andWhere('"userId" = :userId', { userId })
+        .execute();
     } else {
       // If we move the item down, we need to decrement the order of all the items below the newOrderNumber,
       // but below or equal to the newOrderNumber
-      await transactionalEntityManager.createQueryBuilder()
-      .update(PlaylistItem)
-      .set({ order: () => '"order" - 1' })
-      .where('"order" > :currentOrderNumber', { currentOrderNumber })
-      .andWhere('"order" <= :newOrderNumber', { newOrderNumber })
-      .andWhere('"userId" = :userId', { userId })
-      .execute();
+      await transactionalEntityManager
+        .createQueryBuilder()
+        .update(PlaylistItem)
+        .set({ order: () => '"order" - 1' })
+        .where('"order" > :currentOrderNumber', { currentOrderNumber })
+        .andWhere('"order" <= :newOrderNumber', { newOrderNumber })
+        .andWhere('"userId" = :userId', { userId })
+        .execute();
     }
 
     // Fill the gap!
     // Set newOrder to the given playlistItem
-    await transactionalEntityManager.createQueryBuilder()
-    .update(PlaylistItem)
-    .set({ order: newOrderNumber })
-    .where('id = :id', { id: playlistItemId })
-    .andWhere('"userId" = :userId', { userId })
-    .execute();
+    await transactionalEntityManager
+      .createQueryBuilder()
+      .update(PlaylistItem)
+      .set({ order: newOrderNumber })
+      .where('id = :id', { id: playlistItemId })
+      .andWhere('"userId" = :userId', { userId })
+      .execute();
   });
 };
