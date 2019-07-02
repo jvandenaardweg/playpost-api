@@ -94,7 +94,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check to see if the current user is already above it's monthly limit
   if (userAudiofilesUsage.currentMonthInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
-    return res.status(400).json({ message: `You have reached the monthly limit of ${userSubscriptionLimits.limitSecondsPerMonth} minutes of audio. You can upgrade your subscription for more minutes.` });
+    // Check if there's a higher subscription available for the user
+    const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
+    const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
+
+    const message = `You have reached the monthly limit of ${userSubscriptionLimits.limitSecondsPerMonth} minutes of audio. ${upgradeMessagePart}`;
+    return res.status(400).json({ message });
   }
 
   // Fetch the article (without SSML)
@@ -145,18 +150,27 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check to see of the current article readingtime length will go above the user's monthly limit
   if (userAudiofilesUsage.currentMonthInSeconds + articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
-    return res.status(400).json({ message: `The article you are about the request audio for exceeds your monthly limit of ${userSubscriptionLimits.limitSecondsPerMonth} minutes of audio. You can upgrade your subscription for more minutes.` });
+    const limitInMinutesPerMonth = userSubscriptionLimits.limitSecondsPerMonth / 60;
+
+    // Check if there's a higher subscription available for the user
+    const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
+    const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
+
+    return res.status(400).json({
+      message: `This article's audio exceeds your monthly limit of ${limitInMinutesPerMonth} minutes per month. ${upgradeMessagePart}`
+    });
   }
 
-  // Check to see of the current article readingtime length will go above the user's monthly limit
+  // Check to see of the current article length length will go above the user's monthly limit
+  // Important: there might be some slack, because the readingtime could be different then the final audiofile length in seconds, but that doesnt matter
   if (articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerArticle) {
-    return res.status(400).json({ message: `The article you are about the request audio for exceeds your limit of ${userSubscriptionLimits.limitSecondsPerArticle} minutes of audio per article. You can upgrade your subscription for more minutes.` });
-  }
+    const limitInMinutesPerArticle = userSubscriptionLimits.limitSecondsPerArticle / 60;
 
-  // If the readingTime is greater then 30 minutes (1800 seconds)
-  // We just shown an error we cannot create audio for this
-  if (articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerArticle) {
-    const message = `The article is longer then ${userSubscriptionLimits.limitSecondsPerArticle} minutes, which is your current limit. You can upgrade your account to allow longer articles.`;
+    // Check if there's a higher subscription available for the user
+    const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
+    const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
+
+    const message = `This article's audio exceeds your limit of ${limitInMinutesPerArticle} minutes per article. ${upgradeMessagePart}`;
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
@@ -169,6 +183,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     logger.error(loggerPrefix, message);
+
     return res.status(400).json({ message });
   }
 

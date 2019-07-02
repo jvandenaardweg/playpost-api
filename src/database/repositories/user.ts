@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, getCustomRepository, getRepository } from 'typeorm';
+import { EntityRepository, Repository, getCustomRepository, getRepository, Not } from 'typeorm';
 import { User } from '../entities/user';
 import { AudiofileRepository } from '../repositories/audiofile';
 import { InAppSubscription } from '../entities/in-app-subscription';
@@ -96,5 +96,54 @@ export class UserRepository extends Repository<User> {
       available,
       limits
     };
+  }
+
+  /**
+   * Method to find the closest subscription upgrade options for the user.
+   *
+   * Returns a in app subscription we could use to propose to the user.
+   *
+   * @param userId
+   */
+  async findSubscriptionUpgradeOption(userId: string): Promise<InAppSubscription | undefined> {
+    const inAppSubscriptionRepository = getRepository(InAppSubscription);
+    const user = await this.findUserDetails(userId);
+
+    if (!user) return undefined;
+
+    // If the user is not subscribed, return the first paid subscription options
+    if (!user.isSubscribed) {
+      const otherAvailableSubscriptions = await inAppSubscriptionRepository.find({
+        isActive: true,
+        productId: Not('free')
+      });
+
+      // Get the cheapest paying subscription
+      const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {
+        return a.price - b.price;
+      })[0];
+
+      return subscriptionUpgradeOption;
+    }
+
+    const currentPayingSubscription = user.inAppSubscriptions && user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
+    if (!currentPayingSubscription) return undefined; // This should not happen
+
+    // If the user is subscribed
+    // Find a subscription with higher limits
+    const otherAvailableSubscriptions = await inAppSubscriptionRepository.find({
+      isActive: true,
+      id: Not(currentPayingSubscription.id),
+      productId: Not('free')
+    });
+
+    if (!otherAvailableSubscriptions) return undefined;
+
+    // Get the subscription with the highest limits per month
+    const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {
+      return b.limitSecondsPerMonth - a.limitSecondsPerMonth;
+    })[0];
+
+    return subscriptionUpgradeOption;
   }
 }
