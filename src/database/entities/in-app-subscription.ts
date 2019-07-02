@@ -5,7 +5,8 @@ import { ColumnNumericTransformer } from '../utils';
 
 export enum InAppSubscriptionService {
   APPLE = 'apple',
-  GOOGLE = 'google'
+  GOOGLE = 'google',
+  INTERNAL = 'internal' // internally used by Playpost
 }
 
 export enum InAppSubscriptionDuration {
@@ -14,7 +15,7 @@ export enum InAppSubscriptionDuration {
   TWO_MONTHS = '2m',
   THREE_MONTHS = '3m',
   SIX_MONTHS = '6m',
-  ONE_YEAR = '1y',
+  ONE_YEAR = '1y'
 }
 
 export enum InAppSubscriptionCurrency {
@@ -25,7 +26,6 @@ export enum InAppSubscriptionCurrency {
 @Entity()
 @Index(['productId', 'isActive'])
 export class InAppSubscription {
-
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
@@ -48,8 +48,14 @@ export class InAppSubscription {
   @Column({ type: 'enum', enum: InAppSubscriptionDuration, nullable: false })
   duration: InAppSubscriptionDuration;
 
-  @Column({ type: 'enum', enum: InAppSubscriptionService, nullable: false })
+  @Column({ type: 'enum', enum: InAppSubscriptionService, nullable: false, default: InAppSubscriptionService.INTERNAL })
   service: InAppSubscriptionService;
+
+  @Column({ nullable: false, default: 0 })
+  limitSecondsPerMonth: number;
+
+  @Column({ nullable: false, default: 0 })
+  limitSecondsPerArticle: number;
 
   @Column({ nullable: false, default: false })
   isActive: boolean;
@@ -61,5 +67,4 @@ export class InAppSubscription {
   @UpdateDateColumn()
   @IsDate()
   updatedAt: Date;
-
 }
