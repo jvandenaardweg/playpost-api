@@ -23,6 +23,7 @@
     "build:webpack": "webpack",
     "build:typescript": "npx tsc",
     "build:typescript:production": "npx tsc -p tsconfig.production.json",
+    "caches:empty": "ts-node-dev src/empty-cache.ts",
     "worker": "forever -m 5 dist/worker.js",
     "test": "NODE_ENV=unittest jest --silent",
     "pretest": "NODE_ENV=unittest npm run eslint",

@@ -4,3 +4,6 @@ npx sentry-cli releases --org $SENTRY_ORG --project $SENTRY_PROJECT files $HEROK
 
 # Makes sure subscription, language and voice data is the same between all environments
 npm run database:sync
+
+# Clear the Redis cache upon each new release
+npm run caches:empty
