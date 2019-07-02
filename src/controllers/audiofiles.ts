@@ -97,8 +97,19 @@ export const createAudiofile = async (req: Request, res: Response) => {
     // Check if there's a higher subscription available for the user
     const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
     const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
-
     const message = `You have reached the monthly limit of ${userSubscriptionLimits.limitSecondsPerMonth} minutes of audio. ${upgradeMessagePart}`;
+
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
+      Sentry.captureMessage(message);
+    });
+
     return res.status(400).json({ message });
   }
 
@@ -155,10 +166,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
     // Check if there's a higher subscription available for the user
     const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
     const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
+    const message = `This article's audio exceeds your monthly limit of ${limitInMinutesPerMonth} minutes per month. ${upgradeMessagePart}`;
 
-    return res.status(400).json({
-      message: `This article's audio exceeds your monthly limit of ${limitInMinutesPerMonth} minutes per month. ${upgradeMessagePart}`
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
+      Sentry.captureMessage(message);
     });
+
+    return res.status(400).json({ message });
   }
 
   // Check to see of the current article length length will go above the user's monthly limit
@@ -169,7 +190,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
     // Check if there's a higher subscription available for the user
     const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
     const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
-
     const message = `This article's audio exceeds your limit of ${limitInMinutesPerArticle} minutes per article. ${upgradeMessagePart}`;
 
     Sentry.withScope(scope => {
@@ -179,6 +199,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setUser(req.user);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
+      scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
       Sentry.captureMessage(message);
     });
 
