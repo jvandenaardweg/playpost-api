@@ -118,6 +118,8 @@ export class UserRepository extends Repository<User> {
         productId: Not('free')
       });
 
+      if (!otherAvailableSubscriptions || !otherAvailableSubscriptions.length) return undefined;
+
       // Get the cheapest paying subscription
       const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {
         return a.price - b.price;
@@ -137,7 +139,7 @@ export class UserRepository extends Repository<User> {
       productId: Not('free')
     });
 
-    if (!otherAvailableSubscriptions) return undefined;
+    if (!otherAvailableSubscriptions || !otherAvailableSubscriptions.length) return undefined;
 
     // Get the subscription with the highest limits per month
     const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {
