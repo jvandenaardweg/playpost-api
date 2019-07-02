@@ -14,7 +14,6 @@ import { addAllAWSVoices } from './synthesizers/aws';
 import { logger } from './utils/logger';
 import { Sentry } from './error-reporter';
 
-
 import voicesData from './database/seeds/voices';
 import { VoiceRepository } from './database/repositories/voice';
 
@@ -116,869 +115,869 @@ const updateVoicesLabel = async () => {
 
   const voiceLabelMapping = [
     {
-      "name" : "ar-XA-Standard-A",
-      "label" : "Fatima",
-      "gender" : "FEMALE"
+      name: 'ar-XA-Standard-A',
+      label: 'Fatima',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ar-XA-Standard-B",
-      "label" : "Hasan",
-      "gender" : "MALE"
+      name: 'ar-XA-Standard-B',
+      label: 'Hasan',
+      gender: 'MALE'
     },
     {
-      "name" : "ar-XA-Standard-C",
-      "label" : "Abdul",
-      "gender" : "MALE"
+      name: 'ar-XA-Standard-C',
+      label: 'Abdul',
+      gender: 'MALE'
     },
     {
-      "name" : "ar-XA-Wavenet-A",
-      "label" : "Maleeha",
-      "gender" : "FEMALE"
+      name: 'ar-XA-Wavenet-A',
+      label: 'Maleeha',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ar-XA-Wavenet-B",
-      "label" : "Asmar",
-      "gender" : "MALE"
+      name: 'ar-XA-Wavenet-B',
+      label: 'Asmar',
+      gender: 'MALE'
     },
     {
-      "name" : "ar-XA-Wavenet-C",
-      "label" : "Saabir",
-      "gender" : "MALE"
+      name: 'ar-XA-Wavenet-C',
+      label: 'Saabir',
+      gender: 'MALE'
     },
     {
-      "name" : "cs-CZ-Standard-A",
-      "label" : "Adéla",
-      "gender" : "FEMALE"
+      name: 'cs-CZ-Standard-A',
+      label: 'Adéla',
+      gender: 'FEMALE'
     },
     {
-      "name" : "cs-CZ-Wavenet-A",
-      "label" : "Adrianka",
-      "gender" : "FEMALE"
+      name: 'cs-CZ-Wavenet-A',
+      label: 'Adrianka',
+      gender: 'FEMALE'
     },
     {
-      "name" : "da-DK-Standard-A",
-      "label" : "Agnes",
-      "gender" : "FEMALE"
+      name: 'da-DK-Standard-A',
+      label: 'Agnes',
+      gender: 'FEMALE'
     },
     {
-      "name" : "da-DK-Wavenet-A",
-      "label" : "Diana",
-      "gender" : "FEMALE"
+      name: 'da-DK-Wavenet-A',
+      label: 'Diana',
+      gender: 'FEMALE'
     },
     {
-      "name" : "de-DE-Standard-A",
-      "label" : "Eva",
-      "gender" : "FEMALE"
+      name: 'de-DE-Standard-A',
+      label: 'Eva',
+      gender: 'FEMALE'
     },
     {
-      "name" : "de-DE-Standard-B",
-      "label" : "Adrian",
-      "gender" : "MALE"
+      name: 'de-DE-Standard-B',
+      label: 'Adrian',
+      gender: 'MALE'
     },
     {
-      "name" : "de-DE-Wavenet-A",
-      "label" : "Annika",
-      "gender" : "FEMALE"
+      name: 'de-DE-Wavenet-A',
+      label: 'Annika',
+      gender: 'FEMALE'
     },
     {
-      "name" : "de-DE-Wavenet-B",
-      "label" : "Albert",
-      "gender" : "MALE"
+      name: 'de-DE-Wavenet-B',
+      label: 'Albert',
+      gender: 'MALE'
     },
     {
-      "name" : "de-DE-Wavenet-C",
-      "label" : "Edith",
-      "gender" : "FEMALE"
+      name: 'de-DE-Wavenet-C',
+      label: 'Edith',
+      gender: 'FEMALE'
     },
     {
-      "name" : "de-DE-Wavenet-D",
-      "label" : "Claus",
-      "gender" : "MALE"
+      name: 'de-DE-Wavenet-D',
+      label: 'Claus',
+      gender: 'MALE'
     },
     {
-      "name" : "el-GR-Standard-A",
-      "label" : "Efthymía",
-      "gender" : "FEMALE"
+      name: 'el-GR-Standard-A',
+      label: 'Efthymía',
+      gender: 'FEMALE'
     },
     {
-      "name" : "el-GR-Wavenet-A",
-      "label" : "Lydía",
-      "gender" : "FEMALE"
+      name: 'el-GR-Wavenet-A',
+      label: 'Lydía',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-AU-Standard-A",
-      "label" : "Olivia",
-      "gender" : "FEMALE"
+      name: 'en-AU-Standard-A',
+      label: 'Olivia',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-AU-Standard-B",
-      "label" : "Oliver",
-      "gender" : "MALE"
+      name: 'en-AU-Standard-B',
+      label: 'Oliver',
+      gender: 'MALE'
     },
     {
-      "name" : "en-AU-Standard-C",
-      "label" : "Charlotte",
-      "gender" : "FEMALE"
+      name: 'en-AU-Standard-C',
+      label: 'Charlotte',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-AU-Standard-D",
-      "label" : "William",
-      "gender" : "MALE"
+      name: 'en-AU-Standard-D',
+      label: 'William',
+      gender: 'MALE'
     },
     {
-      "name" : "en-AU-Wavenet-A",
-      "label" : "Evie",
-      "gender" : "FEMALE"
+      name: 'en-AU-Wavenet-A',
+      label: 'Evie',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-AU-Wavenet-B",
-      "label" : "Isaac",
-      "gender" : "MALE"
+      name: 'en-AU-Wavenet-B',
+      label: 'Isaac',
+      gender: 'MALE'
     },
     {
-      "name" : "en-AU-Wavenet-C",
-      "label" : "Ava",
-      "gender" : "FEMALE"
+      name: 'en-AU-Wavenet-C',
+      label: 'Ava',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-AU-Wavenet-D",
-      "label" : "Noah",
-      "gender" : "MALE"
+      name: 'en-AU-Wavenet-D',
+      label: 'Noah',
+      gender: 'MALE'
     },
     {
-      "name" : "en-GB-Standard-A",
-      "label" : "Chloe",
-      "gender" : "FEMALE"
+      name: 'en-GB-Standard-A',
+      label: 'Chloe',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-GB-Standard-B",
-      "label" : "George",
-      "gender" : "MALE"
+      name: 'en-GB-Standard-B',
+      label: 'George',
+      gender: 'MALE'
     },
     {
-      "name" : "en-GB-Standard-C",
-      "label" : "Rosie",
-      "gender" : "FEMALE"
+      name: 'en-GB-Standard-C',
+      label: 'Rosie',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-GB-Standard-D",
-      "label" : "Harry",
-      "gender" : "MALE"
+      name: 'en-GB-Standard-D',
+      label: 'Harry',
+      gender: 'MALE'
     },
     {
-      "name" : "en-GB-Wavenet-A",
-      "label" : "Millie",
-      "gender" : "FEMALE"
+      name: 'en-GB-Wavenet-A',
+      label: 'Millie',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-GB-Wavenet-B",
-      "label" : "Jack",
-      "gender" : "MALE"
+      name: 'en-GB-Wavenet-B',
+      label: 'Jack',
+      gender: 'MALE'
     },
     {
-      "name" : "en-GB-Wavenet-C",
-      "label" : "Amelia",
-      "gender" : "FEMALE"
+      name: 'en-GB-Wavenet-C',
+      label: 'Amelia',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-GB-Wavenet-D",
-      "label" : "Jacob",
-      "gender" : "MALE"
+      name: 'en-GB-Wavenet-D',
+      label: 'Jacob',
+      gender: 'MALE'
     },
     {
-      "name" : "en-IN-Standard-A",
-      "label" : "Aabha",
-      "gender" : "FEMALE"
+      name: 'en-IN-Standard-A',
+      label: 'Aabha',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-IN-Standard-B",
-      "label" : "Aarav",
-      "gender" : "MALE"
+      name: 'en-IN-Standard-B',
+      label: 'Aarav',
+      gender: 'MALE'
     },
     {
-      "name" : "en-IN-Standard-C",
-      "label" : "Arjun",
-      "gender" : "MALE"
+      name: 'en-IN-Standard-C',
+      label: 'Arjun',
+      gender: 'MALE'
     },
     {
-      "name" : "en-IN-Wavenet-A",
-      "label" : "Aakriti",
-      "gender" : "FEMALE"
+      name: 'en-IN-Wavenet-A',
+      label: 'Aakriti',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-IN-Wavenet-B",
-      "label" : "Reyansh",
-      "gender" : "MALE"
+      name: 'en-IN-Wavenet-B',
+      label: 'Reyansh',
+      gender: 'MALE'
     },
     {
-      "name" : "en-IN-Wavenet-C",
-      "label" : "Vivaan",
-      "gender" : "MALE"
+      name: 'en-IN-Wavenet-C',
+      label: 'Vivaan',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Standard-B",
-      "label" : "Mason",
-      "gender" : "MALE"
+      name: 'en-US-Standard-B',
+      label: 'Mason',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Standard-C",
-      "label" : "Sophia",
-      "gender" : "FEMALE"
+      name: 'en-US-Standard-C',
+      label: 'Sophia',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-US-Standard-D",
-      "label" : "Ethan",
-      "gender" : "MALE"
+      name: 'en-US-Standard-D',
+      label: 'Ethan',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Standard-E",
-      "label" : "Susan",
-      "gender" : "FEMALE"
+      name: 'en-US-Standard-E',
+      label: 'Susan',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-US-Wavenet-A",
-      "label" : "John",
-      "gender" : "MALE"
+      name: 'en-US-Wavenet-A',
+      label: 'John',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Wavenet-B",
-      "label" : "Michael",
-      "gender" : "MALE"
+      name: 'en-US-Wavenet-B',
+      label: 'Michael',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Wavenet-C",
-      "label" : "Isabella",
-      "gender" : "FEMALE"
+      name: 'en-US-Wavenet-C',
+      label: 'Isabella',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-US-Wavenet-D",
-      "label" : "Richard",
-      "gender" : "MALE"
+      name: 'en-US-Wavenet-D',
+      label: 'Richard',
+      gender: 'MALE'
     },
     {
-      "name" : "en-US-Wavenet-E",
-      "label" : "Rosalie",
-      "gender" : "FEMALE"
+      name: 'en-US-Wavenet-E',
+      label: 'Rosalie',
+      gender: 'FEMALE'
     },
     {
-      "name" : "en-US-Wavenet-F",
-      "label" : "Emily",
-      "gender" : "FEMALE"
+      name: 'en-US-Wavenet-F',
+      label: 'Emily',
+      gender: 'FEMALE'
     },
     {
-      "name" : "es-ES-Standard-A",
-      "label" : "Maya",
-      "gender" : "FEMALE"
+      name: 'es-ES-Standard-A',
+      label: 'Maya',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fi-FI-Standard-A",
-      "label" : "Aada",
-      "gender" : "FEMALE"
+      name: 'fi-FI-Standard-A',
+      label: 'Aada',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fi-FI-Wavenet-A",
-      "label" : "Aava",
-      "gender" : "FEMALE"
+      name: 'fi-FI-Wavenet-A',
+      label: 'Aava',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-CA-Standard-A",
-      "label" : "Adalene",
-      "gender" : "FEMALE"
+      name: 'fr-CA-Standard-A',
+      label: 'Adalene',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-CA-Standard-B",
-      "label" : "Louis",
-      "gender" : "MALE"
+      name: 'fr-CA-Standard-B',
+      label: 'Louis',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-CA-Standard-C",
-      "label" : "Bernadette",
-      "gender" : "FEMALE"
+      name: 'fr-CA-Standard-C',
+      label: 'Bernadette',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-CA-Standard-D",
-      "label" : "Jules ",
-      "gender" : "MALE"
+      name: 'fr-CA-Standard-D',
+      label: 'Jules ',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-CA-Wavenet-A",
-      "label" : "Danielle",
-      "gender" : "FEMALE"
+      name: 'fr-CA-Wavenet-A',
+      label: 'Danielle',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-CA-Wavenet-B",
-      "label" : "Léo",
-      "gender" : "MALE"
+      name: 'fr-CA-Wavenet-B',
+      label: 'Léo',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-CA-Wavenet-C",
-      "label" : "Estelle",
-      "gender" : "FEMALE"
+      name: 'fr-CA-Wavenet-C',
+      label: 'Estelle',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-CA-Wavenet-D",
-      "label" : "Hugo",
-      "gender" : "MALE"
+      name: 'fr-CA-Wavenet-D',
+      label: 'Hugo',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-FR-Standard-A",
-      "label" : "Célia",
-      "gender" : "FEMALE"
+      name: 'fr-FR-Standard-A',
+      label: 'Célia',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-FR-Standard-B",
-      "label" : "Lucas",
-      "gender" : "MALE"
+      name: 'fr-FR-Standard-B',
+      label: 'Lucas',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-FR-Standard-C",
-      "label" : "Amélie",
-      "gender" : "FEMALE"
+      name: 'fr-FR-Standard-C',
+      label: 'Amélie',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-FR-Standard-D",
-      "label" : "Gabriel",
-      "gender" : "MALE"
+      name: 'fr-FR-Standard-D',
+      label: 'Gabriel',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-FR-Wavenet-A",
-      "label" : "Eloise",
-      "gender" : "FEMALE"
+      name: 'fr-FR-Wavenet-A',
+      label: 'Eloise',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-FR-Wavenet-B",
-      "label" : "Armand",
-      "gender" : "MALE"
+      name: 'fr-FR-Wavenet-B',
+      label: 'Armand',
+      gender: 'MALE'
     },
     {
-      "name" : "fr-FR-Wavenet-C",
-      "label" : "Esmée",
-      "gender" : "FEMALE"
+      name: 'fr-FR-Wavenet-C',
+      label: 'Esmée',
+      gender: 'FEMALE'
     },
     {
-      "name" : "fr-FR-Wavenet-D",
-      "label" : "Francis",
-      "gender" : "MALE"
+      name: 'fr-FR-Wavenet-D',
+      label: 'Francis',
+      gender: 'MALE'
     },
     {
-      "name" : "hi-IN-Standard-A",
-      "label" : "Shresta",
-      "gender" : "FEMALE"
+      name: 'hi-IN-Standard-A',
+      label: 'Shresta',
+      gender: 'FEMALE'
     },
     {
-      "name" : "hi-IN-Standard-B",
-      "label" : "Aadhish",
-      "gender" : "MALE"
+      name: 'hi-IN-Standard-B',
+      label: 'Aadhish',
+      gender: 'MALE'
     },
     {
-      "name" : "hi-IN-Standard-C",
-      "label" : "Aadhunik",
-      "gender" : "MALE"
+      name: 'hi-IN-Standard-C',
+      label: 'Aadhunik',
+      gender: 'MALE'
     },
     {
-      "name" : "hi-IN-Wavenet-A",
-      "label" : "Shushma",
-      "gender" : "FEMALE"
+      name: 'hi-IN-Wavenet-A',
+      label: 'Shushma',
+      gender: 'FEMALE'
     },
     {
-      "name" : "hi-IN-Wavenet-B",
-      "label" : "Aadi",
-      "gender" : "MALE"
+      name: 'hi-IN-Wavenet-B',
+      label: 'Aadi',
+      gender: 'MALE'
     },
     {
-      "name" : "hi-IN-Wavenet-C",
-      "label" : "Narendra",
-      "gender" : "MALE"
+      name: 'hi-IN-Wavenet-C',
+      label: 'Narendra',
+      gender: 'MALE'
     },
     {
-      "name" : "hu-HU-Standard-A",
-      "label" : "Hanna",
-      "gender" : "FEMALE"
+      name: 'hu-HU-Standard-A',
+      label: 'Hanna',
+      gender: 'FEMALE'
     },
     {
-      "name" : "hu-HU-Wavenet-A",
-      "label" : "Jazmin",
-      "gender" : "FEMALE"
+      name: 'hu-HU-Wavenet-A',
+      label: 'Jazmin',
+      gender: 'FEMALE'
     },
     {
-      "name" : "id-ID-Standard-A",
-      "label" : "Dara",
-      "gender" : "FEMALE"
+      name: 'id-ID-Standard-A',
+      label: 'Dara',
+      gender: 'FEMALE'
     },
     {
-      "name" : "id-ID-Standard-B",
-      "label" : "Agung",
-      "gender" : "MALE"
+      name: 'id-ID-Standard-B',
+      label: 'Agung',
+      gender: 'MALE'
     },
     {
-      "name" : "id-ID-Standard-C",
-      "label" : "Eka",
-      "gender" : "MALE"
+      name: 'id-ID-Standard-C',
+      label: 'Eka',
+      gender: 'MALE'
     },
     {
-      "name" : "id-ID-Wavenet-A",
-      "label" : "Iman",
-      "gender" : "FEMALE"
+      name: 'id-ID-Wavenet-A',
+      label: 'Iman',
+      gender: 'FEMALE'
     },
     {
-      "name" : "id-ID-Wavenet-B",
-      "label" : "Gunadi",
-      "gender" : "MALE"
+      name: 'id-ID-Wavenet-B',
+      label: 'Gunadi',
+      gender: 'MALE'
     },
     {
-      "name" : "id-ID-Wavenet-C",
-      "label" : "Panuta",
-      "gender" : "MALE"
+      name: 'id-ID-Wavenet-C',
+      label: 'Panuta',
+      gender: 'MALE'
     },
     {
-      "name" : "it-IT-Standard-A",
-      "label" : "Martina",
-      "gender" : "FEMALE"
+      name: 'it-IT-Standard-A',
+      label: 'Martina',
+      gender: 'FEMALE'
     },
     {
-      "name" : "it-IT-Wavenet-A",
-      "label" : "Viola",
-      "gender" : "FEMALE"
+      name: 'it-IT-Wavenet-A',
+      label: 'Viola',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ja-JP-Standard-A",
-      "label" : "Aiko",
-      "gender" : "FEMALE"
+      name: 'ja-JP-Standard-A',
+      label: 'Aiko',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ja-JP-Standard-B",
-      "label" : "Miku",
-      "gender" : "FEMALE"
+      name: 'ja-JP-Standard-B',
+      label: 'Miku',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ja-JP-Standard-C",
-      "label" : "Haruto",
-      "gender" : "MALE"
+      name: 'ja-JP-Standard-C',
+      label: 'Haruto',
+      gender: 'MALE'
     },
     {
-      "name" : "ja-JP-Standard-D",
-      "label" : "Yamato",
-      "gender" : "MALE"
+      name: 'ja-JP-Standard-D',
+      label: 'Yamato',
+      gender: 'MALE'
     },
     {
-      "name" : "ja-JP-Wavenet-A",
-      "label" : "Emica",
-      "gender" : "FEMALE"
+      name: 'ja-JP-Wavenet-A',
+      label: 'Emica',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ja-JP-Wavenet-B",
-      "label" : "Emiko",
-      "gender" : "FEMALE"
+      name: 'ja-JP-Wavenet-B',
+      label: 'Emiko',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ja-JP-Wavenet-C",
-      "label" : "Genkei",
-      "gender" : "MALE"
+      name: 'ja-JP-Wavenet-C',
+      label: 'Genkei',
+      gender: 'MALE'
     },
     {
-      "name" : "ja-JP-Wavenet-D",
-      "label" : "Kenzou",
-      "gender" : "MALE"
+      name: 'ja-JP-Wavenet-D',
+      label: 'Kenzou',
+      gender: 'MALE'
     },
     {
-      "name" : "ko-KR-Standard-A",
-      "label" : "Ha Eun",
-      "gender" : "FEMALE"
+      name: 'ko-KR-Standard-A',
+      label: 'Ha Eun',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ko-KR-Standard-B",
-      "label" : "Seo Ah",
-      "gender" : "FEMALE"
+      name: 'ko-KR-Standard-B',
+      label: 'Seo Ah',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ko-KR-Standard-C",
-      "label" : "Ha Joon",
-      "gender" : "MALE"
+      name: 'ko-KR-Standard-C',
+      label: 'Ha Joon',
+      gender: 'MALE'
     },
     {
-      "name" : "ko-KR-Standard-D",
-      "label" : "Si Woo",
-      "gender" : "MALE"
+      name: 'ko-KR-Standard-D',
+      label: 'Si Woo',
+      gender: 'MALE'
     },
     {
-      "name" : "ko-KR-Wavenet-A",
-      "label" : "Chin-Sun",
-      "gender" : "FEMALE"
+      name: 'ko-KR-Wavenet-A',
+      label: 'Chin-Sun',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ko-KR-Wavenet-B",
-      "label" : "Hwa-Young",
-      "gender" : "FEMALE"
+      name: 'ko-KR-Wavenet-B',
+      label: 'Hwa-Young',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ko-KR-Wavenet-C",
-      "label" : "Hyun-Ki",
-      "gender" : "MALE"
+      name: 'ko-KR-Wavenet-C',
+      label: 'Hyun-Ki',
+      gender: 'MALE'
     },
     {
-      "name" : "ko-KR-Wavenet-D",
-      "label" : "Jung",
-      "gender" : "MALE"
+      name: 'ko-KR-Wavenet-D',
+      label: 'Jung',
+      gender: 'MALE'
     },
     {
-      "name" : "nb-NO-Standard-A",
-      "label" : "Celina",
-      "gender" : "FEMALE"
+      name: 'nb-NO-Standard-A',
+      label: 'Celina',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nb-NO-Standard-B",
-      "label" : "Edvard",
-      "gender" : "MALE"
+      name: 'nb-NO-Standard-B',
+      label: 'Edvard',
+      gender: 'MALE'
     },
     {
-      "name" : "nb-NO-Standard-C",
-      "label" : "Evelyn",
-      "gender" : "FEMALE"
+      name: 'nb-NO-Standard-C',
+      label: 'Evelyn',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nb-NO-Standard-D",
-      "label" : "Ivar",
-      "gender" : "MALE"
+      name: 'nb-NO-Standard-D',
+      label: 'Ivar',
+      gender: 'MALE'
     },
     {
-      "name" : "nb-no-Standard-E",
-      "label" : "Hannah",
-      "gender" : "FEMALE"
+      name: 'nb-no-Standard-E',
+      label: 'Hannah',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nb-NO-Wavenet-A",
-      "label" : "Berit",
-      "gender" : "FEMALE"
+      name: 'nb-NO-Wavenet-A',
+      label: 'Berit',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nb-NO-Wavenet-B",
-      "label" : "Elena",
-      "gender" : "MALE"
+      name: 'nb-NO-Wavenet-B',
+      label: 'Elena',
+      gender: 'MALE'
     },
     {
-      "name" : "nb-NO-Wavenet-C",
-      "label" : "Anniken",
-      "gender" : "FEMALE"
+      name: 'nb-NO-Wavenet-C',
+      label: 'Anniken',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nb-NO-Wavenet-D",
-      "label" : "Jørgen",
-      "gender" : "MALE"
+      name: 'nb-NO-Wavenet-D',
+      label: 'Jørgen',
+      gender: 'MALE'
     },
     {
-      "name" : "nb-no-Wavenet-E",
-      "label" : "Hilma",
-      "gender" : "FEMALE"
+      name: 'nb-no-Wavenet-E',
+      label: 'Hilma',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Standard-A",
-      "label" : "Mirjam",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Standard-A',
+      label: 'Mirjam',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Standard-B",
-      "label" : "Jeroen",
-      "gender" : "MALE"
+      name: 'nl-NL-Standard-B',
+      label: 'Jeroen',
+      gender: 'MALE'
     },
     {
-      "name" : "nl-NL-Standard-C",
-      "label" : "Sander",
-      "gender" : "MALE"
+      name: 'nl-NL-Standard-C',
+      label: 'Sander',
+      gender: 'MALE'
     },
     {
-      "name" : "nl-NL-Standard-D",
-      "label" : "Nienke",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Standard-D',
+      label: 'Nienke',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Standard-E",
-      "label" : "Sabine",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Standard-E',
+      label: 'Sabine',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Wavenet-A",
-      "label" : "Denise",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Wavenet-A',
+      label: 'Denise',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Wavenet-B",
-      "label" : "Stefan",
-      "gender" : "MALE"
+      name: 'nl-NL-Wavenet-B',
+      label: 'Stefan',
+      gender: 'MALE'
     },
     {
-      "name" : "nl-NL-Wavenet-C",
-      "label" : "Koen",
-      "gender" : "MALE"
+      name: 'nl-NL-Wavenet-C',
+      label: 'Koen',
+      gender: 'MALE'
     },
     {
-      "name" : "nl-NL-Wavenet-D",
-      "label" : "Ineke",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Wavenet-D',
+      label: 'Ineke',
+      gender: 'FEMALE'
     },
     {
-      "name" : "nl-NL-Wavenet-E",
-      "label" : "Marije",
-      "gender" : "FEMALE"
+      name: 'nl-NL-Wavenet-E',
+      label: 'Marije',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Standard-A",
-      "label" : "Helena",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Standard-A',
+      label: 'Helena',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Standard-B",
-      "label" : "Dariusz",
-      "gender" : "MALE"
+      name: 'pl-PL-Standard-B',
+      label: 'Dariusz',
+      gender: 'MALE'
     },
     {
-      "name" : "pl-PL-Standard-C",
-      "label" : "Mariusz",
-      "gender" : "MALE"
+      name: 'pl-PL-Standard-C',
+      label: 'Mariusz',
+      gender: 'MALE'
     },
     {
-      "name" : "pl-PL-Standard-D",
-      "label" : "Marzena",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Standard-D',
+      label: 'Marzena',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Standard-E",
-      "label" : "Justyna",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Standard-E',
+      label: 'Justyna',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Wavenet-A",
-      "label" : "Ania",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Wavenet-A',
+      label: 'Ania',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Wavenet-B",
-      "label" : "Mietek",
-      "gender" : "MALE"
+      name: 'pl-PL-Wavenet-B',
+      label: 'Mietek',
+      gender: 'MALE'
     },
     {
-      "name" : "pl-PL-Wavenet-C",
-      "label" : "Igor",
-      "gender" : "MALE"
+      name: 'pl-PL-Wavenet-C',
+      label: 'Igor',
+      gender: 'MALE'
     },
     {
-      "name" : "pl-PL-Wavenet-D",
-      "label" : "Mariola",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Wavenet-D',
+      label: 'Mariola',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pl-PL-Wavenet-E",
-      "label" : "Henryka",
-      "gender" : "FEMALE"
+      name: 'pl-PL-Wavenet-E',
+      label: 'Henryka',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-BR-Standard-A",
-      "label" : "Fernanda",
-      "gender" : "FEMALE"
+      name: 'pt-BR-Standard-A',
+      label: 'Fernanda',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-BR-Wavenet-A",
-      "label" : "Maria",
-      "gender" : "FEMALE"
+      name: 'pt-BR-Wavenet-A',
+      label: 'Maria',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-PT-Standard-A",
-      "label" : "Matilde",
-      "gender" : "FEMALE"
+      name: 'pt-PT-Standard-A',
+      label: 'Matilde',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-PT-Standard-B",
-      "label" : "Alberto",
-      "gender" : "MALE"
+      name: 'pt-PT-Standard-B',
+      label: 'Alberto',
+      gender: 'MALE'
     },
     {
-      "name" : "pt-PT-Standard-C",
-      "label" : "Diego",
-      "gender" : "MALE"
+      name: 'pt-PT-Standard-C',
+      label: 'Diego',
+      gender: 'MALE'
     },
     {
-      "name" : "pt-PT-Standard-D",
-      "label" : "Carolina",
-      "gender" : "FEMALE"
+      name: 'pt-PT-Standard-D',
+      label: 'Carolina',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-PT-Wavenet-A",
-      "label" : "Mariana",
-      "gender" : "FEMALE"
+      name: 'pt-PT-Wavenet-A',
+      label: 'Mariana',
+      gender: 'FEMALE'
     },
     {
-      "name" : "pt-PT-Wavenet-B",
-      "label" : "Fabiano",
-      "gender" : "MALE"
+      name: 'pt-PT-Wavenet-B',
+      label: 'Fabiano',
+      gender: 'MALE'
     },
     {
-      "name" : "pt-PT-Wavenet-C",
-      "label" : "Gilberto",
-      "gender" : "MALE"
+      name: 'pt-PT-Wavenet-C',
+      label: 'Gilberto',
+      gender: 'MALE'
     },
     {
-      "name" : "pt-PT-Wavenet-D",
-      "label" : "Beatriz",
-      "gender" : "FEMALE"
+      name: 'pt-PT-Wavenet-D',
+      label: 'Beatriz',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ru-RU-Standard-A",
-      "label" : "Milana",
-      "gender" : "FEMALE"
+      name: 'ru-RU-Standard-A',
+      label: 'Milana',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ru-RU-Standard-B",
-      "label" : "Aleksei",
-      "gender" : "MALE"
+      name: 'ru-RU-Standard-B',
+      label: 'Aleksei',
+      gender: 'MALE'
     },
     {
-      "name" : "ru-RU-Standard-C",
-      "label" : "Veronika",
-      "gender" : "FEMALE"
+      name: 'ru-RU-Standard-C',
+      label: 'Veronika',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ru-RU-Standard-D",
-      "label" : "Andrey",
-      "gender" : "MALE"
+      name: 'ru-RU-Standard-D',
+      label: 'Andrey',
+      gender: 'MALE'
     },
     {
-      "name" : "ru-RU-Wavenet-A",
-      "label" : "Zhanna",
-      "gender" : "FEMALE"
+      name: 'ru-RU-Wavenet-A',
+      label: 'Zhanna',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ru-RU-Wavenet-B",
-      "label" : "Aleksandr",
-      "gender" : "MALE"
+      name: 'ru-RU-Wavenet-B',
+      label: 'Aleksandr',
+      gender: 'MALE'
     },
     {
-      "name" : "ru-RU-Wavenet-C",
-      "label" : "Arina",
-      "gender" : "FEMALE"
+      name: 'ru-RU-Wavenet-C',
+      label: 'Arina',
+      gender: 'FEMALE'
     },
     {
-      "name" : "ru-RU-Wavenet-D",
-      "label" : "Daniil",
-      "gender" : "MALE"
+      name: 'ru-RU-Wavenet-D',
+      label: 'Daniil',
+      gender: 'MALE'
     },
     {
-      "name" : "sk-SK-Standard-A",
-      "label" : "Helga",
-      "gender" : "FEMALE"
+      name: 'sk-SK-Standard-A',
+      label: 'Helga',
+      gender: 'FEMALE'
     },
     {
-      "name" : "sk-SK-Wavenet-A",
-      "label" : "Nora",
-      "gender" : "FEMALE"
+      name: 'sk-SK-Wavenet-A',
+      label: 'Nora',
+      gender: 'FEMALE'
     },
     {
-      "name" : "sv-SE-Standard-A",
-      "label" : "Christine",
-      "gender" : "FEMALE"
+      name: 'sv-SE-Standard-A',
+      label: 'Christine',
+      gender: 'FEMALE'
     },
     {
-      "name" : "sv-SE-Wavenet-A",
-      "label" : "Anja",
-      "gender" : "FEMALE"
+      name: 'sv-SE-Wavenet-A',
+      label: 'Anja',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Standard-A",
-      "label" : "Miray",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Standard-A',
+      label: 'Miray',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Standard-B",
-      "label" : "Adal",
-      "gender" : "MALE"
+      name: 'tr-TR-Standard-B',
+      label: 'Adal',
+      gender: 'MALE'
     },
     {
-      "name" : "tr-TR-Standard-C",
-      "label" : "Ecrin",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Standard-C',
+      label: 'Ecrin',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Standard-D",
-      "label" : "Azra",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Standard-D',
+      label: 'Azra',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Standard-E",
-      "label" : "Ahmet",
-      "gender" : "MALE"
+      name: 'tr-TR-Standard-E',
+      label: 'Ahmet',
+      gender: 'MALE'
     },
     {
-      "name" : "tr-TR-Wavenet-A",
-      "label" : "Zehra",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Wavenet-A',
+      label: 'Zehra',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Wavenet-B",
-      "label" : "Mehmet",
-      "gender" : "MALE"
+      name: 'tr-TR-Wavenet-B',
+      label: 'Mehmet',
+      gender: 'MALE'
     },
     {
-      "name" : "tr-TR-Wavenet-C",
-      "label" : "Eda",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Wavenet-C',
+      label: 'Eda',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Wavenet-D",
-      "label" : "Eylül",
-      "gender" : "FEMALE"
+      name: 'tr-TR-Wavenet-D',
+      label: 'Eylül',
+      gender: 'FEMALE'
     },
     {
-      "name" : "tr-TR-Wavenet-E",
-      "label" : "Asaf",
-      "gender" : "MALE"
+      name: 'tr-TR-Wavenet-E',
+      label: 'Asaf',
+      gender: 'MALE'
     },
     {
-      "name" : "uk-UA-Standard-A",
-      "label" : "Natalia",
-      "gender" : "FEMALE"
+      name: 'uk-UA-Standard-A',
+      label: 'Natalia',
+      gender: 'FEMALE'
     },
     {
-      "name" : "uk-UA-Wavenet-A",
-      "label" : "Oleksander",
-      "gender" : "FEMALE"
+      name: 'uk-UA-Wavenet-A',
+      label: 'Oleksander',
+      gender: 'FEMALE'
     },
     {
-      "name" : "vi-VN-Standard-A",
-      "label" : "Anh",
-      "gender" : "FEMALE"
+      name: 'vi-VN-Standard-A',
+      label: 'Anh',
+      gender: 'FEMALE'
     },
     {
-      "name" : "vi-VN-Standard-B",
-      "label" : "An",
-      "gender" : "MALE"
+      name: 'vi-VN-Standard-B',
+      label: 'An',
+      gender: 'MALE'
     },
     {
-      "name" : "vi-VN-Standard-C",
-      "label" : "Linh",
-      "gender" : "FEMALE"
+      name: 'vi-VN-Standard-C',
+      label: 'Linh',
+      gender: 'FEMALE'
     },
     {
-      "name" : "vi-VN-Standard-D",
-      "label" : "Bao",
-      "gender" : "MALE"
+      name: 'vi-VN-Standard-D',
+      label: 'Bao',
+      gender: 'MALE'
     },
     {
-      "name" : "vi-VN-Wavenet-A",
-      "label" : "Minh",
-      "gender" : "FEMALE"
+      name: 'vi-VN-Wavenet-A',
+      label: 'Minh',
+      gender: 'FEMALE'
     },
     {
-      "name" : "vi-VN-Wavenet-B",
-      "label" : "Bình",
-      "gender" : "MALE"
+      name: 'vi-VN-Wavenet-B',
+      label: 'Bình',
+      gender: 'MALE'
     },
     {
-      "name" : "vi-VN-Wavenet-C",
-      "label" : "Kim",
-      "gender" : "FEMALE"
+      name: 'vi-VN-Wavenet-C',
+      label: 'Kim',
+      gender: 'FEMALE'
     },
     {
-      "name" : "vi-VN-Wavenet-D",
-      "label" : "Anh Dung",
-      "gender" : "MALE"
+      name: 'vi-VN-Wavenet-D',
+      label: 'Anh Dung',
+      gender: 'MALE'
     }
   ];
 
@@ -993,10 +992,10 @@ const updateVoicesLabel = async () => {
 
     // Do the updates
     for (const voice of googleVoices) {
-      const voiceMape = (voiceLabelMapping.find(voiceMap => voiceMap.name === voice.name));
-      const label = (voiceMape) ? voiceMape.label : voice.name;
+      const voiceMape = voiceLabelMapping.find(voiceMap => voiceMap.name === voice.name);
+      const label = voiceMape ? voiceMape.label : voice.name;
 
-      if (label === voice.name) logger.warn(loggerPrefix, `Skipped "${voice.name}". No label found in mapping.`)
+      if (label === voice.name) logger.warn(loggerPrefix, `Skipped "${voice.name}". No label found in mapping.`);
       await voiceRepository.update(voice.id, { label });
 
       logger.info(loggerPrefix, `Updated "${voice.name}" with label: ${label}.`);
@@ -1007,7 +1006,7 @@ const updateVoicesLabel = async () => {
   } finally {
     logger.info(loggerPrefix, 'Done.');
   }
-}
+};
 
 const updateIsLanguageDefaultForVoices = async () => {
   const loggerPrefix = 'Language Default Voices:';
@@ -1016,7 +1015,7 @@ const updateIsLanguageDefaultForVoices = async () => {
   const voiceLanguageDefaultMapping = [
     'cs-CZ-Standard-A', // CZ
     'sk-SK-Standard-A', // SK
-    'Mizuki', //JP
+    'Mizuki', // JP
     'Maja', // PL
     'Carmen', // RO
     'Liv', // NO
@@ -1057,7 +1056,7 @@ const updateIsLanguageDefaultForVoices = async () => {
   } finally {
     logger.info(loggerPrefix, 'Done.');
   }
-}
+};
 
 const updateIsActiveIsPremiumForVoices = async () => {
   const loggerPrefix = 'Update isActive and isPremium Voices:';
@@ -1088,28 +1087,25 @@ const updateIsActiveIsPremiumForVoices = async () => {
   } finally {
     logger.info(loggerPrefix, 'Done.');
   }
-}
+};
 
 const updateIsHighestQualityForVoices = async () => {
   const loggerPrefix = 'Update isHighestQuality Voices:';
   const voiceRepository = getRepository(Voice);
 
   try {
-
     const voices = await voiceRepository.find();
 
     // Do the updates
     for (const voice of voices) {
-
       if (voice.synthesizer !== Synthesizer.GOOGLE) {
         logger.info(loggerPrefix, `"${voice.name}" is not a Google voice, cannot set isHighestQuality to true.`);
       } else {
-        const isHighestQuality = (voice.name.toLowerCase().includes('wavenet')) ? true : false;
+        const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
         await voiceRepository.update(voice.id, { isHighestQuality });
 
         logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
       }
-
     }
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
@@ -1117,7 +1113,7 @@ const updateIsHighestQualityForVoices = async () => {
   } finally {
     logger.info(loggerPrefix, 'Done.');
   }
-}
+};
 
 const seedInAppSubscriptions = async () => {
   const loggerPrefix = 'Seeding In-App Subscriptions:';
@@ -1131,7 +1127,9 @@ const seedInAppSubscriptions = async () => {
       const foundSubscription = await inAppSubscriptionRepository.findOne({ productId: inAppSubscription.productId });
 
       if (foundSubscription) {
-        logger.warn(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} already exists. We don't add it again`)
+        logger.info(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} already exists. We update it to make sure it's in sync.`);
+        await inAppSubscriptionRepository.update(foundSubscription.id, inAppSubscription);
+        logger.info(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} updated!`);
       } else {
         logger.info(loggerPrefix, 'Creating subscription:', inAppSubscription.name);
         const subscriptionToCreate = await inAppSubscriptionRepository.create(inAppSubscription);
@@ -1172,13 +1170,13 @@ const createVoicePreviews = async () => {
           id: In(languageIds)
         }
       }
-    })
+    });
 
     logger.info(loggerPrefix, `Creating voice previews for ${voicesWithoutPreview.length} voices...`);
 
     for (const voice of voicesWithoutPreview) {
       const updatedVoice = await voiceRepository.createVoicePreview(voice.id);
-      logger.info(loggerPrefix, `Created voice preview for: ${updatedVoice.name}`)
+      logger.info(loggerPrefix, `Created voice preview for: ${updatedVoice.name}`);
     }
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
@@ -1186,13 +1184,12 @@ const createVoicePreviews = async () => {
   } finally {
     logger.info(loggerPrefix, 'Done.');
   }
-
-}
+};
 
 /**
  * This file ensures we have the same basic data on every environment we use
  */
-(async() => {
+(async () => {
   try {
     await createConnection(connectionOptions());
 
@@ -1226,7 +1223,6 @@ const createVoicePreviews = async () => {
     // Creates voice previews for the active voices inside a language
     // Important: uses the Text To Speech API's
     await createVoicePreviews();
-
   } catch (err) {
     logger.error('Error during run');
     logger.error(err);
@@ -1234,5 +1230,4 @@ const createVoicePreviews = async () => {
   } finally {
     process.exit();
   }
-
 })();

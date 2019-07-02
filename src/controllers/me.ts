@@ -15,9 +15,9 @@ const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
 
 export const findCurrentUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const userRepository = getRepository(User);
+  const userRepository = getCustomRepository(UserRepository);
 
-  const user = await userRepository.findOne(userId, { relations: ['voiceSettings', 'inAppSubscriptions'] });
+  const user = await userRepository.findUserDetails(userId);
 
   if (!user) return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND });
 
@@ -137,8 +137,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, 'Setting default voice...');
 
   try {
-
-     // Check if the voice exists and is active
+    // Check if the voice exists and is active
     const voice = await voiceRepository.findOne(voiceId, { where: { isActive: true } });
 
     if (!voice) {
@@ -147,11 +146,13 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
       throw new Error(errorMessage);
     }
 
-    const userIsSubscribed = await userRepository.findIsSubscribed(userId);
+    const user = await userRepository.findUserDetails(userId);
+
+    if (!user) return res.status(400).json({ message: 'User not found.' });
 
     // If a user is not subscribed, but tries to change to a premium voice
     // Notify the user he cannot do this
-    if (!userIsSubscribed && voice.isPremium) {
+    if (!user.isSubscribed && voice.isPremium) {
       const errorMessage = 'It appears you do not have an active Premium subscription to use this voice. If you want to use this voice, please upgrade to a Premium subscription.';
       logger.warn(loggerPrefix, errorMessage);
       throw new Error(errorMessage);
@@ -206,7 +207,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Done!');
     return res.status(200).json({ message: 'Voice set!' });
   } catch (err) {
-    const errorMessage = (err && err.message) ? err.message : 'An unexpected error happened while setting this voice as a default for this language.';
+    const errorMessage = err && err.message ? err.message : 'An unexpected error happened while setting this voice as a default for this language.';
     logger.error(loggerPrefix, errorMessage, err);
     Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
