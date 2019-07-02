@@ -23,7 +23,7 @@ export default [
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 300 * 60, // 300 minutes
     limitSecondsPerArticle: 25 * 60, // 25 minutes
-    isActive: true
+    isActive: false
   },
   {
     productId: 'free',
