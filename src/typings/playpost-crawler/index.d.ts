@@ -1,6 +1,6 @@
 declare namespace PostplayCrawler {
-
   export type Response = {
+    crawler: string;
     title: string | null;
     url: string;
     urlParts: UrlParseResult;
@@ -36,7 +36,7 @@ declare namespace PostplayCrawler {
     username: string;
     origin: string;
     href: string;
-  }
+  };
 
   export type ReadabilityResult = {
     title: string | null;
@@ -47,7 +47,7 @@ declare namespace PostplayCrawler {
     length: number | null;
     excerpt: string | null;
     siteName: string | null;
-  }
+  };
 
   export type MetadataResult = {
     author: string | null;
