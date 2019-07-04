@@ -1,6 +1,7 @@
 declare namespace PostplayCrawler {
 
   export type Response = {
+    crawler: 'fetcher' | 'browser';
     title: string | null;
     url: string;
     urlParts: UrlParseResult;
