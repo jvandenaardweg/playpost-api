@@ -16,7 +16,7 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
     type: 'postgres',
     url: process.env.DATABASE_DIGITALOCEAN ? process.env.DATABASE_DIGITALOCEAN : process.env.DATABASE_URL,
     extra: {
-      ssl: process.env.NODE_ENV === 'production' ? true : true // For Heroku
+      ssl: process.env.NODE_ENV === 'production' ? true : false // For Heroku
     },
     cache: {
       type: 'ioredis',

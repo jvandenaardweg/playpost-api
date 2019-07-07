@@ -25,7 +25,8 @@ export class AudiofileRepository extends Repository<Audiofile> {
           id: userId
         },
         createdAt: Between(firstDayOfCurrentMonth, lastDayOfCurrentMonth)
-      }
+      },
+      select: ['length']
     });
 
     if (!userAudiofilesInCurrentMonth) return 0;
