@@ -16,9 +16,8 @@ export enum AudiofileMimeType {
 }
 
 @Entity()
-@Index(['article'])
+@Index(['article', 'user', 'createdAt'])
 export class Audiofile {
-
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
