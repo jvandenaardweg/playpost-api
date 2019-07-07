@@ -74,6 +74,9 @@ if (!process.env.JWT_SECRET) {
 if (!process.env.DATABASE_URL) {
   throw new Error('Required environment variable "DATABASE_URL" not set.');
 }
+// if (!process.env.DATABASE_DIGITALOCEAN) {
+//   throw new Error('Required environment variable "DATABASE_DIGITALOCEAN" not set.');
+// }
 if (!process.env.REDIS_URL) {
   throw new Error('Required environment variable "REDIS_URL" not set.');
 }
