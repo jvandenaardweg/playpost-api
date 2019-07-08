@@ -10,7 +10,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 120 * 60, // 120 minutes
-    limitSecondsPerArticle: 15 * 60, // 15 minutes
+    limitSecondsPerArticle: 30 * 60, // 30 minutes
     isActive: true
   },
   {
@@ -22,7 +22,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 300 * 60, // 300 minutes
-    limitSecondsPerArticle: 25 * 60, // 25 minutes
+    limitSecondsPerArticle: 30 * 60, // 25 minutes
     isActive: false
   },
   {
@@ -34,7 +34,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 300 * 60, // 300 minutes
-    limitSecondsPerArticle: 25 * 60, // 25 minutes
+    limitSecondsPerArticle: 30 * 60, // 25 minutes
     isActive: true
   },
   {
@@ -46,7 +46,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.INTERNAL,
     limitSecondsPerMonth: 30 * 60, // 30 minutes
-    limitSecondsPerArticle: 5 * 60, // 5 minutes
+    limitSecondsPerArticle: 30 * 60, // 5 minutes
     isActive: true
   }
 ] as InAppSubscription[];
