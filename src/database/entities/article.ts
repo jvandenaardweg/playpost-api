@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany, Index } from 'typeorm';
 import { IsUUID, IsUrl } from 'class-validator';
 
 import { User } from './user';
@@ -7,7 +7,7 @@ import { PlaylistItem } from './playlist-item';
 
 import { ColumnNumericTransformer } from '../utils';
 import { logger } from '../../utils';
-import * as ArticlesPubSub  from '../../pubsub/articles';
+import * as ArticlesPubSub from '../../pubsub/articles';
 import { Language } from './language';
 
 export enum ArticleStatus {
@@ -18,8 +18,8 @@ export enum ArticleStatus {
 }
 
 @Entity()
+@Index(['url', 'canonicalUrl'])
 export class Article extends BaseEntity {
-
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
@@ -102,10 +102,9 @@ export class Article extends BaseEntity {
 
       await ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
     } catch (err) {
-      const errorMessage = (err && err.message) ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
+      const errorMessage = err && err.message ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
       logger.error(loggerPrefix, errorMessage);
       throw err;
     }
-
   }
 }

@@ -281,6 +281,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     articleId = createdArticle.id;
   }
 
+  // TODO: put article creation and playlist item creation in transaction
+
   const playlistItemToCreate = await playlistItemRepository.create({
     article: {
       id: articleId
