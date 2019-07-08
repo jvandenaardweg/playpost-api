@@ -136,3 +136,12 @@ Each automatic renewal sends a transaction to the app. The transaction, or trans
 1. Check if we can run `npm run typeorm:schema:sync` (could be destructive operation, so please use migrations)
 2. Run `npm run database:sync`
 3. Run `npm run caches:empty`
+
+## Run schema:sync on production
+
+**Important:** Schema syncing could be destructive. First check what queries it will run...
+
+1. SSH into the server
+2. Run: `dokku enter playpost-api-production web`
+3. Run: `npm run typeorm schema:sync`
+4. Schema is now synced.
