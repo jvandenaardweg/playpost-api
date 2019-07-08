@@ -56,15 +56,6 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   authorName: string;
 
-  // This column is to indicate wether or not this article is behind a login
-  // If it's behind a login, we cannot play the full article
-  // When isPublic is "null", we just haven't done that check
-  @Column({ nullable: true })
-  isPublic: boolean;
-
-  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the documentHtml to the user. If you need it, use in your find query { select: ['documentHtml'] }
-  documentHtml: string;
-
   @Column('text', { nullable: true })
   html: string;
 
