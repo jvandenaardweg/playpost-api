@@ -7,10 +7,11 @@ import { setupServer } from './server';
 
 const WORKER_COUNT = process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
 
+logger.info('App init:', `Using ${WORKER_COUNT} workers...`);
+
 async function bootstrap() {
-  logger.info('App init:', `Using ${WORKER_COUNT} workers...`);
   await expressCluster(
-    async w => {
+    async () => {
       const app = await setupServer();
       return app;
     },

@@ -27,6 +27,13 @@ import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore, expressBruteRedisStore } from './cache';
 import { logger } from './utils';
 
+const PORT = process.env.PORT || 3000;
+
+const IS_PROTECTED = passport.authenticate('jwt', {
+  session: false,
+  failWithError: true
+});
+
 export const setupServer = async () => {
   // Check required env vars
   if (!process.env.NODE_ENV) {
@@ -99,13 +106,6 @@ export const setupServer = async () => {
     throw new Error('Required environment variable "AWS_REGION" not set.');
   }
 
-  const PORT = process.env.PORT || 3000;
-  const IS_PROTECTED = passport.authenticate('jwt', {
-    session: false,
-    failWithError: true
-  });
-
-  // const bruteStore = new ExpressBrute.MemoryStore();
   const bruteforce = new ExpressBrute(expressBruteRedisStore, {
     freeRetries: process.env.NODE_ENV === 'production' ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
     minWait: 1000 * 60 * 5, // 5 minutes
@@ -132,12 +132,10 @@ export const setupServer = async () => {
     }
   });
 
-  const defaultConnection = connectionOptions('default');
-
   logger.info('App init:', 'Connecting with database...');
 
   // Create a connection with the database
-  const connection = await createConnection(defaultConnection);
+  const connection = await createConnection(connectionOptions('default'));
 
   logger.info('App init:', 'Connected with database', connection.options);
 
