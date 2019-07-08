@@ -68,7 +68,7 @@ workflows:
           filters:
             branches:
               only: master
-      - deploy-to-develop:
+      - deploy-to-test:
           requires:
             - build-and-test
           filters:
