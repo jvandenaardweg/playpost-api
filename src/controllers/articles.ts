@@ -107,7 +107,6 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     let text: string | undefined = undefined;
     let html: string | undefined = undefined;
     let url: string = '';
-    let documentHtml: string | undefined = undefined;
     let readingTime: number | undefined = undefined;
     let imageUrl: string | undefined = undefined;
     let authorName: string | undefined = undefined;
@@ -120,7 +119,6 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
     if (response.ssml) ssml = response.ssml;
     if (response.articleText) text = response.articleText;
     if (response.articleHTML) html = response.articleHTML;
-    if (response.completeHTML) documentHtml = response.completeHTML;
     if (response.readingTimeInSeconds) {
       readingTime = response.readingTimeInSeconds;
     }
@@ -164,8 +162,7 @@ export const fetchFullArticleContents = async (articleUrl: string) => {
       canonicalUrl,
       language,
       title,
-      siteName,
-      documentHtml
+      siteName
     };
   } catch (err) {
     const message = err && err.message ? err.message : 'Unknown error';
@@ -207,7 +204,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
@@ -229,11 +226,6 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   if (!html) {
     return res.status(400).json({
       message: 'The information we got from crawling the page was not enough. Missing html.'
-    });
-  }
-  if (!documentHtml) {
-    return res.status(400).json({
-      message: 'The information we got from crawling the page was not enough. Missing documentHtml.'
     });
   }
   if (!language) {
@@ -272,7 +264,6 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     ssml,
     text,
     html,
-    documentHtml,
     readingTime,
     description,
     imageUrl,
@@ -326,7 +317,7 @@ export const updateArticleToFull = async (articleId: string) => {
   // This might take a few seconds to resolve, as the crawler parses the whole page
   // Takes around 5 seconds for new websites
   // About 2 seconds for already visited websites
-  const { ssml, text, html, documentHtml, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleToUpdate.url);
+  const { ssml, text, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleToUpdate.url);
 
   logger.info(loggerPrefix, 'Successfully fetched full article contents!');
 
@@ -343,9 +334,6 @@ export const updateArticleToFull = async (articleId: string) => {
   }
   if (!html) {
     throw new Error('The information we got from crawling the page was not enough. Missing html.');
-  }
-  if (!documentHtml) {
-    throw new Error('The information we got from crawling the page was not enough. Missing documentHtml.');
   }
   if (!language) {
     throw new Error('The information we got from crawling the page was not enough. Missing language.');
@@ -386,7 +374,6 @@ export const updateArticleToFull = async (articleId: string) => {
     ssml,
     text,
     html,
-    documentHtml,
     readingTime,
     description,
     imageUrl,

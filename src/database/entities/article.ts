@@ -62,9 +62,6 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   isPublic: boolean;
 
-  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the documentHtml to the user. If you need it, use in your find query { select: ['documentHtml'] }
-  documentHtml: string;
-
   @Column('text', { nullable: true })
   html: string;
 
