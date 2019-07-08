@@ -22,9 +22,12 @@ jobs: # a collection of steps
       - run: # run tests
           name: Run tests
           command: npm test
-deployment:
-  production:
-    branch: master
-    commands:
-      - git remote add dokku dokku@dokku-api.playpost.app:playpost-api-production
-      - git push dokku master
+  deploy:
+    working_directory: ~/playpost-api # directory where steps will run
+    docker: # run the steps with Docker
+      - image: circleci/node:lts # ...with this image as the primary container; this is where all `steps` will run
+    steps: # a collection of executable commands
+      - push
+      - run:
+          name: Deploy master to production
+          command: git remote add dokku dokku@dokku-api.playpost.app:playpost-api-production && git push dokku master
