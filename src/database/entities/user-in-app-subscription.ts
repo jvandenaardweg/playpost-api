@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { IsUUID, IsDate } from 'class-validator';
 import { User } from './user';
 import { InAppSubscription } from './in-app-subscription';
@@ -18,9 +18,7 @@ export enum InAppSubscriptionEnvironment {
 
 @Entity()
 @Index(['user', 'inAppSubscription', 'latestTransactionId', 'originalTransactionId'])
-@Unique(['originalTransactionId', 'latestTransactionId'])
 export class UserInAppSubscription {
-
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
