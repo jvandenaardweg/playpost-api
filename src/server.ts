@@ -123,7 +123,7 @@ export const setupServer = async () => {
   const rateLimiter = new ExpressRateLimit({
     store: expressRateLimitRedisStore,
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    max: process.env.NODE_ENV === 'production' ? 9999999 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
     handler: (req, res, next) => {
       // Send JSON so we can read the message
       return res.status(429).json({
