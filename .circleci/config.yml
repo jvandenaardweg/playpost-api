@@ -27,8 +27,6 @@ jobs:
   # Deploy to PRODUCTION
   deploy-to-production:
     working_directory: ~/playpost-api
-    branches:
-      only: master
     docker:
       - image: circleci/node:lts
     steps:
@@ -49,8 +47,6 @@ jobs:
   # Deploy to TEST
   deploy-to-test:
     working_directory: ~/playpost-api
-    branches:
-      only: develop
     docker:
       - image: circleci/node:lts
     steps:
@@ -72,7 +68,7 @@ workflows:
           filters:
             branches:
               only: master
-      - deploy-to-develop:
+      - deploy-to-test:
           requires:
             - build-and-test
           filters:
