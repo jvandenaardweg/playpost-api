@@ -1,8 +1,8 @@
 version: 2
 jobs:
 
-  # Build
-  build:
+  # Build and test
+  build-and-test:
     working_directory: ~/playpost-api
     docker:
       - image: circleci/node:lts
@@ -22,11 +22,13 @@ jobs:
           command: npm run build
       - run:
           name: Run tests
-          command: npm test
+          command: npm run test:circleci
 
   # Deploy to PRODUCTION
   deploy-to-production:
     working_directory: ~/playpost-api
+    branches:
+      only: master
     docker:
       - image: circleci/node:lts
     steps:
@@ -47,6 +49,8 @@ jobs:
   # Deploy to TEST
   deploy-to-test:
     working_directory: ~/playpost-api
+    branches:
+      only: develop
     docker:
       - image: circleci/node:lts
     steps:
@@ -59,24 +63,18 @@ jobs:
 workflows:
   version: 2
 
-  # Build PRODUCTION
-  build-deploy-master:
+  build-test-deploy:
     jobs:
-      - build
+      - build-and-test
       - deploy-to-production:
           requires:
-            - build
+            - build-and-test
           filters:
             branches:
               only: master
-
-  # Build TEST
-  build-deploy-develop:
-    jobs:
-      - build
-      - deploy-to-test:
+      - deploy-to-develop:
           requires:
-            - build
+            - build-and-test
           filters:
             branches:
               only: develop
