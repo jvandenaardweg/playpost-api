@@ -1,18 +1,4 @@
 require('dotenv').config();
-
-import { getGoogleCloudCredentials } from './utils/credentials';
-
-// Attach stackdriver on our Heroku environments
-if (process.env.HEROKU_SLUG_COMMIT && process.env.NODE_ENV && ['production', 'staging', 'test'].includes(process.env.NODE_ENV)) {
-  require('@google-cloud/debug-agent').start({
-    ...getGoogleCloudCredentials(),
-    serviceContext: {
-      service: 'API',
-      version: process.env.HEROKU_SLUG_COMMIT
-    }
-  });
-}
-
 import 'express-async-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
@@ -74,9 +60,6 @@ if (!process.env.JWT_SECRET) {
 if (!process.env.DATABASE_URL) {
   throw new Error('Required environment variable "DATABASE_URL" not set.');
 }
-// if (!process.env.DATABASE_DIGITALOCEAN) {
-//   throw new Error('Required environment variable "DATABASE_DIGITALOCEAN" not set.');
-// }
 if (!process.env.REDIS_URL) {
   throw new Error('Required environment variable "REDIS_URL" not set.');
 }
@@ -141,7 +124,7 @@ const bruteforce = new ExpressBrute(expressBruteRedisStore, {
 const rateLimiter = new ExpressRateLimit({
   store: expressRateLimitRedisStore,
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: process.env.NODE_ENV === 'production' ? 60 : 9999, // 60 requests allowed per minute, 1 per second
+  max: process.env.NODE_ENV === 'production' ? 30 : 9999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
   handler: (req, res, next) => {
     // Send JSON so we can read the message
     return res.status(429).json({
@@ -296,7 +279,7 @@ createConnection(defaultConnection).then(async (connection: any) => {
 
       if (err.message === 'Unauthorized') {
         return res.status(401).json({
-          message: 'You are not logged or your access token is expired/invalid. Please log in to the app and try again.'
+          message: 'You are not logged or your access is expired. Please log in to the app and try again.'
         });
       }
 

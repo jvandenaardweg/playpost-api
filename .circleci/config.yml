@@ -1,51 +1,82 @@
-version: 2 # use CircleCI 2.0
-jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
-    working_directory: ~/playpost-api # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:lts # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
-      - checkout # special step to check out source code to working directory
-      - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+version: 2
+jobs:
+
+  # Build
+  build:
+    working_directory: ~/playpost-api
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Install NPM depedencies
           command: npm install
-      - save_cache: # special step to save the dependency cache
+      - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
       - run:
           name: Build TypeScript
           command: npm run build
-      - run: # run tests
+      - run:
           name: Run tests
           command: npm test
-  deploy:
-    working_directory: ~/playpost-api # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:lts # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
+
+  # Deploy to PRODUCTION
+  deploy-to-production:
+    working_directory: ~/playpost-api
+    docker:
+      - image: circleci/node:lts
+    steps:
       - checkout
       - add_ssh_keys:
           fingerprints:
             - "b2:b5:c6:86:73:74:38:eb:c7:42:6d:3b:84:c6:39:5c"
-      - run: ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
+      - run:
+          name: Add production IP address to known_hosts
+          command: ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
       - run:
           name: Add dokku as remote branch
           command: git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
       - run:
-          name: Push to dokku production
+          name: Push to production
           command: git push dokku master
+
+  # Deploy to TEST
+  deploy-to-test:
+    working_directory: ~/playpost-api
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - run:
+          name: Deploy develop to Heroku
+          command: |
+            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
+
 workflows:
   version: 2
-  build-deploy:
+
+  # Build PRODUCTION
+  build-deploy-master:
     jobs:
       - build
-      - deploy:
+      - deploy-to-production:
           requires:
             - build
           filters:
             branches:
               only: master
+
+  # Build TEST
+  build-deploy-develop:
+    jobs:
+      - build
+      - deploy-to-test:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop

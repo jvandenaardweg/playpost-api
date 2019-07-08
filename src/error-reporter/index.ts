@@ -4,7 +4,7 @@ import * as Integrations from '@sentry/integrations';
 Sentry.init({
   dsn: process.env.NODE_ENV !== 'development' ? process.env.SENTRY_DSN : undefined,
   environment: process.env.NODE_ENV,
-  release: process.env.NODE_ENV !== 'development' ? process.env.HEROKU_SLUG_COMMIT : undefined,
+  release: process.env.GIT_REV ? process.env.GIT_REV : undefined,
   integrations: [
     new Integrations.RewriteFrames({
       root: __dirname
