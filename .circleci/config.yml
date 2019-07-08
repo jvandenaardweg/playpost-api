@@ -61,7 +61,12 @@ workflows:
 
   build-test-deploy:
     jobs:
-      - build-and-test
+      - build-and-test:
+          filters:
+              branches:
+                only:
+                  - master
+                  - develop
       - deploy-to-production:
           requires:
             - build-and-test
