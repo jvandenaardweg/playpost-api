@@ -33,7 +33,7 @@ jobs: # a collection of steps
             - "b2:b5:c6:86:73:74:38:eb:c7:42:6d:3b:84:c6:39:5c"
       - run:
           name: Add dokku as remote branch
-          command: git remote add dokku dokku@dokku-api.playpost.app:playpost-api-production
+          command: git remote add dokku dokku@142.93.227.22:playpost-api-production
       - run:
           name: Push to dokku production
           command: git push dokku master
