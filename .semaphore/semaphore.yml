@@ -30,42 +30,18 @@ blocks:
       jobs:
           - name: Run tests
             commands:
-            - npm run test:circleci
+            - npm run test
 
-  - name: Deploy to Test
-    skip:
-      when: "branch = 'master'"
-    task:
-      secrets:
-        - name: playpost-api-secrets
-      prologue:
-        commands:
-          - checkout
-          - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
-          - nvm use
-      jobs:
-        - name: Deploy to Heroku
-          commands:
-            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
-
-  - name: Deploy to Production
-    skip:
-      when: "branch = 'master'"
-    task:
-      secrets:
-        - name: playpost-api-secrets
-      prologue:
-        commands:
-          - checkout
-          - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
-          - nvm use
-      jobs:
-        - name: Add production IP address to known_hosts
-          commands:
-            - ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
-        - name: Add dokku as remote branch
-          commands:
-            - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
-        - name: Push to production
-          commands:
-            - git push dokku master
+promotions:
+  - name: Production deploy
+    pipeline_file: deploy-production.yml
+    auto_promote_on:
+      - result: passed
+        branch:
+          - master
+  - name: Test deploy
+    pipeline_file: deploy-test.yml
+    auto_promote_on:
+      - result: passed
+        branch:
+          - develop

@@ -1,0 +1,21 @@
+version: v1.0
+name: Deploy to TEST
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Deploy
+    task:
+      secrets:
+        - name: playpost-api-secrets
+      prologue:
+        commands:
+          - checkout
+          - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+          - nvm use
+      jobs:
+        - name: Deploy to Heroku
+          commands:
+            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
+
