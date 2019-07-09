@@ -8,19 +8,23 @@ blocks:
   - name: Install & Build
     task:
       jobs:
-        - name: Git checkout
-          commands:
-            - checkout
         - name: Use correct Node version
           commands:
+            - checkout
             - nvm use
         - name: NPM Install and cache
           commands:
+            - checkout
             - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
             - npm install
             - cache store node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json) node_modules
+        - name: Run linter
+          commands:
+            - checkout
+            - npm run lint
         - name: Build TypeScript
           commands:
+            - checkout
             - npm run build
   - name: Test
     task:
@@ -31,6 +35,7 @@ blocks:
       jobs:
           - name: Run tests
             commands:
+            - checkout
             - npm run test:circleci
 
   - name: Deploy to Test
@@ -40,6 +45,7 @@ blocks:
       jobs:
         - name: Deploy to Heroku
           commands:
+            - checkout
             - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
 
   - name: Deploy to Production
@@ -49,10 +55,13 @@ blocks:
       jobs:
         - name: Add production IP address to known_hosts
           commands:
+            - checkout
             - ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
         - name: Add dokku as remote branch
           commands:
-          - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
+            - checkout
+            - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
         - name: Push to production
           commands:
-          - git push dokku master
+            - checkout
+            - git push dokku master
