@@ -19,7 +19,7 @@ blocks:
           commands:
             - git config --global user.email "semaphore@playpost.app"
             - git config --global user.name "Semaphore CI"
-            - git add .
-            - git commit -m 'Build $SEMAPHORE_GIT_SHA'
-            - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
+            # - git add .
+            # - git commit -m 'Build $SEMAPHORE_GIT_SHA'
+            - git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
 
