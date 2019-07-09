@@ -33,7 +33,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -52,7 +52,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const user = await userRepository.findOne({ email: emailAddressNormalized }, { select: ['id', 'email', 'password'] });
 
   if (!user) {
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -68,7 +68,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   // TODO: Log tries for security
   if (!isValidPassword) {
-    Sentry.configureScope((scope) => {
+    Sentry.configureScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setUser(user);
       scope.setExtra('body', req.body);
@@ -95,12 +95,15 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const decoded = User.verifyJWTAccessToken(token);
 
   // Decode for extra info about the token
-  const expiresAt = (decoded && decoded['exp']) ? new Date(decoded['exp'] * 1000).toISOString() : null;
-  const expiresAtMs = (decoded && decoded['exp']) ? new Date(decoded['exp'] * 1000).getTime() : null;
-  const issuedAt = (decoded && decoded['iat']) ? new Date(decoded['iat'] * 1000).toISOString() : null;
-  const issuedAtMs = (decoded && decoded['iat']) ? new Date(decoded['iat'] * 1000).getTime() : null;
+  const expiresAt = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).toISOString() : null;
+  const expiresAtMs = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).getTime() : null;
+  const issuedAt = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).toISOString() : null;
+  const issuedAtMs = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).getTime() : null;
 
   logger.info(loggerPrefix, `Generated token using user ID "${user.id}" and user email "${user.email}".`);
+
+  // Reset the brute force prevention count
+  // req && req.brute && req.brute.reset && req.brute.reset();
 
   return res.json({ token, expiresAt, expiresAtMs, issuedAt, issuedAtMs });
 };
@@ -132,7 +135,7 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -148,7 +151,7 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   if (!user) {
     const message = 'The given e-mail address does not exist. Are you sure you already have an account?';
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -224,7 +227,7 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
@@ -240,7 +243,7 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   if (!user) {
     const message = `Password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);

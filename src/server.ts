@@ -8,7 +8,8 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
-import ExpressBrute from 'express-brute';
+// import ExpressBrute from 'express-brute-cloudflare';
+import md5 from 'md5';
 
 import { Sentry } from './error-reporter';
 
@@ -24,7 +25,7 @@ import * as languagesController from './controllers/languages';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 
 import { connectionOptions } from './database/connection-options';
-import { expressRateLimitRedisStore, expressBruteRedisStore } from './cache';
+import { expressRateLimitRedisStore } from './cache';
 import { logger } from './utils';
 
 const PORT = process.env.PORT || 3000;
@@ -106,24 +107,36 @@ export const setupServer = async () => {
     throw new Error('Required environment variable "AWS_REGION" not set.');
   }
 
-  const bruteforce = new ExpressBrute(expressBruteRedisStore, {
-    freeRetries: process.env.NODE_ENV === 'production' ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
-    minWait: 1000 * 60 * 5, // 5 minutes
-    failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
-      logger.warn('Express Brute: ', 'Prevented after 5 tries.');
-      return res.status(400).json({
-        message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
-      });
-    },
-    handleStoreError: (err: any) => {
-      logger.error('Express Brute Store error: ', err);
-    }
-  });
+  // const bruteforce = new ExpressBrute(expressBruteRedisStore, {
+  //   freeRetries: process.env.NODE_ENV === 'production' ? 5 : 10, // 5 retries, because some auth endpoints depend on each other
+  //   minWait: 1000 * 60 * 5, // 5 minutes
+  //   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
+  //     logger.warn('Express Brute: ', 'Prevented after 5 tries.');
+  //     return res.status(400).json({
+  //       message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
+  //     });
+  //   },
+  //   handleStoreError: (err: any) => {
+  //     logger.error('Express Brute Store error: ', err);
+  //   }
+  // });
 
   const rateLimiter = new ExpressRateLimit({
     store: expressRateLimitRedisStore,
     windowMs: 1 * 60 * 1000, // 1 minute
     max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    keyGenerator: req => {
+      const authorizationHeaders = req.headers['authorization'] as string;
+      const cloudflareIpAddress = req.headers['cf-connecting-ip'] as string;
+      const xForwardedForIpAddress = req.headers['x-forwarded-for'] as string;
+      const ipAddressOfUser = cloudflareIpAddress || xForwardedForIpAddress || req.ip;
+
+      // Create a key based on the authorization headers and the ip address
+      // So we can filter on a per-user basis, so we don't block multiple users behind the same ip address
+      const key = md5(`${authorizationHeaders}${ipAddressOfUser}`);
+
+      return key;
+    },
     handler: (req, res, next) => {
       // Send JSON so we can read the message
       return res.status(429).json({
@@ -140,6 +153,9 @@ export const setupServer = async () => {
   logger.info('App init:', 'Connected with database', connection.options);
 
   const app: express.Application = express();
+
+  // Set trust proxy for CloudFlare and nginx on production
+  app.set('trust proxy', ['loopback']);
 
   // Hardening our server using Helmet
   app.use(helmet());
@@ -182,10 +198,10 @@ export const setupServer = async () => {
 
   // Public
   // Use expressBrute to increase the delay between each requests
-  app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
-  app.post('/v1/auth/reset-password', bruteforce.prevent, authController.getResetPasswordToken);
-  app.post('/v1/auth/update-password', bruteforce.prevent, authController.updatePasswordUsingToken);
-  app.post('/v1/users', bruteforce.prevent, usersController.createUser);
+  app.post('/v1/auth', authController.getAuthenticationToken);
+  app.post('/v1/auth/reset-password', authController.getResetPasswordToken);
+  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken);
+  app.post('/v1/users', usersController.createUser);
 
   // Protected
 
