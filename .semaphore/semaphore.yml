@@ -24,6 +24,7 @@ blocks:
         commands:
           - checkout
           - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+          - nvm use
       jobs:
           - name: Run tests
             commands:
@@ -37,6 +38,7 @@ blocks:
         commands:
           - checkout
           - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+          - nvm use
       jobs:
         - name: Deploy to Heroku
           commands:
@@ -50,6 +52,7 @@ blocks:
         commands:
           - checkout
           - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+          - nvm use
       jobs:
         - name: Add production IP address to known_hosts
           commands:
