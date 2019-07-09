@@ -9,6 +9,7 @@ import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
 import ExpressBrute from 'express-brute';
+import md5 from 'md5';
 
 import { Sentry } from './error-reporter';
 
@@ -123,7 +124,19 @@ export const setupServer = async () => {
   const rateLimiter = new ExpressRateLimit({
     store: expressRateLimitRedisStore,
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: process.env.NODE_ENV === 'production' ? 9999999 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    keyGenerator: req => {
+      const authorizationHeaders = req.headers['authorization'] as string;
+      const cloudflareIpAddress = req.headers['cf-connecting-ip'] as string;
+      const xForwardedForIpAddress = req.headers['x-forwarded-for'] as string;
+      const ipAddressOfUser = cloudflareIpAddress || xForwardedForIpAddress || req.ip;
+
+      // Create a key based on the authorization headers and the ip address
+      // So we can filter on a per-user basis, so we don't block multiple users behind the same ip address
+      const key = md5(`${authorizationHeaders}${ipAddressOfUser}`);
+
+      return key;
+    },
     handler: (req, res, next) => {
       // Send JSON so we can read the message
       return res.status(429).json({
@@ -140,6 +153,9 @@ export const setupServer = async () => {
   logger.info('App init:', 'Connected with database', connection.options);
 
   const app: express.Application = express();
+
+  // Set trust proxy for CloudFlare and nginx on production
+  app.set('trust proxy', ['loopback']);
 
   // Hardening our server using Helmet
   app.use(helmet());
