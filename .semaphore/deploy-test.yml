@@ -17,5 +17,7 @@ blocks:
       jobs:
         - name: Deploy to Heroku
           commands:
+            - git add .
+            - git commit -m 'Build $SEMAPHORE_GIT_SHA'
             - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
 
