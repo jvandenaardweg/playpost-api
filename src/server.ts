@@ -107,19 +107,19 @@ export const setupServer = async () => {
     throw new Error('Required environment variable "AWS_REGION" not set.');
   }
 
-  const bruteforce = new ExpressBrute(expressBruteRedisStore, {
-    freeRetries: process.env.NODE_ENV === 'production' ? 5 : 10, // 5 retries, because some auth endpoints depend on each other
-    minWait: 1000 * 60 * 5, // 5 minutes
-    failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
-      logger.warn('Express Brute: ', 'Prevented after 5 tries.');
-      return res.status(400).json({
-        message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
-      });
-    },
-    handleStoreError: (err: any) => {
-      logger.error('Express Brute Store error: ', err);
-    }
-  });
+  // const bruteforce = new ExpressBrute(expressBruteRedisStore, {
+  //   freeRetries: process.env.NODE_ENV === 'production' ? 5 : 10, // 5 retries, because some auth endpoints depend on each other
+  //   minWait: 1000 * 60 * 5, // 5 minutes
+  //   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
+  //     logger.warn('Express Brute: ', 'Prevented after 5 tries.');
+  //     return res.status(400).json({
+  //       message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
+  //     });
+  //   },
+  //   handleStoreError: (err: any) => {
+  //     logger.error('Express Brute Store error: ', err);
+  //   }
+  // });
 
   const rateLimiter = new ExpressRateLimit({
     store: expressRateLimitRedisStore,
@@ -198,10 +198,10 @@ export const setupServer = async () => {
 
   // Public
   // Use expressBrute to increase the delay between each requests
-  app.post('/v1/auth', bruteforce.prevent, authController.getAuthenticationToken);
-  app.post('/v1/auth/reset-password', bruteforce.prevent, authController.getResetPasswordToken);
-  app.post('/v1/auth/update-password', bruteforce.prevent, authController.updatePasswordUsingToken);
-  app.post('/v1/users', bruteforce.prevent, usersController.createUser);
+  app.post('/v1/auth', authController.getAuthenticationToken);
+  app.post('/v1/auth/reset-password', authController.getResetPasswordToken);
+  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken);
+  app.post('/v1/users', usersController.createUser);
 
   // Protected
 

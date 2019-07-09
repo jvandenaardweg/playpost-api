@@ -103,7 +103,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, `Generated token using user ID "${user.id}" and user email "${user.email}".`);
 
   // Reset the brute force prevention count
-  req && req.brute && req.brute.reset && req.brute.reset();
+  // req && req.brute && req.brute.reset && req.brute.reset();
 
   return res.json({ token, expiresAt, expiresAtMs, issuedAt, issuedAtMs });
 };
