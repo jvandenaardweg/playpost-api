@@ -12,8 +12,6 @@ blocks:
       prologue:
         commands:
           - checkout
-          - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
-          - nvm use
       jobs:
         - name: Deploy to Heroku
           commands:
