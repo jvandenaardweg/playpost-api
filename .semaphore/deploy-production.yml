@@ -1,0 +1,26 @@
+version: v1.0
+name: Deploy to PRODUCTION
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Deploy
+    task:
+      secrets:
+        - name: playpost-api-production-key
+      prologue:
+        commands:
+          - checkout
+      jobs:
+        - name: Prepare SSH for deployment
+          commands:
+            - ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
+            - chmod 600 ~/.ssh/id_rsa_semaphore_heroku
+            - ssh-add ~/.ssh/id_rsa_semaphore_heroku
+        - name: Add dokku as remote branch
+          commands:
+            - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
+        - name: Push to production
+          commands:
+            - git push dokku master
