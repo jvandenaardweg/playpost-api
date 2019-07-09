@@ -8,7 +8,7 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
-import ExpressBrute from 'express-brute';
+import ExpressBrute from 'express-brute-cloudflare';
 import md5 from 'md5';
 
 import { Sentry } from './error-reporter';
@@ -108,7 +108,7 @@ export const setupServer = async () => {
   }
 
   const bruteforce = new ExpressBrute(expressBruteRedisStore, {
-    freeRetries: process.env.NODE_ENV === 'production' ? 5 : 9999, // 5 retries, because some auth endpoints depend on each other
+    freeRetries: process.env.NODE_ENV === 'production' ? 5 : 10, // 5 retries, because some auth endpoints depend on each other
     minWait: 1000 * 60 * 5, // 5 minutes
     failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
       logger.warn('Express Brute: ', 'Prevented after 5 tries.');
