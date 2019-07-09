@@ -7,7 +7,7 @@ agent:
 blocks:
   - name: Install & Build
     skip:
-      when: "branch != 'master' OR branch != 'develop'"
+      when: "branch != 'master' AND branch != 'develop'"
     task:
       jobs:
         - name: Build
@@ -23,7 +23,7 @@ blocks:
             - npm run build
   - name: Test
     skip:
-      when: "branch != 'master' OR branch != 'develop'"
+      when: "branch != 'master' AND branch != 'develop'"
     task:
       secrets:
         - name: playpost-api-secrets
