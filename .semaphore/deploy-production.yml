@@ -16,8 +16,8 @@ blocks:
         - name: Push to Production
           commands:
             - ssh-keyscan 142.93.227.22 >> ~/.ssh/known_hosts
-            - chmod 600 ~/.ssh/id_rsa_semaphore
-            - ssh-add ~/.ssh/id_rsa_semaphore
+            - chmod 600 ~/.ssh/id_rsa_semaphoreci
+            - ssh-add ~/.ssh/id_rsa_semaphoreci
             - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
             - git push dokku master
 
