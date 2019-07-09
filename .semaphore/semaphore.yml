@@ -34,6 +34,8 @@ blocks:
     skip:
       when: "branch = 'master'"
     task:
+      secrets:
+        - name: playpost-api-secrets
       prologue:
         commands:
           - checkout
@@ -45,6 +47,8 @@ blocks:
             - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git master
 
   - name: Deploy to Production
+    secrets:
+        - name: playpost-api-secrets
     skip:
       when: "branch = 'master'"
     task:
