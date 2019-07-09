@@ -25,7 +25,7 @@ import * as languagesController from './controllers/languages';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 
 import { connectionOptions } from './database/connection-options';
-import { expressRateLimitRedisStore, expressBruteRedisStore } from './cache';
+import { expressRateLimitRedisStore } from './cache';
 import { logger } from './utils';
 
 const PORT = process.env.PORT || 3000;
