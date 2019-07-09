@@ -6,6 +6,8 @@ agent:
     os_image: ubuntu1804
 blocks:
   - name: Install & Build
+    skip:
+      when: "branch != 'master' OR branch != 'develop'"
     task:
       jobs:
         - name: Build
@@ -20,6 +22,8 @@ blocks:
             - cache store node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json) node_modules
             - npm run build
   - name: Test
+    skip:
+      when: "branch != 'master' OR branch != 'develop'"
     task:
       secrets:
         - name: playpost-api-secrets
