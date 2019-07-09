@@ -8,7 +8,7 @@ import compression from 'compression';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
-import ExpressBrute from 'express-brute-cloudflare';
+// import ExpressBrute from 'express-brute-cloudflare';
 import md5 from 'md5';
 
 import { Sentry } from './error-reporter';
