@@ -18,7 +18,7 @@
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
     "database:sync": "ts-node-dev src/database-sync.ts",
-    "build": "npm run build:typescript:production && npm run copy:package",
+    "build": "npm run build:typescript:production",
     "heroku-postbuild": "npm run build",
     "build:webpack": "webpack",
     "build:typescript": "npx tsc",
