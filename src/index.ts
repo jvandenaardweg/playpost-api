@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { version } = require('./package.json');
+const { version } = require('../package.json');
 
 import expressCluster from 'express-cluster';
 import os from 'os';
@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/node';
 import * as Integrations from '@sentry/integrations';
 
 import { logger } from './utils';
-// import { setupServer } from './server';
+import { setupServer } from './server';
 
 const WORKER_COUNT = process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
 
@@ -24,7 +24,7 @@ Sentry.init({
       root: __dirname
     })
   ],
-  enabled: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
+  enabled: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test' // Do not run on your local machine
 });
 
 logger.info('App init:', 'Sentry setup!', Sentry.SDK_VERSION);
@@ -33,10 +33,9 @@ async function bootstrap() {
   await expressCluster(
     async () => {
       try {
-        throw new Error('Sentry!');
-        // const app = await setupServer();
+        const app = await setupServer();
 
-        // return app;
+        return app;
       } catch (err) {
         return Sentry.captureException(err);
       }
