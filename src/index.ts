@@ -34,7 +34,6 @@ async function bootstrap() {
     async () => {
       try {
         const app = await setupServer();
-
         return app;
       } catch (err) {
         return Sentry.captureException(err);
