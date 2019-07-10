@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "engines": {
-    "node": "10.15.0",
-    "npm": "6.5.0"
+    "node": "^10.15.0",
+    "npm": "^6.8.0"
   },
   "scripts": {
     "start": "forever -m 5 dist/index.js",
@@ -41,11 +41,24 @@
     "upgrade-interactive": "npm-check --update",
     "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
     "tsc:watch": "tsc -p ./ --noEmit -w",
-    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jvandenaardweg/playpost-api.git"
+  },
+  "auto-changelog": {
+    "output": "CHANGELOG.md",
+    "template": "keepachangelog",
+    "unreleased": true,
+    "commitLimit": false
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test"
+    }
   },
   "author": "Jordy van den Aardweg",
   "license": "ISC",
@@ -88,6 +101,7 @@
     "@types/uuid": "^3.4.5",
     "@types/ws": "^6.0.1",
     "app-root-path": "^2.2.1",
+    "auto-changelog": "^1.14.1",
     "aws-sdk": "^2.489.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -112,6 +126,7 @@
     "forever": "^1.0.0",
     "fs-extra": "^8.1.0",
     "helmet": "^3.18.0",
+    "husky": "^3.0.0",
     "in-app-purchase": "^1.11.4",
     "ioredis": "^4.11.1",
     "jest": "^24.8.0",

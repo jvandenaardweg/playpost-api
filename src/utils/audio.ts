@@ -2,9 +2,9 @@ import appRootPath from 'app-root-path';
 import fluentFfmpeg from 'fluent-ffmpeg';
 import ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as musicMetadata from 'music-metadata';
+import * as Sentry from '@sentry/node';
 
 import { logger } from '../utils';
-import { Sentry } from '../error-reporter';
 
 fluentFfmpeg.setFfmpegPath(ffmpeg.path);
 
@@ -22,7 +22,7 @@ export const getAudioFileDurationInSeconds = async (audioFilePath: string): Prom
   } catch (err) {
     logger.info('Audio Util (Duration): Failed to get audiofile duration.', audioFilePath);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('audioFilePath', audioFilePath);
       Sentry.captureException(err);
@@ -61,26 +61,25 @@ export const concatAudioFiles = async (audioFiles: string[], storageUploadPath: 
     }
 
     return fluentFfmpeg()
-    .format(format)
-    .audioCodec(audioCodec)
-    .input(`concat:${audioFiles.join('|')}`)
-    .outputOptions('-acodec copy')
-    .save(outputPath)
-    .on('error', (err: any) => {
-      logger.error('Audio Util (Concat): Concat failed using ffmpeg:', err);
-      return reject(err);
-    })
-    .on('end', () => {
-      const hrend = process.hrtime(hrstart);
-      const ds = hrend[0];
-      const dms = hrend[1] / 1000000;
-      logger.info('Audio Util (Concat): Concat success!');
-      logger.info(`Audio Util (Concat): Execution time: ${ds} ${dms}ms`);
-      return resolve(outputPath);
-    })
-    .on('codecData', (data) => {
-      logger.info('Audio Util (Concat): Data:', data);
-    });
+      .format(format)
+      .audioCodec(audioCodec)
+      .input(`concat:${audioFiles.join('|')}`)
+      .outputOptions('-acodec copy')
+      .save(outputPath)
+      .on('error', (err: any) => {
+        logger.error('Audio Util (Concat): Concat failed using ffmpeg:', err);
+        return reject(err);
+      })
+      .on('end', () => {
+        const hrend = process.hrtime(hrstart);
+        const ds = hrend[0];
+        const dms = hrend[1] / 1000000;
+        logger.info('Audio Util (Concat): Concat success!');
+        logger.info(`Audio Util (Concat): Execution time: ${ds} ${dms}ms`);
+        return resolve(outputPath);
+      })
+      .on('codecData', data => {
+        logger.info('Audio Util (Concat): Data:', data);
+      });
   });
-
 };

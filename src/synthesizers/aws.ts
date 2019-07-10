@@ -4,19 +4,18 @@ import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
 import LocaleCode from 'locale-code';
 import { getRepository } from 'typeorm';
+import * as Sentry from '@sentry/node';
 
 import { Voice, Gender, Synthesizer } from '../database/entities/voice';
-
 import { SynthesizerType } from './index';
 import { logger } from '../utils/logger';
-import { Sentry } from '../error-reporter';
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
 // Create an Polly client
 const client = new Polly({
   signatureVersion: 'v4',
-  region: 'eu-central-1',
+  region: 'eu-central-1'
 });
 
 export interface AWSSynthesizerOptions extends Polly.Types.SynthesizeSpeechInput {}
@@ -45,7 +44,7 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
     const voiceId = voice.Id;
     const voiceName = voice.Name;
     const voiceLanguageCode = voice.LanguageCode;
-    const voiceGender = (voice.Gender === 'Male') ? Gender.MALE : Gender.FEMALE;
+    const voiceGender = voice.Gender === 'Male' ? Gender.MALE : Gender.FEMALE;
 
     const foundVoice = await voiceRepository.findOne({ name: voiceId });
 
@@ -60,7 +59,6 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
         if (!countryCode) {
           logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`);
         } else {
-
           try {
             const voiceToCreate = await voiceRepository.create({
               countryCode,
@@ -77,7 +75,7 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
           } catch (err) {
             logger.error(loggerPrefix, 'AWS Polly: Failed to create the voice in the database', err);
 
-            Sentry.withScope((scope) => {
+            Sentry.withScope(scope => {
               scope.setLevel(Sentry.Severity.Critical);
               scope.setExtra('voice', voice);
               scope.setExtra('foundVoice', foundVoice);
@@ -95,14 +93,7 @@ export const addAllAWSVoices = async (loggerPrefix: string) => {
   return voices;
 };
 
-export const awsSSMLToSpeech = (
-  index: number,
-  ssmlPart: string,
-  type: SynthesizerType,
-  identifier: string,
-  synthesizerOptions: AWSSynthesizerOptions,
-  storageUploadPath: string
-): Promise<string> => {
+export const awsSSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: AWSSynthesizerOptions, storageUploadPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const loggerPrefix = 'AWS SSML Part To Speech:';
 
@@ -141,7 +132,7 @@ export const awsSSMLToSpeech = (
       logger.info(loggerPrefix, 'Received synthesized audio for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
 
       // Write the binary audio content to a local file
-      return fsExtra.writeFile(tempLocalAudiofilePath, response.AudioStream, 'binary', (writeFileError) => {
+      return fsExtra.writeFile(tempLocalAudiofilePath, response.AudioStream, 'binary', writeFileError => {
         if (writeFileError) {
           logger.error(loggerPrefix, `Writing temporary file for synthesized SSML part ${index} failed.`, writeFileError);
           return reject(writeFileError);
@@ -157,13 +148,7 @@ export const awsSSMLToSpeech = (
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const awsSSMLPartsToSpeech = async (
-  ssmlParts: string[],
-  type: SynthesizerType,
-  identifier: string,
-  synthesizerOptions: AWSSynthesizerOptions,
-  storageUploadPath: string
-) => {
+export const awsSSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: AWSSynthesizerOptions, storageUploadPath: string) => {
   const promises: Promise<string>[] = [];
   const loggerPrefix = 'AWS SSML Parts To Speech:';
 

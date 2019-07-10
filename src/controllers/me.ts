@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { getRepository, getCustomRepository, getConnection } from 'typeorm';
 import joi from 'joi';
+import * as Sentry from '@sentry/node';
+
 import { User } from '../database/entities/user';
 import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
 import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
-import { Sentry } from '../error-reporter';
+
 import { UserRepository } from '../database/repositories/user';
 import * as cacheKeys from '../cache/keys';
 

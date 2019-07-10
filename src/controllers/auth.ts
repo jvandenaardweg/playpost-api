@@ -4,10 +4,11 @@ import passport from 'passport';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import joi from 'joi';
+import * as Sentry from '@sentry/node';
+
 import { logger } from '../utils';
 import { UserRepository } from '../database/repositories/user';
 import * as AWSSes from '../mailers/aws-ses';
-import { Sentry } from '../error-reporter';
 
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';

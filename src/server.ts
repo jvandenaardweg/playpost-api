@@ -10,8 +10,7 @@ import { createConnection } from 'typeorm';
 import ExpressRateLimit from 'express-rate-limit';
 // import ExpressBrute from 'express-brute-cloudflare';
 import md5 from 'md5';
-
-import { Sentry } from './error-reporter';
+import * as Sentry from '@sentry/node';
 
 import * as audiofileController from './controllers/audiofiles';
 import * as meController from './controllers/me';
