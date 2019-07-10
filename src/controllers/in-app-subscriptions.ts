@@ -2,17 +2,18 @@ import { Request, Response } from 'express';
 import { getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 import joi from 'joi';
-import { logger } from '../utils';
+import * as Sentry from '@sentry/node';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
+
+import { logger } from '../utils';
 import { InAppSubscriptionStatus, UserInAppSubscription, InAppSubscriptionEnvironment } from '../database/entities/user-in-app-subscription';
 import { InAppSubscription } from '../database/entities/in-app-subscription';
-import { Sentry } from '../error-reporter';
 
 const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
 
 inAppPurchase.config({
   applePassword: APPLE_IAP_SHARED_SECRET, // this comes from iTunes Connect (You need this to valiate subscriptions)
-  test: (NODE_ENV !== 'production'), // Don't use sandbox validation on production
+  test: NODE_ENV !== 'production', // Don't use sandbox validation on production
   verbose: false // Output debug logs to stdout stream
 });
 
@@ -69,7 +70,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
     if (!expiredSubscriptions.length) return res.status(200).json({ message: 'No active subscriptions found with an expiresAt date greater then the current date. Nothing to update...' });
 
     for (const expiredSubscription of expiredSubscriptions) {
-      const userId = (expiredSubscription.user) ? expiredSubscription.user.id : null;
+      const userId = expiredSubscription.user ? expiredSubscription.user.id : null;
       const productId = expiredSubscription.inAppSubscription.productId;
 
       const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, productId, userId);
@@ -83,9 +84,9 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
 
     return res.json({ message: 'Updated!' });
   } catch (err) {
-    const errorMessage = (err && err.message) ? err.message : 'An unknown error happened while syncing expired subscriptions.';
+    const errorMessage = err && err.message ? err.message : 'An unknown error happened while syncing expired subscriptions.';
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       Sentry.captureException(err);
     });
@@ -138,9 +139,9 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     return res.json({ ...userInAppSubscriptionResult });
   } catch (err) {
-    const message = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+    const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       Sentry.captureException(err);
     });
@@ -156,10 +157,9 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
 
   const { originalTransactionId } = userInAppSubscription;
-  const userId = (userInAppSubscription.user) ? userInAppSubscription.user.id : null;
+  const userId = userInAppSubscription.user ? userInAppSubscription.user.id : null;
 
   try {
-
     // If we receive a sandbox subscription on the prod environment, just error
     // This should only happen for beta users
     // We've disabled below check, because appareantly the Apple Reviewe also uses the Sandbox environment
@@ -197,12 +197,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
     if (userId && existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
-      logger.info(
-        loggerPrefix,
-        'Transaction already exists in the database, but it is from a different user.',
-        `Transaction user: "${existingUserInAppSubscription.user.id}"`,
-        `Logged in user: "${userId}"`
-      );
+      logger.info(loggerPrefix, 'Transaction already exists in the database, but it is from a different user.', `Transaction user: "${existingUserInAppSubscription.user.id}"`, `Logged in user: "${userId}"`);
 
       logger.info(loggerPrefix, `We update the user of the transaction to: "${userId}".`);
 
@@ -221,10 +216,10 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     return userInAppSubscriptionResult;
   } catch (err) {
-    const message = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+    const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, message);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       Sentry.captureException(err);
     });
@@ -242,7 +237,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
  * @param receipt
  */
 export const validateReceipt = async (receipt: Receipt, productId?: string | null | undefined, userId?: string | null): Promise<UserInAppSubscription> => {
-  const sessionId = (typeof receipt === 'string') ? receipt.substring(0, 20) : null;
+  const sessionId = typeof receipt === 'string' ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
@@ -274,7 +269,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       }
     }
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       Sentry.captureException(err);
     });
@@ -327,7 +322,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     if (!productId) {
       const message = 'Cannot process this receipt because the productId is not defined.';
 
-      Sentry.withScope((scope) => {
+      Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
         if (userId) scope.setUser({ id: userId });
         scope.setExtra('receipt', receipt);
@@ -348,12 +343,12 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       productId
     });
 
-    const inAppSubscriptionId = (inAppSubscription) ? inAppSubscription.id : null;
+    const inAppSubscriptionId = inAppSubscription ? inAppSubscription.id : null;
 
     if (!inAppSubscriptionId) {
       const message = 'In-App Subscription ID could not be found.';
 
-      Sentry.withScope((scope) => {
+      Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
         if (userId) scope.setUser({ id: userId });
         scope.setExtra('receipt', receipt);
@@ -373,29 +368,29 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     const latestReceipt = validationResponse.latest_receipt || receipt;
 
     // @ts-ignore
-    const environment = (validationResponse.environment === 'Sandbox') ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
+    const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
 
     // "purchaseDateMs" and "cancellationDateMs" are not in the types, but are available in the response
     // So we ignore the TS errors here for now
     // @ts-ignore
-    const startedAt = (purchase.originalPurchaseDateMs) ? new Date(parseInt(purchase.originalPurchaseDateMs, 10)).toISOString() : (purchase.originalPurchaseDate) ? new Date(parseInt(purchase.originalPurchaseDate, 10)).toISOString() : undefined;
+    const startedAt = purchase.originalPurchaseDateMs ? new Date(parseInt(purchase.originalPurchaseDateMs, 10)).toISOString() : purchase.originalPurchaseDate ? new Date(parseInt(purchase.originalPurchaseDate, 10)).toISOString() : undefined;
 
     // @ts-ignore
-    const expiresAt = (purchase.expirationDate) ? new Date(parseInt(purchase.expirationDate, 10)).toISOString() : undefined;
+    const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate, 10)).toISOString() : undefined;
 
     // @ts-ignore
-    const renewedAt = (purchase.purchaseDateMs > purchase.originalPurchaseDateMs) ? new Date(purchase.purchaseDateMs).toISOString() : undefined;
+    const renewedAt = purchase.purchaseDateMs > purchase.originalPurchaseDateMs ? new Date(purchase.purchaseDateMs).toISOString() : undefined;
 
     // @ts-ignore
-    const canceledAt = (purchase.cancellationDateMs) ? new Date(parseInt(purchase.cancellationDateMs, 10)).toISOString() : (purchase.cancellationDate) ? purchase.cancellationDate : undefined;
+    const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs, 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
 
     // Only connect to a user if we have one
     // This could be empty if we receive events from Apple, but did not created a transaction in our database yet
-    const user = (userId)
+    const user = userId
       ? {
         user: {
-          id: userId
-        }
+            id: userId
+          }
       }
       : undefined;
 
@@ -420,9 +415,9 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
     return userInAppSubscriptionData;
   } catch (err) {
-    const errorMessage = (err && err.message) ? err.message : 'Error happened while getting the purchase data.';
+    const errorMessage = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       Sentry.captureException(err);
     });
@@ -444,7 +439,7 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
   // Find the user's subscription
   const foundUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
     where: {
-      originalTransactionId,
+      originalTransactionId
     },
     relations: ['user', 'inAppSubscription']
   });
@@ -454,7 +449,7 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
   // }
 
   // User could be empty if we receive notifications from apple
-  const userId = (foundUserInAppSubscription && foundUserInAppSubscription.user) ? foundUserInAppSubscription.user.id : null;
+  const userId = foundUserInAppSubscription && foundUserInAppSubscription.user ? foundUserInAppSubscription.user.id : null;
 
   // Validate the receipt with Apple
   // The result should be that the receipt is active

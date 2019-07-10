@@ -1,7 +1,6 @@
 require('dotenv').config();
 import { createConnection } from 'typeorm';
-
-import { Sentry } from './error-reporter';
+import * as Sentry from '@sentry/node';
 
 import { connectionOptions } from './database/connection-options';
 
@@ -11,7 +10,7 @@ import { listenCrawlFullArticle } from './pubsub/articles';
 
 logger.info('Worker init: Setting up...');
 
-Sentry.configureScope((scope) => {
+Sentry.configureScope(scope => {
   scope.setExtra('process', 'worker');
 });
 
@@ -30,11 +29,10 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
 
     listenForAppleSubscriptionNotifications();
     listenCrawlFullArticle();
-
   } catch (err) {
     logger.error('Worker: Captured an uncaught error', err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('connection', connection);
       Sentry.captureException(err);

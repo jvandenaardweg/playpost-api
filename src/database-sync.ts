@@ -1,5 +1,6 @@
 require('dotenv').config();
 import { createConnection, getRepository, IsNull, getCustomRepository, In } from 'typeorm';
+import * as Sentry from '@sentry/node';
 
 import { connectionOptions } from './database/connection-options';
 import { Language } from './database/entities/language';
@@ -7,13 +8,9 @@ import { Voice, Synthesizer } from './database/entities/voice';
 import { InAppSubscription } from './database/entities/in-app-subscription';
 import languages from './database/seeds/languages';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
-
 import { addAllGoogleVoices } from './synthesizers/google';
 import { addAllAWSVoices } from './synthesizers/aws';
-
 import { logger } from './utils/logger';
-import { Sentry } from './error-reporter';
-
 import voicesData from './database/seeds/voices';
 import { VoiceRepository } from './database/repositories/voice';
 

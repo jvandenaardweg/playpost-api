@@ -1,8 +1,9 @@
 require('dotenv').config();
 import nodeFetch from 'node-fetch';
 import md5 from 'md5';
+import * as Sentry from '@sentry/node';
+
 import { logger } from '../utils';
-import { Sentry } from '../error-reporter';
 
 const { MAILCHIMP_LIST_ID, MAILCHIMP_API_KEY } = process.env;
 
@@ -36,8 +37,7 @@ export const addEmailToMailchimpList = async (emailAddress: string) => {
       headers,
       method: 'POST',
       body: payloadStringified
-    })
-    .then(response => response.json());
+    }).then(response => response.json());
 
     logger.info(`Mailchimp: Successfully added ${emailAddress} to list "${MAILCHIMP_LIST_ID}".`);
     return response;

@@ -1,14 +1,14 @@
 {
   "name": "playpost-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/index.js",
   "engines": {
-    "node": "10.15.0",
-    "npm": "6.5.0"
+    "node": "^10.15.0",
+    "npm": "^6.8.0"
   },
   "scripts": {
-    "start": "forever -m 5 dist/index.js",
+    "start": "node dist/index.js",
     "dev": "npm run dev:database && npm run dev:worker & npm run dev:index",
     "debug": "npm run dev:database && npm run debug:worker & npm run debug:index",
     "debug:index": "ts-node-dev --inspect=9230 --respawn --transpileOnly ./src/index.ts",
@@ -18,11 +18,12 @@
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
     "database:sync": "ts-node-dev src/database-sync.ts",
-    "build": "npm run build:typescript:production",
+    "build": "npm run build:typescript:production && npm run copy:package",
     "heroku-postbuild": "npm run build",
     "build:webpack": "webpack",
     "build:typescript": "npx tsc",
     "build:typescript:production": "npx tsc -p tsconfig.production.json",
+    "copy:package": "cp package.json dist/",
     "caches:empty": "ts-node-dev src/empty-cache.ts",
     "worker": "forever -m 5 dist/worker.js",
     "test": "NODE_ENV=unittest jest --silent --silent",
@@ -41,11 +42,24 @@
     "upgrade-interactive": "npm-check --update",
     "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
     "tsc:watch": "tsc -p ./ --noEmit -w",
-    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jvandenaardweg/playpost-api.git"
+  },
+  "auto-changelog": {
+    "output": "CHANGELOG.md",
+    "template": "keepachangelog",
+    "unreleased": true,
+    "commitLimit": false
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test"
+    }
   },
   "author": "Jordy van den Aardweg",
   "license": "ISC",
@@ -88,11 +102,13 @@
     "@types/uuid": "^3.4.5",
     "@types/ws": "^6.0.1",
     "app-root-path": "^2.2.1",
+    "auto-changelog": "^1.14.1",
     "aws-sdk": "^2.489.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "class-validator": "^0.9.1",
     "compression": "^1.7.4",
+    "copyfiles": "^2.1.1",
     "date-fns": "^1.30.1",
     "dotenv": "^8.0.0",
     "eslint": "^6.0.1",
@@ -112,6 +128,7 @@
     "forever": "^1.0.0",
     "fs-extra": "^8.1.0",
     "helmet": "^3.18.0",
+    "husky": "^3.0.0",
     "in-app-purchase": "^1.11.4",
     "ioredis": "^4.11.1",
     "jest": "^24.8.0",

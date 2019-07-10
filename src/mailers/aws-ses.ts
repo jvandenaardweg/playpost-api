@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
-import { logger } from '@sentry/utils';
-import { Sentry } from '../error-reporter';
+import * as Sentry from '@sentry/node';
+
+import { logger } from '../utils';
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
@@ -10,9 +11,7 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html
   const params = {
     Destination: {
-      ToAddresses: [
-        toEmail,
-      ]
+      ToAddresses: [toEmail]
     },
     Message: {
       Body: {
@@ -31,9 +30,7 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
       }
     },
     Source: 'noreply@playpost.app',
-    ReplyToAddresses: [
-      'info@playpost.app'
-    ],
+    ReplyToAddresses: ['info@playpost.app']
   };
 
   try {
@@ -44,7 +41,7 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
 
     return result;
   } catch (err) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('toEmail', toEmail);
       scope.setExtra('title', title);
@@ -57,4 +54,4 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
 
     throw err; // pass it up
   }
-}
+};

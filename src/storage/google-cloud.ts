@@ -1,13 +1,13 @@
 require('dotenv').config();
 import { Storage, UploadResponse, File, DeleteFileResponse } from '@google-cloud/storage';
+import * as Sentry from '@sentry/node';
+import LocaleCode from 'locale-code';
+
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
 import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
-
-import LocaleCode from 'locale-code';
 import { logger } from '../utils';
-import { Sentry } from '../error-reporter';
 
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
@@ -31,15 +31,7 @@ export const getPublicFileUrl = (uploadResponse: UploadResponse) => {
 /**
  * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
  */
-export const uploadArticleAudioFile = async (
-  voice: Voice,
-  concatinatedLocalAudiofilePath: string,
-  storageUploadPath: string,
-  mimeType: AudiofileMimeType,
-  article: Article,
-  audiofileId: string,
-  audiofileLength: number
-) => {
+export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudiofilePath: string, storageUploadPath: string, mimeType: AudiofileMimeType, article: Article, audiofileId: string, audiofileLength: number) => {
   const hrstart = process.hrtime();
 
   let extension = 'mp3';
@@ -72,7 +64,7 @@ export const uploadArticleAudioFile = async (
           articleId: article.id,
           articleTitle: article.title,
           articleUrl: article.url,
-          articleSourceName: article.sourceName,
+          articleSourceName: article.sourceName
         },
         // Enable long-lived HTTP caching headers
         // Use only if the contents of the file will never change
@@ -88,7 +80,7 @@ export const uploadArticleAudioFile = async (
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Failed to upload.`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('voice', voice);
       scope.setExtra('concatinatedLocalAudiofilePath', concatinatedLocalAudiofilePath);
@@ -112,12 +104,7 @@ export const uploadArticleAudioFile = async (
 /**
  * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
  */
-export const uploadVoicePreviewAudiofile = async (
-  voice: Voice,
-  audiofilePath: string,
-  mimeType: AudiofileMimeType,
-  audiofileLength: number
-) => {
+export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: string, mimeType: AudiofileMimeType, audiofileLength: number) => {
   const hrstart = process.hrtime();
   const uploadPath = `${voice.id}`;
 
@@ -160,7 +147,7 @@ export const uploadVoicePreviewAudiofile = async (
   } catch (err) {
     logger.error(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Failed to upload.`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('voice', voice);
       scope.setExtra('audiofilePath', audiofilePath);
@@ -182,7 +169,10 @@ export const deleteFile = async (filename: string) => {
   try {
     logger.info(`Google Cloud Storage (Delete File): Deleting file "${filename}"...`);
 
-    const deleteFileResponse: DeleteFileResponse = await storage.bucket(DEFAULT_BUCKET_NAME).file(filename).delete();
+    const deleteFileResponse: DeleteFileResponse = await storage
+      .bucket(DEFAULT_BUCKET_NAME)
+      .file(filename)
+      .delete();
 
     logger.info(`Google Cloud Storage (Delete File): Successfully deleted file "${filename}"!`);
 
@@ -190,7 +180,7 @@ export const deleteFile = async (filename: string) => {
   } catch (err) {
     logger.error(`Google Cloud Storage (Delete File): Failed to delete file "${filename}"!`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('filename', filename);
       Sentry.captureException(err);
@@ -236,7 +226,7 @@ export const deleteVoicePreview = async (voiceId?: string) => {
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting voice preview: "${prefix}"...`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('voiceId', voiceId);
       scope.setExtra('prefix', prefix);
@@ -246,7 +236,6 @@ export const deleteVoicePreview = async (voiceId?: string) => {
     throw err;
   }
 };
-
 
 /**
  * Deletes an article's audiofile from our Google Cloud Storage.
@@ -285,7 +274,7 @@ export const deleteAudiofile = async (articleId?: string, audiofileId?: string) 
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('articleId', articleId);
       scope.setExtra('audiofileId', audiofileId);
@@ -327,7 +316,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
     }
 
     // Create delete file promises for each file
-    const promises = files.map((file) => {
+    const promises = files.map(file => {
       logger.info(loggerPrefix, `Found: "${file.name}". Deleting...`);
       return deleteFile(file.name);
     });
@@ -341,7 +330,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
   } catch (err) {
     logger.error(loggerPrefix, `Error while deleting audiofile: "${prefix}"...`, err);
 
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('articleId', articleId);
       scope.setExtra('prefix', prefix);
