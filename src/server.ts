@@ -72,6 +72,9 @@ export const setupServer = async () => {
   if (!process.env.CRAWLER_URL) {
     throw new Error('Required environment variable "CRAWLER_URL" not set.');
   }
+  if (!process.env.CRAWLER_EXTRACTOR_URL) {
+    throw new Error('Required environment variable "CRAWLER_EXTRACTOR_URL" not set.');
+  }
   if (!process.env.SENTRY_DSN) {
     throw new Error('Required environment variable "SENTRY_DSN" not set.');
   }

@@ -65,6 +65,9 @@ export class Article extends BaseEntity {
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['text'] }
   text: string;
 
+  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['documentHtml'] }
+  documentHtml: string; // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
+
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
   user: User;
 

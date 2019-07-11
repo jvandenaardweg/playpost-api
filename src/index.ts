@@ -36,6 +36,7 @@ async function bootstrap() {
         const app = await setupServer();
         return app;
       } catch (err) {
+        logger.error('Error during setup', err.message);
         return Sentry.captureException(err);
       }
     },

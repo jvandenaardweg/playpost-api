@@ -201,7 +201,7 @@ export const findAllArchivedItems = async (req: Request, res: Response) => {
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const loggerPrefix = 'Create Playlist Item By Article URL:';
   const userId = req.user.id;
-  const { articleUrl } = req.body;
+  const { articleUrl, documentHtml }: { articleUrl: string, documentHtml?: string } = req.body; // articleUrl is required, documentHtml is optional
 
   let articleId = '';
 
@@ -230,6 +230,9 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // For this we'll do an extra check later in the updateArticleToFull() method, to ensure we don't get duplicates
   // By doing it this way, we keep this method very quick and responsive for our user
   const normalizedUrl = getNormalizedUrl(articleUrl);
+
+  // Correctly escape the string
+  const { stringifiedDocumentHtml } = JSON.parse(JSON.stringify({ stringifiedDocumentHtml: documentHtml }));
 
   // Find the article by "url" OR "canonicalUrl"
   const article = await articleRepository.findOne({
@@ -270,6 +273,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     // If we do not have an article yet, create one in the database...
     // ...so our crawler tries to fetch the article in the background
     const articleToCreate = await articleRepository.create({
+      documentHtml: stringifiedDocumentHtml, // Add the html string if we have it
       url: normalizedUrl,
       user: {
         id: userId

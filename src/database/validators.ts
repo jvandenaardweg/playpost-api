@@ -34,7 +34,8 @@ export const playlistInputValidationSchema = joi.object().keys({
     .min(0),
   articleUrl: joi.string().uri(),
   archivedAt: joi.alternatives().try(joi.string().allow(null)),
-  favoritedAt: joi.alternatives().try(joi.string().allow(null))
+  favoritedAt: joi.alternatives().try(joi.string().allow(null)),
+  documentHtml: joi.string()
 });
 
 export const userInputValidationSchema = joi.object().keys({

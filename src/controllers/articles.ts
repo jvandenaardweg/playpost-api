@@ -86,18 +86,42 @@ export const deleteById = async (req: Request, res: Response) => {
   return res.json({ message: 'Article is deleted!' });
 };
 
-export const fetchFullArticleContents = async (articleUrl: string) => {
+export const fetchFullArticleContents = async (articleUrl: string, documentHtml?: string) => {
   const loggerPrefix = 'Fetch Full Article Contents:';
-  if (!process.env.CRAWLER_URL) {
-    throw new Error('Environment variable "CRAWLER_URL" not set.');
+
+  if (!articleUrl) {
+    const errorMessage = 'articleUrl is required to fetch the full article contents.';
+    logger.error(loggerPrefix, errorMessage, articleUrl)
+    throw new Error(errorMessage);
   }
 
   try {
-    const response: PostplayCrawler.Response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
+    let response: PostplayCrawler.Response;
 
-    // Fast crawler has troubles with this URL:
-    // https://www.bloomberg.com/news/articles/2019-05-12/trade-war-scenarios-force-investors-to-rewrite-playbook?srnd=premium-europe
-    // const response: PostplayCrawler.Response = await nodeFetch(`https://playpost-crawler-test.herokuapp.com/v1/fast?url=${articleUrl}`).then(response => response.json());
+    // If we have a html string, we use a different endpoint
+    // We don't need to crawl the page, we can just try to extract data from the HTML string we got
+    if (documentHtml) {
+      const body = {
+        documentHtml,
+        url: articleUrl
+      };
+
+      logger.info(loggerPrefix, 'Get article data using given documentHtml...');
+
+      response = await nodeFetch(`${process.env.CRAWLER_EXTRACTOR_URL}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(body)
+      }).then(response => response.json());
+
+      logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!', response);
+    } else {
+      logger.info(loggerPrefix, 'Get article data using given articleUrl...', articleUrl);
+      response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
+      logger.info(loggerPrefix, 'Successfully got article data using given articleUrl!', articleUrl);
+    }
 
     if (!response) {
       throw new Error('Dit not receive a response from the crawler.');
@@ -303,7 +327,7 @@ export const updateArticleToFull = async (articleId: string) => {
   const languageRepository = getRepository(Language);
 
   // Get the article details from the database
-  const articleToUpdate = await articleRepository.findOne(articleId);
+  const articleToUpdate = await articleRepository.findOne(articleId, { select: ['id', 'url', 'status', 'documentHtml'] });
 
   if (!articleToUpdate) {
     const errorMessage = 'Could not find article.';
@@ -317,7 +341,20 @@ export const updateArticleToFull = async (articleId: string) => {
   // This might take a few seconds to resolve, as the crawler parses the whole page
   // Takes around 5 seconds for new websites
   // About 2 seconds for already visited websites
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleToUpdate.url);
+  const {
+    ssml,
+    text,
+    html,
+    readingTime,
+    imageUrl,
+    authorName,
+    description,
+    canonicalUrl,
+    language,
+    title,
+    siteName,
+    url
+  } = await fetchFullArticleContents(articleToUpdate.url, articleToUpdate.documentHtml);
 
   logger.info(loggerPrefix, 'Successfully fetched full article contents!');
 
@@ -381,7 +418,8 @@ export const updateArticleToFull = async (articleId: string) => {
     canonicalUrl: currentUrl, // We add a canonicalUrl, this one could be different than "url", but should point to the same article
     status: ArticleStatus.FINISHED,
     language: foundLanguage,
-    sourceName: siteName
+    sourceName: siteName,
+    documentHtml: undefined // Remove the documentHtml, we don't need it anymore
   });
 
   logger.info(loggerPrefix, 'Updated article with crawler data!');
