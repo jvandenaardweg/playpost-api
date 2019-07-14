@@ -8,7 +8,9 @@
     "npm": "^6.8.0"
   },
   "scripts": {
-    "start": "forever -m 5 dist/index.js",
+    "start": "npm run start:server && npm run start:worker",
+    "start:server": "forever -m 5 dist/index.js",
+    "start:worker": "forever -m 5 dist/worker.js",
     "dev": "npm run dev:database && npm run dev:worker & npm run dev:index",
     "debug": "npm run dev:database && npm run debug:worker & npm run debug:index",
     "debug:index": "ts-node-dev --inspect=9230 --respawn --transpileOnly ./src/index.ts",
