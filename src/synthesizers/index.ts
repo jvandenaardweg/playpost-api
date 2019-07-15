@@ -8,7 +8,7 @@ import { Synthesizer, Voice } from '../database/entities/voice';
 import * as storage from '../storage/google-cloud';
 
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
-import { AWS_CHARACTER_LIMIT, getSSMLParts } from '../utils/ssml';
+import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGLE_CHARACTER_HARD_LIMIT, GOOGLE_CHARACTER_SOFT_LIMIT } from '../utils/ssml';
 
 import AWS, { Polly } from 'aws-sdk';
 import { logger } from '../utils';
@@ -130,8 +130,8 @@ const synthesizeUsingAWS = async (
 
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
-    softLimit: AWS_CHARACTER_LIMIT - 1000,
-    hardLimit: AWS_CHARACTER_LIMIT
+    softLimit: AWS_CHARACTER_SOFT_LIMIT,
+    hardLimit: AWS_CHARACTER_HARD_LIMIT
   });
 
   logger.info(loggerPrefix, `Received ${ssmlParts.length} SSML parts to be used for the synthesizer.`);
@@ -218,7 +218,10 @@ const synthesizeUsingGoogle = async (
   storageUploadPath: string
 ) => {
   // Step 1: Split the SSML into chunks the synthesizer allows
-  const ssmlParts = getSSMLParts(ssml);
+  const ssmlParts = getSSMLParts(ssml, {
+    softLimit: GOOGLE_CHARACTER_SOFT_LIMIT,
+    hardLimit: GOOGLE_CHARACTER_HARD_LIMIT
+  });
 
   const synthesizerOptions: IGoogleSynthesizerOptions = {
     audioConfig: {

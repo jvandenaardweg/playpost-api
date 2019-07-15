@@ -1,21 +1,28 @@
 import pollySsmlSplit from 'polly-ssml-split';
 import { logger } from '../utils';
 
-export const GOOGLE_CHARACTER_LIMIT = 5000;
-export const AWS_CHARACTER_LIMIT = 3000;
+export const GOOGLE_CHARACTER_HARD_LIMIT = 5000;
+export const GOOGLE_CHARACTER_SOFT_LIMIT = 4000;
+
+export const AWS_CHARACTER_HARD_LIMIT = 3000;
+export const AWS_CHARACTER_SOFT_LIMIT = 1500;
+
+export const DEFAULT_SSML_SPLIT_HARD_LIMIT = 5000;
+export const DEFAULT_SSML_SPLIT_SOFT_LIMIT = 3000;
 
 interface ISsmlSplitOptions {
   softLimit?: number;
   hardLimit: number;
+  extraSplitChars?: string;
 }
 
 export const getSSMLParts = (ssml: string, optionsOverwrite?: ISsmlSplitOptions) => {
   const loggerPrefix = 'SSML (Util):';
 
   const defaultOptions: ISsmlSplitOptions = {
-    hardLimit: GOOGLE_CHARACTER_LIMIT, // MAX length of a single batch of split text
-    softLimit: AWS_CHARACTER_LIMIT // MIN length of a single batch of split text
-    // extraSplitChars: ',;', // Set of extra split characters (Optional property)
+    hardLimit: DEFAULT_SSML_SPLIT_HARD_LIMIT, // MAX length of a single batch of split text
+    softLimit: DEFAULT_SSML_SPLIT_SOFT_LIMIT, // MIN length of a single batch of split text
+    extraSplitChars: '<p>', // Set of extra split characters (Optional property)
   };
 
   let options = defaultOptions;
