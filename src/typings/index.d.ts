@@ -1,13 +1,13 @@
-import { UserInAppSubscription } from "database/entities/user-in-app-subscription";
+import { UserInAppSubscription } from '../database/entities/user-in-app-subscription';
 
-export interface CrawlFullArticleData {
+export interface ICrawlFullArticleData {
   articleId: string;
   articleUrl: string;
 }
 
 // https://developer.apple.com/documentation/storekit/in-app_purchase/enabling_status_update_notifications
 //
-export interface AppleSubscriptionNotificationRequestBody {
+export interface IAppleSubscriptionNotificationRequestBody {
   environment: 'Sandbox' | 'PROD'; // Specifies whether the notification is for a sandbox or a production environment
   notification_type: 'INITIAL_BUY' | 'CANCEL' | 'RENEWAL' | 'INTERACTIVE_RENEWAL' | 'DID_CHANGE_RENEWAL_PREF' | 'DID_CHANGE_RENEWAL_STATUS'; // Describes the kind of event that triggered the notification. // https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Chapters/Subscriptions.html#//apple_ref/doc/uid/TP40008267-CH7-SW16
   password: string; // This value is the same as the shared secret you POST when validating receipts.
@@ -16,9 +16,9 @@ export interface AppleSubscriptionNotificationRequestBody {
   cancellation_date_ms?: string; // Specifies the date and time the App Store processed the refund for a subscription either because the customer requested a cancelation through Apple customer support or upgraded their subscription, in Unix epoch time format, in milliseconds. Use this time format for processing dates.
   web_order_line_item_id?: string; // The primary key for identifying a subscription purchase. Posted only if the notification_type is CANCEL.
   latest_receipt?: string; // The base-64 encoded transaction receipt for the most recent renewal transaction. Posted only if the notification_type is RENEWAL or INTERACTIVE_RENEWAL, and only if the renewal is successful.
-  latest_receipt_info?: AppleSubscriptionNotificationReceiptDetails; // The JSON representation of the receipt for the most recent renewal. Posted only if renewal is successful. Not posted for notification_type CANCEL.
+  latest_receipt_info?: IAppleSubscriptionNotificationReceiptDetails; // The JSON representation of the receipt for the most recent renewal. Posted only if renewal is successful. Not posted for notification_type CANCEL.
   latest_expired_receipt?: string; // The base-64 encoded transaction receipt for the most recent renewal transaction. Posted only if the subscription expired.
-  latest_expired_receipt_info?: AppleSubscriptionNotificationReceiptDetails; // The JSON representation of the receipt for the most recent renewal transaction. Posted only if the notification_type is RENEWAL or CANCEL or if renewal failed and subscription expired.
+  latest_expired_receipt_info?: IAppleSubscriptionNotificationReceiptDetails; // The JSON representation of the receipt for the most recent renewal transaction. Posted only if the notification_type is RENEWAL or CANCEL or if renewal failed and subscription expired.
   auto_renew_status_change_date?: string;
   auto_renew_status_change_date_pst?: string;
   auto_renew_status_change_date_ms?: string;
@@ -28,7 +28,7 @@ export interface AppleSubscriptionNotificationRequestBody {
   expiration_intent?: string; // This is the same as the Subscription Expiration Intent in the receipt. Posted only if notification_type is RENEWAL or INTERACTIVE_RENEWAL.
 }
 
-export interface AppleSubscriptionNotificationReceiptDetails {
+export interface IAppleSubscriptionNotificationReceiptDetails {
   original_purchase_date_pst: string;
   cancellation_date_ms: string;
   quantity: string;

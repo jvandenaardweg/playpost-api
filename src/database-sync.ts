@@ -1,18 +1,17 @@
-require('dotenv').config();
-import { createConnection, getRepository, IsNull, getCustomRepository, In } from 'typeorm';
 import * as Sentry from '@sentry/node';
+import { createConnection, getCustomRepository, getRepository, In, IsNull } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
-import { Language } from './database/entities/language';
-import { Voice, Synthesizer } from './database/entities/voice';
 import { InAppSubscription } from './database/entities/in-app-subscription';
-import languages from './database/seeds/languages';
-import inAppSubscriptions from './database/seeds/in-app-subscriptions';
-import { addAllGoogleVoices } from './synthesizers/google';
-import { addAllAWSVoices } from './synthesizers/aws';
-import { logger } from './utils/logger';
-import voicesData from './database/seeds/voices';
+import { Language } from './database/entities/language';
+import { Synthesizer, Voice } from './database/entities/voice';
 import { VoiceRepository } from './database/repositories/voice';
+import inAppSubscriptions from './database/seeds/in-app-subscriptions';
+import languages from './database/seeds/languages';
+import voicesData from './database/seeds/voices';
+import { addAllAWSVoices } from './synthesizers/aws';
+import { addAllGoogleVoices } from './synthesizers/google';
+import { logger } from './utils/logger';
 
 const seedLanguages = async () => {
   const loggerPrefix = 'Seeding Languages:';
@@ -992,7 +991,7 @@ const updateVoicesLabel = async () => {
       const voiceMape = voiceLabelMapping.find(voiceMap => voiceMap.name === voice.name);
       const label = voiceMape ? voiceMape.label : voice.name;
 
-      if (label === voice.name) logger.warn(loggerPrefix, `Skipped "${voice.name}". No label found in mapping.`);
+      if (label === voice.name) { logger.warn(loggerPrefix, `Skipped "${voice.name}". No label found in mapping.`); }
       await voiceRepository.update(voice.id, { label });
 
       logger.info(loggerPrefix, `Updated "${voice.name}" with label: ${label}.`);

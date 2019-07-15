@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, Unique, ManyToOne, Index } from 'typeorm';
-import { IsUUID, IsDate } from 'class-validator';
+import { IsDate, IsUUID } from 'class-validator';
+import { CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { Language } from './language';
 import { User } from './user';
 import { Voice } from './voice';
@@ -11,22 +11,22 @@ export class UserVoiceSetting {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this user voice setting
-  user: User;
+  public user: User;
 
   @ManyToOne(type => Voice, { onDelete: 'CASCADE', eager: true }) // When an Voice is deleted, we delete this user voice setting
-  voice: Voice;
+  public voice: Voice;
 
   @ManyToOne(type => Language, { onDelete: 'CASCADE', eager: true }) // When an Language is deleted, we delete this voice setting
-  language: Language;
+  public language: Language;
 
   @CreateDateColumn()
   @IsDate()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

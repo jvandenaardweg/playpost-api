@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Index, OneToMany, ManyToOne, Unique } from 'typeorm';
 import { IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
-import { Audiofile } from './audiofile';
 import { ColumnNumericTransformer } from '../utils';
+import { Audiofile } from './audiofile';
 import { Language } from './language';
 
 export enum Gender {
@@ -36,64 +36,64 @@ export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: false }) // en-US
-  languageCode: string;
+  public languageCode: string;
 
   @Column({ nullable: false }) // US
-  countryCode: string;
+  public countryCode: string;
 
   @Column({ nullable: false, unique: true }) // en-US-Wavenet-D
-  name: string;
+  public name: string;
 
   @Column({ nullable: false, unique: true }) // John
-  label: string;
+  public label: string;
 
   @Column({ type: 'enum', enum: Gender, nullable: false }) // MALE or FEMALE
-  gender: Gender;
+  public gender: Gender;
 
   @Column({ type: 'enum', enum: Synthesizer, nullable: false }) // Google or AWS
-  synthesizer: Synthesizer;
+  public synthesizer: Synthesizer;
 
   @Column({ type: 'enum', enum: AudioProfile, nullable: false, default: AudioProfile.DEFAULT }) // Default
-  audioProfile: AudioProfile;
+  public audioProfile: AudioProfile;
 
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer(), default: 1 })
-  speakingRate: number;
+  public speakingRate: number;
 
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer(), default: 0 })
-  pitch: number;
+  public pitch: number;
 
   @Column({ nullable: true })
-  naturalSampleRateHertz: number;
+  public naturalSampleRateHertz: number;
 
   @Column({ nullable: false, default: false }) // true means it is available for our users, false is unavailable for our users
-  isActive: boolean;
+  public isActive: boolean;
 
   @Column({ nullable: false, default: true }) // Determine if this voice requires a subscription within the app
-  isPremium: boolean;
+  public isPremium: boolean;
 
   @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
-  isHighestQuality: boolean;
+  public isHighestQuality: boolean;
 
   @Column({ nullable: true, default: null }) // Determine if this voice is the default for the language
-  isLanguageDefault: boolean;
+  public isLanguageDefault: boolean;
 
   @Column({ nullable: true }) // A URL to an audiofile with an example
-  exampleAudioUrl: string;
+  public exampleAudioUrl: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @OneToMany(type => Audiofile, audiofile => audiofile.voice, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, don't remove the voice
-  audiofiles: Audiofile[];
+  public audiofiles: Audiofile[];
 
   @ManyToOne(type => Language, { nullable: true, onDelete: 'RESTRICT', eager: true })
   // On delete of an Language, restrict the deletion if there's a voice using that language.
   // eager: true is needed so our app can determine the correct language for a voice
-  language: Language;
+  public language: Language;
 }

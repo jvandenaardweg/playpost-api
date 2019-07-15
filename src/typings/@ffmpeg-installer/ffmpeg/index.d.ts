@@ -1,1 +1,1 @@
-declare module '@ffmpeg-installer/ffmpeg'
+declare module '@ffmpeg-installer/ffmpeg';

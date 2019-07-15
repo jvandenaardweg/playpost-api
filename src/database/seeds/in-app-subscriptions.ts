@@ -1,4 +1,4 @@
-import { InAppSubscriptionCurrency, InAppSubscriptionDuration, InAppSubscriptionService, InAppSubscription } from '../entities/in-app-subscription';
+import { InAppSubscription, InAppSubscriptionCurrency, InAppSubscriptionDuration, InAppSubscriptionService } from '../entities/in-app-subscription';
 
 export default [
   {

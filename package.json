@@ -14,13 +14,13 @@
     "start:worker": "forever -m 5 dist/worker.js",
     "dev": "npm run dev:database && npm run dev:worker & npm run dev:index",
     "debug": "npm run dev:database && npm run debug:worker & npm run debug:index",
-    "debug:index": "ts-node-dev --inspect=9230 --respawn --transpileOnly ./src/index.ts",
-    "debug:worker": "ts-node-dev --inspect=9231 --respawn --transpileOnly ./src/worker.ts",
-    "dev:index": "ts-node-dev --respawn --transpileOnly src/index.ts --ignore-watch src/worker.ts",
-    "dev:worker": "ts-node-dev --respawn --transpileOnly src/worker.ts --ignore-watch src/index.ts &",
+    "debug:index": "ts-node-dev -r dotenv/config --inspect=9230 --respawn --transpileOnly ./src/index.ts",
+    "debug:worker": "ts-node-dev -r dotenv/config --inspect=9231 --respawn --transpileOnly ./src/worker.ts",
+    "dev:index": "ts-node-dev -r dotenv/config --respawn --transpileOnly src/index.ts --ignore-watch src/worker.ts",
+    "dev:worker": "ts-node-dev -r dotenv/config --respawn --transpileOnly src/worker.ts --ignore-watch src/index.ts &",
     "dev:database": "docker-compose up -d",
     "dev:docker:rebuild": "docker-compose up -d --force-recreate --build",
-    "database:sync": "ts-node-dev src/database-sync.ts",
+    "database:sync": "ts-node-dev -r dotenv/config src/database-sync.ts",
     "build": "npm run build:typescript:production",
     "heroku-postbuild": "npm run build",
     "build:typescript": "npx tsc",
@@ -159,6 +159,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "husky": "^3.0.0"
+    "husky": "^3.0.0",
+    "tslint-config-prettier": "^1.18.0"
   }
 }

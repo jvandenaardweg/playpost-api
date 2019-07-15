@@ -1,6 +1,6 @@
-import { EntityRepository, Repository, Between } from 'typeorm';
+import { endOfMonth, startOfMonth } from 'date-fns';
+import { Between, EntityRepository, Repository } from 'typeorm';
 import { Audiofile } from '../entities/audiofile';
-import { startOfMonth, endOfMonth } from 'date-fns';
 
 @EntityRepository(Audiofile)
 export class AudiofileRepository extends Repository<Audiofile> {
@@ -14,7 +14,7 @@ export class AudiofileRepository extends Repository<Audiofile> {
    * @param userId
    * @returns totalUsageCurrentMonthInSeconds
    */
-  async findAudiofileUsageInCurrentMonth(userId: string): Promise<number> {
+  public async findAudiofileUsageInCurrentMonth(userId: string): Promise<number> {
     const today = new Date();
     const firstDayOfCurrentMonth = startOfMonth(today);
     const lastDayOfCurrentMonth = endOfMonth(today);
@@ -29,7 +29,7 @@ export class AudiofileRepository extends Repository<Audiofile> {
       select: ['length']
     });
 
-    if (!userAudiofilesInCurrentMonth) return 0;
+    if (!userAudiofilesInCurrentMonth) { return 0; }
 
     const totalUsageCurrentMonthInSeconds = userAudiofilesInCurrentMonth.reduce((length, audiofile) => {
       // tslint:disable no-parameter-reassignment

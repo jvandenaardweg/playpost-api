@@ -1,21 +1,21 @@
-import { Request, Response } from 'express';
-import { getRepository, getCustomRepository } from 'typeorm';
-import joi from 'joi';
-import uuid from 'uuid';
 import * as Sentry from '@sentry/node';
+import { Request, Response } from 'express';
+import joi from 'joi';
+import { getCustomRepository, getRepository } from 'typeorm';
+import uuid from 'uuid';
 
 import * as storage from '../storage/google-cloud';
 
-import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Article, ArticleStatus } from '../database/entities/article';
+import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Voice } from '../database/entities/voice';
 
+import { UserVoiceSetting } from '../database/entities/user-voice-setting';
+import { AudiofileRepository } from '../database/repositories/audiofile';
+import { UserRepository } from '../database/repositories/user';
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
-import { UserVoiceSetting } from '../database/entities/user-voice-setting';
-import { UserRepository } from '../database/repositories/user';
-import { AudiofileRepository } from '../database/repositories/audiofile';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
@@ -29,7 +29,7 @@ export const findById = async (req: Request, res: Response) => {
 
   const audiofile = await audiofileRepository.findOne(audiofileId, { relations: ['voice'] });
 
-  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
+  if (!audiofile) { return res.status(400).json({ message: 'Audiofile not found.' }); }
 
   return res.json(audiofile);
 };
@@ -39,12 +39,12 @@ export const findById = async (req: Request, res: Response) => {
  *
  */
 export const createAudiofile = async (req: Request, res: Response) => {
-  interface RequestBody {
+  interface IRequestBody {
     mimeType: AudiofileMimeType;
     voiceId: string;
   }
 
-  interface RequestParams {
+  interface IRequestParams {
     articleId: string;
   }
 
@@ -53,8 +53,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const loggerPrefix = 'Create Audiofile:';
 
   const userId = req.user.id;
-  const { articleId } = req.params as RequestParams;
-  const { mimeType } = req.body as RequestBody;
+  const { articleId } = req.params as IRequestParams;
+  const { mimeType } = req.body as IRequestBody;
 
   const articleRepository = getRepository(Article);
   const voiceRepository = getRepository(Voice);
@@ -82,7 +82,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const user = await userRepository.findUserDetails(userId);
 
-  if (!user) return res.status(400).json({ message: 'User not found.' });
+  if (!user) { return res.status(400).json({ message: 'User not found.' }); }
 
   const userIsSubscribed = user.isSubscribed;
   const userSubscriptionLimits = user.limits.audiofiles;
@@ -494,7 +494,7 @@ export const findAllAudiofiles = async (req: Request, res: Response) => {
   const userEmail = req.user.email;
   const audiofileRepository = getRepository(Audiofile);
 
-  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
 
   const audiofiles = await audiofileRepository.findAndCount();
 
@@ -517,7 +517,7 @@ export const findAudiofileById = async (req: Request, res: Response) => {
 
   const audiofile = await audiofileRepository.findOne(audiofileId);
 
-  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
+  if (!audiofile) { return res.status(400).json({ message: 'Audiofile not found.' }); }
 
   return res.json(audiofile);
 };
@@ -531,11 +531,11 @@ export const deleteById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
-  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
 
   const audiofile = await audiofileRepository.findOne(audiofileId, { relations: ['article'] });
 
-  if (!audiofile) return res.status(400).json({ message: 'Audiofile not found.' });
+  if (!audiofile) { return res.status(400).json({ message: 'Audiofile not found.' }); }
 
   const articleId = audiofile.article.id;
 

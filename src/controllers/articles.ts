@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
+import joi from 'joi';
 import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
-import joi from 'joi';
 import urlParse from 'url-parse';
 
-import * as storage from '../storage/google-cloud';
 import { Article, ArticleStatus } from '../database/entities/article';
-import { audiofileInputValidationSchema, articleInputValidationSchema } from '../database/validators';
-import { PlaylistItem } from '../database/entities/playlist-item';
-import { logger } from '../utils';
 import { Language } from '../database/entities/language';
+import { PlaylistItem } from '../database/entities/playlist-item';
+import { articleInputValidationSchema, audiofileInputValidationSchema } from '../database/validators';
+import * as storage from '../storage/google-cloud';
+import { logger } from '../utils';
 
 export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
@@ -77,7 +77,7 @@ export const deleteById = async (req: Request, res: Response) => {
 
   const article = await articleRepository.findOne(articleId);
 
-  if (!article) return res.status(400).json({ message: 'Article not found.' });
+  if (!article) { return res.status(400).json({ message: 'Article not found.' }); }
 
   await articleRepository.remove(article);
 
@@ -91,12 +91,12 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
 
   if (!articleUrl) {
     const errorMessage = 'articleUrl is required to fetch the full article contents.';
-    logger.error(loggerPrefix, errorMessage, articleUrl)
+    logger.error(loggerPrefix, errorMessage, articleUrl);
     throw new Error(errorMessage);
   }
 
   try {
-    let response: PostplayCrawler.Response;
+    let result: PostplayCrawler.IResponse;
 
     // If we have a html string, we use a different endpoint
     // We don't need to crawl the page, we can just try to extract data from the HTML string we got
@@ -108,7 +108,7 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
 
       logger.info(loggerPrefix, 'Get article data using given documentHtml...');
 
-      response = await nodeFetch(`${process.env.CRAWLER_EXTRACTOR_URL}`, {
+      result = await nodeFetch(`${process.env.CRAWLER_EXTRACTOR_URL}`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -116,62 +116,62 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
         body: JSON.stringify(body)
       }).then(response => response.json());
 
-      logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!', response);
+      logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!', result);
     } else {
       logger.info(loggerPrefix, 'Get article data using given articleUrl...', articleUrl);
-      response = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
+      result = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
       logger.info(loggerPrefix, 'Successfully got article data using given articleUrl!', articleUrl);
     }
 
-    if (!response) {
-      throw new Error('Dit not receive a response from the crawler.');
+    if (!result) {
+      throw new Error('Dit not receive a result from the crawler.');
     }
 
-    let ssml: string | undefined = undefined;
-    let text: string | undefined = undefined;
-    let html: string | undefined = undefined;
+    let ssml: string | undefined;
+    let text: string | undefined;
+    let html: string | undefined;
     let url: string = '';
-    let readingTime: number | undefined = undefined;
-    let imageUrl: string | undefined = undefined;
-    let authorName: string | undefined = undefined;
-    let description: string | undefined = undefined;
-    let canonicalUrl: string | undefined = undefined;
-    let language: string | undefined = undefined;
-    let title: string | undefined = undefined;
-    let siteName: string | undefined = undefined;
+    let readingTime: number | undefined;
+    let imageUrl: string | undefined;
+    let authorName: string | undefined;
+    let description: string | undefined;
+    let canonicalUrl: string | undefined;
+    let language: string | undefined;
+    let title: string | undefined;
+    let siteName: string | undefined;
 
-    if (response.ssml) ssml = response.ssml;
-    if (response.articleText) text = response.articleText;
-    if (response.articleHTML) html = response.articleHTML;
-    if (response.readingTimeInSeconds) {
-      readingTime = response.readingTimeInSeconds;
+    if (result.ssml) { ssml = result.ssml; }
+    if (result.articleText) { text = result.articleText; }
+    if (result.articleHTML) { html = result.articleHTML; }
+    if (result.readingTimeInSeconds) {
+      readingTime = result.readingTimeInSeconds;
     }
-    if (response.metadata && response.metadata.image) {
-      imageUrl = response.metadata.image;
+    if (result.metadata && result.metadata.image) {
+      imageUrl = result.metadata.image;
     }
-    if (response.metadata && response.metadata.author) {
-      authorName = response.metadata.author;
+    if (result.metadata && result.metadata.author) {
+      authorName = result.metadata.author;
     }
-    if (response.description) description = response.description;
+    if (result.description) { description = result.description; }
 
-    if (response.canonicalUrl) {
-      canonicalUrl = response.canonicalUrl;
-    } else if (response.metadata && response.metadata.url) {
-      canonicalUrl = response.metadata.url;
+    if (result.canonicalUrl) {
+      canonicalUrl = result.canonicalUrl;
+    } else if (result.metadata && result.metadata.url) {
+      canonicalUrl = result.metadata.url;
     }
 
-    if (response.language) language = response.language;
-    if (response.title) title = response.title;
-    if (response.url) url = response.url;
+    if (result.language) { language = result.language; }
+    if (result.title) { title = result.title; }
+    if (result.url) { url = result.url; }
 
-    if (response.siteName) {
-      siteName = response.siteName;
-    } else if (response.hostName) {
-      siteName = response.hostName;
-    } else if (response.canonicalUrl) {
-      siteName = urlParse(response.canonicalUrl).hostname;
-    } else if (response.url) {
-      siteName = urlParse(response.url).hostname;
+    if (result.siteName) {
+      siteName = result.siteName;
+    } else if (result.hostName) {
+      siteName = result.hostName;
+    } else if (result.canonicalUrl) {
+      siteName = urlParse(result.canonicalUrl).hostname;
+    } else if (result.url) {
+      siteName = urlParse(result.url).hostname;
     }
 
     return {
@@ -494,7 +494,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
       }
     });
 
-    const userPlaylistItemsArticlesIds = userPlaylistItems.map(playlistItem => playlistItem.article.id);
+    const userPlaylistItemsArticlesIds = userPlaylistItems.map(userPlaylistItem => userPlaylistItem.article.id);
 
     if (userPlaylistItemsArticlesIds.includes(existingArticleId)) {
       logger.info(loggerPrefix, `(enforcing) User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);

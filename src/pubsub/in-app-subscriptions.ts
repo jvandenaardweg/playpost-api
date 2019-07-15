@@ -1,12 +1,11 @@
-require('dotenv').config();
-import { PubSub, Message } from '@google-cloud/pubsub';
-import inAppPurchase from 'in-app-purchase';
+import { Message, PubSub } from '@google-cloud/pubsub';
 import * as Sentry from '@sentry/node';
+import inAppPurchase from 'in-app-purchase';
 
-import { AppleSubscriptionNotificationRequestBody } from '../typings';
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
-import { getGoogleCloudCredentials } from '../utils/credentials';
+import { IAppleSubscriptionNotificationRequestBody } from '../typings';
 import { logger } from '../utils';
+import { getGoogleCloudCredentials } from '../utils/credentials';
 
 const { GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS } = process.env;
 
@@ -30,7 +29,7 @@ export const listenForAppleSubscriptionNotifications = () => {
 
   const pubsub = new PubSub(getGoogleCloudCredentials());
 
-  if (!GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set. Please add it.');
+  if (!GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) { throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set. Please add it.'); }
 
   const subscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
 
@@ -44,7 +43,7 @@ const handleMessage = async (message: Message) => {
 
   const reDeliverDelayInSeconds = 60;
 
-  let notification = {} as AppleSubscriptionNotificationRequestBody;
+  let notification = {} as any as IAppleSubscriptionNotificationRequestBody;
 
   try {
     notification = JSON.parse(message.data.toString());
@@ -85,7 +84,7 @@ const handleMessage = async (message: Message) => {
  * @param reDeliverDelayInSeconds
  * @param loggerPrefix
  */
-const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNotificationRequestBody, message: Message, reDeliverDelayInSeconds: number, loggerPrefix: string) => {
+const handleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNotificationRequestBody, message: Message, reDeliverDelayInSeconds: number, loggerPrefix: string) => {
   const availableEvents = ['INITIAL_BUY', 'CANCEL', 'RENEWAL', 'INTERACTIVE_RENEWAL', 'DID_CHANGE_RENEWAL_PREF', 'DID_CHANGE_RENEWAL_STATUS'];
 
   logger.info(loggerPrefix, notification);
@@ -159,7 +158,7 @@ const handleSubscriptionStatusEvent = async (notification: AppleSubscriptionNoti
   }
 };
 
-const getOriginalTransactionId = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
+const getOriginalTransactionId = (notification: IAppleSubscriptionNotificationRequestBody): string | undefined => {
   // expired
   const expiredOriginalTransactionId = notification.latest_expired_receipt_info && notification.latest_expired_receipt_info.original_transaction_id;
 
@@ -172,11 +171,11 @@ const getOriginalTransactionId = (notification: AppleSubscriptionNotificationReq
   return originalTransactionId;
 };
 
-const getLatestReceipt = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
+const getLatestReceipt = (notification: IAppleSubscriptionNotificationRequestBody): string | undefined => {
   return notification.latest_receipt || notification.latest_expired_receipt;
 };
 
-const getProductId = (notification: AppleSubscriptionNotificationRequestBody): string | undefined => {
+const getProductId = (notification: IAppleSubscriptionNotificationRequestBody): string | undefined => {
   const expiredReceiptProductId = notification.latest_expired_receipt_info ? notification.latest_expired_receipt_info.product_id : undefined;
   const latestReceiptProductId = notification.latest_receipt_info ? notification.latest_receipt_info.product_id : undefined;
   const autoRenewProductId = notification.auto_renew_product_id ? notification.auto_renew_product_id : undefined;

@@ -1,4 +1,4 @@
-import { getSSMLParts, GOOGLE_CHARACTER_LIMIT, AWS_CHARACTER_LIMIT } from '../ssml';
+import { AWS_CHARACTER_LIMIT, getSSMLParts, GOOGLE_CHARACTER_LIMIT } from '../ssml';
 
 describe('ssml', () => {
 
@@ -22,8 +22,8 @@ describe('ssml', () => {
       const expectedSecondPart = '<speak><p>Cras interdum pulvinar posuere. Pellentesque mollis consectetur elit, vitae iaculis nibh dapibus vel. Duis maximus fringilla magna ac fermentum. Vestibulum porttitor eros tellus, a fermentum leo bibendum pellentesque. Mauris semper fringilla mauris, non fringilla velit dictum sed.</p></speak>';
 
       const ssmlParts = getSSMLParts(exampleSsml, {
-        softLimit: 200,
-        hardLimit: 500
+        hardLimit: 500,
+        softLimit: 200
       });
 
       expect(ssmlParts).toHaveLength(2);
@@ -40,8 +40,8 @@ describe('ssml', () => {
       const expectedSecondPart = '<speak><p>Sed viverra, magna vitae aliquet faucibus, lacus turpis tristique turpis, eu convallis quam nibh a nisi. In viverra tempus ullamcorper. Quisque sollicitudin vehicula urna, lacinia bibendum felis pulvinar eu. Pellentesque feugiat vehicula nunc, vitae bibendum erat. Curabitur eu felis et augue hendrerit laoreet. Ut et aliquet dolor, eu facilisis justo. Pellentesque elementum iaculis nulla vitae ornare. Integer volutpat, turpis eu placerat fermentum, erat diam tincidunt lacus, ut consequat arcu ex vel ipsum. Fusce nec quam molestie, laoreet elit ut, dictum nulla. Nulla fringilla facilisis accumsan. Sed nisi sem, ornare at cursus accumsan, vehicula vel augue. Cras semper feugiat ex, ac commodo felis rhoncus non.</p><p>Pellentesque pharetra pharetra dictum. Ut urna justo, tristique et ipsum at, sodales gravida tellus. Morbi vitae cursus orci. Ut id dui quis enim blandit egestas. Quisque euismod varius eros, vel tincidunt purus venenatis eu. Praesent tempor, ex at consectetur sodales, nisi erat pharetra sapien, quis ultrices sem leo a ex. Sed et eros fermentum, porttitor mauris a, elementum elit. Etiam a sagittis urna. Nunc ac risus ullamcorper, tincidunt erat eu, efficitur elit. Integer sapien elit, vehicula eu justo in, interdum congue est. Vestibulum id sem a ipsum faucibus posuere. Mauris vel blandit ligula, vel vehicula quam. Curabitur turpis purus, efficitur id varius ac, hendrerit sed nunc. Phasellus quis iaculis massa. Donec nec dui sed ante elementum interdum sed ac quam.</p><p>Vestibulum faucibus ultrices suscipit. Sed lacinia nunc vel lorem facilisis auctor. Nulla facilisi. Nam pretium egestas ligula at efficitur. Sed ut mauris ut mi blandit luctus. Fusce tristique pharetra felis non fermentum. Sed rhoncus fringilla semper. Maecenas suscipit euismod magna pretium vehicula. Duis iaculis pulvinar luctus. Nulla fermentum vulputate nisi in molestie. Suspendisse a urna laoreet, tincidunt lorem nec, accumsan ligula. Pellentesque a quam eu velit scelerisque varius. Nullam quis mollis libero. Maecenas sodales ac leo at auctor. In dapibus commodo magna sit amet sollicitudin. Quisque molestie auctor nunc vitae ornare.</p><p>Vestibulum malesuada non lectus vitae suscipit. Maecenas vel cursus diam. Nunc at malesuada ante. Curabitur facilisis nisl nec dolor tempor, quis tempor lorem pharetra. Morbi pretium, dolor eu tincidunt vestibulum, ligula diam interdum eros, tempor suscipit nulla metus nec enim. Suspendisse id sem mi. Nunc vitae dui ultricies, convallis nunc quis, aliquam tellus. Maecenas at odio eu est semper maximus. Vivamus nec lorem erat. Mauris tempor luctus erat id elementum. Maecenas dictum ex in eros porttitor, eu lobortis nisi pretium. Duis porta vitae dolor quis auctor.</p></speak>';
 
       const ssmlParts = getSSMLParts(exampleSsml, {
-        softLimit: GOOGLE_CHARACTER_LIMIT - 1000,
-        hardLimit: GOOGLE_CHARACTER_LIMIT
+        hardLimit: GOOGLE_CHARACTER_LIMIT,
+        softLimit: GOOGLE_CHARACTER_LIMIT - 1000
       });
 
       expect(ssmlParts).toHaveLength(2);
@@ -61,8 +61,8 @@ describe('ssml', () => {
       const expectedThirdPart = '<speak><p>Pellentesque pharetra pharetra dictum. Ut urna justo, tristique et ipsum at, sodales gravida tellus. Morbi vitae cursus orci. Ut id dui quis enim blandit egestas. Quisque euismod varius eros, vel tincidunt purus venenatis eu. Praesent tempor, ex at consectetur sodales, nisi erat pharetra sapien, quis ultrices sem leo a ex. Sed et eros fermentum, porttitor mauris a, elementum elit. Etiam a sagittis urna. Nunc ac risus ullamcorper, tincidunt erat eu, efficitur elit. Integer sapien elit, vehicula eu justo in, interdum congue est. Vestibulum id sem a ipsum faucibus posuere. Mauris vel blandit ligula, vel vehicula quam. Curabitur turpis purus, efficitur id varius ac, hendrerit sed nunc. Phasellus quis iaculis massa. Donec nec dui sed ante elementum interdum sed ac quam.</p><p>Vestibulum faucibus ultrices suscipit. Sed lacinia nunc vel lorem facilisis auctor. Nulla facilisi. Nam pretium egestas ligula at efficitur. Sed ut mauris ut mi blandit luctus. Fusce tristique pharetra felis non fermentum. Sed rhoncus fringilla semper. Maecenas suscipit euismod magna pretium vehicula. Duis iaculis pulvinar luctus. Nulla fermentum vulputate nisi in molestie. Suspendisse a urna laoreet, tincidunt lorem nec, accumsan ligula. Pellentesque a quam eu velit scelerisque varius. Nullam quis mollis libero. Maecenas sodales ac leo at auctor. In dapibus commodo magna sit amet sollicitudin. Quisque molestie auctor nunc vitae ornare.</p><p>Vestibulum malesuada non lectus vitae suscipit. Maecenas vel cursus diam. Nunc at malesuada ante. Curabitur facilisis nisl nec dolor tempor, quis tempor lorem pharetra. Morbi pretium, dolor eu tincidunt vestibulum, ligula diam interdum eros, tempor suscipit nulla metus nec enim. Suspendisse id sem mi. Nunc vitae dui ultricies, convallis nunc quis, aliquam tellus. Maecenas at odio eu est semper maximus. Vivamus nec lorem erat. Mauris tempor luctus erat id elementum. Maecenas dictum ex in eros porttitor, eu lobortis nisi pretium. Duis porta vitae dolor quis auctor.</p></speak>';
 
       const ssmlParts = getSSMLParts(exampleSsml, {
-        softLimit: AWS_CHARACTER_LIMIT - 1000,
-        hardLimit: AWS_CHARACTER_LIMIT
+        hardLimit: AWS_CHARACTER_LIMIT,
+        softLimit: AWS_CHARACTER_LIMIT - 1000
       });
 
       expect(ssmlParts).toHaveLength(3);
@@ -74,6 +74,5 @@ describe('ssml', () => {
       expect(ssmlParts[2]).toHaveLength(2024);
     });
   });
-
 
 });

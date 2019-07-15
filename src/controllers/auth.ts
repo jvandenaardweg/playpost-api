@@ -1,14 +1,14 @@
+import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
-import { getRepository, getCustomRepository } from 'typeorm';
+import joi from 'joi';
 import passport from 'passport';
+import { getCustomRepository, getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
-import joi from 'joi';
-import * as Sentry from '@sentry/node';
 
-import { logger } from '../utils';
 import { UserRepository } from '../database/repositories/user';
 import * as AWSSes from '../mailers/aws-ses';
+import { logger } from '../utils';
 
 const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
 const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
@@ -96,10 +96,10 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const decoded = User.verifyJWTAccessToken(token);
 
   // Decode for extra info about the token
-  const expiresAt = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).toISOString() : null;
-  const expiresAtMs = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).getTime() : null;
-  const issuedAt = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).toISOString() : null;
-  const issuedAtMs = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).getTime() : null;
+  const expiresAt = decoded && decoded.exp ? new Date(decoded.exp * 1000).toISOString() : null;
+  const expiresAtMs = decoded && decoded.exp ? new Date(decoded.exp * 1000).getTime() : null;
+  const issuedAt = decoded && decoded.iat ? new Date(decoded.iat * 1000).toISOString() : null;
+  const issuedAtMs = decoded && decoded.iat ? new Date(decoded.iat * 1000).getTime() : null;
 
   logger.info(loggerPrefix, `Generated token using user ID "${user.id}" and user email "${user.email}".`);
 
@@ -122,14 +122,14 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
  * @param res
  */
 export const getResetPasswordToken = async (req: Request, res: Response) => {
-  interface RequestBody {
+  interface IRequestBody {
     email: string;
   }
 
   const loggerPrefix = 'Get Reset Password Token: ';
   const userRepository = getCustomRepository(UserRepository);
 
-  const { email } = req.body as RequestBody;
+  const { email } = req.body as IRequestBody;
 
   const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
 
@@ -213,7 +213,7 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
  * @param res
  */
 export const updatePasswordUsingToken = async (req: Request, res: Response) => {
-  interface RequestBody {
+  interface IRequestBody {
     resetPasswordToken: string;
     password: string;
   }
@@ -221,7 +221,7 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   const loggerPrefix = 'Update Password Using Token: ';
   const userRepository = getCustomRepository(UserRepository);
 
-  const { resetPasswordToken, password } = req.body as RequestBody;
+  const { resetPasswordToken, password } = req.body as IRequestBody;
 
   const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('resetPasswordToken', 'password'));
 

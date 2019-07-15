@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
-import { getRepository, getCustomRepository } from 'typeorm';
 import joi from 'joi';
+import { getCustomRepository, getRepository } from 'typeorm';
 
 import { Voice } from '../database/entities/voice';
 
 import * as storage from '../storage/google-cloud';
 
 import { CACHE_ONE_DAY } from '../constants/cache';
-import { voiceInputValidationSchema } from '../database/validators';
 import { VoiceRepository } from '../database/repositories/voice';
+import { voiceInputValidationSchema } from '../database/validators';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
@@ -89,7 +89,7 @@ export const deleteVoicePreview = async (req: Request, res: Response) => {
   const { voiceId }: { voiceId: string } = req.params;
   const voiceRepository = getRepository(Voice);
 
-  if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
 
   const { error } = joi.validate(req.params, voiceInputValidationSchema.requiredKeys('voiceId'));
 
@@ -100,9 +100,9 @@ export const deleteVoicePreview = async (req: Request, res: Response) => {
 
   const voice = await voiceRepository.findOne(voiceId);
 
-  if (!voice) return res.status(400).json({ message: 'Voice not found!' });
+  if (!voice) { return res.status(400).json({ message: 'Voice not found!' }); }
 
-  if (!voice.exampleAudioUrl) return res.status(400).json({ message: 'This voice has no voice preview. Nothing to be deleted!' });
+  if (!voice.exampleAudioUrl) { return res.status(400).json({ message: 'This voice has no voice preview. Nothing to be deleted!' }); }
 
   // Delete the URL from the voice in the database
   await voiceRepository.update(voiceId, {

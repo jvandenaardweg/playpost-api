@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Unique, Index, OneToMany } from 'typeorm';
-import { IsUUID, IsDate } from 'class-validator';
-import { Voice } from './voice';
+import { IsDate, IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
+import { Voice } from './voice';
 
 @Entity()
 @Unique(['name', 'code']) // Only one unique code and name combination
@@ -10,31 +10,31 @@ export class Language {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column()
-  name: string; // French
+  public name: string; // French
 
   @Column({ nullable: true })
-  nativeName: string; // French => Français
+  public nativeName: string; // French => Français
 
   @Column()
-  code: string; // fr, en, de, nl...
+  public code: string; // fr, en, de, nl...
 
   @Column({ default: false })
-  isActive: boolean; // to allow languages to be displayed or not
+  public isActive: boolean; // to allow languages to be displayed or not
 
   @OneToMany(type => Voice, voice => voice.language, { onDelete: 'NO ACTION' }) // On delete of a Voice, do nothing, so don't delete the language
-  voices: Voice[];
+  public voices: Voice[];
 
   @OneToMany(type => Article, article => article.language, { onDelete: 'NO ACTION' }) // On delete of a Article, do nothing, so don't delete the language
-  articles: Article[];
+  public articles: Article[];
 
   @CreateDateColumn()
   @IsDate()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

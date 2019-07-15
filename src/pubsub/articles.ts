@@ -1,9 +1,8 @@
-require('dotenv').config();
-import { getGoogleCloudCredentials } from '../utils/credentials';
-import { PubSub, Message } from '@google-cloud/pubsub';
+import { Message, PubSub } from '@google-cloud/pubsub';
 import * as Sentry from '@sentry/node';
+import { getGoogleCloudCredentials } from '../utils/credentials';
 
-import { CrawlFullArticleData } from '../typings';
+import { ICrawlFullArticleData } from '../typings';
 
 import * as articlesController from '../controllers/articles';
 import { ArticleStatus } from '../database/entities/article';
@@ -16,7 +15,7 @@ export const listenCrawlFullArticle = () => {
   const reDeliverDelayInSeconds = 10;
   const pubsub = new PubSub(getGoogleCloudCredentials());
 
-  if (!GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set. Please add it.');
+  if (!GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) { throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set. Please add it.'); }
 
   const subscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
 
@@ -27,7 +26,7 @@ export const listenCrawlFullArticle = () => {
   const tries = [];
 
   const messageHandler = async (message: Message) => {
-    const { articleId }: CrawlFullArticleData = JSON.parse(message.data.toString());
+    const { articleId }: ICrawlFullArticleData = JSON.parse(message.data.toString());
 
     try {
       // Just try 3 times
@@ -51,7 +50,7 @@ export const listenCrawlFullArticle = () => {
 
       logger.info(loggerPrefix, 'tries:', tries[articleId]);
 
-      if (!articleId) throw new Error('Did not receive an articleId from pubsub.');
+      if (!articleId) { throw new Error('Did not receive an articleId from pubsub.'); }
 
       logger.info(loggerPrefix, 'Worker process started: ', articleId);
 
@@ -106,7 +105,7 @@ export async function publishCrawlFullArticle(articleId: string, articleUrl: str
   try {
     const pubsub = new PubSub(getGoogleCloudCredentials());
 
-    if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) throw new Error('Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.');
+    if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) { throw new Error('Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.'); }
 
     const buffer = Buffer.from(
       JSON.stringify({

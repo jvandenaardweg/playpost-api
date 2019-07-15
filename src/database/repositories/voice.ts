@@ -1,24 +1,24 @@
-import { EntityRepository, Repository, getConnection } from 'typeorm';
-import { Voice } from '../entities/voice';
-import { SynthesizerEncoding } from '../../synthesizers';
-import { AudiofileMimeType } from '../entities/audiofile';
-import { googleSSMLToSpeech } from '../../synthesizers/google';
-import { awsSSMLToSpeech } from '../../synthesizers/aws';
-import { getAudioFileDurationInSeconds } from '../../utils/audio';
-import * as storage from '../../storage/google-cloud';
 import fsExtra from 'fs-extra';
+import { EntityRepository, getConnection, Repository } from 'typeorm';
+import * as storage from '../../storage/google-cloud';
+import { SynthesizerEncoding } from '../../synthesizers';
+import { awsSSMLToSpeech } from '../../synthesizers/aws';
+import { googleSSMLToSpeech } from '../../synthesizers/google';
+import { getAudioFileDurationInSeconds } from '../../utils/audio';
+import { AudiofileMimeType } from '../entities/audiofile';
+import { Voice } from '../entities/voice';
 
 @EntityRepository(Voice)
 export class VoiceRepository extends Repository<Voice> {
 
-  async createVoicePreview(voiceId: string): Promise<Voice> {
+  public async createVoicePreview(voiceId: string): Promise<Voice> {
     let localAudiofilePath: string = '';
     let audioEncoding: SynthesizerEncoding;
     let mimeType: AudiofileMimeType;
 
     const voice = await this.findOne(voiceId);
 
-    if (!voice) throw new Error('Voice not found, cannot create preview.');
+    if (!voice) { throw new Error('Voice not found, cannot create preview.'); }
 
     // tslint:disable max-line-length
     const ssml = {
@@ -122,9 +122,9 @@ export class VoiceRepository extends Repository<Voice> {
     const randomIndex = Math.floor(Math.random() * 3);
     const previewSsml = (ssml[voice.language.name]) ? ssml[voice.language.name][randomIndex] : null;
 
-    if (!previewSsml) throw new Error('Cannot create a voice preview, because there is no SSML for this language.');
+    if (!previewSsml) { throw new Error('Cannot create a voice preview, because there is no SSML for this language.'); }
 
-    if (!['Google', 'AWS'].includes(voice.synthesizer)) throw new Error('Voice synthesizer not supported.');
+    if (!['Google', 'AWS'].includes(voice.synthesizer)) { throw new Error('Voice synthesizer not supported.'); }
 
     if (voice.synthesizer === 'Google') {
       audioEncoding = SynthesizerEncoding.GOOGLE_LINEAR16;
@@ -205,11 +205,11 @@ export class VoiceRepository extends Repository<Voice> {
 
     // When we have updated a voice, remove all related caches
     const cache = await getConnection('default').queryResultCache;
-    if (cache) await cache.remove(['voices_all', 'voices_active', 'voices_active_free', 'voices_active_premium']);
+    if (cache) { await cache.remove(['voices_all', 'voices_active', 'voices_active_free', 'voices_active_premium']); }
 
     const updatedVoice = await this.findOne(voice.id);
 
-    if (!updatedVoice) throw new Error('Updated voice not found.');
+    if (!updatedVoice) { throw new Error('Updated voice not found.'); }
 
     return updatedVoice;
   }

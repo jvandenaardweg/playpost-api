@@ -1,30 +1,29 @@
-require('dotenv').config();
-import 'express-async-errors';
-import express, { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
-import passport from 'passport';
-import helmet from 'helmet';
 import compression from 'compression';
-import responseTime from 'response-time';
-import { createConnection } from 'typeorm';
+import express, { NextFunction, Request, Response } from 'express';
+import 'express-async-errors';
 import ExpressRateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 // import ExpressBrute from 'express-brute-cloudflare';
 import md5 from 'md5';
-import * as Sentry from '@sentry/node';
+import passport from 'passport';
+import responseTime from 'response-time';
+import { createConnection } from 'typeorm';
 
+import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
+import * as authController from './controllers/auth';
+import * as catchAllController from './controllers/catch-all';
+import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
+import * as languagesController from './controllers/languages';
 import * as meController from './controllers/me';
 import * as playlistController from './controllers/playlist';
 import * as usersController from './controllers/users';
-import * as authController from './controllers/auth';
-import * as articlesController from './controllers/articles';
-import * as catchAllController from './controllers/catch-all';
 import * as voicesController from './controllers/voices';
-import * as languagesController from './controllers/languages';
-import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 
-import { connectionOptions } from './database/connection-options';
 import { expressRateLimitRedisStore } from './cache';
+import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
 
 const PORT = process.env.PORT || 3000;
@@ -119,7 +118,7 @@ export const setupServer = async () => {
     windowMs: 1 * 60 * 1000, // 1 minute
     max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
     keyGenerator: req => {
-      const authorizationHeaders = req.headers['authorization'] as string;
+      const authorizationHeaders = req.headers.authorization as string;
       const cloudflareIpAddress = req.headers['cf-connecting-ip'] as string;
       const xForwardedForIpAddress = req.headers['x-forwarded-for'] as string;
       const ipAddressOfUser = cloudflareIpAddress || xForwardedForIpAddress || req.ip;

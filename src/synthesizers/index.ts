@@ -1,19 +1,19 @@
 import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
 
-import { Voice, Synthesizer } from '../database/entities/voice';
 import { Article } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
+import { Synthesizer, Voice } from '../database/entities/voice';
 
 import * as storage from '../storage/google-cloud';
 
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
-import { getSSMLParts, AWS_CHARACTER_LIMIT } from '../utils/ssml';
+import { AWS_CHARACTER_LIMIT, getSSMLParts } from '../utils/ssml';
 
-import { googleSSMLPartsToSpeech, GoogleSynthesizerOptions, GoogleAudioEncodingType } from './google';
-import { awsSSMLPartsToSpeech, AWSSynthesizerOptions } from './aws';
 import AWS, { Polly } from 'aws-sdk';
 import { logger } from '../utils';
+import { awsSSMLPartsToSpeech } from './aws';
+import { GoogleAudioEncodingType, googleSSMLPartsToSpeech, IGoogleSynthesizerOptions } from './google';
 
 export type SynthesizerType = 'article' | 'preview';
 export type SynthesizerAudioEncodingTypes = GoogleAudioEncodingType & Polly.OutputFormat;
@@ -136,7 +136,7 @@ const synthesizeUsingAWS = async (
 
   logger.info(loggerPrefix, `Received ${ssmlParts.length} SSML parts to be used for the synthesizer.`);
 
-  const synthesizerOptions: AWSSynthesizerOptions = {
+  const synthesizerOptions: Polly.Types.SynthesizeSpeechInput = {
     OutputFormat: encodingParameter,
     VoiceId: voice.name,
     LanguageCode: voice.languageCode,
@@ -220,7 +220,7 @@ const synthesizeUsingGoogle = async (
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml);
 
-  const synthesizerOptions: GoogleSynthesizerOptions = {
+  const synthesizerOptions: IGoogleSynthesizerOptions = {
     audioConfig: {
       audioEncoding: encodingParameter
     },

@@ -1,6 +1,6 @@
-import { concatAudioFiles, getAudioFileDurationInSeconds } from '../audio';
 import appRootPath from 'app-root-path';
 import fsExtra from 'fs-extra';
+import { concatAudioFiles, getAudioFileDurationInSeconds } from '../audio';
 
 const exampleFile1 = `${appRootPath}/src/mocks/audio/example-file-1.mp3`;
 const exampleFile2 = `${appRootPath}/src/mocks/audio/example-file-2.mp3`;
@@ -30,12 +30,12 @@ describe('audio', () => {
         const filePath = await concatAudioFiles([exampleFile1, exampleFile2], 'example-concatinated', 'MP3');
         expect(filePath).toBe(expectedOutput);
       });
-  
+
       it('Should also concatinate with 1 mp3 audiofile.', async () => {
         const filePath = await concatAudioFiles([exampleFile1], 'example-concatinated', 'MP3');
         expect(filePath).toBe(expectedOutput);
       });
-  
+
       it('Should throw an error when no files to concatinate are given.', async () => {
         try {
           await concatAudioFiles([], 'example-concatinated', 'MP3');
@@ -43,7 +43,7 @@ describe('audio', () => {
           expect(e.message).toBeDefined();
         }
       });
-  
+
       it('Should throw an error when concatinating mp3 fails.', async () => {
         try {
           await concatAudioFiles([exampleWrongFile, exampleWrongFile], 'example-concatinated', 'MP3');
@@ -59,12 +59,12 @@ describe('audio', () => {
         const filePath = await concatAudioFiles([exampleOpusFile1, exampleOpusFile2], 'example-concatinated', 'OGG_OPUS');
         expect(filePath).toBe(expectedOpusOutput);
       });
-  
+
       it('Should concatenate 1 opus audiofiles into one.', async () => {
         const filePath = await concatAudioFiles([exampleOpusFile1], 'example-concatinated', 'OGG_OPUS');
         expect(filePath).toBe(expectedOpusOutput);
       });
-  
+
       it('Should throw an error when no files to concatinate are given.', async () => {
         try {
           await concatAudioFiles([], 'example-concatinated', 'OGG_OPUS');
@@ -72,7 +72,7 @@ describe('audio', () => {
           expect(e.message).toBeDefined();
         }
       });
-  
+
       it('Should throw an error when concatinating opus fails.', async () => {
         try {
           await concatAudioFiles([exampleWrongFile, exampleWrongFile], 'example-concatinated', 'OGG_OPUS');
@@ -80,17 +80,15 @@ describe('audio', () => {
           expect(e.message).toBeDefined();
         }
       });
-  
+
       it('Should concatenate 2 opus audiofiles into one.', async () => {
         const filePath = await concatAudioFiles([exampleOpusFile1, exampleOpusFile2], 'example-concatinated', 'OGG_OPUS');
         expect(filePath).toBe(expectedOpusOutput);
       });
-  
+
     });
 
   });
-
-
 
   describe('getAudioFileDurationInSeconds()', () => {
 

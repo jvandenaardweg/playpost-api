@@ -4788,4 +4788,4 @@ export default [
     name: 'pl-PL-Standard-A',
     gender: 'FEMALE'
   }
-]
+];

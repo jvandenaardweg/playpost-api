@@ -1,15 +1,14 @@
-require('dotenv').config();
-import fsExtra from 'fs-extra';
 import textToSpeech from '@google-cloud/text-to-speech';
-import appRootPath from 'app-root-path';
-import { getRepository } from 'typeorm';
-import LocaleCode from 'locale-code';
 import * as Sentry from '@sentry/node';
+import appRootPath from 'app-root-path';
+import fsExtra from 'fs-extra';
+import LocaleCode from 'locale-code';
+import { getRepository } from 'typeorm';
 
-import { Voice, Gender, Synthesizer } from '../database/entities/voice';
+import { Gender, Synthesizer, Voice } from '../database/entities/voice';
 import { getGoogleCloudCredentials } from '../utils/credentials';
-import { SynthesizerType } from './index';
 import { logger } from '../utils/logger';
+import { SynthesizerType } from './index';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
@@ -17,7 +16,7 @@ const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
 export type GoogleAudioEncodingType = 'MP3' | 'LINEAR16' | 'OGG_OPUS' | 'AUDIO_ENCODING_UNSPECIFIED';
 
-export interface GoogleSynthesizerOptions {
+export interface IGoogleSynthesizerOptions {
   input: {
     text?: string;
     ssml?: string;
@@ -37,7 +36,7 @@ export interface GoogleSynthesizerOptions {
   };
 }
 
-export interface TextToSpeechVoice {
+export interface ITextToSpeechVoice {
   languageCodes: string[];
   name: string;
   ssmlGender: Gender;
@@ -48,7 +47,7 @@ export const getAllGoogleVoices = async (loggerPrefix: string) => {
   try {
     logger.info(loggerPrefix, 'Google Text To Speech: Getting all Google Text To Speech voices from the API...');
     const [result] = await client.listVoices({});
-    const voices: TextToSpeechVoice[] = result.voices;
+    const voices: ITextToSpeechVoice[] = result.voices;
     logger.info(loggerPrefix, `Google Text To Speech: Got ${voices.length} voices from the API...`);
     return voices;
   } catch (err) {
@@ -121,15 +120,14 @@ export const addAllGoogleVoices = async (loggerPrefix: string) => {
   return voices;
 };
 
-export const googleSSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string): Promise<string> => {
+export const googleSSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: IGoogleSynthesizerOptions, storageUploadPath: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     // Create a copy of the synthesizerOptions before giving it to the synthesizeSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
-    const ssmlPartSynthesizerOptions = Object.assign(synthesizerOptions, {
+    const ssmlPartSynthesizerOptions = {...synthesizerOptions, 
       input: {
         ssml: ssmlPart
-      }
-    });
+      }};
 
     let extension = 'mp3';
 
@@ -150,13 +148,13 @@ export const googleSSMLToSpeech = (index: number, ssmlPart: string, type: Synthe
 
     // Performs the Text-to-Speech request
     return client.synthesizeSpeech(ssmlPartSynthesizerOptions, (err: any, response: any) => {
-      if (err) return reject(err);
+      if (err) { return reject(err); }
 
-      if (!response) return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()'));
+      if (!response) { return reject(new Error('Google Text To Speech: Received no response from synthesizeSpeech()')); }
 
       // Write the binary audio content to a local file
       return fsExtra.writeFile(tempLocalAudiofilePath, response.audioContent, 'binary', writeFileError => {
-        if (writeFileError) return reject(writeFileError);
+        if (writeFileError) { return reject(writeFileError); }
 
         logger.info(`Google Text To Speech: Received synthesized audio file for ${type} ID '${identifier}' SSML part ${index}: ${tempLocalAudiofilePath}`);
         return resolve(tempLocalAudiofilePath);
@@ -168,13 +166,13 @@ export const googleSSMLToSpeech = (index: number, ssmlPart: string, type: Synthe
 /**
  * Synthesizes the SSML parts into seperate audiofiles
  */
-export const googleSSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string) => {
-  const promises: Promise<string>[] = [];
+export const googleSSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: IGoogleSynthesizerOptions, storageUploadPath: string) => {
+  const promises: Array<Promise<string>> = [];
 
   ssmlParts.forEach((ssmlPart: string, index: number) => {
     // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
     // Note: this seem to fix the problem we had with concurrent requests
-    const synthesizerOptionsCopy = Object.assign({}, synthesizerOptions);
+    const synthesizerOptionsCopy = {...synthesizerOptions};
     promises.push(googleSSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
   });
 

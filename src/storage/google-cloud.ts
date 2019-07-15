@@ -1,18 +1,17 @@
-require('dotenv').config();
-import { Storage, UploadResponse, File, DeleteFileResponse } from '@google-cloud/storage';
+import { DeleteFileResponse, File, Storage, UploadResponse } from '@google-cloud/storage';
 import * as Sentry from '@sentry/node';
 import LocaleCode from 'locale-code';
 
-import { getGoogleCloudCredentials } from '../utils/credentials';
 import { Article } from '../database/entities/article';
-import { Voice } from '../database/entities/voice';
 import { AudiofileMimeType } from '../database/entities/audiofile';
+import { Voice } from '../database/entities/voice';
 import { logger } from '../utils';
+import { getGoogleCloudCredentials } from '../utils/credentials';
 
 const storage = new Storage(getGoogleCloudCredentials());
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 
-if (!DEFAULT_BUCKET_NAME) throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.');
+if (!DEFAULT_BUCKET_NAME) { throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.'); }
 
 const DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH = 'articles';
 const DEFAULT_AUDIOFILES_BASE_PATH = 'audiofiles';
@@ -304,7 +303,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
 
   const prefix = `${DEFAULT_ARTICLE_AUDIOFILES_BASE_PATH}/${articleId}`;
 
-  if (!articleId) return new Error(`${loggerPrefix} articleId parameter is required for deleting an article's audiofiles.`);
+  if (!articleId) { return new Error(`${loggerPrefix} articleId parameter is required for deleting an article's audiofiles.`); }
 
   try {
     logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);

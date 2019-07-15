@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
-import { playlistInputValidationSchema } from '../database/validators';
-import { getRepository, getManager, MoreThan, Not } from 'typeorm';
-import joi from 'joi';
 import * as Sentry from '@sentry/node';
+import { Request, Response } from 'express';
+import joi from 'joi';
+import { getManager, getRepository, MoreThan, Not } from 'typeorm';
+import { playlistInputValidationSchema } from '../database/validators';
 
-import { PlaylistItem } from '../database/entities/playlist-item';
 import { Article, ArticleStatus } from '../database/entities/article';
-import { getNormalizedUrl } from '../utils/string';
+import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
+import { getNormalizedUrl } from '../utils/string';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
 const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given article does not exist in your playlist.';

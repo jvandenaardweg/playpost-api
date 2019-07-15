@@ -1,77 +1,117 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, AfterInsert, OneToMany, AfterRemove, BeforeInsert } from 'typeorm';
-import { IsEmail, IsUUID } from 'class-validator';
 import bcryptjs from 'bcryptjs';
-import jsonwebtoken from 'jsonwebtoken';
+import { IsEmail, IsUUID } from 'class-validator';
 import crypto from 'crypto';
+import jsonwebtoken from 'jsonwebtoken';
+import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
+import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
-import { UserVoiceSetting } from './user-voice-setting';
-import { removeEmailToMailchimpList, addEmailToMailchimpList } from '../../mailers/mailchimp';
 import { UserInAppSubscription } from './user-in-app-subscription';
+import { UserVoiceSetting } from './user-voice-setting';
 
 const { JWT_SECRET } = process.env;
 
 @Entity()
 export class User {
 
+  /**
+   * Takes a plain text password and returns a hash using bcryptjs.
+   */
+  public static hashPassword = (password: string) => {
+    return bcryptjs.hash(password, 10);
+  }
+
+  /**
+   * Creates and reurns a JWT token using a user ID and e-mail address.
+   */
+  public static generateJWTAccessToken = (id: string, email: string): string => {
+    if (!JWT_SECRET) { throw new Error('Please set the JWT_SECRET environment variable.'); }
+    return jsonwebtoken.sign({ id, email }, JWT_SECRET);
+  }
+
+  public static generateRandomRefreshToken = (): string => {
+    return crypto.randomBytes(40).toString('hex');
+  }
+
+  public static generateRandomResetPasswordToken = (): string => {
+    const length = 6;
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
+  }
+
+  public static verifyJWTAccessToken = (accessToken: string): object | string => {
+    if (!JWT_SECRET) { throw new Error('Please set the JWT_SECRET environment variable.'); }
+    return jsonwebtoken.verify(accessToken, JWT_SECRET);
+  }
+
+  /**
+   * Compares a plain text password with a hashed one. Returns true if they match.
+   */
+  public static comparePassword = (password: string, hashedPassword: string) => {
+    return bcryptjs.compare(password, hashedPassword);
+  }
+
+  public static normalizeEmail = (email: string) => {
+    return email.toLowerCase();
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: false, unique: true })
   @IsEmail()
-  email: string;
+  public email: string;
 
   @Column({ nullable: false, select: false })
-  password: string;
+  public password: string;
 
   @Column('varchar', { length: 6, nullable: true, select: false })
-  resetPasswordToken: string;
+  public resetPasswordToken: string;
 
   @Column({ nullable: true })
-  authenticatedAt: Date;
+  public authenticatedAt: Date;
 
   @Column({ nullable: true, select: false })
-  requestResetPasswordAt: Date;
+  public requestResetPasswordAt: Date;
 
   @Column({ nullable: true, select: false })
-  resetPasswordAt: Date;
+  public resetPasswordAt: Date;
 
   @Column({ nullable: true })
-  activatedAt: Date;
+  public activatedAt: Date;
 
   @OneToMany(type => Article, article => article.user)
-  articles: Article[];
+  public articles: Article[];
 
   @OneToMany(type => Audiofile, audiofile => audiofile.user)
-  audiofiles: Audiofile[];
+  public audiofiles: Audiofile[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
-  playlistItems: PlaylistItem[];
+  public playlistItems: PlaylistItem[];
 
   @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
-  voiceSettings: UserVoiceSetting[];
+  public voiceSettings: UserVoiceSetting[];
 
   @OneToMany(type => UserInAppSubscription, userInAppSubscription => userInAppSubscription.user)
-  inAppSubscriptions: UserInAppSubscription[];
+  public inAppSubscriptions: UserInAppSubscription[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @BeforeInsert()
-  lowercaseEmail() {
+  public lowercaseEmail() {
     this.email = this.email.toLowerCase();
   }
 
   @AfterInsert()
-  async afterInsert() {
+  public async afterInsert() {
     const loggerPrefix = 'Database Entity (User): @AfterInsert():';
 
     // Don't add our integration test account to Mailchimp
@@ -87,7 +127,7 @@ export class User {
   }
 
   @AfterRemove()
-  async afterRemove() {
+  public async afterRemove() {
     const loggerPrefix = 'Database Entity (User): @AfterRemove():';
 
     // Do not run for our integration test user
@@ -100,46 +140,5 @@ export class User {
         throw err;
       }
     }
-  }
-
-  /**
-   * Takes a plain text password and returns a hash using bcryptjs.
-   */
-  static hashPassword = (password: string) => {
-    return bcryptjs.hash(password, 10);
-  }
-
-  /**
-   * Creates and reurns a JWT token using a user ID and e-mail address.
-   */
-  static generateJWTAccessToken = (id: string, email: string): string => {
-    if (!JWT_SECRET) throw new Error('Please set the JWT_SECRET environment variable.');
-    return jsonwebtoken.sign({ id, email }, JWT_SECRET);
-  }
-
-  static generateRandomRefreshToken = (): string => {
-    return crypto.randomBytes(40).toString('hex');
-  }
-
-  static generateRandomResetPasswordToken = (): string => {
-    const length = 6;
-    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
-  }
-
-  static verifyJWTAccessToken = (accessToken: string): object | string => {
-    if (!JWT_SECRET) throw new Error('Please set the JWT_SECRET environment variable.');
-    return jsonwebtoken.verify(accessToken, JWT_SECRET);
-  }
-
-
-  /**
-  * Compares a plain text password with a hashed one. Returns true if they match.
-  */
-  static comparePassword = (password: string, hashedPassword: string) => {
-    return bcryptjs.compare(password, hashedPassword);
-  }
-
-  static normalizeEmail = (email: string) => {
-    return email.toLowerCase();
   }
 }

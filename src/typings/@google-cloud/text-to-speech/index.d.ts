@@ -1,1 +1,1 @@
-declare module '@google-cloud/text-to-speech'
+declare module '@google-cloud/text-to-speech';

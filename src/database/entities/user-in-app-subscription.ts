@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { IsUUID, IsDate } from 'class-validator';
-import { User } from './user';
+import { IsDate, IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { InAppSubscription } from './in-app-subscription';
+import { User } from './user';
 
 export enum InAppSubscriptionStatus {
   CANCELED = 'canceled',
@@ -21,62 +21,62 @@ export enum InAppSubscriptionEnvironment {
 export class UserInAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: true })
   @IsDate()
-  startedAt: Date; // purchase date
+  public startedAt: Date; // purchase date
 
   @Column({ nullable: true })
   @IsDate()
-  expiresAt: Date; // expires date
+  public expiresAt: Date; // expires date
 
   @Column({ nullable: true, unique: true })
-  latestTransactionId: string; // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)
+  public latestTransactionId: string; // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)
 
   @Column({ nullable: true, unique: true })
-  originalTransactionId: string; // The initial transaction the user did to purchase the subscription
+  public originalTransactionId: string; // The initial transaction the user did to purchase the subscription
 
   @Column({ nullable: false })
-  latestReceipt: string;
+  public latestReceipt: string;
 
   @Column({ nullable: false, default: false })
-  isTrial: boolean;
+  public isTrial: boolean;
 
   @Column({ nullable: false })
-  isCanceled: boolean;
+  public isCanceled: boolean;
 
   @Column({ nullable: false })
-  isExpired: boolean;
+  public isExpired: boolean;
 
   @Column({ type: 'enum', enum: InAppSubscriptionStatus, nullable: false })
-  status: InAppSubscriptionStatus;
+  public status: InAppSubscriptionStatus;
 
   @Column({ type: 'enum', enum: InAppSubscriptionEnvironment, nullable: false })
-  environment: InAppSubscriptionEnvironment;
+  public environment: InAppSubscriptionEnvironment;
 
   @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
   // When we delete a user, we keep their purchase history, so we can keep track of purchases
   // User could also be null if we receive purchase events from Apple, but we didnt register a purchase in our database
-  user: User;
+  public user: User;
 
   @ManyToOne(type => InAppSubscription, { onDelete: 'RESTRICT', eager: true })
   // When we try to delete a Subscription, prevent that from happening
-  inAppSubscription: InAppSubscription;
+  public inAppSubscription: InAppSubscription;
 
   @Column({ nullable: true })
   @IsDate()
-  renewedAt: Date; // purchase date
+  public renewedAt: Date; // purchase date
 
   @Column({ nullable: true })
   @IsDate()
-  canceledAt: Date;
+  public canceledAt: Date;
 
   @CreateDateColumn()
   @IsDate()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

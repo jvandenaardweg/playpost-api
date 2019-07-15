@@ -1,8 +1,8 @@
+import ffmpeg from '@ffmpeg-installer/ffmpeg';
+import * as Sentry from '@sentry/node';
 import appRootPath from 'app-root-path';
 import fluentFfmpeg from 'fluent-ffmpeg';
-import ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as musicMetadata from 'music-metadata';
-import * as Sentry from '@sentry/node';
 
 import { logger } from '../utils';
 

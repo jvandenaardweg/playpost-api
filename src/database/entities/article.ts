@@ -1,13 +1,13 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, AfterInsert, OneToMany, Index } from 'typeorm';
-import { IsUUID, IsUrl } from 'class-validator';
+import { IsUrl, IsUUID } from 'class-validator';
+import { AfterInsert, BaseEntity, Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { User } from './user';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
+import { User } from './user';
 
-import { ColumnNumericTransformer } from '../utils';
-import { logger } from '../../utils';
 import * as ArticlesPubSub from '../../pubsub/articles';
+import { logger } from '../../utils';
+import { ColumnNumericTransformer } from '../utils';
 import { Language } from './language';
 
 export enum ArticleStatus {
@@ -22,72 +22,72 @@ export enum ArticleStatus {
 export class Article extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: true })
-  title: string;
+  public title: string;
 
   @Column({ nullable: true })
-  description: string;
+  public description: string;
 
   @Column({ unique: true })
   @IsUrl()
-  url: string;
+  public url: string;
 
   // The "canonicalUrl" is filled in after we crawl the page. We could get redirects. The URL we end up is the "canonicalUrl", which could be different then "url".
   @Column({ unique: true, nullable: true })
   @IsUrl()
-  canonicalUrl: string;
+  public canonicalUrl: string;
 
   @Column({ type: 'enum', enum: ArticleStatus, default: ArticleStatus.NEW })
-  status: ArticleStatus;
+  public status: ArticleStatus;
 
   @Column({ nullable: true })
-  sourceName: string;
+  public sourceName: string;
 
   // Not required
   @Column({ nullable: true })
   @IsUrl()
-  imageUrl: string;
+  public imageUrl: string;
 
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
-  readingTime: number; // Time in seconds
+  public readingTime: number; // Time in seconds
 
   @Column({ nullable: true })
-  authorName: string;
+  public authorName: string;
 
   @Column('text', { nullable: true })
-  html: string;
+  public html: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the ssml to the user. If you need it, use in your find query { select: ['ssml'] }
-  ssml: string;
+  public ssml: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['text'] }
-  text: string;
+  public text: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['documentHtml'] }
-  documentHtml: string; // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
+  public documentHtml: string; // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
 
   @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
-  user: User;
+  public user: User;
 
   @ManyToOne(type => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
-  language: Language;
+  public language: Language;
 
   @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
-  audiofiles: Audiofile[];
+  public audiofiles: Audiofile[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'NO ACTION' }) // On delete of a PlaylistItem, don't remove the Article
-  playlistItems: PlaylistItem[];
+  public playlistItems: PlaylistItem[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @AfterInsert()
-  async afterInsert() {
+  public async afterInsert() {
     const loggerPrefix = 'Database Entity (Article):';
 
     try {

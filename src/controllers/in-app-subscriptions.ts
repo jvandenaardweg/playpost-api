@@ -1,13 +1,13 @@
+import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
+import inAppPurchase, { Receipt } from 'in-app-purchase';
+import joi from 'joi';
 import { getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
-import joi from 'joi';
-import * as Sentry from '@sentry/node';
-import inAppPurchase, { Receipt } from 'in-app-purchase';
 
-import { logger } from '../utils';
-import { InAppSubscriptionStatus, UserInAppSubscription, InAppSubscriptionEnvironment } from '../database/entities/user-in-app-subscription';
 import { InAppSubscription } from '../database/entities/in-app-subscription';
+import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription';
+import { logger } from '../utils';
 
 const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
 
@@ -67,7 +67,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       relations: ['user', 'inAppSubscription']
     });
 
-    if (!expiredSubscriptions.length) return res.status(200).json({ message: 'No active subscriptions found with an expiresAt date greater then the current date. Nothing to update...' });
+    if (!expiredSubscriptions.length) { return res.status(200).json({ message: 'No active subscriptions found with an expiresAt date greater then the current date. Nothing to update...' }); }
 
     for (const expiredSubscription of expiredSubscriptions) {
       const userId = expiredSubscription.user ? expiredSubscription.user.id : null;
@@ -101,13 +101,13 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
  * A method to validate the purchase receipt from our users with Apple/Google servers
  */
 export const validateInAppSubscriptionReceipt = async (req: Request, res: Response) => {
-  interface RequestBody {
+  interface IRequestBody {
     productId: string;
     receipt: Receipt;
   }
 
   const loggerPrefix = 'Create And Validate In App Subscription: ';
-  const { receipt, productId } = req.body as RequestBody;
+  const { receipt, productId } = req.body as IRequestBody;
   const { id: userId } = req.user;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
@@ -123,7 +123,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     // First, check if the subscription exists
     const subscription = await inAppSubscriptionRepository.findOne({ productId, isActive: true });
-    if (!subscription) throw new Error('An active subscription could not be found.');
+    if (!subscription) { throw new Error('An active subscription could not be found.'); }
 
     logger.info(loggerPrefix, 'Subscription exists! We continue...');
 
@@ -185,13 +185,13 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
       logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
 
-      const userInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(savedInAppSubscriptionPurchase.id);
+      const existingUserInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(savedInAppSubscriptionPurchase.id);
 
-      if (!userInAppSubscriptionResult) throw new Error('Could not find just added user in app subscription.');
+      if (!existingUserInAppSubscriptionResult) { throw new Error('Could not find just added user in app subscription.'); }
 
       logger.info(loggerPrefix, 'Finished! Returning created database entry...');
 
-      return userInAppSubscriptionResult;
+      return existingUserInAppSubscriptionResult;
     }
 
     // If there's already a transaction, but the user is different
@@ -210,7 +210,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
 
     const userInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(existingUserInAppSubscription.id);
 
-    if (!userInAppSubscriptionResult) throw new Error('Could not find just updated user in app subscription.');
+    if (!userInAppSubscriptionResult) { throw new Error('Could not find just updated user in app subscription.'); }
 
     logger.info(loggerPrefix, 'Finished! Returning updated database entry...');
 
@@ -324,7 +324,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
-        if (userId) scope.setUser({ id: userId });
+        if (userId) { scope.setUser({ id: userId }); }
         scope.setExtra('receipt', receipt);
         scope.setExtra('isValid', isValid);
         scope.setExtra('isCanceled', isCanceled);
@@ -350,7 +350,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
-        if (userId) scope.setUser({ id: userId });
+        if (userId) { scope.setUser({ id: userId }); }
         scope.setExtra('receipt', receipt);
         scope.setExtra('isValid', isValid);
         scope.setExtra('isCanceled', isCanceled);
@@ -389,8 +389,8 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     const user = userId
       ? {
         user: {
-            id: userId
-          }
+          id: userId
+        }
       }
       : undefined;
 

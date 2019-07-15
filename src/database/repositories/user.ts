@@ -1,42 +1,42 @@
-import { EntityRepository, Repository, getCustomRepository, getRepository, Not } from 'typeorm';
+import { EntityRepository, getCustomRepository, getRepository, Not, Repository } from 'typeorm';
+import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
 import { AudiofileRepository } from '../repositories/audiofile';
-import { InAppSubscription } from '../entities/in-app-subscription';
 
-type SubscriptionLimits = {
+interface ISubscriptionLimits {
   limitSecondsPerMonth: number;
   limitSecondsPerArticle: number;
-};
+}
 
-type SubscriptionUsed = {
+interface ISubscriptionUsed {
   currentMonthInSeconds: number;
-};
+}
 
-type SubscriptionAvailable = {
+interface ISubscriptionAvailable {
   currentMonthInSeconds: number;
-};
+}
 
-interface UserDetails extends Partial<User> {
+interface IUserDetails extends Partial<User> {
   isSubscribed: boolean;
   used: {
-    audiofiles: SubscriptionUsed;
+    audiofiles: ISubscriptionUsed;
   };
   available: {
-    audiofiles: SubscriptionAvailable;
+    audiofiles: ISubscriptionAvailable;
   };
   limits: {
-    audiofiles: SubscriptionLimits;
+    audiofiles: ISubscriptionLimits;
   };
 }
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async findActiveSubscriptionLimits(userId: string): Promise<SubscriptionLimits> {
+  public async findActiveSubscriptionLimits(userId: string): Promise<ISubscriptionLimits> {
     const user = await this.findOne(userId, {
       relations: ['inAppSubscriptions']
     });
 
-    if (!user) throw new Error('Could not find user for subscription limits.');
+    if (!user) { throw new Error('Could not find user for subscription limits.'); }
 
     const activeSubscription = user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
 
@@ -45,7 +45,7 @@ export class UserRepository extends Repository<User> {
       const inAppSubscriptionsRepository = getRepository(InAppSubscription);
       const freeSubscription = await inAppSubscriptionsRepository.findOne({ productId: 'free' });
 
-      if (!freeSubscription) throw new Error('Could not find free subscription.');
+      if (!freeSubscription) { throw new Error('Could not find free subscription.'); }
 
       return {
         limitSecondsPerMonth: freeSubscription.limitSecondsPerMonth,
@@ -62,11 +62,11 @@ export class UserRepository extends Repository<User> {
     return paidAccountLimits;
   }
 
-  async findUserDetails(userId: string): Promise<UserDetails | undefined> {
+  public async findUserDetails(userId: string): Promise<IUserDetails | undefined> {
     const audiofileRepository = getCustomRepository(AudiofileRepository);
     const user = await this.findOne(userId, { relations: ['voiceSettings', 'inAppSubscriptions'] });
 
-    if (!user) return undefined;
+    if (!user) { return undefined; }
 
     const subscriptionLimits = await this.findActiveSubscriptionLimits(userId);
     const currentMonthAudiofileUsageInSeconds = await audiofileRepository.findAudiofileUsageInCurrentMonth(userId);
@@ -105,31 +105,31 @@ export class UserRepository extends Repository<User> {
    *
    * @param userId
    */
-  async findSubscriptionUpgradeOption(userId: string): Promise<InAppSubscription | undefined> {
+  public async findSubscriptionUpgradeOption(userId: string): Promise<InAppSubscription | undefined> {
     const inAppSubscriptionRepository = getRepository(InAppSubscription);
     const user = await this.findUserDetails(userId);
 
-    if (!user) return undefined;
+    if (!user) { return undefined; }
 
     // If the user is not subscribed, return the first paid subscription options
     if (!user.isSubscribed) {
-      const otherAvailableSubscriptions = await inAppSubscriptionRepository.find({
+      const unsubscribedOtherAvailableSubscriptions = await inAppSubscriptionRepository.find({
         isActive: true,
         productId: Not('free')
       });
 
-      if (!otherAvailableSubscriptions || !otherAvailableSubscriptions.length) return undefined;
+      if (!unsubscribedOtherAvailableSubscriptions || !unsubscribedOtherAvailableSubscriptions.length) { return undefined; }
 
       // Get the cheapest paying subscription
-      const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {
+      const unsubscribedSubscriptionUpgradeOption = [...unsubscribedOtherAvailableSubscriptions].sort((a, b) => {
         return a.price - b.price;
       })[0];
 
-      return subscriptionUpgradeOption;
+      return unsubscribedSubscriptionUpgradeOption;
     }
 
     const currentPayingSubscription = user.inAppSubscriptions && user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
-    if (!currentPayingSubscription) return undefined; // This should not happen
+    if (!currentPayingSubscription) { return undefined; } // This should not happen
 
     // If the user is subscribed
     // Find a subscription with higher limits
@@ -139,7 +139,7 @@ export class UserRepository extends Repository<User> {
       productId: Not('free')
     });
 
-    if (!otherAvailableSubscriptions || !otherAvailableSubscriptions.length) return undefined;
+    if (!otherAvailableSubscriptions || !otherAvailableSubscriptions.length) { return undefined; }
 
     // Get the subscription with the highest limits per month
     const subscriptionUpgradeOption = [...otherAvailableSubscriptions].sort((a, b) => {

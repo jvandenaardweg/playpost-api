@@ -1,12 +1,11 @@
-require('dotenv').config();
-import { createConnection } from 'typeorm';
 import * as Sentry from '@sentry/node';
+import { createConnection } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
 
-import { logger } from './utils';
-import { listenForAppleSubscriptionNotifications } from './pubsub/in-app-subscriptions';
 import { listenCrawlFullArticle } from './pubsub/articles';
+import { listenForAppleSubscriptionNotifications } from './pubsub/in-app-subscriptions';
+import { logger } from './utils';
 
 logger.info('Worker init: Setting up...');
 

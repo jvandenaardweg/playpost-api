@@ -1,1 +1,1 @@
-declare module 'unfluff'
+declare module 'unfluff';

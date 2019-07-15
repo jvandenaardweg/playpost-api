@@ -1,14 +1,14 @@
 import { ConnectionOptions } from 'typeorm';
 
-import { User } from './entities/user';
 import { Article } from './entities/article';
-import { PlaylistItem } from './entities/playlist-item';
 import { Audiofile } from './entities/audiofile';
-import { Voice } from './entities/voice';
-import { Language } from './entities/language';
-import { UserVoiceSetting } from './entities/user-voice-setting';
-import { UserInAppSubscription } from './entities/user-in-app-subscription';
 import { InAppSubscription } from './entities/in-app-subscription';
+import { Language } from './entities/language';
+import { PlaylistItem } from './entities/playlist-item';
+import { User } from './entities/user';
+import { UserInAppSubscription } from './entities/user-in-app-subscription';
+import { UserVoiceSetting } from './entities/user-voice-setting';
+import { Voice } from './entities/voice';
 
 export const connectionOptions = (name = 'default'): ConnectionOptions => {
   return {

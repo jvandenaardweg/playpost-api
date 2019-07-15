@@ -1,7 +1,6 @@
-require('dotenv').config();
-import nodeFetch from 'node-fetch';
-import md5 from 'md5';
 import * as Sentry from '@sentry/node';
+import md5 from 'md5';
+import nodeFetch from 'node-fetch';
 
 import { logger } from '../utils';
 
@@ -32,14 +31,14 @@ export const addEmailToMailchimpList = async (emailAddress: string) => {
 
     const payloadStringified = JSON.stringify(payload);
 
-    const response = await nodeFetch(MAILCHIMP_API_LIST_MEMBERS_URL, {
+    const result = await nodeFetch(MAILCHIMP_API_LIST_MEMBERS_URL, {
       headers,
       method: 'POST',
       body: payloadStringified
     }).then(response => response.json());
 
     logger.info(`Mailchimp: Successfully added ${emailAddress} to list "${MAILCHIMP_LIST_ID}".`);
-    return response;
+    return result;
   } catch (err) {
     logger.error(`Mailchimp: Error while adding "${emailAddress}" to list ${MAILCHIMP_LIST_ID}.`);
     Sentry.captureException(err);
@@ -58,13 +57,13 @@ export const removeEmailToMailchimpList = async (emailAddress: string) => {
 
     const subscriberHash = md5(emailAddress.toLowerCase());
 
-    const response = await nodeFetch(`${MAILCHIMP_API_LIST_MEMBERS_URL}/${subscriberHash}`, {
+    const result = await nodeFetch(`${MAILCHIMP_API_LIST_MEMBERS_URL}/${subscriberHash}`, {
       headers,
       method: 'DELETE'
     });
 
     logger.info(`Mailchimp: Successfully deleted ${emailAddress} from list "${MAILCHIMP_LIST_ID}".`);
-    return response;
+    return result;
   } catch (err) {
     logger.error(`Mailchimp: Error while deleting "${emailAddress}" from list ${MAILCHIMP_LIST_ID}.`);
     Sentry.captureException(err);

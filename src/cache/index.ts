@@ -1,7 +1,6 @@
-require('dotenv').config();
+import ExpressBruteRedis from 'express-brute-redis';
 import IORedis from 'ioredis';
 import RateLimitRedis from 'rate-limit-redis';
-import ExpressBruteRedis from 'express-brute-redis';
 
 export const redisClient = new IORedis(process.env.REDIS_URL);
 
@@ -21,7 +20,7 @@ export const expressRateLimitRedisStore = new RateLimitRedis({
 export const emptyAllCaches = () => {
   return new Promise((resolve, reject) => {
     redisClient.flushdb((err, res) => {
-      if (err) return reject(err);
+      if (err) { return reject(err); }
       return resolve(res);
     });
   });

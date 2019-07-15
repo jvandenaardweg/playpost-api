@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
-import { IsUUID, IsDate } from 'class-validator';
+import { IsDate, IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { ColumnNumericTransformer } from '../utils';
 
@@ -28,43 +28,43 @@ export enum InAppSubscriptionCurrency {
 export class InAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: false, unique: true }) // "premium"
-  productId: string;
+  public productId: string;
 
   @Column({ nullable: false }) // "Premium"
-  name: string;
+  public name: string;
 
   @Column({ nullable: false }) // "Premium features"
-  description: string;
+  public description: string;
 
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer() }) // 4.99
-  price: number;
+  public price: number;
 
   @Column({ type: 'enum', enum: InAppSubscriptionCurrency, nullable: false })
-  currency: InAppSubscriptionCurrency;
+  public currency: InAppSubscriptionCurrency;
 
   @Column({ type: 'enum', enum: InAppSubscriptionDuration, nullable: false })
-  duration: InAppSubscriptionDuration;
+  public duration: InAppSubscriptionDuration;
 
   @Column({ type: 'enum', enum: InAppSubscriptionService, nullable: false, default: InAppSubscriptionService.INTERNAL })
-  service: InAppSubscriptionService;
+  public service: InAppSubscriptionService;
 
   @Column({ nullable: false, default: 0 })
-  limitSecondsPerMonth: number;
+  public limitSecondsPerMonth: number;
 
   @Column({ nullable: false, default: 0 })
-  limitSecondsPerArticle: number;
+  public limitSecondsPerArticle: number;
 
   @Column({ nullable: false, default: false })
-  isActive: boolean;
+  public isActive: boolean;
 
   @CreateDateColumn()
   @IsDate()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

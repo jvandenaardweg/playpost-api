@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Unique, ManyToOne, Index } from 'typeorm';
-import { IsUUID, IsInt, IsDate } from 'class-validator';
+import { IsDate, IsInt, IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
 import { User } from './user';
 
@@ -12,35 +12,35 @@ export class PlaylistItem {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE', eager: true }) // When an Article is deleted, we delete this PlaylistItem
-  article: Article;
+  public article: Article;
 
   @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this PlaylistItem
-  user: User;
+  public user: User;
 
   @Column({ nullable: false, default: 0 })
   @IsInt()
-  order: number;
+  public order: number;
 
   @Column({ nullable: true })
   @IsDate()
-  lastPlayedAt: Date;
+  public lastPlayedAt: Date;
 
   @Column({ nullable: true })
   @IsDate()
-  archivedAt: Date;
+  public archivedAt: Date;
 
   @Column({ nullable: true })
   @IsDate()
-  favoritedAt: Date;
+  public favoritedAt: Date;
 
   @CreateDateColumn()
   @IsDate()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

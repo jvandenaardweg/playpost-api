@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { getRepository, getConnection } from 'typeorm';
+import joi from 'joi';
+import { getConnection, getRepository } from 'typeorm';
+import * as cacheKeys from '../cache/keys';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
-import * as cacheKeys from '../cache/keys';
 import { routeIsProtected } from './auth';
-import joi from 'joi';
 
 const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
 const MESSAGE_USER_NOT_FOUND = 'No user found';
@@ -27,7 +27,7 @@ export const createUser = [
     const emailAddressNormalized = User.normalizeEmail(email);
     const existingUser = await userRepository.findOne({ email: emailAddressNormalized });
 
-    if (existingUser) return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS });
+    if (existingUser) { return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS }); }
 
     const hashedPassword = await User.hashPassword(password);
 
@@ -35,7 +35,7 @@ export const createUser = [
 
     // Validate the input
     const validationResult = await validateInput(User, userToCreate);
-    if (validationResult.errors.length) return res.status(400).json(validationResult);
+    if (validationResult.errors.length) { return res.status(400).json(validationResult); }
 
     // Create the user
     // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
@@ -58,20 +58,20 @@ export const deleteUser = [
     const { userId } = req.params;
     const userRepository = getRepository(User);
 
-    if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: MESSAGE_USER_NOT_ALLOWED });
+    if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: MESSAGE_USER_NOT_ALLOWED }); }
 
     const validationResult = await validateInput(User, { id: userId });
-    if (validationResult.errors.length) return res.status(400).json(validationResult);
+    if (validationResult.errors.length) { return res.status(400).json(validationResult); }
 
     const userToDelete = await userRepository.findOne(userId);
 
-    if (!userToDelete) return res.status(400).json({ message: MESSAGE_USER_NOT_FOUND });
+    if (!userToDelete) { return res.status(400).json({ message: MESSAGE_USER_NOT_FOUND }); }
 
     await userRepository.remove(userToDelete);
 
     // Remove the JWT verification cache for faster API responses
     const cache = await getConnection('default').queryResultCache;
-    if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+    if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
     return res.json({ message: MESSAGE_USER_DELETED });
   }
@@ -83,7 +83,7 @@ export const findAllUsers = [
     const userEmail = req.user.email;
     const userRepository = getRepository(User);
 
-    if (userEmail !== 'jordyvandenaardweg@gmail.com') return res.status(403).json({ message: 'You dont have access to this endpoint.' });
+    if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
 
     const users = await userRepository.find({
       order: {

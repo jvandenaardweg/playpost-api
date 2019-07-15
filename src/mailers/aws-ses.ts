@@ -1,5 +1,5 @@
-import AWS from 'aws-sdk';
 import * as Sentry from '@sentry/node';
+import AWS from 'aws-sdk';
 
 import { logger } from '../utils';
 

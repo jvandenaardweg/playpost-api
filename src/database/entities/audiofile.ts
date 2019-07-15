@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, ManyToOne, Index } from 'typeorm';
 import { IsUUID } from 'class-validator';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
-import { Voice } from './voice';
 import { User } from './user';
+import { Voice } from './voice';
 
 import { ColumnNumericTransformer } from '../utils';
 
@@ -20,35 +20,35 @@ export enum AudiofileMimeType {
 export class Audiofile {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Column({ nullable: true })
-  url: string;
+  public url: string;
 
   @Column({ nullable: true })
-  bucket: string;
+  public bucket: string;
 
   @Column({ nullable: true })
-  filename: string;
+  public filename: string;
 
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
-  length: number; // Length in seconds
+  public length: number; // Length in seconds
 
   @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
-  mimeType: AudiofileMimeType;
+  public mimeType: AudiofileMimeType;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
-  article: Article;
+  public article: Article;
 
   @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
-  voice: Voice;
+  public voice: Voice;
 
   @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
-  user: User;
+  public user: User;
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 }

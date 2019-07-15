@@ -1,16 +1,16 @@
-import { Request, Response } from 'express';
-import { getRepository, getCustomRepository, getConnection } from 'typeorm';
-import joi from 'joi';
 import * as Sentry from '@sentry/node';
+import { Request, Response } from 'express';
+import joi from 'joi';
+import { getConnection, getCustomRepository, getRepository } from 'typeorm';
 
 import { User } from '../database/entities/user';
-import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
-import { logger } from '../utils';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
+import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
+import { logger } from '../utils';
 
-import { UserRepository } from '../database/repositories/user';
 import * as cacheKeys from '../cache/keys';
+import { UserRepository } from '../database/repositories/user';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
 const MESSAGE_ME_DELETED = 'Your account is deleted. This cannot be undone.';
@@ -21,7 +21,7 @@ export const findCurrentUser = async (req: Request, res: Response) => {
 
   const user = await userRepository.findUserDetails(userId);
 
-  if (!user) return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND });
+  if (!user) { return res.status(400).json({ message: MESSAGE_ME_NOT_FOUND }); }
 
   return res.json(user);
 };
@@ -62,11 +62,11 @@ export const updateEmail = async (req: Request, res: Response) => {
 
   // Remove the JWT verification cache as the user updated data
   const cache = await getConnection('default').queryResultCache;
-  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+  if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
   const updatedUser = await userRepository.findOne(userId);
 
-  if (!updatedUser) return res.status(400).json({ message: 'Could not find your user details after updating the e-mail address.' });
+  if (!updatedUser) { return res.status(400).json({ message: 'Could not find your user details after updating the e-mail address.' }); }
 
   return res.json({ updatedUser });
 };
@@ -89,7 +89,7 @@ export const updatePassword = async (req: Request, res: Response) => {
 
   // Remove the JWT verification cache as the user updated data
   const cache = await getConnection('default').queryResultCache;
-  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+  if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
   const updatedUser = await userRepository.findOne(userId);
 
@@ -102,13 +102,13 @@ export const deleteCurrentUser = async (req: Request, res: Response) => {
 
   const user = await userRepository.findOne(userId);
 
-  if (!user) return res.status(400).json({ message: 'User not found!' });
+  if (!user) { return res.status(400).json({ message: 'User not found!' }); }
 
   await userRepository.remove(user);
 
   // Remove the JWT verification cache as the user is not there anymore
   const cache = await getConnection('default').queryResultCache;
-  if (cache) await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+  if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
   return res.json({ message: MESSAGE_ME_DELETED });
 };
@@ -150,7 +150,7 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
 
     const user = await userRepository.findUserDetails(userId);
 
-    if (!user) return res.status(400).json({ message: 'User not found.' });
+    if (!user) { return res.status(400).json({ message: 'User not found.' }); }
 
     // If a user is not subscribed, but tries to change to a premium voice
     // Notify the user he cannot do this

@@ -1,8 +1,8 @@
-import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStatic } from 'passport';
-import { User } from '../database/entities/user';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
+import { User } from '../database/entities/user';
 
 const { JWT_SECRET } = process.env;
 
@@ -11,16 +11,16 @@ const opts = {
   secretOrKey: JWT_SECRET
 };
 
-type StrategyPayload = {
+interface IStrategyPayload {
   id: string,
   email: string
-};
+}
 
 module.exports = (passport: PassportStatic) => {
   return passport.use(
-    new Strategy(opts, async (payload: StrategyPayload, done) => {
+    new Strategy(opts, async (payload: IStrategyPayload, done) => {
 
-      if (!payload) return done(null, false, 'Token not valid.');
+      if (!payload) { return done(null, false, 'Token not valid.'); }
 
       // id available in payload
       const { id } = payload;
@@ -36,7 +36,7 @@ module.exports = (passport: PassportStatic) => {
         loadEagerRelations: false
       });
 
-      if (!user) return done(null, false, 'User not found.');
+      if (!user) { return done(null, false, 'User not found.'); }
 
       return done(null, { id: user.id, email: user.email });
 

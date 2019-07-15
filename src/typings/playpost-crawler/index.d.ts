@@ -1,5 +1,5 @@
 declare namespace PostplayCrawler {
-  export type Response = {
+  export interface IResponse {
     crawler: string;
     title: string | null;
     url: string;
@@ -20,9 +20,9 @@ declare namespace PostplayCrawler {
     ssml: string | null;
     completeHTML: string | null;
     readability: ReadabilityResult;
-  };
+  }
 
-  export type UrlParseResult = {
+  export interface IUrlParseResult {
     slashes: boolean;
     protocol: string;
     hash: string;
@@ -36,9 +36,9 @@ declare namespace PostplayCrawler {
     username: string;
     origin: string;
     href: string;
-  };
+  }
 
-  export type ReadabilityResult = {
+  export interface IReadabilityResult {
     title: string | null;
     byline: string | null;
     dir: string | null;
@@ -47,9 +47,9 @@ declare namespace PostplayCrawler {
     length: number | null;
     excerpt: string | null;
     siteName: string | null;
-  };
+  }
 
-  export type MetadataResult = {
+  export interface IMetadataResult {
     author: string | null;
     description: string | null;
     image: string | null;
@@ -57,5 +57,5 @@ declare namespace PostplayCrawler {
     title: string | null;
     url: string | null;
     date: string | null;
-  };
+  }
 }
