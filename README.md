@@ -23,16 +23,21 @@ DATABASE_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim
 
 REDIS_URL = "redis://localhost:6381"
 
+TYPEORM_CONNECTION = "postgres"
 TYPEORM_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
 TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
 TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
+TYPEORM_DRIVER_EXTRA = '{ "ssl": false }'
 
 GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner, or create your own
 GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL = "" # Ask the repository owner, or create your own
 GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner, or create your own
 
-MAILCHIMP_LIST_ID = "" # Ask the repository owner, or create your own
-MAILCHIMP_API_KEY = "" # Ask the repository owner, or create your own
+AWS_USER = ""
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+AWS_REGION= "eu-west-1"
+
 ```
 
 4. Run `npm run dev`, this will launch the database and start the Node server.
