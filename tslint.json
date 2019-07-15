@@ -4,7 +4,6 @@
     "tslint-config-prettier"
   ],
   "rules": {
-    "comma-dangle": "off",
     "trailing-comma": false,
     "max-line-length": [false, 200],
     "import-name": false,

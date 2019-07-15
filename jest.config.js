@@ -2,6 +2,7 @@ module.exports = {
   globals: {
     NODE_ENV: 'test'
   },
+  setupFiles: ['dotenv/config'],
   roots: ['<rootDir>/src'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
