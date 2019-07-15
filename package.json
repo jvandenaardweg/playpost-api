@@ -59,7 +59,6 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm test",
       "pre-push": "npm test"
     }
   },
@@ -130,7 +129,6 @@
     "forever": "^1.0.0",
     "fs-extra": "^8.1.0",
     "helmet": "^3.18.0",
-    "husky": "^3.0.0",
     "in-app-purchase": "^1.11.4",
     "ioredis": "^4.11.2",
     "jest": "^24.8.0",
@@ -163,5 +161,8 @@
     "typescript-tslint-plugin": "^0.5.4",
     "url-parse": "^1.4.7",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "husky": "^3.0.0"
   }
 }
