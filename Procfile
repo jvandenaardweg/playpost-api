@@ -1,3 +1,3 @@
 release: bash ./release.sh
-web: npm start:server
-worker: npm start:worker
+web: npm run start:server
+worker: npm run start:worker
