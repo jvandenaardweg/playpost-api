@@ -9,7 +9,7 @@ import { VoiceRepository } from './database/repositories/voice';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
 import voicesData from './database/seeds/voices';
-import { addAllAWSVoices } from './synthesizers/aws';
+import { AwsSynthesizer } from './synthesizers/aws';
 import { addAllGoogleVoices } from './synthesizers/google';
 import { logger } from './utils/logger';
 
@@ -58,11 +58,12 @@ const seedVoices = async () => {
   const loggerPrefix = 'Seeding Voices:';
   const voiceRepository = getRepository(Voice);
   const languageRepository = getRepository(Language);
+  const awsSynthesizer = new AwsSynthesizer();
 
   try {
     logger.info(loggerPrefix, 'Checking for new voices at Google and AWS...');
     await addAllGoogleVoices(loggerPrefix);
-    await addAllAWSVoices(loggerPrefix);
+    await awsSynthesizer.addAllVoices(loggerPrefix);
 
     logger.info(loggerPrefix, 'Checking which voices are not connected to a language yet...');
 

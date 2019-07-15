@@ -12,7 +12,7 @@ import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGL
 
 import AWS, { Polly } from 'aws-sdk';
 import { logger } from '../utils';
-import { awsSSMLPartsToSpeech } from './aws';
+import { AwsSynthesizer } from './aws';
 import { GoogleAudioEncodingType, googleSSMLPartsToSpeech, IGoogleSynthesizerOptions } from './google';
 
 export type SynthesizerType = 'article' | 'preview';
@@ -125,6 +125,7 @@ const synthesizeUsingAWS = async (
   storageUploadPath: string
 ) => {
   const loggerPrefix = 'Synthesize Using AWS:';
+  const awsSynthesizer = new AwsSynthesizer();
 
   logger.info(loggerPrefix, 'Starting...');
 
@@ -147,7 +148,7 @@ const synthesizeUsingAWS = async (
   logger.info(loggerPrefix, 'Synthesize using these default synthsizer options:', synthesizerOptions);
 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await awsSSMLPartsToSpeech(
+  const localAudiofilePaths = await awsSynthesizer.SSMLPartsToSpeech(
     ssmlParts,
     'article',
     article.id,

@@ -2,7 +2,7 @@ import fsExtra from 'fs-extra';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
 import * as storage from '../../storage/google-cloud';
 import { SynthesizerEncoding } from '../../synthesizers';
-import { awsSSMLToSpeech } from '../../synthesizers/aws';
+import { AwsSynthesizer } from '../../synthesizers/aws';
 import { googleSSMLToSpeech } from '../../synthesizers/google';
 import { getAudioFileDurationInSeconds } from '../../utils/audio';
 import { AudiofileMimeType } from '../entities/audiofile';
@@ -156,6 +156,7 @@ export class VoiceRepository extends Repository<Voice> {
       );
 
     } else if (voice.synthesizer === 'AWS') {
+      const awsSynthesizer = new AwsSynthesizer();
       audioEncoding = SynthesizerEncoding.AWS_MP3;
       mimeType = AudiofileMimeType.MP3;
 
@@ -169,7 +170,7 @@ export class VoiceRepository extends Repository<Voice> {
       };
 
       // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-      localAudiofilePath = await awsSSMLToSpeech(
+      localAudiofilePath = await awsSynthesizer.SSMLToSpeech(
         0,
         synthesizerOptions.Text,
         'preview',

@@ -19,6 +19,7 @@ import * as inAppSubscriptionsController from './controllers/in-app-subscription
 import * as languagesController from './controllers/languages';
 import * as meController from './controllers/me';
 import * as playlistController from './controllers/playlist';
+import * as synthesizersController from './controllers/synthesizers';
 import * as usersController from './controllers/users';
 import * as voicesController from './controllers/voices';
 
@@ -246,7 +247,10 @@ export const setupServer = async () => {
   // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
   app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
+
+  app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', (req, res) => {
