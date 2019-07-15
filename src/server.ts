@@ -75,9 +75,6 @@ export const setupServer = async () => {
   if (!process.env.CRAWLER_EXTRACTOR_URL) {
     throw new Error('Required environment variable "CRAWLER_EXTRACTOR_URL" not set.');
   }
-  if (!process.env.SENTRY_DSN) {
-    throw new Error('Required environment variable "SENTRY_DSN" not set.');
-  }
   if (!process.env.APPLE_IAP_SHARED_SECRET) {
     throw new Error('Required environment variable "APPLE_IAP_SHARED_SECRET" not set.');
   }
@@ -89,12 +86,6 @@ export const setupServer = async () => {
   }
   if (!process.env.TYPEORM_MIGRATIONS) {
     throw new Error('Required environment variable "TYPEORM_MIGRATIONS" not set.');
-  }
-  if (!process.env.MAILCHIMP_LIST_ID) {
-    throw new Error('Required environment variable "MAILCHIMP_LIST_ID" not set.');
-  }
-  if (!process.env.MAILCHIMP_API_KEY) {
-    throw new Error('Required environment variable "MAILCHIMP_API_KEY" not set.');
   }
   if (!process.env.AWS_USER) {
     throw new Error('Required environment variable "AWS_USER" not set.');

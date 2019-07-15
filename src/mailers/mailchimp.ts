@@ -5,9 +5,8 @@ import * as Sentry from '@sentry/node';
 
 import { logger } from '../utils';
 
-const { MAILCHIMP_LIST_ID, MAILCHIMP_API_KEY } = process.env;
-
-if (!MAILCHIMP_API_KEY || !MAILCHIMP_LIST_ID) throw new Error('Please set the MAILCHIMP_LIST_ID and MAILCHIMP_LIST_ID environment variable.');
+const MAILCHIMP_LIST_ID = '714d3d1c6d';
+const MAILCHIMP_API_KEY = '2180a3003601f812d7f391a398891d32-us2';
 
 const MAILCHIMP_SERVER_ID = MAILCHIMP_API_KEY.split('-')[1];
 const MAILCHIMP_API_LIST_MEMBERS_URL = `https://${MAILCHIMP_SERVER_ID}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members`;

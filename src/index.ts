@@ -16,7 +16,7 @@ logger.info('App init:', 'Release version:', version);
 logger.info('App init:', `Using ${WORKER_COUNT} workers...`);
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
   environment: process.env.NODE_ENV,
   release: version ? version : undefined,
   integrations: [
