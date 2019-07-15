@@ -9,8 +9,6 @@ interface ISsmlSplitOptions {
   hardLimit: number;
 }
 
-/* eslint-disable no-console */
-
 export const getSSMLParts = (ssml: string, optionsOverwrite?: ISsmlSplitOptions) => {
   const loggerPrefix = 'SSML (Util):';
 

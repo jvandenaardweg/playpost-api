@@ -12,8 +12,6 @@ import { SynthesizerType } from './index';
 
 const client = new textToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
 
-/* eslint-disable no-console */
-
 export type GoogleAudioEncodingType = 'MP3' | 'LINEAR16' | 'OGG_OPUS' | 'AUDIO_ENCODING_UNSPECIFIED';
 
 export interface IGoogleSynthesizerOptions {

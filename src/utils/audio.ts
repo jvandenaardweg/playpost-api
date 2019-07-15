@@ -8,7 +8,6 @@ import { logger } from '../utils';
 
 fluentFfmpeg.setFfmpegPath(ffmpeg.path);
 
-/* eslint-disable no-console */
 export const getAudioFileDurationInSeconds = async (audioFilePath: string): Promise<number> => {
   logger.info('Audio Util (Duration): Get audiofile duration in seconds...');
 
