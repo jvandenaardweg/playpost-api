@@ -9,6 +9,7 @@
     "import-name": false,
     "align": false,
     "object-literal-sort-keys": false,
-    "no-namespace": false
+    "no-namespace": false,
+    "no-string-literal": false
   }
 }

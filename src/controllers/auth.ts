@@ -96,10 +96,10 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const decoded = User.verifyJWTAccessToken(token);
 
   // Decode for extra info about the token
-  const expiresAt = decoded && decoded.exp ? new Date(decoded.exp * 1000).toISOString() : null;
-  const expiresAtMs = decoded && decoded.exp ? new Date(decoded.exp * 1000).getTime() : null;
-  const issuedAt = decoded && decoded.iat ? new Date(decoded.iat * 1000).toISOString() : null;
-  const issuedAtMs = decoded && decoded.iat ? new Date(decoded.iat * 1000).getTime() : null;
+  const expiresAt = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).toISOString() : null;
+  const expiresAtMs = decoded && decoded['exp'] ? new Date(decoded['exp'] * 1000).getTime() : null;
+  const issuedAt = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).toISOString() : null;
+  const issuedAtMs = decoded && decoded['iat'] ? new Date(decoded['iat'] * 1000).getTime() : null;
 
   logger.info(loggerPrefix, `Generated token using user ID "${user.id}" and user email "${user.email}".`);
 
