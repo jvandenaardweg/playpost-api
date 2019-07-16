@@ -3,7 +3,7 @@ import { EntityRepository, getConnection, Repository } from 'typeorm';
 import * as storage from '../../storage/google-cloud';
 import { SynthesizerEncoding } from '../../synthesizers';
 import { AwsSynthesizer } from '../../synthesizers/aws';
-import { googleSSMLToSpeech } from '../../synthesizers/google';
+import { GoogleSynthesizer } from '../../synthesizers/google';
 import { getAudioFileDurationInSeconds } from '../../utils/audio';
 import { AudiofileMimeType } from '../entities/audiofile';
 import { Voice } from '../entities/voice';
@@ -127,6 +127,7 @@ export class VoiceRepository extends Repository<Voice> {
     if (!['Google', 'AWS'].includes(voice.synthesizer)) { throw new Error('Voice synthesizer not supported.'); }
 
     if (voice.synthesizer === 'Google') {
+      const googleSynthesizer = new GoogleSynthesizer();
       audioEncoding = SynthesizerEncoding.GOOGLE_LINEAR16;
       mimeType = AudiofileMimeType.WAV;
 
@@ -146,7 +147,7 @@ export class VoiceRepository extends Repository<Voice> {
       };
 
       // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-      localAudiofilePath = await googleSSMLToSpeech(
+      localAudiofilePath = await googleSynthesizer.SSMLToSpeech(
         0,
         synthesizerOptions.input.ssml,
         'preview',
