@@ -1,3 +1,6 @@
+// tslint:disable-next-line
+const { version } = require('../package.json');
+
 import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import compression from 'compression';
@@ -169,6 +172,12 @@ export const setupServer = async () => {
 
   // Compress the output
   app.use(compression());
+
+  // Send API version information
+  app.use((req, res, next) => {
+    res.append('X-API-Version', version);
+    next();
+  });
 
   // Setup Sentry error tracking
   Sentry.configureScope(scope => {
