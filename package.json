@@ -82,6 +82,7 @@
     "@types/express-rate-limit": "^3.3.0",
     "@types/fluent-ffmpeg": "^2.1.10",
     "@types/fs-extra": "^8.0.0",
+    "@types/google-cloud__text-to-speech": "^0.5.0",
     "@types/helmet": "0.0.43",
     "@types/in-app-purchase": "^1.10.0",
     "@types/ioredis": "^4.0.13",

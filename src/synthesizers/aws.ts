@@ -1,19 +1,23 @@
 import * as Sentry from '@sentry/node';
 import appRootPath from 'app-root-path';
 import AWS, { Polly } from 'aws-sdk';
-import fsExtra from 'fs-extra';
 import LocaleCode from 'locale-code';
 import { getRepository } from 'typeorm';
 
 import { Gender, Synthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
 import { SynthesizerType } from './index';
+import { Synthesizers } from './synthesizers';
 
-export class AwsSynthesizer {
-  public voices: Polly.Voice[];
+export type AWSVoice = Polly.Voice
+
+export class AwsSynthesizer extends Synthesizers {
+  public voices: AWSVoice[];
   public client: AWS.Polly;
 
   constructor() {
+    super([]);
+
     AWS.config.update({ region: process.env.AWS_REGION });
 
     this.client = new Polly({
@@ -22,7 +26,7 @@ export class AwsSynthesizer {
     });
   }
 
-  public getAllVoices = async (): Promise<Polly.Voice[]> => {
+  public getAllVoices = async (): Promise<AWSVoice[]> => {
     return new Promise((resolve, reject) => {
       logger.info('AWS Polly: Getting all AWS Polly voices from the API...');
 
@@ -39,7 +43,7 @@ export class AwsSynthesizer {
     });
   }
 
-  public addAllVoices = async (loggerPrefix: string) => {
+  public addAllVoices = async (loggerPrefix: string): Promise<AWSVoice[]> => {
     logger.info(loggerPrefix, 'AWS Polly: Checking if we need to add new voices to the database...');
     const voiceRepository = getRepository(Voice);
 
@@ -119,14 +123,11 @@ export class AwsSynthesizer {
 
       const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-      // Make sure the path exists, if not, we create it
-      fsExtra.ensureFileSync(tempLocalAudiofilePath);
-
       // tslint:disable max-line-length
       logger.info(loggerPrefix, 'Synthesizing:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
 
       // Performs the Text-to-Speech request
-      return this.client.synthesizeSpeech(ssmlPartSynthesizerOptions, (err, response) => {
+      return this.client.synthesizeSpeech(ssmlPartSynthesizerOptions, async (err, response) => {
         if (err) {
           logger.error(loggerPrefix, 'Synthesizing failed for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
           logger.error(err);
@@ -136,15 +137,14 @@ export class AwsSynthesizer {
         logger.info(loggerPrefix, 'Received synthesized audio for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
 
         // Write the binary audio content to a local file
-        return fsExtra.writeFile(tempLocalAudiofilePath, response.AudioStream, 'binary', writeFileError => {
-          if (writeFileError) {
-            logger.error(loggerPrefix, `Writing temporary file for synthesized SSML part ${index} failed.`, writeFileError);
-            return reject(writeFileError);
-          }
-
+        try {
+          const savedTempLocalAudiofilePath = await this.saveTempFile(tempLocalAudiofilePath, response.AudioStream);
           logger.info(loggerPrefix, `Finished part ${index}. Wrote file to: `, tempLocalAudiofilePath);
-          return resolve(tempLocalAudiofilePath);
-        });
+          resolve(savedTempLocalAudiofilePath);
+        } catch (err) {
+          logger.error(loggerPrefix, `Writing temporary file for synthesized SSML part ${index} failed.`, err);
+          reject(err);
+        }
       });
     });
   };
@@ -152,7 +152,7 @@ export class AwsSynthesizer {
   /**
    * Synthesizes the SSML parts into seperate audiofiles
    */
-  public SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string) => {
+  public SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string[]> => {
     const promises: Array<Promise<string>> = [];
     const loggerPrefix = 'AWS SSML Parts To Speech:';
 
@@ -167,13 +167,20 @@ export class AwsSynthesizer {
 
     logger.info(loggerPrefix, 'Waiting for all SSML part promises to resolve...');
 
-    const tempLocalAudiofilePaths = await Promise.all(promises);
+    try {
+      const tempLocalAudiofilePaths = await Promise.all(promises);
 
-    tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
+      tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
 
-    logger.info(loggerPrefix, 'All SSML part promises resolved. Returning temporary local audiofile paths:', tempLocalAudiofilePaths);
+      logger.info(loggerPrefix, 'All SSML part promises resolved. Returning temporary local audiofile paths:', tempLocalAudiofilePaths);
 
-    return tempLocalAudiofilePaths;
+      return tempLocalAudiofilePaths;
+    } catch (err) {
+      // Cleanup temp files when there's an error
+      await this.removeAllTempFiles();
+
+      throw err;
+    }
   };
 
 }

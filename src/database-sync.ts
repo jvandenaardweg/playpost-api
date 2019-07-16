@@ -10,7 +10,7 @@ import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
 import voicesData from './database/seeds/voices';
 import { AwsSynthesizer } from './synthesizers/aws';
-import { addAllGoogleVoices } from './synthesizers/google';
+import { GoogleSynthesizer } from './synthesizers/google';
 import { logger } from './utils/logger';
 
 const seedLanguages = async () => {
@@ -59,10 +59,11 @@ const seedVoices = async () => {
   const voiceRepository = getRepository(Voice);
   const languageRepository = getRepository(Language);
   const awsSynthesizer = new AwsSynthesizer();
+  const googleSynthesizer = new GoogleSynthesizer();
 
   try {
     logger.info(loggerPrefix, 'Checking for new voices at Google and AWS...');
-    await addAllGoogleVoices(loggerPrefix);
+    await googleSynthesizer.addAllVoices(loggerPrefix);
     await awsSynthesizer.addAllVoices(loggerPrefix);
 
     logger.info(loggerPrefix, 'Checking which voices are not connected to a language yet...');

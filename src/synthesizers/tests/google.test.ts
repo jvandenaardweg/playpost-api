@@ -1,35 +1,46 @@
-import { AwsSynthesizer } from '../aws';
+import { GoogleAudioEncoding, GoogleSynthesizer } from '../google';
+
+import mockedGoogleVoices from '../../../tests/__mocks/googleVoices';
 
 jest.mock('fs-extra');
 
-import mockedAwsVoices from '../../../tests/__mocks/awsVoices';
-
-describe('Synthesizer: AWS', () => {
+describe('Synthesizer: Google', () => {
+  const exampleSynthesizerOptions = {
+    input: {
+      ssml: ''
+    },
+    voice: {
+      name: 'ar-XA-Wavenet-C'
+    },
+    audioConfig: {
+      audioEncoding: 'MP3' as GoogleAudioEncoding
+    }
+  };
 
   describe('getAllVoices()', () => {
     const exampleErrorMessage = 'Example error';
 
-    test('Should return all the AWS voices', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+    test('Should return all the Google voices', async () => {
+      const googleSynthesizer = new GoogleSynthesizer();
 
       // @ts-ignore
-      // Mock the AWS method
-      awsSynthesizer.client.describeVoices = jest.fn((callback) => callback('', { Voices: mockedAwsVoices }));
+      // Mock the Google method
+      googleSynthesizer.client.listVoices = jest.fn().mockResolvedValue([{ voices: mockedGoogleVoices }]);
 
-      const voices = await awsSynthesizer.getAllVoices();
+      const voices = await googleSynthesizer.getAllVoices('test');
 
-      expect(voices).toEqual(mockedAwsVoices);
+      expect(voices).toEqual(mockedGoogleVoices);
     });
 
     test('Should return an error when there is an error', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
 
       // @ts-ignore
       // Mock the AWS method
-      awsSynthesizer.client.describeVoices = jest.fn((callback) => callback(exampleErrorMessage, null));
+      googleSynthesizer.client.listVoices = jest.fn().mockRejectedValue(exampleErrorMessage);
 
       try {
-        await awsSynthesizer.getAllVoices();
+        await googleSynthesizer.getAllVoices('test');
       } catch (err) {
         expect(err).toEqual(exampleErrorMessage);
       }
@@ -47,37 +58,34 @@ describe('Synthesizer: AWS', () => {
     const exampleExtension = 'mp3';
     const exampleStorageUploadPath = 'articles/ce57cfa6-6397-4b9c-9e0f-d11b8f6656de/audiofiles/34db4efc-014e-4b9b-85ca-903fdb6a7479';
     const expectedTempLocalAudiofilePath = `/temp/${exampleStorageUploadPath}-${exampleIndex}.${exampleExtension}`;
-    const exampleSynthesizerOptions = {
-      OutputFormat: 'mp3',
-      Text: exampleSsmlPart,
-      VoiceId: 'Kimberly'
-    };
     const exampleResponse = {
-      AudioStream: 'asdasdasdad'
+      audioContent: 'asdasdasdad'
     }
 
     test('Should return a temporary filepath of the saved file', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
 
       // @ts-ignore
-      // Mock the AWS method
-      awsSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
+      // Mock the Google method
+      googleSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
 
-      const storageUploadPath = await awsSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      const storageUploadPath = await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPath.includes(expectedTempLocalAudiofilePath)).toBe(true);
+
     });
 
     test('Should return a error when synthesizeSpeech has an error', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
       const exampleError = 'SSML To Speech failed';
 
       // @ts-ignore
-      awsSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback(exampleError, null));
+      // Mock the Google method
+      googleSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback(exampleError, null));
 
       try {
-        await awsSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
       } catch (err) {
         expect(err).toEqual(exampleError);
       }
@@ -85,18 +93,18 @@ describe('Synthesizer: AWS', () => {
     });
 
     test('Should return a error when saveTempFile has an error', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
       const exampleSaveFileError = 'Failed to save file.';
 
       // @ts-ignore
       // Mock a successful synthesizeSpeech method
-      awsSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
+      googleSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
 
       // Mock a saveTempFile error
-      awsSynthesizer.saveTempFile = jest.fn().mockRejectedValue(exampleSaveFileError);
+      googleSynthesizer.saveTempFile = jest.fn().mockRejectedValue(exampleSaveFileError);
 
       try {
-        await awsSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
       } catch (err) {
         expect(err).toEqual(exampleSaveFileError);
       }
@@ -115,20 +123,14 @@ describe('Synthesizer: AWS', () => {
     const expectedPath1 = `${exampleStorageUploadPath}-0.mp3`;
     const expectedPath2 = `${exampleStorageUploadPath}-1.mp3`;
 
-    const exampleSynthesizerOptions = {
-      OutputFormat: 'mp3',
-      Text: '',
-      VoiceId: 'Kimberly'
-    };
-
     test('Should return a temporary filepath of the saved file', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
 
       // @ts-ignore
-      // Mock SSMLToSpeech
-      awsSynthesizer.SSMLToSpeech = (index) => jest.fn().mockResolvedValue(`${exampleStorageUploadPath}-${index}.mp3`)();
+      // Mock the result of SSMLToSpeech
+      googleSynthesizer.SSMLToSpeech = (index) => jest.fn().mockResolvedValue(`${exampleStorageUploadPath}-${index}.mp3`)();
 
-      const storageUploadPaths = await awsSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      const storageUploadPaths = await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPaths[0].includes(expectedPath1)).toBe(true);
@@ -136,20 +138,20 @@ describe('Synthesizer: AWS', () => {
     });
 
     test('Should run removeAllTempFiles when SSMLPartsToSpeech has an error', async () => {
-      const awsSynthesizer = new AwsSynthesizer();
+      const googleSynthesizer = new GoogleSynthesizer();
       const exampleError = 'Some error happened';
 
-      awsSynthesizer.removeAllTempFiles = jest.fn();
+      googleSynthesizer.removeAllTempFiles = jest.fn();
 
       // @ts-ignore
       // Mock SSMLToSpeech
-      awsSynthesizer.SSMLToSpeech = (index) => jest.fn().mockRejectedValue(exampleError)();
+      googleSynthesizer.SSMLToSpeech = (index) => jest.fn().mockRejectedValue(exampleError)();
 
       try {
-        await awsSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
       } catch (err) {
         expect(err).toBe(exampleError);
-        expect(awsSynthesizer.removeAllTempFiles).toHaveBeenCalledTimes(1);
+        expect(googleSynthesizer.removeAllTempFiles).toHaveBeenCalledTimes(1);
       }
 
     });
