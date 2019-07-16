@@ -46,7 +46,7 @@ describe('Storage: Google Cloud', () => {
 
   })
 
-  describe('deleteAudiofile()', async () => {
+  describe('deleteAudiofile()', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
@@ -105,7 +105,7 @@ describe('Storage: Google Cloud', () => {
 
   })
 
-  describe('deleteVoicePreview()', async () => {
+  describe('deleteVoicePreview()', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
@@ -149,7 +149,7 @@ describe('Storage: Google Cloud', () => {
 
   })
 
-  describe('uploadArticleAudioFile()', async () => {
+  describe('uploadArticleAudioFile()', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
@@ -202,7 +202,7 @@ describe('Storage: Google Cloud', () => {
 
   })
 
-  describe('uploadVoicePreviewAudiofile()', async () => {
+  describe('uploadVoicePreviewAudiofile()', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
@@ -249,7 +249,7 @@ describe('Storage: Google Cloud', () => {
 
   })
 
-  describe('deleteAllArticleAudiofiles()', async () => {
+  describe('deleteAllArticleAudiofiles()', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
