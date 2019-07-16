@@ -1,22 +1,18 @@
-import appRootPath from 'app-root-path';
-import fsExtra from 'fs-extra';
+// import appRootPath from 'app-root-path';
+import { Polly } from 'aws-sdk';
 
 import { Article } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Synthesizer, Voice } from '../database/entities/voice';
-
 import * as storage from '../storage/google-cloud';
-
+import { logger } from '../utils';
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
 import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGLE_CHARACTER_HARD_LIMIT, GOOGLE_CHARACTER_SOFT_LIMIT } from '../utils/ssml';
-
-import AWS, { Polly } from 'aws-sdk';
-import { logger } from '../utils';
 import { AwsSynthesizer } from './aws';
-import { GoogleAudioEncodingType, googleSSMLPartsToSpeech, IGoogleSynthesizerOptions } from './google';
+import { GoogleAudioEncoding, GoogleSynthesizer, GoogleSynthesizerOptions } from './google';
 
 export type SynthesizerType = 'article' | 'preview';
-export type SynthesizerAudioEncodingTypes = GoogleAudioEncodingType & Polly.OutputFormat;
+export type SynthesizerAudioEncodingTypes = GoogleAudioEncoding & Polly.OutputFormat;
 
 export enum SynthesizerEncoding {
   GOOGLE_MP3 = 'MP3',
@@ -27,7 +23,7 @@ export enum SynthesizerEncoding {
   AWS_OGG_VORBIS = 'ogg_vorbis'
 }
 
-AWS.config.update({ region: process.env.AWS_REGION });
+export * from './synthesizers';
 
 /**
  * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
@@ -94,7 +90,8 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
 
   if (voice.synthesizer === 'Google') {
     logger.info(loggerPrefix, 'Starting Google Synthesizing...');
-    createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
+    const googleEncodingParameter = encodingParameter.toString() as GoogleAudioEncoding;
+    createdAudiofile = await synthesizeUsingGoogle(ssml, voice, article, audiofile, mimeType, googleEncodingParameter, storageUploadPath);
     logger.info(loggerPrefix, 'Finished Google Synthesizing.');
   } else if (voice.synthesizer === 'AWS') {
     logger.info(loggerPrefix, 'Starting AWS Polly Synthesizing...');
@@ -188,10 +185,11 @@ const synthesizeUsingAWS = async (
   logger.info(loggerPrefix, 'Audiofile successfully uploaded to our storage!');
 
   // Step 6: Delete the local file, we don't need it anymore
-  const pathToRemove = `${appRootPath}/temp/${article.id}`;
-  await fsExtra.remove(pathToRemove);
+  // const pathToRemove = `${appRootPath}/temp/${article.id}`;
+  // await fsExtra.remove(pathToRemove);
+  await awsSynthesizer.removeAllTempFiles();
 
-  logger.info(loggerPrefix, 'Removed temp audiofiles:', pathToRemove);
+  logger.info(loggerPrefix, 'Removed temp audiofiles.');
 
   // Step 7: Create a publicfile URL our users can use
   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
@@ -215,16 +213,18 @@ const synthesizeUsingGoogle = async (
   article: Article,
   audiofile: Audiofile,
   mimeType: AudiofileMimeType,
-  encodingParameter: SynthesizerEncoding,
+  encodingParameter: GoogleAudioEncoding,
   storageUploadPath: string
 ) => {
+  const googleSynthesizer = new GoogleSynthesizer();
+
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
     softLimit: GOOGLE_CHARACTER_SOFT_LIMIT,
     hardLimit: GOOGLE_CHARACTER_HARD_LIMIT
   });
 
-  const synthesizerOptions: IGoogleSynthesizerOptions = {
+  const synthesizerOptions: GoogleSynthesizerOptions = {
     audioConfig: {
       audioEncoding: encodingParameter
     },
@@ -239,7 +239,7 @@ const synthesizeUsingGoogle = async (
   };
 
   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await googleSSMLPartsToSpeech(
+  const localAudiofilePaths = await googleSynthesizer.SSMLPartsToSpeech(
     ssmlParts,
     'article',
     article.id,
@@ -269,7 +269,7 @@ const synthesizeUsingGoogle = async (
   );
 
   // Step 6: Delete the local file, we don't need it anymore
-  await fsExtra.remove(`${appRootPath}/temp/${article.id}`);
+  await googleSynthesizer.removeAllTempFiles();
 
   // Step 7: Create a publicfile URL our users can use
   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
@@ -282,3 +282,4 @@ const synthesizeUsingGoogle = async (
 
   return audiofile;
 };
+

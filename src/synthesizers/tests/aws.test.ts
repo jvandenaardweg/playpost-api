@@ -1,5 +1,6 @@
-import fsExtra from 'fs-extra';
 import { AwsSynthesizer } from '../aws';
+
+jest.mock('fs-extra');
 
 import mockedAwsVoices from '../../../tests/__mocks/awsVoices';
 
@@ -41,7 +42,6 @@ describe('Synthesizer: AWS', () => {
   })
 
   describe('SSMLToSpeech()', () => {
-    const exampleError = 'SSML To Speech failed';
     const exampleSsmlPart = '<speak><p>test ssml</p></speak>';
     const exampleIndex = 0;
     const exampleExtension = 'mp3';
@@ -52,13 +52,12 @@ describe('Synthesizer: AWS', () => {
       Text: exampleSsmlPart,
       VoiceId: 'Kimberly'
     };
+    const exampleResponse = {
+      AudioStream: 'asdasdasdad'
+    }
 
     test('Should return a temporary filepath of the saved file', async () => {
       const awsSynthesizer = new AwsSynthesizer();
-
-      const exampleResponse = {
-        AudioStream: 'asdasdasdad'
-      }
 
       // @ts-ignore
       // Mock the AWS method
@@ -68,22 +67,38 @@ describe('Synthesizer: AWS', () => {
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPath.includes(expectedTempLocalAudiofilePath)).toBe(true);
-
-      // Remove the file
-      fsExtra.remove(storageUploadPath);
     });
 
     test('Should return a error when synthesizeSpeech has an error', async () => {
       const awsSynthesizer = new AwsSynthesizer();
+      const exampleError = 'SSML To Speech failed';
 
       // @ts-ignore
-      // Mock the AWS method
       awsSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback(exampleError, null));
 
       try {
         await awsSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
       } catch (err) {
         expect(err).toEqual(exampleError);
+      }
+
+    });
+
+    test('Should return a error when saveTempFile has an error', async () => {
+      const awsSynthesizer = new AwsSynthesizer();
+      const exampleSaveFileError = 'Failed to save file.';
+
+      // @ts-ignore
+      // Mock a successful synthesizeSpeech method
+      awsSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
+
+      // Mock a saveTempFile error
+      awsSynthesizer.saveTempFile = jest.fn().mockRejectedValue(exampleSaveFileError);
+
+      try {
+        await awsSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      } catch (err) {
+        expect(err).toEqual(exampleSaveFileError);
       }
 
     });
@@ -110,18 +125,33 @@ describe('Synthesizer: AWS', () => {
       const awsSynthesizer = new AwsSynthesizer();
 
       // @ts-ignore
-      // Mock the AWS method
-      awsSynthesizer.client.SSMLToSpeech = Promise.resolve();
+      // Mock SSMLToSpeech
+      awsSynthesizer.SSMLToSpeech = (index) => jest.fn().mockResolvedValue(`${exampleStorageUploadPath}-${index}.mp3`)();
 
       const storageUploadPaths = await awsSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPaths[0].includes(expectedPath1)).toBe(true);
       expect(storageUploadPaths[1].includes(expectedPath2)).toBe(true);
+    });
 
-      // Remove the files
-      fsExtra.remove(storageUploadPaths[0]);
-      fsExtra.remove(storageUploadPaths[1]);
+    test('Should run removeAllTempFiles when SSMLPartsToSpeech has an error', async () => {
+      const awsSynthesizer = new AwsSynthesizer();
+      const exampleError = 'Some error happened';
+
+      awsSynthesizer.removeAllTempFiles = jest.fn();
+
+      // @ts-ignore
+      // Mock SSMLToSpeech
+      awsSynthesizer.SSMLToSpeech = (index) => jest.fn().mockRejectedValue(exampleError)();
+
+      try {
+        await awsSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      } catch (err) {
+        expect(err).toBe(exampleError);
+        expect(awsSynthesizer.removeAllTempFiles).toHaveBeenCalledTimes(1);
+      }
+
     });
 
     afterAll(() => {

@@ -1,7 +1,6 @@
-import { Polly } from 'aws-sdk';
 import { Request, Response } from 'express';
-import { AwsSynthesizer } from '../synthesizers/aws';
-import { getAllGoogleVoices, ITextToSpeechVoice } from '../synthesizers/google';
+import { AwsSynthesizer, AWSVoice } from '../synthesizers/aws';
+import { GoogleSynthesizer, GoogleVoice } from '../synthesizers/google';
 import { logger } from '../utils/logger';
 
 export const findAllVoices = async (req: Request, res: Response) => {
@@ -13,12 +12,13 @@ export const findAllVoices = async (req: Request, res: Response) => {
   }
 
   try {
-    let voices: ITextToSpeechVoice[] | Polly.Voice[] | undefined;
+    let voices: GoogleVoice[] | AWSVoice[] | undefined;
 
     if (synthesizerName === 'google') {
-      voices = await getAllGoogleVoices(loggerPrefix);
+      const googleSynthesizer = new GoogleSynthesizer();
+      voices = await googleSynthesizer.getAllVoices(loggerPrefix);
     } else if (synthesizerName === 'aws') {
-      const awsSynthesizer = new AwsSynthesizer()
+      const awsSynthesizer = new AwsSynthesizer();
       voices = await awsSynthesizer.getAllVoices();
     }
 
