@@ -1,7 +1,8 @@
-import { DeleteFileResponse, File, Storage, UploadResponse } from '@google-cloud/storage';
+import { DeleteFileResponse, File, Storage, UploadOptions, UploadResponse } from '@google-cloud/storage';
 import * as Sentry from '@sentry/node';
 import LocaleCode from 'locale-code';
 
+import * as request from 'request';
 import { Article } from '../database/entities/article';
 import { AudiofileMimeType } from '../database/entities/audiofile';
 import { Voice } from '../database/entities/voice';
@@ -9,6 +10,7 @@ import { logger } from '../utils';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
 const storage = new Storage(getGoogleCloudCredentials());
+
 const DEFAULT_BUCKET_NAME = process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME;
 
 if (!DEFAULT_BUCKET_NAME) { throw new Error('Please set the GOOGLE_CLOUD_STORAGE_BUCKET_NAME environment variable.'); }
@@ -49,7 +51,7 @@ export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudi
 
   try {
     // Uploads a local file to the bucket
-    const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(concatinatedLocalAudiofilePath, {
+    const uploadOptions: UploadOptions = {
       destination,
       contentType: mimeType,
       gzip: true,
@@ -71,7 +73,8 @@ export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudi
         cacheControl: 'public, max-age=31536000',
         contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
       }
-    });
+    }
+    const uploadResponse = await upload(concatinatedLocalAudiofilePath, uploadOptions);
 
     logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Uploaded file!`, uploadResponse[0].metadata.name);
 
@@ -123,7 +126,7 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
     logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Uploading file "${audiofilePath}" to bucket "${DEFAULT_BUCKET_NAME}" in "${destination}"...`);
 
     // Uploads a local file to the bucket
-    const uploadResponse: UploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, {
+    const uploadOptions: UploadOptions = {
       destination,
       contentType: mimeType,
       gzip: true,
@@ -138,7 +141,9 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
         cacheControl: 'public, max-age=31536000',
         contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
       }
-    });
+    }
+
+    const uploadResponse: UploadResponse = await upload(audiofilePath, uploadOptions);
 
     logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Uploaded file!`, uploadResponse[0].metadata.name);
 
@@ -164,31 +169,6 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
   }
 };
 
-export const deleteFile = async (filename: string) => {
-  try {
-    logger.info(`Google Cloud Storage (Delete File): Deleting file "${filename}"...`);
-
-    const deleteFileResponse: DeleteFileResponse = await storage
-      .bucket(DEFAULT_BUCKET_NAME)
-      .file(filename)
-      .delete();
-
-    logger.info(`Google Cloud Storage (Delete File): Successfully deleted file "${filename}"!`);
-
-    return deleteFileResponse;
-  } catch (err) {
-    logger.error(`Google Cloud Storage (Delete File): Failed to delete file "${filename}"!`, err);
-
-    Sentry.withScope(scope => {
-      scope.setLevel(Sentry.Severity.Critical);
-      scope.setExtra('filename', filename);
-      Sentry.captureException(err);
-    });
-
-    throw err;
-  }
-};
-
 /**
  * Deletes a voice preview file from our Google Cloud Storage.
  * The method will first search the bucket by prefix. If it finds any files, it will delete the first one.
@@ -209,7 +189,7 @@ export const deleteVoicePreview = async (voiceId?: string) => {
 
   try {
     logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
-    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+    const files = await getFiles(prefix);
 
     if (!files.length) {
       logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
@@ -244,10 +224,10 @@ export const deleteVoicePreview = async (voiceId?: string) => {
  * @param articleId
  * @param audiofileId
  */
-export const deleteAudiofile = async (articleId?: string, audiofileId?: string) => {
+export const deleteAudiofile = async (articleId: string, audiofileId: string) => {
   const loggerPrefix = 'Google Cloud Storage (Delete Audiofile):';
 
-  if (!articleId && !audiofileId) {
+  if (!articleId || !audiofileId) {
     const errorMessage = 'Both the articleId and audiofileId parameters are required to delete the audiofile from storage.';
     logger.error(loggerPrefix, errorMessage);
     return new Error(errorMessage);
@@ -257,7 +237,7 @@ export const deleteAudiofile = async (articleId?: string, audiofileId?: string) 
 
   try {
     logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
-    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+    const files = await getFiles(prefix);
 
     if (!files.length) {
       logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
@@ -307,7 +287,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
 
   try {
     logger.info(loggerPrefix, `Finding files by prefix: "${prefix}"...`);
-    const [files] = await storage.bucket(DEFAULT_BUCKET_NAME).getFiles({ prefix });
+    const files = await getFiles(prefix);
 
     if (!files.length) {
       logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
@@ -339,3 +319,22 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
     throw err;
   }
 };
+
+export const getFiles = async (prefix: string): Promise<File[]> => {
+  const [files] = await storage.bucket(`${DEFAULT_BUCKET_NAME}`).getFiles({ prefix });
+  return files;
+}
+
+export const deleteFile = async (filename: string): Promise<[request.Response]> => {
+  const deleteFileResponse: DeleteFileResponse = await storage
+    .bucket(DEFAULT_BUCKET_NAME)
+    .file(filename)
+    .delete();
+
+  return deleteFileResponse;
+};
+
+export const upload = async (audiofilePath: string, uploadOptions: UploadOptions): Promise<[File, request.Response]> => {
+  const uploadResponse = await storage.bucket(DEFAULT_BUCKET_NAME).upload(audiofilePath, uploadOptions);
+  return uploadResponse;
+}

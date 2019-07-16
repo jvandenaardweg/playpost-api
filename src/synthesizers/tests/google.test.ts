@@ -141,6 +141,7 @@ describe('Synthesizer: Google', () => {
       const googleSynthesizer = new GoogleSynthesizer();
       const exampleError = 'Some error happened';
 
+      // Mock the removeAllTempFiles method so we can check if it gets called
       googleSynthesizer.removeAllTempFiles = jest.fn();
 
       // @ts-ignore

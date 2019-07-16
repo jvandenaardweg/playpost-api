@@ -140,6 +140,7 @@
     "polly-ssml-split": "^0.1.0",
     "rate-limit-redis": "^1.6.0",
     "reflect-metadata": "^0.1.13",
+    "request": "^2.88.0",
     "response-time": "^2.3.2",
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",

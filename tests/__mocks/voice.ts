@@ -1,0 +1,30 @@
+export default {
+  id: 'dcba3e18-6dec-462f-8a9f-a92b453e931d',
+  languageCode: 'en-US',
+  countryCode: 'US',
+  name: 'Ivy',
+  label: 'Ivy',
+  gender: 'FEMALE',
+  synthesizer: 'AWS',
+  audioProfile: 'default',
+  speakingRate: 1,
+  pitch: 0,
+  naturalSampleRateHertz: null,
+  isActive: true,
+  isPremium: true,
+  isHighestQuality: false,
+  isLanguageDefault: null,
+  exampleAudioUrl: 'https://storage-development.playpost.app/voices/dcba3e18-6dec-462f-8a9f-a92b453e931d.mp3',
+  createdAt: '2019-04-25T11:35:03.691Z',
+  updatedAt: '2019-07-15T04:15:29.145Z',
+  language: {
+    id: '95f01039-fe8e-412d-a542-7089303b84c8',
+    name: 'English',
+    nativeName: 'English',
+    code: 'en',
+    isActive: true,
+    createdAt: '2019-05-16T12:51:57.546Z',
+    updatedAt: '2019-05-16T12:51:57.546Z'
+  },
+  audiofiles: []
+}
