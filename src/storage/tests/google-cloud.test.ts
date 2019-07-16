@@ -1,7 +1,7 @@
 import * as GoogleCloudStorage from '../google-cloud';
 
-import voiceMock from '../../../tests/__mocks/voice';
 import articleMock from '../../../tests/__mocks/article';
+import voiceMock from '../../../tests/__mocks/voice';
 import { AudiofileMimeType } from '../../database/entities/audiofile';
 
 jest.mock('@google-cloud/storage');
