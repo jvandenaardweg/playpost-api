@@ -12,7 +12,6 @@
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    // "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     "stripInternal": true,
@@ -22,8 +21,10 @@
     "moduleResolution": "node",
     "noEmit": true,
     "outDir": "dist",
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
+    "removeComments": true,
+    "incremental": true,
     "skipLibCheck": true, // Fix conflict with node types: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/16825
     "plugins": [
       { "name": "typescript-tslint-plugin" }
@@ -32,7 +33,6 @@
   },
   "include": [
     "src/**/*",
-    "src/typings"
   ],
   "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts"]
 }
