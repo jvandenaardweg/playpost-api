@@ -108,7 +108,7 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
 
       logger.info(loggerPrefix, 'Get article data using given documentHtml...');
 
-      result = await nodeFetch(`${process.env.CRAWLER_EXTRACTOR_URL}`, {
+      result = await nodeFetch(`${process.env.CRAWLER_BASE_URL}/extractor`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -119,7 +119,7 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
       logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!', result);
     } else {
       logger.info(loggerPrefix, 'Get article data using given articleUrl...', articleUrl);
-      result = await nodeFetch(`${process.env.CRAWLER_URL}?url=${articleUrl}`).then(response => response.json());
+      result = await nodeFetch(`${process.env.CRAWLER_BASE_URL}/browser?url=${articleUrl}`).then(response => response.json());
       logger.info(loggerPrefix, 'Successfully got article data using given articleUrl!', articleUrl);
     }
 

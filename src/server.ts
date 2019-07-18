@@ -18,6 +18,7 @@ import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
 import * as authController from './controllers/auth';
 import * as catchAllController from './controllers/catch-all';
+import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
 import * as meController from './controllers/me';
@@ -72,11 +73,8 @@ export const setupServer = async () => {
   if (!process.env.REDIS_URL) {
     throw new Error('Required environment variable "REDIS_URL" not set.');
   }
-  if (!process.env.CRAWLER_URL) {
-    throw new Error('Required environment variable "CRAWLER_URL" not set.');
-  }
-  if (!process.env.CRAWLER_EXTRACTOR_URL) {
-    throw new Error('Required environment variable "CRAWLER_EXTRACTOR_URL" not set.');
+  if (!process.env.CRAWLER_BASE_URL) {
+    throw new Error('Required environment variable "CRAWLER_BASE_URL" not set.');
   }
   if (!process.env.APPLE_IAP_SHARED_SECRET) {
     throw new Error('Required environment variable "APPLE_IAP_SHARED_SECRET" not set.');
@@ -260,6 +258,8 @@ export const setupServer = async () => {
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
   app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
+
+  app.get('/health', healthController.getHealthStatus);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', (req, res) => {

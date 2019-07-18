@@ -1,4 +1,5 @@
 steps:
+- name: node:10.15.0
 - name: 'gcr.io/cloud-builders/npm'
   args: ['install']
 - name: 'gcr.io/cloud-builders/npm'
