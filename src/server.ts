@@ -18,6 +18,7 @@ import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
 import * as authController from './controllers/auth';
 import * as catchAllController from './controllers/catch-all';
+import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
 import * as meController from './controllers/me';
@@ -260,6 +261,8 @@ export const setupServer = async () => {
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
   app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
+
+  app.get('/health', healthController.getHealthStatus);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', (req, res) => {
