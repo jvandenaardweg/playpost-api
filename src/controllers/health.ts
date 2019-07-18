@@ -1,3 +1,6 @@
+// tslint:disable-next-line
+const { version } = require('../../package.json');
+
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
@@ -60,6 +63,7 @@ export const getHealthStatus = async (req: Request, res: Response) => {
 
   return res.status(statusCode).json({
     status,
+    apiVersion: version,
     services: {
       database: databaseStatus,
       redis: redisStatus,
