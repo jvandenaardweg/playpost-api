@@ -73,11 +73,8 @@ export const setupServer = async () => {
   if (!process.env.REDIS_URL) {
     throw new Error('Required environment variable "REDIS_URL" not set.');
   }
-  if (!process.env.CRAWLER_URL) {
-    throw new Error('Required environment variable "CRAWLER_URL" not set.');
-  }
-  if (!process.env.CRAWLER_EXTRACTOR_URL) {
-    throw new Error('Required environment variable "CRAWLER_EXTRACTOR_URL" not set.');
+  if (!process.env.CRAWLER_BASE_URL) {
+    throw new Error('Required environment variable "CRAWLER_BASE_URL" not set.');
   }
   if (!process.env.APPLE_IAP_SHARED_SECRET) {
     throw new Error('Required environment variable "APPLE_IAP_SHARED_SECRET" not set.');
