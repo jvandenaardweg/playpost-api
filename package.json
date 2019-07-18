@@ -1,6 +1,6 @@
 {
   "name": "playpost-api",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "",
   "main": "dist/index.js",
   "engines": {
@@ -43,7 +43,6 @@
     "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "version": "auto-changelog -p && git add CHANGELOG.md",
     "postversion": "git push && git push --tags --no-verify"
-
   },
   "repository": {
     "type": "git",
