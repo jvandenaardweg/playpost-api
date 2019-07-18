@@ -19,5 +19,5 @@ blocks:
             - chmod 600 ~/.ssh/id_rsa_semaphoreci
             - ssh-add ~/.ssh/id_rsa_semaphoreci
             - git remote add dokku dokku@142.93.227.22:playpost-api-production # IP address as remote is used, as CloudFlare does not support ssh/git
-            - git push dokku master
+            - git push dokku master & # Uses "&" to not wait for deployment output
 

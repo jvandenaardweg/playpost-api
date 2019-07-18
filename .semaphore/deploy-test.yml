@@ -18,5 +18,5 @@ blocks:
             - git config --global user.email "semaphore@playpost.app"
             - git config --global user.name "Semaphore CI"
             - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/playpost-api-test.git
-            - git push heroku -f $SEMAPHORE_GIT_BRANCH:master
+            - git push heroku -f $SEMAPHORE_GIT_BRANCH:master & # Uses "&" to not wait for deployment output
 
