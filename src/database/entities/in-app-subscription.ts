@@ -1,5 +1,5 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn, Unique } from 'typeorm';
 
 import { ColumnNumericTransformer } from '../utils';
 
@@ -24,13 +24,14 @@ export enum InAppSubscriptionCurrency {
 }
 
 @Entity()
+@Unique(['productId', 'service'])
 @Index(['productId', 'isActive'])
 export class InAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   public id: string;
 
-  @Column({ nullable: false, unique: true }) // "premium"
+  @Column({ nullable: false }) // "premium"
   public productId: string;
 
   @Column({ nullable: false }) // "Premium"

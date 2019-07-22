@@ -1122,7 +1122,7 @@ const seedInAppSubscriptions = async () => {
     logger.info(loggerPrefix, 'Creating subscriptions...');
 
     for (const inAppSubscription of inAppSubscriptions) {
-      const foundSubscription = await inAppSubscriptionRepository.findOne({ productId: inAppSubscription.productId });
+      const foundSubscription = await inAppSubscriptionRepository.findOne({ productId: inAppSubscription.productId, service: inAppSubscription.service });
 
       if (foundSubscription) {
         logger.info(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} already exists. We update it to make sure it's in sync.`);
