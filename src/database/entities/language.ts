@@ -22,6 +22,9 @@ export class Language {
   code: string; // fr, en, de, nl...
 
   @Column({ default: false })
+  rightToLeft: boolean; // like Arabic reads from "right to left"
+
+  @Column({ default: false })
   isActive: boolean; // to allow languages to be displayed or not
 
   @OneToMany(type => Voice, voice => voice.language, { onDelete: 'NO ACTION' }) // On delete of a Voice, do nothing, so don't delete the language

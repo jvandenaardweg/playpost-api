@@ -25,6 +25,13 @@ const seedLanguages = async () => {
     for (const languageCode of languageCodes) {
       const language = languages[languageCode];
 
+      const languageData = {
+        code: languageCode,
+        name: language.name,
+        nativeName: language.native,
+        rightToLeft: !!language.rtl
+      }
+
       logger.info(loggerPrefix, 'Trying to add:', languageCode, language.name, language.native, '...');
 
       const existingLanguage = await languageRepository.findOne({
@@ -32,15 +39,15 @@ const seedLanguages = async () => {
       });
 
       if (existingLanguage) {
-        logger.warn(loggerPrefix, 'Language already exists, we do not add this:', languageCode, language.name, language.native, '...');
+        // Update, make sure it's in sync
+        await languageRepository.update(existingLanguage.id, languageData);
+
+        logger.info(loggerPrefix, 'Language already exists, we update:', languageCode, language.name, language.native, '...');
       } else {
         // Create the languages
-        const languageToCreate = await languageRepository.create({
-          code: languageCode,
-          name: language.name,
-          nativeName: language.native
-        });
+        const languageToCreate = await languageRepository.create(languageData);
 
+        // Save it
         await languageRepository.save(languageToCreate);
 
         logger.info(loggerPrefix, 'Successfully added:', languageCode, language.name, language.native);
@@ -535,6 +542,21 @@ const updateVoicesLabel = async () => {
     {
       name: 'it-IT-Wavenet-A',
       label: 'Viola',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'it-IT-Standard-D',
+      label: 'Stefano',
+      gender: 'MALE'
+    },
+    {
+      name: 'it-IT-Standard-C',
+      label: 'Gian',
+      gender: 'MALE'
+    },
+    {
+      name: 'it-IT-Standard-B',
+      label: 'Carina',
       gender: 'FEMALE'
     },
     {
