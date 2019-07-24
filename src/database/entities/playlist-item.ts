@@ -12,35 +12,35 @@ export class PlaylistItem {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE', eager: true }) // When an Article is deleted, we delete this PlaylistItem
-  public article: Article;
+  article: Article;
 
   @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this PlaylistItem
-  public user: User;
+  user: User;
 
   @Column({ nullable: false, default: 0 })
   @IsInt()
-  public order: number;
+  order: number;
 
   @Column({ nullable: true })
   @IsDate()
-  public lastPlayedAt: Date;
+  lastPlayedAt: Date;
 
   @Column({ nullable: true })
   @IsDate()
-  public archivedAt: Date;
+  archivedAt: Date;
 
   @Column({ nullable: true })
   @IsDate()
-  public favoritedAt: Date;
+  favoritedAt: Date;
 
   @CreateDateColumn()
   @IsDate()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

@@ -14,7 +14,7 @@ export class AudiofileRepository extends Repository<Audiofile> {
    * @param userId
    * @returns totalUsageCurrentMonthInSeconds
    */
-  public async findAudiofileUsageInCurrentMonth(userId: string): Promise<number> {
+  async findAudiofileUsageInCurrentMonth(userId: string): Promise<number> {
     const today = new Date();
     const firstDayOfCurrentMonth = startOfMonth(today);
     const lastDayOfCurrentMonth = endOfMonth(today);

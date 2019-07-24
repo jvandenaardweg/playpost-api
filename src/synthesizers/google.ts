@@ -24,14 +24,14 @@ export interface ITextToSpeechVoice {
 }
 
 export class GoogleSynthesizer extends Synthesizers {
-  public client: typeof GoogleTextToSpeech.TextToSpeechClient.prototype;
+  client: typeof GoogleTextToSpeech.TextToSpeechClient.prototype;
 
   constructor() {
     super([]);
     this.client = new GoogleTextToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
   }
 
-  public getAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
+  getAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
     try {
       logger.info(loggerPrefix, 'Google Text To Speech: Getting all Google Text To Speech voices from the API...');
       const result = await this.client.listVoices({});
@@ -50,7 +50,7 @@ export class GoogleSynthesizer extends Synthesizers {
     }
   };
 
-  public addAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
+  addAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
     logger.info(loggerPrefix, 'Google Text To Speech: Checking if we need to add new voices to the database...');
 
     const voiceRepository = getRepository(Voice);
@@ -109,7 +109,7 @@ export class GoogleSynthesizer extends Synthesizers {
     return voices;
   };
 
-  public SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string): Promise<string> => {
+  SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string): Promise<string> => {
     const loggerPrefix = 'Google SSML Part To Speech:';
 
     return new Promise((resolve, reject) => {
@@ -153,7 +153,7 @@ export class GoogleSynthesizer extends Synthesizers {
     });
   };
 
-  public SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string) => {
+  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string) => {
     const promises: Array<Promise<string>> = [];
 
     try {

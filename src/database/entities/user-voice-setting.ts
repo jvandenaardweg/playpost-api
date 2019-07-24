@@ -11,22 +11,22 @@ export class UserVoiceSetting {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @ManyToOne(type => User, { onDelete: 'CASCADE' }) // When an User is deleted, we delete this user voice setting
-  public user: User;
+  user: User;
 
   @ManyToOne(type => Voice, { onDelete: 'CASCADE', eager: true }) // When an Voice is deleted, we delete this user voice setting
-  public voice: Voice;
+  voice: Voice;
 
   @ManyToOne(type => Language, { onDelete: 'CASCADE', eager: true }) // When an Language is deleted, we delete this voice setting
-  public language: Language;
+  language: Language;
 
   @CreateDateColumn()
   @IsDate()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

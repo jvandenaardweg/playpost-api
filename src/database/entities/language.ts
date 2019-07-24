@@ -10,31 +10,31 @@ export class Language {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @Column()
-  public name: string; // French
+  name: string; // French
 
   @Column({ nullable: true })
-  public nativeName: string; // French => Français
+  nativeName: string; // French => Français
 
   @Column()
-  public code: string; // fr, en, de, nl...
+  code: string; // fr, en, de, nl...
 
   @Column({ default: false })
-  public isActive: boolean; // to allow languages to be displayed or not
+  isActive: boolean; // to allow languages to be displayed or not
 
   @OneToMany(type => Voice, voice => voice.language, { onDelete: 'NO ACTION' }) // On delete of a Voice, do nothing, so don't delete the language
-  public voices: Voice[];
+  voices: Voice[];
 
   @OneToMany(type => Article, article => article.language, { onDelete: 'NO ACTION' }) // On delete of a Article, do nothing, so don't delete the language
-  public articles: Article[];
+  articles: Article[];
 
   @CreateDateColumn()
   @IsDate()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

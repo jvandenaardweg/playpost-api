@@ -21,28 +21,28 @@ export class User {
   /**
    * Takes a plain text password and returns a hash using bcryptjs.
    */
-  public static hashPassword = (password: string) => {
+  static hashPassword = (password: string) => {
     return bcryptjs.hash(password, 10);
   }
 
   /**
    * Creates and reurns a JWT token using a user ID and e-mail address.
    */
-  public static generateJWTAccessToken = (id: string, email: string): string => {
+  static generateJWTAccessToken = (id: string, email: string): string => {
     if (!JWT_SECRET) { throw new Error('Please set the JWT_SECRET environment variable.'); }
     return jsonwebtoken.sign({ id, email }, JWT_SECRET);
   }
 
-  public static generateRandomRefreshToken = (): string => {
+  static generateRandomRefreshToken = (): string => {
     return crypto.randomBytes(40).toString('hex');
   }
 
-  public static generateRandomResetPasswordToken = (): string => {
+  static generateRandomResetPasswordToken = (): string => {
     const length = 6;
     return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
   }
 
-  public static verifyJWTAccessToken = (accessToken: string): object | string => {
+  static verifyJWTAccessToken = (accessToken: string): object | string => {
     if (!JWT_SECRET) { throw new Error('Please set the JWT_SECRET environment variable.'); }
     return jsonwebtoken.verify(accessToken, JWT_SECRET);
   }
@@ -50,68 +50,68 @@ export class User {
   /**
    * Compares a plain text password with a hashed one. Returns true if they match.
    */
-  public static comparePassword = (password: string, hashedPassword: string) => {
+  static comparePassword = (password: string, hashedPassword: string) => {
     return bcryptjs.compare(password, hashedPassword);
   }
 
-  public static normalizeEmail = (email: string) => {
+  static normalizeEmail = (email: string) => {
     return email.toLowerCase();
   }
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @Column({ nullable: false, unique: true })
   @IsEmail()
-  public email: string;
+  email: string;
 
   @Column({ nullable: false, select: false })
-  public password: string;
+  password: string;
 
   @Column('varchar', { length: 6, nullable: true, select: false })
-  public resetPasswordToken: string;
+  resetPasswordToken: string;
 
   @Column({ nullable: true })
-  public authenticatedAt: Date;
+  authenticatedAt: Date;
 
   @Column({ nullable: true, select: false })
-  public requestResetPasswordAt: Date;
+  requestResetPasswordAt: Date;
 
   @Column({ nullable: true, select: false })
-  public resetPasswordAt: Date;
+  resetPasswordAt: Date;
 
   @Column({ nullable: true })
-  public activatedAt: Date;
+  activatedAt: Date;
 
   @OneToMany(type => Article, article => article.user)
-  public articles: Article[];
+  articles: Article[];
 
   @OneToMany(type => Audiofile, audiofile => audiofile.user)
-  public audiofiles: Audiofile[];
+  audiofiles: Audiofile[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
-  public playlistItems: PlaylistItem[];
+  playlistItems: PlaylistItem[];
 
   @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
-  public voiceSettings: UserVoiceSetting[];
+  voiceSettings: UserVoiceSetting[];
 
   @OneToMany(type => UserInAppSubscription, userInAppSubscription => userInAppSubscription.user)
-  public inAppSubscriptions: UserInAppSubscription[];
+  inAppSubscriptions: UserInAppSubscription[];
 
   @CreateDateColumn()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  public updatedAt: Date;
+  updatedAt: Date;
 
   @BeforeInsert()
-  public lowercaseEmail() {
+  lowercaseEmail() {
     this.email = this.email.toLowerCase();
   }
 
   @AfterInsert()
-  public async afterInsert() {
+  async afterInsert() {
     const loggerPrefix = 'Database Entity (User): @AfterInsert():';
 
     // Don't add our integration test account to Mailchimp
@@ -127,7 +127,7 @@ export class User {
   }
 
   @AfterRemove()
-  public async afterRemove() {
+  async afterRemove() {
     const loggerPrefix = 'Database Entity (User): @AfterRemove():';
 
     // Do not run for our integration test user

@@ -1,13 +1,13 @@
 import fsExtra from 'fs-extra';
 
 export class Synthesizers {
-  public tempFilePaths: string[];
+  tempFilePaths: string[];
 
   constructor(tempFilePaths: string[]) {
     this.tempFilePaths = tempFilePaths;
   }
 
-  public saveTempFile = async (tempLocalAudiofilePath: string, response: any): Promise<string> => {
+  saveTempFile = async (tempLocalAudiofilePath: string, response: any): Promise<string> => {
     await fsExtra.ensureFile(tempLocalAudiofilePath);
     await fsExtra.writeFile(tempLocalAudiofilePath, response, 'binary');
 
@@ -16,7 +16,7 @@ export class Synthesizers {
     return tempLocalAudiofilePath;
   }
 
-  public removeTempFilePath = async (tempLocalAudiofilePath: string): Promise<string> => {
+  removeTempFilePath = async (tempLocalAudiofilePath: string): Promise<string> => {
     await fsExtra.remove(tempLocalAudiofilePath);
 
     this.tempFilePaths = this.tempFilePaths.filter((tempFilePath) => tempFilePath !== tempLocalAudiofilePath);
@@ -24,7 +24,7 @@ export class Synthesizers {
     return tempLocalAudiofilePath;
   }
 
-  public removeAllTempFiles = async (): Promise<string[]> => {
+  removeAllTempFiles = async (): Promise<string[]> => {
     for (const tempFilePath of this.tempFilePaths) {
       await fsExtra.remove(tempFilePath);
     }

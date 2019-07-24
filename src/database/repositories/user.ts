@@ -31,7 +31,7 @@ interface IUserDetails extends Partial<User> {
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  public async findActiveSubscriptionLimits(userId: string): Promise<ISubscriptionLimits> {
+  async findActiveSubscriptionLimits(userId: string): Promise<ISubscriptionLimits> {
     const user = await this.findOne(userId, {
       relations: ['inAppSubscriptions']
     });
@@ -62,7 +62,7 @@ export class UserRepository extends Repository<User> {
     return paidAccountLimits;
   }
 
-  public async findUserDetails(userId: string): Promise<IUserDetails | undefined> {
+  async findUserDetails(userId: string): Promise<IUserDetails | undefined> {
     const audiofileRepository = getCustomRepository(AudiofileRepository);
     const user = await this.findOne(userId, { relations: ['voiceSettings', 'inAppSubscriptions'] });
 
@@ -105,7 +105,7 @@ export class UserRepository extends Repository<User> {
    *
    * @param userId
    */
-  public async findSubscriptionUpgradeOption(userId: string): Promise<InAppSubscription | undefined> {
+  async findSubscriptionUpgradeOption(userId: string): Promise<InAppSubscription | undefined> {
     const inAppSubscriptionRepository = getRepository(InAppSubscription);
     const user = await this.findUserDetails(userId);
 

@@ -29,43 +29,43 @@ export enum InAppSubscriptionCurrency {
 export class InAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @Column({ nullable: false }) // "premium"
-  public productId: string;
+  productId: string;
 
   @Column({ nullable: false }) // "Premium"
-  public name: string;
+  name: string;
 
   @Column({ nullable: false }) // "Premium features"
-  public description: string;
+  description: string;
 
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer() }) // 4.99
-  public price: number;
+  price: number;
 
   @Column({ type: 'enum', enum: InAppSubscriptionCurrency, nullable: false })
-  public currency: InAppSubscriptionCurrency;
+  currency: InAppSubscriptionCurrency;
 
   @Column({ type: 'enum', enum: InAppSubscriptionDuration, nullable: false })
-  public duration: InAppSubscriptionDuration;
+  duration: InAppSubscriptionDuration;
 
   @Column({ type: 'enum', enum: InAppSubscriptionService, nullable: false, default: InAppSubscriptionService.INTERNAL })
-  public service: InAppSubscriptionService;
+  service: InAppSubscriptionService;
 
   @Column({ nullable: false, default: 0 })
-  public limitSecondsPerMonth: number;
+  limitSecondsPerMonth: number;
 
   @Column({ nullable: false, default: 0 })
-  public limitSecondsPerArticle: number;
+  limitSecondsPerArticle: number;
 
   @Column({ nullable: false, default: false })
-  public isActive: boolean;
+  isActive: boolean;
 
   @CreateDateColumn()
   @IsDate()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @IsDate()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

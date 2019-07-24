@@ -11,7 +11,7 @@ import { Voice } from '../entities/voice';
 @EntityRepository(Voice)
 export class VoiceRepository extends Repository<Voice> {
 
-  public async createVoicePreview(voiceId: string): Promise<Voice> {
+  async createVoicePreview(voiceId: string): Promise<Voice> {
     let localAudiofilePath: string = '';
     let audioEncoding: SynthesizerEncoding;
     let mimeType: AudiofileMimeType;

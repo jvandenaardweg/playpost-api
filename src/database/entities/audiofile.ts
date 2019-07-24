@@ -20,35 +20,35 @@ export enum AudiofileMimeType {
 export class Audiofile {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
-  public id: string;
+  id: string;
 
   @Column({ nullable: true })
-  public url: string;
+  url: string;
 
   @Column({ nullable: true })
-  public bucket: string;
+  bucket: string;
 
   @Column({ nullable: true })
-  public filename: string;
+  filename: string;
 
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
-  public length: number; // Length in seconds
+  length: number; // Length in seconds
 
   @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
-  public mimeType: AudiofileMimeType;
+  mimeType: AudiofileMimeType;
 
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
-  public article: Article;
+  article: Article;
 
   @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
-  public voice: Voice;
+  voice: Voice;
 
   @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
-  public user: User;
+  user: User;
 
   @CreateDateColumn()
-  public createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  public updatedAt: Date;
+  updatedAt: Date;
 }

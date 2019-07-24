@@ -12,8 +12,8 @@ import { Synthesizers } from './synthesizers';
 export type AWSVoice = Polly.Voice
 
 export class AwsSynthesizer extends Synthesizers {
-  public voices: AWSVoice[];
-  public client: AWS.Polly;
+  voices: AWSVoice[];
+  client: AWS.Polly;
 
   constructor() {
     super([]);
@@ -26,7 +26,7 @@ export class AwsSynthesizer extends Synthesizers {
     });
   }
 
-  public getAllVoices = async (): Promise<AWSVoice[]> => {
+  getAllVoices = async (): Promise<AWSVoice[]> => {
     return new Promise((resolve, reject) => {
       logger.info('AWS Polly: Getting all AWS Polly voices from the API...');
 
@@ -43,7 +43,7 @@ export class AwsSynthesizer extends Synthesizers {
     });
   }
 
-  public addAllVoices = async (loggerPrefix: string): Promise<AWSVoice[]> => {
+  addAllVoices = async (loggerPrefix: string): Promise<AWSVoice[]> => {
     logger.info(loggerPrefix, 'AWS Polly: Checking if we need to add new voices to the database...');
     const voiceRepository = getRepository(Voice);
 
@@ -102,7 +102,7 @@ export class AwsSynthesizer extends Synthesizers {
     return voices;
   };
 
-  public SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string> => {
+  SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const loggerPrefix = 'AWS SSML Part To Speech:';
 
@@ -152,7 +152,7 @@ export class AwsSynthesizer extends Synthesizers {
   /**
    * Synthesizes the SSML parts into seperate audiofiles
    */
-  public SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string[]> => {
+  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string[]> => {
     const promises: Array<Promise<string>> = [];
     const loggerPrefix = 'AWS SSML Parts To Speech:';
 
