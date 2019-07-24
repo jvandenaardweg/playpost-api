@@ -1022,7 +1022,7 @@ const updateIsLanguageDefaultForVoices = async () => {
     'Seoyeon', // KR
     'uk-UA-Standard-A', // UA
     'Hans', // DE
-    'Céline', // FR
+    'Celine', // FR
     'Filiz', // TR
     'ar-XA-Standard-B', // XA
     'Bianca', // IT
@@ -1036,7 +1036,9 @@ const updateIsLanguageDefaultForVoices = async () => {
     'Ruben', // NL
     'id-ID-Standard-C', // ID
     'Mads', // DK
-    'vi-VN-Standard-C' // VN
+    'vi-VN-Standard-C', // VN
+    'hi-IN-Standard-B', // IN (Hindi Indian)
+    // 'Ines' // PT, see BR
   ];
 
   try {
@@ -1100,9 +1102,15 @@ const updateIsHighestQualityForVoices = async () => {
         logger.info(loggerPrefix, `"${voice.name}" is not a Google voice, cannot set isHighestQuality to true.`);
       } else {
         const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
-        await voiceRepository.update(voice.id, { isHighestQuality });
 
-        logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
+        // If there's a need to update
+        if (isHighestQuality !== voice.isHighestQuality) {
+          await voiceRepository.update(voice.id, { isHighestQuality });
+
+          logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
+        } else {
+          logger.info(loggerPrefix, `No update for "${voice.name}"`);
+        }
       }
     }
   } catch (err) {

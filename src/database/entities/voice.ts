@@ -30,7 +30,7 @@ export enum AudioProfile {
 }
 
 @Entity()
-@Unique(['isLanguageDefault', 'language'])
+@Unique(['isLanguageDefault', 'languageCode'])
 @Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality'])
 export class Voice {
 

@@ -115,6 +115,77 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Es el más denso y el quinto mayor de los ocho planetas del sistema solar. También es el mayor de los cuatro terrestres o rocosos.</p>
           <p>La Tierra se formó hace aproximadamente 4550 millones de años y la vida surgió unos mil millones de años después. Es el hogar de millones de especies, incluyendo los seres humanos y actualmente el único cuerpo astronómico donde se conoce la existencia de vida.</p>
         </speak>`
+      ],
+      Polish: [
+        `<speak>
+          <p>Ziemia trzecia, licząc od Słońca, oraz piąta pod względem wielkości planeta Układu Słonecznego. Pod względem średnicy, masy i gęstości jest to największa planeta skalista Układu Słonecznego.</p>
+          <p>Ziemia jest zamieszkana przez miliony gatunków, w tym przez człowieka. Jest jedynym znanym miejscem we Wszechświecie, w którym występuje życie.</p>
+          <p>Według danych zebranych metodą datowania izotopowego, planeta uformowała się ok. 4,54 ± 0,05 mld lat temu.</p>
+        </speak>`,
+        `<speak>
+          <p>Księżyc jedyny naturalny satelita Ziemi (nie licząc tzw. księżyców Kordylewskiego, które są obiektami pyłowymi i przez niektórych badaczy uważane za obiekty przejściowe).</p>
+          <p>Jest piątym co do wielkości księżycem w Układzie Słonecznym.</p>
+          <p>Przeciętna odległość od środka Ziemi do środka Księżyca to 384 399 km, co stanowi mniej więcej trzydziestokrotność średnicy ziemskiej.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars, czwarta od Słońca planeta Układu Słonecznego. Nazwana od imienia rzymskiego boga wojny – Marsa.</p>
+          <p>Zawdzięcza ją barwie, która przy obserwacji z Ziemi wydaje się rdzawo-czerwona i kojarzyła się starożytnym Rzymianom z pożogą wojenną.</p>
+          <p>Odcień bierze się od tlenków żelaza pokrywających powierzchnię. Mars jest planetą wewnętrzną z cienką atmosferą, o powierzchni usianej kraterami uderzeniowymi, podobnie jak powierzchnia Księżyca i wielu innych ciał Układu Słonecznego.</p>
+        </speak>`
+      ],
+      Hindi: [
+        `<speak>
+          <p>पृथ्वी, जिसे विश्व भी कहा जाता है, सूर्य से तीसरा ग्रह और ज्ञात ब्रह्माण्ड में एकमात्र ग्रह है जहाँ जीवन उपस्थित है। यह सौर मंडल में सबसे घना और चार स्थलीय ग्रहों में सबसे बड़ा ग्रह है।</p>
+          <p>रेडियोधर्मी डेटिंग और साक्ष्य के अन्य स्रोतों के अनुसार, पृथ्वी की आयु लगभग 4.54 बिलियन साल हैं। पृथ्वी की गुरुत्वाकर्षण, अंतरिक्ष में अन्य पिण्ड के साथ परस्पर प्रभावित रहती है, विशेष रूप से सूर्य और चंद्रमा से, जोकि पृथ्वी का एकमात्र प्राकृतिक उपग्रह हैं।</p>
+          <p>सूर्य के चारों ओर परिक्रमण के दौरान, पृथ्वी अपनी कक्षा में 365 बार घूमती है; इस प्रकार, पृथ्वी का एक वर्ष लगभग 365.26 दिन लंबा होता है। पृथ्वी के परिक्रमण के दौरान इसके धुरी में झुकाव होता है, जिसके कारण ही ग्रह की सतह पर मौसमी विविधताये (ऋतुएँ) पाई जाती हैं।</p>
+          <p>पृथ्वी और चंद्रमा के बीच गुरुत्वाकर्षण के कारण समुद्र में ज्वार-भाटे आते है, यह पृथ्वी को इसकी अपनी अक्ष पर स्थिर करता है, तथा इसकी परिक्रमण को धीमा कर देता है।</p>
+        </speak>`,
+        `<speak>
+          <p>चन्द्रमा पृथ्वी का एकमात्र प्राकृतिक उपग्रह है। यह सौर मंडल का पाचवाँ,सबसे विशाल प्राकृतिक उपग्रह है। इसका आकार क्रिकेट बॉल की तरह गोल है।</p>
+          <p>और यह खुद से नहीं चमकता बल्कि यह तो सूर्य के प्रकाश से प्रकाशित होता है। पृथ्वी से चन्द्रमा की दूरी ३८४,४०३ किलोमीटर है। यह दूरी पृथ्वी कि परिधि के ३० गुना है। चन्द्रमा पर गुरुत्वाकर्षण पृथ्वी से १/६ है।</p>
+          <p>यह पृथ्वी कि परिक्रमा २७.३ दिन में पूरा करता है और अपने अक्ष के चारो ओर एक पूरा चक्कर भी २७.३ दिन में लगाता है। यही कारण है कि चन्द्रमा का एक ही हिस्सा या फेस हमेशा पृथ्वी की ओर होता है।</p>
+          <p>यदि चन्द्रमा पर खड़े होकर पृथ्वी को देखे तो पृथ्वी साफ़ साफ़ अपने अक्ष पर घूर्णन करती हुई नजर आएगी लेकिन आसमान में उसकी स्थिति सदा स्थिर बनी रहेगी अर्थात पृथ्वी को कई वर्षो तक निहारते रहो वह अपनी जगह से टस से मस नहीं होगी।</p>
+          <p>पृथ्वी- चन्द्रमा-सूर्य ज्यामिति के कारण "चन्द्र दशा" हर २९.५ दिनों में बदलती है।</p>
+        </speak>`,
+        `<speak>
+          <p>मंगल सौरमंडल में सूर्य से चौथा ग्रह है। पृथ्वी से इसकी आभा रक्तिम दिखती है, जिस वजह से इसे "लाल ग्रह" के नाम से भी जाना जाता है।</p>
+          <p>सौरमंडल के ग्रह दो तरह के होते हैं - "स्थलीय ग्रह" जिनमें ज़मीन होती है और "गैसीय ग्रह" जिनमें अधिकतर गैस ही गैस है। पृथ्वी की तरह, मंगल भी एक स्थलीय धरातल वाला ग्रह है। इसका वातावरण विरल है।</p>
+          <p>इसकी सतह देखने पर चंद्रमा के गर्त और पृथ्वी के ज्वालामुखियों, घाटियों, रेगिस्तान और ध्रुवीय बर्फीली चोटियों की याद दिलाती है। हमारे सौरमंडल का सबसे अधिक ऊँचा पर्वत, ओलम्पस मोन्स मंगल पर ही स्थित है। साथ ही विशालतम कैन्यन वैलेस मैरीनेरिस भी यहीं पर स्थित है।</p>
+          <p>अपनी भौगोलिक विशेषताओं के अलावा, मंगल का घूर्णन काल और मौसमी चक्र पृथ्वी के समान हैं। इस गृह पर जीवन होने की संभावना है।</p>
+        </speak>`
+      ],
+      Russian: [
+        `<speak>
+          <p>Земля́ — третья по удалённости от Солнца планета Солнечной системы. Самая плотная, пятая по диаметру и массе среди всех планет и крупнейшая среди планет земной группы, в которую входят также Меркурий, Венера и Марс.</p>
+          <p>Иногда упоминается как Мир, Голубая планета, иногда Терра (от лат. Terra). Единственное известное человеку на данный момент тело Солнечной системы в частности и Вселенной вообще, населённое живыми организмами.</p>
+        </speak>`,
+        `<speak>
+          <p>Луна́ — естественный спутник Земли. Самый близкий к Солнцу спутник планеты, так как у ближайших к Солнцу планет, Меркурия и Венеры, спутников нет.</p>
+          <p>Второй по яркости объект на земном небосводе после Солнца и пятый по величине естественный спутник планеты Солнечной системы. Среднее расстояние между центрами Земли и Луны — 384 467 км (0,002 57 а. е., ~ 30 диаметров Земли).</p>
+        </speak>`,
+        `<speak>
+          <p>Марс — четвёртая по удалённости от Солнца и седьмая по размерам планета Солнечной системы; масса планеты составляет 10,7 % массы Земли.</p>
+          <p>Названа в честь Марса — древнеримского бога войны, соответствующего древнегреческому Аресу. Иногда Марс называют «красной планетой» из-за красноватого оттенка поверхности, придаваемого ей минералом маггемитом — γ-оксидом железа(III).</p>
+        </speak>`
+      ],
+      Portuguese: [
+        `<speak>
+          <p>A Terra é o terceiro planeta mais próximo do Sol, o mais denso e o quinto maior dos oito planetas do Sistema Solar. É também o maior dos quatro planetas telúricos.</p>
+          <p>É por vezes designada como Mundo ou Planeta Azul. Lar de milhões de espécies de seres vivos, incluindo os humanos, a Terra é o único corpo celeste onde é conhecida a existência de vida.</p>
+          <p>O planeta formou-se há 4,56 bilhões de anos, e a vida surgiu na sua superfície um bilhão de anos depois.</p>
+        </speak>`,
+        `<speak>
+          <p>A Lua é o único satélite natural da Terra e o quinto maior do Sistema Solar.</p>
+          <p>É o maior satélite natural de um planeta no sistema solar em relação ao tamanho do seu corpo primário, tendo 27% do diâmetro e 60% da densidade da Terra, o que representa 1⁄81 da sua massa.</p>
+          <p>Entre os satélites cuja densidade é conhecida, a Lua é o segundo mais denso, atrás de Io.</p>
+          <p>Estima-se que a formação da Lua tenha ocorrido há cerca de 4,51 mil milhões* de anos, relativamente pouco tempo após a formação da Terra.</p>
+        </speak>`,
+        `<speak>
+          <p>Marte é o quarto planeta a partir do Sol, o segundo menor do Sistema Solar.</p>
+          <p>Batizado em homenagem ao deus romano da guerra, muitas vezes é descrito como o "Planeta Vermelho", porque o óxido de ferro predominante em sua superfície lhe dá uma aparência avermelhada.</p>
+          <p>Marte é um planeta rochoso com uma atmosfera fina, com características de superfície que lembram tanto as crateras de impacto da Lua quanto vulcões, vales, desertos e calotas polares da Terra.</p>
+          <p>O período de rotação e os ciclos sazonais de Marte são também semelhantes aos da Terra, assim como é a inclinação que produz as suas estações do ano.</p>
+        </speak>`
       ]
     };
 
