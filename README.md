@@ -149,4 +149,5 @@ Each automatic renewal sends a transaction to the app. The transaction, or trans
 1. SSH into the server
 2. Run: `dokku enter playpost-api-production web`
 3. Run: `npm run typeorm schema:sync`
-4. Schema is now synced.
+4. Run `npm run database:sync`
+4. Schema and database is now synced.
