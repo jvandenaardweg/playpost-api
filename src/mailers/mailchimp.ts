@@ -4,7 +4,7 @@ import nodeFetch from 'node-fetch';
 
 import { logger } from '../utils';
 
-const MAILCHIMP_LIST_ID = '714d3d1c6d';
+const MAILCHIMP_LIST_ID = 'd2914f7072';
 const MAILCHIMP_API_KEY = '2180a3003601f812d7f391a398891d32-us2';
 
 const MAILCHIMP_SERVER_ID = MAILCHIMP_API_KEY.split('-')[1];
