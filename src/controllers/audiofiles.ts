@@ -72,7 +72,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setUser(req.user);
-      scope.setExtra('article', article);
       Sentry.captureMessage(message);
     });
 
@@ -104,7 +103,6 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setUser(req.user);
-      scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
       Sentry.captureMessage(message);
