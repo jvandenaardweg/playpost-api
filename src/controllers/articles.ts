@@ -139,6 +139,8 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
     let language: string | undefined;
     let title: string | undefined;
     let siteName: string | undefined;
+    let isCompatible: boolean | undefined;
+    let compatibilityMessage: string | undefined;
 
     if (result.ssml) { ssml = result.ssml; }
     if (result.articleText) { text = result.articleText; }
@@ -174,6 +176,11 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
       siteName = urlParse(result.url).hostname;
     }
 
+    if (result.validationResult) {
+      isCompatible = result.validationResult.isValid;
+      compatibilityMessage = result.validationResult.message;
+    }
+
     return {
       ssml,
       text,
@@ -186,7 +193,9 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
       canonicalUrl,
       language,
       title,
-      siteName
+      siteName,
+      isCompatible,
+      compatibilityMessage
     };
   } catch (err) {
     const message = err && err.message ? err.message : 'Unknown error';
@@ -353,7 +362,9 @@ export const updateArticleToFull = async (articleId: string) => {
     language,
     title,
     siteName,
-    url
+    url,
+    isCompatible,
+    compatibilityMessage
   } = await fetchFullArticleContents(articleToUpdate.url, articleToUpdate.documentHtml);
 
   logger.info(loggerPrefix, 'Successfully fetched full article contents!');
@@ -419,7 +430,9 @@ export const updateArticleToFull = async (articleId: string) => {
     status: ArticleStatus.FINISHED,
     language: foundLanguage,
     sourceName: siteName,
-    documentHtml: undefined // Remove the documentHtml, we don't need it anymore
+    documentHtml: undefined, // Remove the documentHtml, we don't need it anymore
+    isCompatible,
+    compatibilityMessage
   });
 
   logger.info(loggerPrefix, 'Updated article with crawler data!');

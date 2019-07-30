@@ -82,12 +82,6 @@ export const setupServer = async () => {
   if (!process.env.TYPEORM_URL) {
     throw new Error('Required environment variable "TYPEORM_URL" not set.');
   }
-  if (!process.env.TYPEORM_ENTITIES) {
-    throw new Error('Required environment variable "TYPEORM_ENTITIES" not set.');
-  }
-  if (!process.env.TYPEORM_MIGRATIONS) {
-    throw new Error('Required environment variable "TYPEORM_MIGRATIONS" not set.');
-  }
   if (!process.env.AWS_USER) {
     throw new Error('Required environment variable "AWS_USER" not set.');
   }

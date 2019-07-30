@@ -136,9 +136,17 @@ The subscription will automatically renew 6 times per account per 8 hour window,
 
 Each automatic renewal sends a transaction to the app. The transaction, or transactions, depending on how much time has passed, is processed the next time the app is opened. Validating these transactions triggers yet another password prompt. When the app is live on the App Store it shouldn’t trigger these additional password prompts.
 
+## Migrations
+Updating the database is strictly done using migrations.
+
+1. Create a migration, example: `npm run typeorm migration:generate -- --name ArticleCompatible -d src/database/migrations`
+2. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
+3. Restart the service
+4. When starting the service migrations are run automatically
+
 ## When updating the environment with new data
 
-1. Check if we can run `npm run typeorm:schema:sync` (could be destructive operation, so please use migrations)
+1. Make sure the migrations were run. We enabled logging for this.
 2. Run `npm run database:sync`
 3. Run `npm run caches:empty`
 

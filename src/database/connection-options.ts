@@ -9,6 +9,7 @@ import { User } from './entities/user';
 import { UserInAppSubscription } from './entities/user-in-app-subscription';
 import { UserVoiceSetting } from './entities/user-voice-setting';
 import { Voice } from './entities/voice';
+import { ArticleCompatible1564467937421 } from './migrations/1564467937421-ArticleCompatible';
 
 export const connectionOptions = (name = 'default'): ConnectionOptions => {
   return {
@@ -22,10 +23,24 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
       type: 'ioredis',
       options: process.env.REDIS_URL
     },
-    logging: process.env.NODE_ENV === 'production' ? ['error'] : ['error'], // Complete logging in dev, only errors in production
-    synchronize: process.env.NODE_ENV === 'production' ? false : true, // Sync changes directly when in dev
-    entities: [User, PlaylistItem, Article, Audiofile, Voice, Language, UserVoiceSetting, UserInAppSubscription, InAppSubscription],
-    migrationsRun: true, // Run migrations on start. So when we deploy to production, migrations run automatically.
+    logging: process.env.NODE_ENV === 'production' ? ['error', 'schema', 'warn'] : true, // Complete logging in dev, only errors in production
+    synchronize: false,
+    entities: [
+      User,
+      PlaylistItem,
+      Article,
+      Audiofile,
+      Voice,
+      Language,
+      UserVoiceSetting,
+      UserInAppSubscription,
+      InAppSubscription
+    ],
+    migrations: [
+      // In order of execution is important, oldest first
+      ArticleCompatible1564467937421
+    ],
+    migrationsRun: true, // Run migrations on start.
     dropSchema: false,
     maxQueryExecutionTime: 1000
   };

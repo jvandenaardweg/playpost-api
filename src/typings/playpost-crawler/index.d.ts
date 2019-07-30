@@ -1,6 +1,8 @@
 declare namespace PostplayCrawler {
   export interface IResponse {
     crawler: string;
+    statusCode: number;
+    validationResult: ArticleValidationResult,
     title: string | null;
     url: string;
     urlParts: UrlParseResult;
@@ -20,6 +22,11 @@ declare namespace PostplayCrawler {
     ssml: string | null;
     completeHTML: string | null;
     readability: ReadabilityResult;
+  }
+
+  export interface ArticleValidationResult {
+    message: string;
+    isValid: boolean;
   }
 
   export interface IUrlParseResult {
