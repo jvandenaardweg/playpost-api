@@ -2,7 +2,7 @@ import pino from 'pino';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const IS_STAGING = process.env.NODE_ENV === 'staging';
-const IS_TEST = process.env.HEROKU_APP_ID;
+const IS_TEST = process.env.NODE_ENV === 'test';
 
 export const logger = pino({
   enabled: !IS_TEST,
