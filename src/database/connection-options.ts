@@ -23,7 +23,7 @@ export const connectionOptions = (name = 'default'): ConnectionOptions => {
       type: 'ioredis',
       options: process.env.REDIS_URL
     },
-    logging: process.env.NODE_ENV === 'production' ? ['error', 'schema', 'warn'] : true, // Complete logging in dev, only errors in production
+    logging: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // Complete logging in dev, only errors in production
     synchronize: false,
     entities: [
       User,
