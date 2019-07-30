@@ -17,7 +17,7 @@ logger.info('App init:', `Using ${WORKER_COUNT} workers...`);
 
 Sentry.init({
   dsn: 'https://479dcce7884b457cb001deadf7408c8c@sentry.io/1399178',
-  enabled: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test', // Do not run on your local machine
+  enabled: process.env.NODE_ENV === 'production', // Do not run on your local machine
   environment: process.env.NODE_ENV,
   integrations: [
     new Integrations.RewriteFrames({
