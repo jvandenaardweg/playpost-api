@@ -41,8 +41,6 @@ export const listenForAppleSubscriptionNotifications = () => {
 const handleMessage = async (message: Message) => {
   const loggerPrefix = 'Google PubSub Worker (Apple Subscription Notifications) (message):';
 
-  const reDeliverDelayInSeconds = 60;
-
   let notification = {} as any as IAppleSubscriptionNotificationRequestBody;
 
   try {
@@ -57,7 +55,7 @@ const handleMessage = async (message: Message) => {
       return message.ack();
     }
 
-    await handleSubscriptionStatusEvent(notification, message, reDeliverDelayInSeconds, loggerPrefix);
+    await handleSubscriptionStatusEvent(notification, message, loggerPrefix);
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'Unknown error happened while processing this notification.';
 
@@ -69,8 +67,9 @@ const handleMessage = async (message: Message) => {
 
     logger.error(loggerPrefix, errorMessage);
 
-    logger.info(loggerPrefix, 'Retry...');
-    message.nack(reDeliverDelayInSeconds); // re-deliver, so we can retry.
+    message.nack(); // re-deliver, so we can retry.
+    logger.info(loggerPrefix, 'Sending nack(), so we can retry...');
+
     // TODO: Could possibly result in messages being nack'd all the time, to infinity. Find a way to resolve that later.
   }
 };
@@ -84,7 +83,7 @@ const handleMessage = async (message: Message) => {
  * @param reDeliverDelayInSeconds
  * @param loggerPrefix
  */
-const handleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNotificationRequestBody, message: Message, reDeliverDelayInSeconds: number, loggerPrefix: string) => {
+const handleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNotificationRequestBody, message: Message, loggerPrefix: string) => {
   const availableEvents = ['INITIAL_BUY', 'CANCEL', 'RENEWAL', 'INTERACTIVE_RENEWAL', 'DID_CHANGE_RENEWAL_PREF', 'DID_CHANGE_RENEWAL_STATUS'];
 
   logger.info(loggerPrefix, notification);

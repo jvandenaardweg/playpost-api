@@ -12,7 +12,6 @@ const { GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE, GOOGLE_PUBSUB_TOPIC_CRAWL
 
 export const listenCrawlFullArticle = () => {
   const loggerPrefix = 'Google PubSub Worker (Crawl Full Article):';
-  const reDeliverDelayInSeconds = 10;
   const pubsub = new PubSub(getGoogleCloudCredentials());
 
   if (!GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) { throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set. Please add it.'); }
@@ -86,8 +85,8 @@ export const listenCrawlFullArticle = () => {
       await articlesController.updateArticleStatus(articleId, ArticleStatus.FAILED);
       logger.error(loggerPrefix, 'Worker process set status to failed: ', articleId);
 
-      message.nack(reDeliverDelayInSeconds); // re-deliver, so we can retry
-      logger.error(loggerPrefix, 'Re-deliver message in seconds:', reDeliverDelayInSeconds);
+      message.nack(); // re-deliver, so we can retry
+      logger.error(loggerPrefix, 'Sending nack(). Re-deliver message...');
     }
   };
 
