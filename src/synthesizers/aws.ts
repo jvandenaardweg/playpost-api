@@ -4,7 +4,7 @@ import AWS, { Polly } from 'aws-sdk';
 import LocaleCode from 'locale-code';
 import { getRepository } from 'typeorm';
 
-import { Gender, Synthesizer, Voice } from '../database/entities/voice';
+import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
 import { SynthesizerType } from './index';
 import { Synthesizers } from './synthesizers';
@@ -53,7 +53,7 @@ export class AwsSynthesizer extends Synthesizers {
       const voiceId = voice.Id;
       const voiceName = voice.Name;
       const voiceLanguageCode = voice.LanguageCode;
-      const voiceGender = voice.Gender === 'Male' ? Gender.MALE : Gender.FEMALE;
+      const voiceGender = voice.Gender === 'Male' ? EVoiceGender.MALE : EVoiceGender.FEMALE;
 
       const foundVoice = await voiceRepository.findOne({ name: voiceId });
 
@@ -75,7 +75,7 @@ export class AwsSynthesizer extends Synthesizers {
                 name: voiceId,
                 label: voiceName,
                 gender: voiceGender,
-                synthesizer: Synthesizer.AWS
+                synthesizer: EVoiceSynthesizer.AWS
               });
 
               const createdVoice = await voiceRepository.save(voiceToCreate);

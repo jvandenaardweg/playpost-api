@@ -3,7 +3,7 @@ import { Polly } from 'aws-sdk';
 
 import { Article } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
-import { Synthesizer, Voice } from '../database/entities/voice';
+import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import * as storage from '../storage/google-cloud';
 import { logger } from '../utils';
 import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
@@ -34,25 +34,25 @@ export * from './synthesizers';
  * { "OutputFormat": "mp3" } (AWS)
  *
  */
-export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesizer: Synthesizer) => {
+export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesizer: EVoiceSynthesizer) => {
   if (mimeType === 'audio/mpeg') {
-    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : SynthesizerEncoding.AWS_MP3;
+    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : SynthesizerEncoding.AWS_MP3;
   }
 
   if (mimeType === 'audio/wav') {
-    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : null;
+    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : null;
   }
 
   if (mimeType === 'audio/pcm') {
-    return (synthesizer === Synthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_PCM;
+    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_PCM;
   }
 
   if (mimeType === 'audio/ogg') {
-    return (synthesizer === Synthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_OGG_VORBIS;
+    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_OGG_VORBIS;
   }
 
   if (mimeType === 'audio/opus') {
-    return (synthesizer === Synthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_OGG_OPUS : null;
+    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_OGG_OPUS : null;
   }
 
   return null;

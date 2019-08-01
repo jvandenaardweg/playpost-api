@@ -5,19 +5,25 @@ import { ColumnNumericTransformer } from '../utils';
 import { Audiofile } from './audiofile';
 import { Language } from './language';
 
-export enum Gender {
+export enum EVoiceGender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   NEUTRAL = 'NEUTRAL',
   SSML_VOICE_GENDER_UNSPECIFIED = 'SSML_VOICE_GENDER_UNSPECIFIED'
 }
 
-export enum Synthesizer {
+export enum EVoiceSynthesizer {
   GOOGLE = 'Google',
   AWS = 'AWS'
 }
 
-export enum AudioProfile {
+export enum EVoiceQuality {
+  NORMAL = 'Normal', // AWS Polly
+  HIGH = 'High', // Google Standard
+  VERY_HIGH = 'Very High' // Google WaveNet
+}
+
+export enum EVoiceAudioProfile {
   DEFAULT = 'default',
   HEADPHONE = 'headphone-class-device',
   SMARTPHONE = 'handset-class-device',
@@ -31,7 +37,7 @@ export enum AudioProfile {
 
 @Entity()
 @Unique(['isLanguageDefault', 'languageCode'])
-@Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality'])
+@Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality', 'quality'])
 export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
@@ -50,14 +56,17 @@ export class Voice {
   @Column({ nullable: false, unique: true }) // John
   label: string;
 
-  @Column({ type: 'enum', enum: Gender, nullable: false }) // MALE or FEMALE
-  gender: Gender;
+  @Column({ type: 'enum', enum: EVoiceGender, nullable: false }) // MALE or FEMALE
+  gender: EVoiceGender;
 
-  @Column({ type: 'enum', enum: Synthesizer, nullable: false }) // Google or AWS
-  synthesizer: Synthesizer;
+  @Column({ type: 'enum', enum: EVoiceSynthesizer, nullable: false }) // Google or AWS
+  synthesizer: EVoiceSynthesizer;
 
-  @Column({ type: 'enum', enum: AudioProfile, nullable: false, default: AudioProfile.DEFAULT }) // Default
-  audioProfile: AudioProfile;
+  @Column({ type: 'enum', enum: EVoiceQuality, nullable: false, default: EVoiceQuality.NORMAL }) // Default is "Normal" (lowest quality)
+  quality: EVoiceQuality;
+
+  @Column({ type: 'enum', enum: EVoiceAudioProfile, nullable: false, default: EVoiceAudioProfile.DEFAULT }) // Default
+  audioProfile: EVoiceAudioProfile;
 
   @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer(), default: 1 })
   speakingRate: number;
@@ -77,7 +86,7 @@ export class Voice {
   @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
   isHighestQuality: boolean;
 
-  @Column({ nullable: true, default: null }) // Determine if this voice is the default for the language
+  @Column({ nullable: true }) // Determine if this voice is the default for the language
   isLanguageDefault: boolean;
 
   @Column({ nullable: true }) // A URL to an audiofile with an example

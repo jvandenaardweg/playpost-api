@@ -4,7 +4,7 @@ import appRootPath from 'app-root-path';
 import LocaleCode from 'locale-code';
 import { getRepository } from 'typeorm';
 
-import { Gender, Synthesizer, Voice } from '../database/entities/voice';
+import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { logger } from '../utils/logger';
 import { SynthesizerType } from './index';
@@ -19,7 +19,7 @@ export type GoogleSynthesizerOptions = SynthesizeSpeechRequest;
 export interface ITextToSpeechVoice {
   languageCodes: string[];
   name: string;
-  ssmlGender: Gender;
+  ssmlGender: EVoiceGender;
   naturalSampleRateHertz: number;
 }
 
@@ -61,7 +61,7 @@ export class GoogleSynthesizer extends Synthesizers {
       const voiceName = voice.name;
       // @ts-ignore
       const voiceLanguageCode = voice.languageCodes[0];
-      const voiceGender = voice.ssmlGender as Gender;
+      const voiceGender = voice.ssmlGender as EVoiceGender;
       const voiceNaturalSampleRateHertz = voice.naturalSampleRateHertz;
 
       const foundVoice = await voiceRepository.findOne({ name: voiceName });
@@ -81,7 +81,7 @@ export class GoogleSynthesizer extends Synthesizers {
               name: voiceName,
               label: voiceName,
               gender: voiceGender,
-              synthesizer: Synthesizer.GOOGLE,
+              synthesizer: EVoiceSynthesizer.GOOGLE,
               naturalSampleRateHertz: voiceNaturalSampleRateHertz,
               isHighestQuality: voiceName.toLowerCase().includes('wavenet') ? true : false
             });

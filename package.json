@@ -40,7 +40,7 @@
     "typeorm:local:schema:sync": "ts-node ./node_modules/.bin/typeorm schema:sync",
     "tsc:watch": "tsc -p ./ --noEmit -w",
     "typescript:check": "tsc -p ./ --noEmit",
-    "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
     "version": "auto-changelog -p && git add CHANGELOG.md",
     "postversion": "git push && git push --tags --no-verify"
   },

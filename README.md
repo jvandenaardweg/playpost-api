@@ -139,10 +139,12 @@ Each automatic renewal sends a transaction to the app. The transaction, or trans
 ## Migrations
 Updating the database is strictly done using migrations.
 
-1. Create a migration, example: `npm run typeorm migration:generate -- --name ArticleCompatible -d src/database/migrations`
-2. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
-3. Restart the service
-4. When starting the service migrations are run automatically
+1. Do your database changes
+2. Run `npm run build`
+3. Create a migration, example: `npm run typeorm migration:generate -- --name ArticleCompatible -d src/database/migrations`
+4. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
+5. Restart the service
+6. When starting the service migrations are run automatically
 
 ## When updating the environment with new data
 

@@ -4,7 +4,7 @@ import { createConnection, getCustomRepository, getRepository, In, IsNull } from
 import { connectionOptions } from './database/connection-options';
 import { InAppSubscription } from './database/entities/in-app-subscription';
 import { Language } from './database/entities/language';
-import { Synthesizer, Voice } from './database/entities/voice';
+import { EVoiceSynthesizer, Voice, EVoiceQuality } from './database/entities/voice';
 import { VoiceRepository } from './database/repositories/voice';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
@@ -1004,7 +1004,7 @@ const updateVoicesLabel = async () => {
   try {
     const googleVoices = await voiceRepository.find({
       where: {
-        synthesizer: Synthesizer.GOOGLE
+        synthesizer: EVoiceSynthesizer.GOOGLE
       }
     });
 
@@ -1120,7 +1120,7 @@ const updateIsHighestQualityForVoices = async () => {
 
     // Do the updates
     for (const voice of voices) {
-      if (voice.synthesizer !== Synthesizer.GOOGLE) {
+      if (voice.synthesizer !== EVoiceSynthesizer.GOOGLE) {
         logger.info(loggerPrefix, `"${voice.name}" is not a Google voice, cannot set isHighestQuality to true.`);
       } else {
         const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
@@ -1134,6 +1134,50 @@ const updateIsHighestQualityForVoices = async () => {
           logger.info(loggerPrefix, `No update for "${voice.name}"`);
         }
       }
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
+  }
+};
+
+const updateQualityForVoices = async () => {
+  const loggerPrefix = 'Update quality column for Voices:';
+  const voiceRepository = getRepository(Voice);
+
+  try {
+    const voices = await voiceRepository.find();
+
+    // Do the updates
+    for (const voice of voices) {
+
+      // AWS Polly and everything else is "normal" quality
+      let quality = EVoiceQuality.NORMAL;
+
+      // All Google WaveNet voices are "very high" quality
+      if (voice.synthesizer === 'Google' && voice.isHighestQuality) {
+        quality = EVoiceQuality.VERY_HIGH
+      }
+
+      // All Google Standard voices are "high" quality
+      if (voice.synthesizer === 'Google' && !voice.isHighestQuality) {
+        quality = EVoiceQuality.HIGH;
+      }
+
+      logger.info(loggerPrefix, `Update "${voice.name}" to set quality: ${quality}`);
+
+      await voiceRepository.update(
+        {
+          id: voice.id
+        },
+        {
+          quality
+        }
+      );
+
+      logger.info(loggerPrefix, `Updated "${voice.name}" with: ${quality}`);
     }
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
@@ -1247,6 +1291,9 @@ const createVoicePreviews = async () => {
 
     // Set isHighestQuality for voices
     await updateIsHighestQualityForVoices();
+
+    // Set quality for voices
+    await updateQualityForVoices();
 
     // Creates voice previews for the active voices inside a language
     // Important: uses the Text To Speech API's
