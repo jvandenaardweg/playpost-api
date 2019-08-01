@@ -4,7 +4,7 @@ import { createConnection, getCustomRepository, getRepository, In, IsNull } from
 import { connectionOptions } from './database/connection-options';
 import { InAppSubscription } from './database/entities/in-app-subscription';
 import { Language } from './database/entities/language';
-import { EVoiceSynthesizer, Voice, EVoiceQuality } from './database/entities/voice';
+import { EVoiceQuality, EVoiceSynthesizer, Voice } from './database/entities/voice';
 import { VoiceRepository } from './database/repositories/voice';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';

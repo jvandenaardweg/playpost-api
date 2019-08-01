@@ -25,7 +25,7 @@ const config: ConnectionOptions = {
     type: 'ioredis',
     options: process.env.REDIS_URL
   },
-  logging: true,
+  logging: ['error', 'warn'],
   synchronize: false, // Keep this on false, use migrations
   entities: [
     User,
