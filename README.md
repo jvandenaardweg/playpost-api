@@ -25,8 +25,8 @@ REDIS_URL = "redis://localhost:6381"
 
 TYPEORM_CONNECTION = "postgres"
 TYPEORM_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
-TYPEORM_ENTITIES = "src/database/entities/**/*.ts"
-TYPEORM_MIGRATIONS = "src/database/migrations/**/*.ts"
+TYPEORM_ENTITIES = "dist/database/entities/**/*.js"
+TYPEORM_MIGRATIONS = "dist/database/migrations/**/*.js"
 TYPEORM_DRIVER_EXTRA = '{ "ssl": false }'
 
 GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner, or create your own
@@ -65,11 +65,7 @@ Make sure these environment variables are set in Heroku:
 ```yaml
 DATABASE_URL = "" # When using Heroku Postgres, this will be filled by Heroku
 TYPEORM_URL = "" # This should be filled with the value of DATABASE_URL
-TYPEORM_ENTITIES = "dist/database/entities/**/*.js"
-TYPEORM_MIGRATIONS = "dist/database/migrations/**/*.js"
 ```
-
-The above `TYPEORM_ENTITIES` and `TYPEORM_MIGRATIONS` differ from your local dev environment, as it is now using the `./dist` folder.
 
 ## Manually sync database
 
@@ -139,12 +135,13 @@ Each automatic renewal sends a transaction to the app. The transaction, or trans
 ## Migrations
 Updating the database is strictly done using migrations.
 
-1. Do your database changes
-2. Run `npm run build`
+1. Do your database changes in the entity files
+2. Run `npm run build` to generate a build which the typeorm CLI can use
 3. Create a migration, example: `npm run typeorm migration:generate -- --name ArticleCompatible -d src/database/migrations`
-4. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
-5. Restart the service
-6. When starting the service migrations are run automatically
+4. Verify the migration file is correct
+5. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
+6. Restart the service
+7. When starting the service migrations are run automatically
 
 ## When updating the environment with new data
 
