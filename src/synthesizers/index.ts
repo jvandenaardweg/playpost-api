@@ -6,7 +6,7 @@ import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import * as storage from '../storage/google-cloud';
 import { logger } from '../utils';
-import { concatAudioFiles, getAudioFileDurationInSeconds } from '../utils/audio';
+import { getAudioFileDurationInSeconds } from '../utils/audio';
 import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGLE_CHARACTER_HARD_LIMIT, GOOGLE_CHARACTER_SOFT_LIMIT } from '../utils/ssml';
 import { AwsSynthesizer } from './aws';
 import { GoogleAudioEncoding, GoogleSynthesizer, GoogleSynthesizerOptions } from './google';
@@ -156,13 +156,16 @@ const synthesizeUsingAWS = async (
   logger.info(loggerPrefix, 'Received local audiofile paths:', localAudiofilePaths);
 
   // Step 3: Combine multiple audiofiles into one
-  const concatinatedLocalAudiofilePath = await concatAudioFiles(
+  const concatinatedLocalAudiofilePath = await awsSynthesizer.concatinateAudioFiles(
     localAudiofilePaths,
     storageUploadPath,
     encodingParameter
   );
 
   logger.info(loggerPrefix, 'Received concatinated audiofile path:', concatinatedLocalAudiofilePath);
+
+  // Add the concatinated file to the tempFilePaths, so we can correctly clean it up later
+  await awsSynthesizer.tempFilePaths.push(concatinatedLocalAudiofilePath);
 
   // Step 4: Get the length of the audiofile
   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
@@ -248,7 +251,7 @@ const synthesizeUsingGoogle = async (
   );
 
   // Step 3: Combine multiple audiofiles into one
-  const concatinatedLocalAudiofilePath = await concatAudioFiles(
+  const concatinatedLocalAudiofilePath = await googleSynthesizer.concatinateAudioFiles(
     localAudiofilePaths,
     storageUploadPath,
     encodingParameter

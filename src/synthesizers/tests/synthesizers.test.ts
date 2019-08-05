@@ -19,10 +19,16 @@ describe('Synthesizers', () => {
     const synthesizier = new Synthesizers([]);
 
     synthesizier.tempFilePaths.push(examplePath);
-    await synthesizier.removeAllTempFiles();
+    synthesizier.tempFilePaths.push(examplePath);
+
+    expect(synthesizier.tempFilePaths).toHaveLength(2);
+
+    const tempFilePaths = await synthesizier.removeAllTempFiles();
 
     expect(synthesizier.tempFilePaths).toHaveLength(0);
-    expect(fsExtra.remove).toHaveBeenCalled();
+    expect(fsExtra.remove).toHaveBeenCalledTimes(2);
+    expect(tempFilePaths).toHaveLength(0);
+    expect(synthesizier.tempFilePaths).toHaveLength(0);
 
   });
 
@@ -31,9 +37,13 @@ describe('Synthesizers', () => {
     const synthesizier = new Synthesizers([]);
 
     synthesizier.tempFilePaths.push(examplePath);
-    await synthesizier.removeTempFilePath(examplePath);
+
+    expect(synthesizier.tempFilePaths).toHaveLength(1);
+
+    const tempFilePaths = await synthesizier.removeTempFilePath(examplePath);
 
     expect(synthesizier.tempFilePaths).toHaveLength(0);
+    expect(tempFilePaths).toHaveLength(0);
     expect(fsExtra.remove).toHaveBeenCalled();
 
   });

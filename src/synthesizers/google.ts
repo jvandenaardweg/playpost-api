@@ -118,7 +118,8 @@ export class GoogleSynthesizer extends Synthesizers {
       const ssmlPartSynthesizerOptions = {...synthesizerOptions,
         input: {
           ssml: ssmlPart
-        }};
+        }
+      };
 
       let extension = 'mp3';
 
