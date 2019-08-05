@@ -208,6 +208,29 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Ini disebabkan oleh keberadaan besi(III) oksida di permukaan planet Mars. Mars adalah planet bebatuan dengan atmosfer yang tipis. Di permukaan Mars terdapat kawah, gunung berapi, lembah, gurun, dan tudung es.</p>
           <p>Periode rotasi dan siklus musim Mars mirip dengan Bumi. Di Mars berdiri Olympus Mons, gunung tertinggi di Tata Surya, dan Valles Marineris, lembah terbesar di Tata Surya. Selain itu, di belahan utara terdapat cekungan Borealis yang meliputi 40% permukaan Mars.</p>
         </speak>`
+      ],
+      Chinese: [
+        `<speak>
+          <p>地球是太阳系中由內及外的第三顆行星，距离太阳约1.5亿公里。地球是宇宙中人類已知唯一存在生命的天体，也是人類居住的星球，共有76.6億人口。</p>
+          <p>地球质量约为5.97×1024公斤，半径约6,371公里，地球的密度是太阳系中最高的。地球同时进行自转和公转运动，分别产生了昼夜及四季的变化更替，一太陽日自转一周，一太陽年公转一周。</p>
+          <p>自转轨道面称为赤道面，公转轨道面称为黄道面，两者之间的夹角称为黄赤交角。地球仅擁有一顆自然卫星，即月球。</p>
+          <p>地球表面有71%的面积被水覆盖，称为海洋或湖或河流，其余是陆地板块組成的大洲和岛屿，表面分布河流和湖泊等水源。</p>
+          <p>南极的冰盖及北极存有冰。主體包括岩石圈、地幔、熔融态金属的外地核以及固态金属的內地核。擁有由外地核產生的地磁场。</p>
+          <p>外部被氣體包圍，称为大氣層，主要成分為氮、氧、氬。</p>
+        </speak>`,
+        `<speak>
+          <p>月球，俗稱月亮，又稱月，在中國古時又稱太陰、玄兔、嬋娟、望舒，是地球唯一的天然衛星，並且是太陽系中第五大的衛星。月球的直徑略大于地球的四分之一，質量约为地球的1/81，相对于所环绕的行星，它是体积和质量最大的卫星，也是太阳系内密度第二高的卫星，仅次于木卫一。</p>
+          <p>一般认为月亮形成于约45亿年前，即地球出现后的不久。</p>
+          <p>有关它的起源有几种假说，但沒有一種能完全合理地作毫無破綻的解釋，最被普遍认可的是大碰撞說，它假設月球形成于地球与火星般大小的「忒伊亚」之间的一次巨大撞击。</p>
+        </speak>`,
+        `<speak>
+          <p>火星（拉丁語：Mars, 天文符號♂），是離太陽第四近的行星，為太陽系中四顆類地行星之一。</p>
+          <p>西方稱火星為瑪爾斯，是羅馬神話中的戰神；古漢語中則因为它荧荧如火，位置、亮度時常變動讓人無法捉摸而稱之為熒惑。</p>
+          <p>火星是太陽系的八大行星中第二小的行星，其質量、體積仅比水星略大。火星的直徑約為地球的一半，自轉軸傾角、自轉週期則與地球相當，但繞太陽公轉周期是地球的兩倍[3]。</p>
+          <p>在地球上，火星肉眼可見，亮度可達-2.91，只比金星、月球和太陽暗，但在大部分時間裡比木星暗。</p>
+          <p>火星大气以二氧化碳为主，既稀薄又寒冷。火星在視覺上呈現為橘紅色是由其地表所廣泛分佈的氧化鐵造成的。</p>
+          <p>火星地表沙丘、砾石遍布且没有稳定的液态水，火星南半球是古老、充满陨石坑的高地，北半球则是较年轻的平原。</p>
+        </speak>`
       ]
     };
 

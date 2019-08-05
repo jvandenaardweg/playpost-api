@@ -89,10 +89,17 @@ const seedVoices = async () => {
         languageCode = 'no';
       }
 
+      // CMN = Chinese Mandarin
+      // We just connect it Chinese
+      if (languageCode === 'cmn') {
+        languageCode = 'zh';
+      }
+
       logger.info(loggerPrefix, `Connecting languageCode "${languageCode}" to voice ID "${voice.id}"...`);
 
       const language = await languageRepository.findOne({ code: languageCode });
 
+      // Connect the voice to a language
       await voiceRepository.update(voice.id, { language });
 
       logger.info(loggerPrefix, `Successfully connected languageCode "${languageCode}" to voice ID "${voice.id}"!`);
@@ -1061,6 +1068,7 @@ const updateIsLanguageDefaultForVoices = async () => {
     'vi-VN-Standard-C', // VN
     'hi-IN-Standard-B', // IN (Hindi Indian)
     // 'Ines' // PT, see BR
+    'Zhiyu' // CN
   ];
 
   try {

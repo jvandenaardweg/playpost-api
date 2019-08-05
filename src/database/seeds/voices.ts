@@ -1,6 +1,27 @@
 // copied from environment with correct voice data
 export default [
   {
+    id: '9a83dfc3-5b0f-40f1-a98a-2768efb40763',
+    languageCode: 'cmn-CN',
+    countryCode: 'CN',
+    name: 'Zhiyu',
+    label: 'Zhiyu',
+    gender: 'FEMALE',
+    synthesizer: 'AWS',
+    quality: 'Normal',
+    audioProfile: 'default',
+    speakingRate: 1,
+    pitch: 0,
+    naturalSampleRateHertz: null,
+    isActive: true,
+    isPremium: false,
+    isHighestQuality: false,
+    isLanguageDefault: true,
+    exampleAudioUrl: null,
+    createdAt: '2019-08-05T12:31:04.150Z',
+    updatedAt: '2019-08-05T12:31:06.065Z',
+  },
+  {
     id: '099bc044-8ffa-4fc4-a38c-fc059c3c01f1',
     audioProfile: 'default',
     label: 'Adéla',

@@ -139,7 +139,7 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
           voiceName: voice.name
         },
         cacheControl: 'public, max-age=31536000',
-        contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
+        contentLanguage: voice.language.code
       }
     }
 

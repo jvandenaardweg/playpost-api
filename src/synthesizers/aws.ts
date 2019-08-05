@@ -63,7 +63,12 @@ export class AwsSynthesizer extends Synthesizers {
         if (!voiceLanguageCode) {
           logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
         } else {
-          const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+          let countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+
+          if (voiceLanguageCode === 'cmn-CN') {
+            // cmn-CH is Chinese Mandarin
+            countryCode = LocaleCode.getCountryCode('zh-CN')
+          }
 
           if (!countryCode) {
             logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
