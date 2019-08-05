@@ -186,6 +186,28 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Marte é um planeta rochoso com uma atmosfera fina, com características de superfície que lembram tanto as crateras de impacto da Lua quanto vulcões, vales, desertos e calotas polares da Terra.</p>
           <p>O período de rotação e os ciclos sazonais de Marte são também semelhantes aos da Terra, assim como é a inclinação que produz as suas estações do ano.</p>
         </speak>`
+      ],
+      Indonesian: [
+        `<speak>
+          <p>Bumi adalah planet ketiga dari Matahari yang merupakan planet terpadat dan terbesar kelima dari delapan planet dalam Tata Surya.</p>
+          <p>Bumi juga merupakan planet terbesar dari empat planet kebumian Tata Surya. Bumi terkadang disebut dengan dunia atau Planet Biru.</p>
+          <p>Bumi terbentuk sekitar 4,54 miliar tahun yang lalu, dan kehidupan sudah muncul di permukaannya paling tidak sekitar 3,5 miliar tahun yang lalu.</p>
+          <p>Biosfer Bumi kemudian secara perlahan mengubah atmosfer dan kondisi fisik dasar lainnya, yang memungkinkan terjadinya perkembangbiakan organisme serta pembentukan lapisan ozon, yang bersama medan magnet Bumi menghalangi radiasi surya berbahaya dan mengizinkan makhluk hidup mikroskopis untuk berkembang biak dengan aman di daratan.</p>
+          <p>Sifat fisik, sejarah geologi, dan orbit Bumi memungkinkan kehidupan untuk bisa terus bertahan.</p>
+        </speak>`,
+        `<speak>
+          <p>Bulan adalah satelit alami Bumi satu-satunya dan merupakan satelit terbesar kelima dalam Tata Surya.</p>
+          <p>Bulan juga merupakan satelit alami terbesar di Tata Surya menurut ukuran planet yang diorbitnya, dengan diameter 27%, kepadatan 60%, dan massa ​1⁄81 (1.23%) dari Bumi.</p>
+          <p>Di antara satelit alami lainnya, Bulan adalah satelit terpadat kedua setelah Io, satelit Yupiter.</p>
+          <p>Bulan berada pada rotasi sinkron dengan Bumi, yang selalu memperlihatkan sisi yang sama pada Bumi, dengan sisi dekat ditandai oleh mare vulkanik gelap yang terdapat di antara dataran tinggi kerak yang terang dan kawah tubrukan yang menonjol.</p>
+          <p>Bulan adalah benda langit yang paling terang setelah Matahari.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars adalah planet terdekat keempat dari Matahari. Namanya diambil dari dewa perang Romawi, Mars.</p>
+          <p>Planet ini sering dijuluki sebagai "planet merah" karena tampak dari jauh berwarna kemerah-kemerahan.</p>
+          <p>Ini disebabkan oleh keberadaan besi(III) oksida di permukaan planet Mars. Mars adalah planet bebatuan dengan atmosfer yang tipis. Di permukaan Mars terdapat kawah, gunung berapi, lembah, gurun, dan tudung es.</p>
+          <p>Periode rotasi dan siklus musim Mars mirip dengan Bumi. Di Mars berdiri Olympus Mons, gunung tertinggi di Tata Surya, dan Valles Marineris, lembah terbesar di Tata Surya. Selain itu, di belahan utara terdapat cekungan Borealis yang meliputi 40% permukaan Mars.</p>
+        </speak>`
       ]
     };
 
