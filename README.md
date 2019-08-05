@@ -15,27 +15,27 @@ This repository includes the API for the Playpost App.
 3. Create a `.env` file in the root of this project with the following data:
 
 ```yaml
-NODE_ENV = "development"
+NODE_ENV="development"
 
-JWT_SECRET = "JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
+JWT_SECRET="JustASimpleSecretForDevelopmentDoNotUseThisForProduction"
 
-DATABASE_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
+DATABASE_URL="postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
 
-REDIS_URL = "redis://localhost:6381"
+REDIS_URL="redis://localhost:6381"
 
-TYPEORM_CONNECTION = "postgres"
-TYPEORM_URL = "postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
-TYPEORM_ENTITIES = "dist/database/entities/**/*.js"
-TYPEORM_MIGRATIONS = "dist/database/migrations/**/*.js"
-TYPEORM_DRIVER_EXTRA = '{ "ssl": false }'
+TYPEORM_CONNECTION="postgres"
+TYPEORM_URL="postgres://playpostapi:playpostapi@localhost:5432/d5sgoa8nt7dnim"
+TYPEORM_ENTITIES="dist/database/entities/**/*.js"
+TYPEORM_MIGRATIONS="dist/database/migrations/**/*.js"
+TYPEORM_DRIVER_EXTRA='{ "ssl": false }'
 
-GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID = "" # Ask the repository owner, or create your own
-GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL = "" # Ask the repository owner, or create your own
-GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY = "" # Ask the repository owner, or create your own
+GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID="" # Ask the repository owner, or create your own
+GOOGLE_CLOUD_CREDENTIALS_CLIENT_EMAIL="" # Ask the repository owner, or create your own
+GOOGLE_CLOUD_CREDENTIALS_PRIVATE_KEY="" # Ask the repository owner, or create your own
 
-AWS_USER = ""
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
+AWS_USER=""
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
 AWS_REGION= "eu-west-1"
 
 ```
@@ -63,8 +63,8 @@ Upon each deploy to Heroku, the migrations are run. To adjust this behaviour see
 Make sure these environment variables are set in Heroku:
 
 ```yaml
-DATABASE_URL = "" # When using Heroku Postgres, this will be filled by Heroku
-TYPEORM_URL = "" # This should be filled with the value of DATABASE_URL
+DATABASE_URL="" # When using Heroku Postgres, this will be filled by Heroku
+TYPEORM_URL="" # This should be filled with the value of DATABASE_URL
 ```
 
 ## Manually sync database
