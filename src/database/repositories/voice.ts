@@ -226,10 +226,46 @@ export class VoiceRepository extends Repository<Voice> {
         `<speak>
           <p>火星（拉丁語：Mars, 天文符號♂），是離太陽第四近的行星，為太陽系中四顆類地行星之一。</p>
           <p>西方稱火星為瑪爾斯，是羅馬神話中的戰神；古漢語中則因为它荧荧如火，位置、亮度時常變動讓人無法捉摸而稱之為熒惑。</p>
-          <p>火星是太陽系的八大行星中第二小的行星，其質量、體積仅比水星略大。火星的直徑約為地球的一半，自轉軸傾角、自轉週期則與地球相當，但繞太陽公轉周期是地球的兩倍[3]。</p>
+          <p>火星是太陽系的八大行星中第二小的行星，其質量、體積仅比水星略大。火星的直徑約為地球的一半，自轉軸傾角、自轉週期則與地球相當，但繞太陽公轉周期是地球的兩倍。</p>
           <p>在地球上，火星肉眼可見，亮度可達-2.91，只比金星、月球和太陽暗，但在大部分時間裡比木星暗。</p>
           <p>火星大气以二氧化碳为主，既稀薄又寒冷。火星在視覺上呈現為橘紅色是由其地表所廣泛分佈的氧化鐵造成的。</p>
           <p>火星地表沙丘、砾石遍布且没有稳定的液态水，火星南半球是古老、充满陨石坑的高地，北半球则是较年轻的平原。</p>
+        </speak>`
+      ],
+      Italian: [
+        `<speak>
+          <p>La Terra è il terzo pianeta in ordine di distanza dal Sole e il più grande dei pianeti terrestri del sistema solare, sia per massa sia per diametro.</p>
+          <p>È il luogo primigenio degli esseri umani ed, essendo l'unico corpo planetario del sistema solare adatto a sostenere la vita come da noi concepita e conosciuta, è anche l’unico luogo nel quale vivono tutte le specie viventi conosciute.</p>
+          <p>Sulla sua superficie, si trova acqua in tutti e tre gli stati (solido, liquido e gassoso) e un'atmosfera composta in prevalenza da azoto e ossigeno che, insieme al campo magnetico che avvolge il pianeta, protegge la Terra dai raggi cosmici e dalle radiazioni solari.</p>
+        </speak>`,
+        `<speak>
+          <p>La Luna è un satellite naturale, l'unico della Terra.</p>
+          <p>Il suo nome proprio viene talvolta utilizzato, per antonomasia e con l'iniziale minuscola («una luna»), come sinonimo di satellite anche per i corpi celesti che orbitano attorno ad altri pianeti.</p>
+          <p>Orbita a una distanza media di circa 384 400 km dalla Terra, sufficientemente vicina da essere osservabile a occhio nudo, il che rende possibile distinguerne alcuni rilievi sulla superficie.</p>
+          <p>Essendo in rotazione sincrona rivolge sempre la stessa faccia verso la Terra e il suo lato nascosto è rimasto sconosciuto fino al periodo delle esplorazioni spaziali.</p>
+        </speak>`,
+        `<speak>
+          <p>Marte è il quarto pianeta del sistema solare in ordine di distanza dal Sole; è visibile a occhio nudo ed è l'ultimo dei pianeti di tipo terrestre dopo Mercurio, Venere e la Terra.</p>
+          <p>Chiamato il Pianeta rosso a causa del suo colore caratteristico causato dalle grandi quantità di ossido di ferro che lo ricoprono, Marte prende il nome dall'omonima divinità della mitologia romana e il suo simbolo astronomico è la rappresentazione stilizzata dello scudo e della lancia del dio.</p>
+        </speak>`
+      ],
+      Korean: [
+        `<speak>
+          <p>지구(地球, Earth)는 태양으로부터 세 번째 행성이며, 엷은 대기층으로 둘러싸여 있고, 지금까지 발견된 지구형 행성 가운데 가장 크다.</p>
+          <p>지구는 45억 6700만 년 전 형성되었으며, 지구와 행성 테이아의 격렬한 충돌로 생성된 달을 위성으로 두고 있다. 지구의 중력은 우주의 다른 물체, 특히 태양과 지구의 유일한 자연위성인 달과 상호작용한다.</p>
+          <p>지구와 달 사이의 중력 작용으로 조석 현상이 발생한다.</p>
+        </speak>`,
+        `<speak>
+          <p>달은 지구의 유일한 영구적 자연위성으로, 태양계내의 위성 중 5번째로 크다.</p>
+          <p>행성의 크기와 연관하여 자연위성 중 가장 크다. 지구 중심으로부터 달 중심까지의 거리는 평균 38만 4400킬로미터로, 지구 지름의 30배이며, 지구에서 태양까지 거리의 400분의 1이다.</p>
+          <p>달의 지름은 지구의 약 4분의 1, 태양의 약 400분의 1인 3500 km이다. 달의 부피는 지구의 약 1/50 정도이며, 표면에서의 중력은 지구의 약 17%이다.</p>
+          <p>달은 지구를 약 27.3일에 일주하며(공전 주기), 지구-달-태양의 위치 변화는 29.5일을 주기로 달라지는 달의 상을 만든다(삭망 주기).</p>
+        </speak>`,
+        `<speak>
+          <p>화성은 태양계의 네 번째 행성이다. 4개의 지구형 행성 중 하나다.</p>
+          <p>붉은색을 띠기 때문에 동양권에서는 불을 뜻하는 화(火)를 써서 화성 또는 형혹성(熒惑星)이라 부르고, 서양권에서는 로마 신화의 전쟁의 신 마르스의 이름을 따 Mars라 부른다.</p>
+          <p>오늘날 영어에서 3월을 뜻하는 March도 여기서 생겼다. 지구와의 거리는 7800만 km이다</p>
+          <p>매리너 4호가 1965년에 화성을 처음으로 근접 비행을 하기 전까지 과학계 안팎의 사람들은 화성에 대량의 물이 존재하리라고 기대하였다.</p>
         </speak>`
       ]
     };

@@ -8,7 +8,7 @@ import { EVoiceQuality, EVoiceSynthesizer, Voice } from './database/entities/voi
 import { VoiceRepository } from './database/repositories/voice';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
-import voicesData from './database/seeds/voices';
+// import voicesData from './database/seeds/voices';
 import { AwsSynthesizer } from './synthesizers/aws';
 import { GoogleSynthesizer } from './synthesizers/google';
 import { logger } from './utils/logger';
@@ -1005,6 +1005,21 @@ const updateVoicesLabel = async () => {
       name: 'vi-VN-Wavenet-D',
       label: 'Anh Dung',
       gender: 'MALE'
+    },
+    {
+      name: 'it-IT-Wavenet-B',
+      label: 'Laura',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'it-IT-Wavenet-D',
+      label: 'Marco',
+      gender: 'MALE'
+    },
+    {
+      name: 'it-IT-Wavenet-C',
+      label: 'Roberto',
+      gender: 'MALE'
     }
   ];
 
@@ -1068,7 +1083,8 @@ const updateIsLanguageDefaultForVoices = async () => {
     'vi-VN-Standard-C', // VN
     'hi-IN-Standard-B', // IN (Hindi Indian)
     // 'Ines' // PT, see BR
-    'Zhiyu' // CN
+    'Zhiyu', // CN
+    'Bianca' // IT
   ];
 
   try {
@@ -1092,25 +1108,736 @@ const updateIsActiveIsPremiumForVoices = async () => {
   const loggerPrefix = 'Update isActive and isPremium Voices:';
   const voiceRepository = getRepository(Voice);
 
+  // An array of voice languageCode's for voices that should be active
+  const isActiveMapping = [
+    {
+      "languageCode" : "nl-NL"
+    },
+    {
+      "languageCode" : "en-US"
+    },
+    {
+      "languageCode" : "en-AU"
+    },
+    {
+      "languageCode" : "fr-FR"
+    },
+    {
+      "languageCode" : "hi-IN"
+    },
+    {
+      "languageCode" : "pt-BR"
+    },
+    {
+      "languageCode" : "cmn-CN"
+    },
+    {
+      "languageCode" : "id-ID"
+    },
+    {
+      "languageCode" : "de-DE"
+    },
+    {
+      "languageCode" : "ru-RU"
+    },
+    {
+      "languageCode" : "es-ES"
+    },
+    {
+      "languageCode" : "pt-PT"
+    },
+    {
+      "languageCode" : "pl-PL"
+    },
+    {
+      "languageCode" : "en-GB"
+    },
+    {
+      "languageCode": "it-IT"
+    },
+    {
+      "languageCode": "en-IN"
+    },
+    {
+      "languageCode": "fr-CA"
+    },
+    {
+      "languageCode": "ko-KR",
+    }
+  ]
+
+  // An array of voice name's that should be considered "Premium"
+  const premiumVoicesMapping = [
+    {
+      "name" : "it-IT-Standard-B"
+    },
+    {
+      "name" : "nl-NL-Standard-C"
+    },
+    {
+      "name" : "en-AU-Wavenet-A"
+    },
+    {
+      "name" : "en-US-Standard-E"
+    },
+    {
+      "name" : "ja-JP-Standard-C"
+    },
+    {
+      "name" : "es-ES-Standard-A"
+    },
+    {
+      "name" : "it-IT-Standard-D"
+    },
+    {
+      "name" : "Ivy"
+    },
+    {
+      "name" : "pl-PL-Wavenet-A"
+    },
+    {
+      "name" : "nl-NL-Wavenet-B"
+    },
+    {
+      "name" : "Chantal"
+    },
+    {
+      "name" : "hi-IN-Standard-C"
+    },
+    {
+      "name" : "Lea"
+    },
+    {
+      "name" : "en-US-Standard-D"
+    },
+    {
+      "name" : "pl-PL-Standard-E"
+    },
+    {
+      "name" : "en-US-Standard-C"
+    },
+    {
+      "name" : "fr-CA-Wavenet-A"
+    },
+    {
+      "name" : "id-ID-Wavenet-A"
+    },
+    {
+      "name" : "hi-IN-Wavenet-B"
+    },
+    {
+      "name" : "it-IT-Standard-C"
+    },
+    {
+      "name" : "nl-NL-Standard-A"
+    },
+    {
+      "name" : "en-US-Wavenet-B"
+    },
+    {
+      "name" : "fr-CA-Standard-D"
+    },
+    {
+      "name" : "tr-TR-Standard-A"
+    },
+    {
+      "name" : "Miguel"
+    },
+    {
+      "name" : "ar-XA-Standard-C"
+    },
+    {
+      "name" : "ko-KR-Standard-A"
+    },
+    {
+      "name" : "Ewa"
+    },
+    {
+      "name" : "id-ID-Standard-B"
+    },
+    {
+      "name" : "en-IN-Standard-A"
+    },
+    {
+      "name" : "Amy"
+    },
+    {
+      "name" : "Tatyana"
+    },
+    {
+      "name" : "ja-JP-Standard-D"
+    },
+    {
+      "name" : "Nicole"
+    },
+    {
+      "name" : "en-IN-Wavenet-C"
+    },
+    {
+      "name" : "ko-KR-Standard-C"
+    },
+    {
+      "name" : "it-IT-Standard-A"
+    },
+    {
+      "name" : "Takumi"
+    },
+    {
+      "name" : "fr-FR-Wavenet-B"
+    },
+    {
+      "name" : "Jan"
+    },
+    {
+      "name" : "ru-RU-Standard-B"
+    },
+    {
+      "name" : "pl-PL-Standard-D"
+    },
+    {
+      "name" : "el-GR-Standard-A"
+    },
+    {
+      "name" : "ar-XA-Standard-A"
+    },
+    {
+      "name" : "en-US-Wavenet-F"
+    },
+    {
+      "name" : "vi-VN-Standard-B"
+    },
+    {
+      "name" : "Penelope"
+    },
+    {
+      "name" : "en-IN-Wavenet-A"
+    },
+    {
+      "name" : "ru-RU-Standard-D"
+    },
+    {
+      "name" : "ko-KR-Wavenet-B"
+    },
+    {
+      "name" : "ja-JP-Standard-A"
+    },
+    {
+      "name" : "da-DK-Wavenet-A"
+    },
+    {
+      "name" : "pl-PL-Standard-B"
+    },
+    {
+      "name" : "tr-TR-Standard-B"
+    },
+    {
+      "name" : "en-AU-Wavenet-D"
+    },
+    {
+      "name" : "en-IN-Standard-B"
+    },
+    {
+      "name" : "ko-KR-Standard-B"
+    },
+    {
+      "name" : "vi-VN-Standard-D"
+    },
+    {
+      "name" : "fr-CA-Standard-A"
+    },
+    {
+      "name" : "Ines"
+    },
+    {
+      "name" : "Emma"
+    },
+    {
+      "name" : "de-DE-Standard-A"
+    },
+    {
+      "name" : "Kimberly"
+    },
+    {
+      "name" : "Carla"
+    },
+    {
+      "name" : "Giorgio"
+    },
+    {
+      "name" : "ru-RU-Wavenet-A"
+    },
+    {
+      "name" : "ja-JP-Wavenet-D"
+    },
+    {
+      "name" : "Jacek"
+    },
+    {
+      "name" : "tr-TR-Standard-E"
+    },
+    {
+      "name" : "Aditi"
+    },
+    {
+      "name" : "da-DK-Standard-A"
+    },
+    {
+      "name" : "fr-FR-Standard-A"
+    },
+    {
+      "name" : "Lotte"
+    },
+    {
+      "name" : "Naja"
+    },
+    {
+      "name" : "pl-PL-Wavenet-E"
+    },
+    {
+      "name" : "Salli"
+    },
+    {
+      "name" : "Mia"
+    },
+    {
+      "name" : "Kendra"
+    },
+    {
+      "name" : "fr-FR-Standard-D"
+    },
+    {
+      "name" : "hi-IN-Standard-A"
+    },
+    {
+      "name" : "Dora"
+    },
+    {
+      "name" : "Vitoria"
+    },
+    {
+      "name" : "Lucia"
+    },
+    {
+      "name" : "Justin"
+    },
+    {
+      "name" : "Raveena"
+    },
+    {
+      "name" : "Cristiano"
+    },
+    {
+      "name" : "Russell"
+    },
+    {
+      "name" : "Joey"
+    },
+    {
+      "name" : "ru-RU-Standard-A"
+    },
+    {
+      "name" : "ko-KR-Wavenet-D"
+    },
+    {
+      "name" : "nb-NO-Wavenet-A"
+    },
+    {
+      "name" : "ko-KR-Wavenet-C"
+    },
+    {
+      "name" : "de-DE-Standard-B"
+    },
+    {
+      "name" : "Brian"
+    },
+    {
+      "name" : "de-DE-Wavenet-A"
+    },
+    {
+      "name" : "hi-IN-Wavenet-A"
+    },
+    {
+      "name" : "tr-TR-Standard-C"
+    },
+    {
+      "name" : "ko-KR-Standard-D"
+    },
+    {
+      "name" : "en-GB-Standard-D"
+    },
+    {
+      "name" : "en-AU-Standard-D"
+    },
+    {
+      "name" : "nl-NL-Wavenet-A"
+    },
+    {
+      "name" : "Marlene"
+    },
+    {
+      "name" : "en-AU-Standard-B"
+    },
+    {
+      "name" : "Enrique"
+    },
+    {
+      "name" : "Vicki"
+    },
+    {
+      "name" : "en-GB-Standard-B"
+    },
+    {
+      "name" : "ko-KR-Wavenet-A"
+    },
+    {
+      "name" : "en-GB-Standard-C"
+    },
+    {
+      "name" : "en-AU-Standard-C"
+    },
+    {
+      "name" : "nb-NO-Standard-A"
+    },
+    {
+      "name" : "nb-no-Wavenet-E"
+    },
+    {
+      "name" : "Matthew"
+    },
+    {
+      "name" : "Mathieu"
+    },
+    {
+      "name" : "pt-BR-Standard-A"
+    },
+    {
+      "name" : "fr-FR-Standard-B"
+    },
+    {
+      "name" : "tr-TR-Standard-D"
+    },
+    {
+      "name" : "pl-PL-Standard-C"
+    },
+    {
+      "name" : "nb-no-Standard-E"
+    },
+    {
+      "name" : "pt-PT-Standard-B"
+    },
+    {
+      "name" : "sv-SE-Standard-A"
+    },
+    {
+      "name" : "vi-VN-Standard-A"
+    },
+    {
+      "name" : "pt-PT-Standard-D"
+    },
+    {
+      "name" : "en-IN-Standard-C"
+    },
+    {
+      "name" : "en-AU-Wavenet-B"
+    },
+    {
+      "name" : "ja-JP-Wavenet-A"
+    },
+    {
+      "name" : "ar-XA-Wavenet-B"
+    },
+    {
+      "name" : "fi-FI-Wavenet-A"
+    },
+    {
+      "name" : "tr-TR-Wavenet-C"
+    },
+    {
+      "name" : "fr-CA-Wavenet-C"
+    },
+    {
+      "name" : "en-IN-Wavenet-B"
+    },
+    {
+      "name" : "tr-TR-Wavenet-B"
+    },
+    {
+      "name" : "it-IT-Wavenet-A"
+    },
+    {
+      "name" : "nb-NO-Standard-C"
+    },
+    {
+      "name" : "sv-SE-Wavenet-A"
+    },
+    {
+      "name" : "nl-NL-Wavenet-C"
+    },
+    {
+      "name" : "nb-NO-Wavenet-D"
+    },
+    {
+      "name" : "nb-NO-Standard-D"
+    },
+    {
+      "name" : "fr-CA-Wavenet-D"
+    },
+    {
+      "name" : "pt-PT-Wavenet-C"
+    },
+    {
+      "name" : "nl-NL-Standard-E"
+    },
+    {
+      "name" : "nb-NO-Wavenet-C"
+    },
+    {
+      "name" : "hi-IN-Wavenet-C"
+    },
+    {
+      "name" : "nl-NL-Wavenet-D"
+    },
+    {
+      "name" : "id-ID-Standard-A"
+    },
+    {
+      "name" : "cs-CZ-Wavenet-A"
+    },
+    {
+      "name" : "en-GB-Wavenet-A"
+    },
+    {
+      "name" : "pl-PL-Wavenet-B"
+    },
+    {
+      "name" : "pl-PL-Wavenet-C"
+    },
+    {
+      "name" : "en-GB-Wavenet-B"
+    },
+    {
+      "name" : "pl-PL-Wavenet-D"
+    },
+    {
+      "name" : "nb-NO-Wavenet-B"
+    },
+    {
+      "name" : "en-US-Wavenet-A"
+    },
+    {
+      "name" : "pt-PT-Standard-A"
+    },
+    {
+      "name" : "nl-NL-Wavenet-E"
+    },
+    {
+      "name" : "en-GB-Wavenet-D"
+    },
+    {
+      "name" : "ru-RU-Wavenet-D"
+    },
+    {
+      "name" : "en-AU-Wavenet-C"
+    },
+    {
+      "name" : "pt-PT-Standard-C"
+    },
+    {
+      "name" : "id-ID-Wavenet-B"
+    },
+    {
+      "name" : "hu-HU-Wavenet-A"
+    },
+    {
+      "name" : "fr-CA-Standard-B"
+    },
+    {
+      "name" : "en-AU-Standard-A"
+    },
+    {
+      "name" : "en-US-Wavenet-C"
+    },
+    {
+      "name" : "it-IT-Wavenet-D"
+    },
+    {
+      "name" : "en-GB-Standard-A"
+    },
+    {
+      "name" : "it-IT-Wavenet-C"
+    },
+    {
+      "name" : "pt-BR-Wavenet-A"
+    },
+    {
+      "name" : "en-US-Standard-B"
+    },
+    {
+      "name" : "ja-JP-Wavenet-C"
+    },
+    {
+      "name" : "it-IT-Wavenet-B"
+    },
+    {
+      "name" : "vi-VN-Wavenet-C"
+    },
+    {
+      "name" : "id-ID-Wavenet-C"
+    },
+    {
+      "name" : "ar-XA-Wavenet-A"
+    },
+    {
+      "name" : "de-DE-Wavenet-D"
+    },
+    {
+      "name" : "sk-SK-Wavenet-A"
+    },
+    {
+      "name" : "fr-CA-Wavenet-B"
+    },
+    {
+      "name" : "uk-UA-Wavenet-A"
+    },
+    {
+      "name" : "nl-NL-Standard-D"
+    },
+    {
+      "name" : "pt-PT-Wavenet-A"
+    },
+    {
+      "name" : "vi-VN-Wavenet-A"
+    },
+    {
+      "name" : "vi-VN-Wavenet-D"
+    },
+    {
+      "name" : "ru-RU-Wavenet-C"
+    },
+    {
+      "name" : "fr-FR-Wavenet-A"
+    },
+    {
+      "name" : "fr-FR-Wavenet-C"
+    },
+    {
+      "name" : "tr-TR-Wavenet-D"
+    },
+    {
+      "name" : "de-DE-Wavenet-C"
+    },
+    {
+      "name" : "vi-VN-Wavenet-B"
+    },
+    {
+      "name" : "en-US-Wavenet-E"
+    },
+    {
+      "name" : "tr-TR-Wavenet-E"
+    },
+    {
+      "name" : "tr-TR-Wavenet-A"
+    },
+    {
+      "name" : "ru-RU-Wavenet-B"
+    },
+    {
+      "name" : "fr-CA-Standard-C"
+    },
+    {
+      "name" : "ja-JP-Standard-B"
+    },
+    {
+      "name" : "de-DE-Wavenet-B"
+    },
+    {
+      "name" : "en-GB-Wavenet-C"
+    },
+    {
+      "name" : "fr-FR-Standard-C"
+    },
+    {
+      "name" : "pt-PT-Wavenet-D"
+    },
+    {
+      "name" : "fr-FR-Wavenet-D"
+    },
+    {
+      "name" : "ru-RU-Standard-C"
+    },
+    {
+      "name" : "pl-PL-Standard-A"
+    },
+    {
+      "name" : "pt-PT-Wavenet-B"
+    },
+    {
+      "name" : "nl-NL-Standard-B"
+    },
+    {
+      "name" : "en-US-Wavenet-D"
+    },
+    {
+      "name" : "el-GR-Wavenet-A"
+    },
+    {
+      "name" : "nb-NO-Standard-B"
+    },
+    {
+      "name" : "ja-JP-Wavenet-B"
+    },
+    {
+      "name" : "ar-XA-Wavenet-C"
+    }
+  ]
+
   try {
-    // Do the updates
-    for (const voice of voicesData) {
-      logger.info(loggerPrefix, `Update "${voice.name}" to set isActive isPremium.`);
+    for (const voice of isActiveMapping) {
+      logger.info(loggerPrefix, `Update voices with languageCode "${voice.languageCode}" to be isActive.`);
+      // Set voice isActive to true based on the language code
+      await voiceRepository.update(
+        {
+          languageCode: voice.languageCode
+        },
+        {
+          isActive: true
+        }
+      );
+      logger.info(loggerPrefix, `Updated voice with languageCode "${voice.languageCode}"!`);
+    }
 
-      const updatedColumns = {
-        isActive: voice.isActive,
-        isPremium: voice.isPremium
-      };
-
+    for (const voice of premiumVoicesMapping) {
+      logger.info(loggerPrefix, `Update voices with name "${voice.name}" to be isPremium.`);
+      // Set voice isPremium to true based on the voice name
       await voiceRepository.update(
         {
           name: voice.name
         },
-        updatedColumns
+        {
+          isPremium: true
+        }
       );
-
-      logger.info(loggerPrefix, `Updated "${voice.name}" with: ${JSON.stringify(updatedColumns)}`);
+      logger.info(loggerPrefix, `Updated voice with name "${voice.name}"!`);
     }
+
+    // Do the updates
+    // for (const voice of voicesData) {
+    //   logger.info(loggerPrefix, `Update "${voice.name}" to set isActive isPremium.`);
+
+    //   const updatedColumns = {
+    //     isActive: voice.isActive,
+    //     isPremium: voice.isPremium
+    //   };
+
+    //   await voiceRepository.update(
+    //     {
+    //       name: voice.name
+    //     },
+    //     updatedColumns
+    //   );
+
+    //   logger.info(loggerPrefix, `Updated "${voice.name}" with: ${JSON.stringify(updatedColumns)}`);
+    // }
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
