@@ -14,12 +14,13 @@ export enum EVoiceGender {
 
 export enum EVoiceSynthesizer {
   GOOGLE = 'Google',
-  AWS = 'AWS'
+  AWS = 'AWS',
+  MICROSOFT = 'Microsoft'
 }
 
 export enum EVoiceQuality {
-  NORMAL = 'Normal', // AWS Polly
-  HIGH = 'High', // Google Standard
+  NORMAL = 'Normal', // AWS Polly, Microsoft Standard
+  HIGH = 'High', // Google Standard, AWS Polly (Neural), Microsoft Neural
   VERY_HIGH = 'Very High' // Google WaveNet
 }
 
@@ -37,6 +38,7 @@ export enum EVoiceAudioProfile {
 
 @Entity()
 @Unique(['isLanguageDefault', 'languageCode'])
+@Unique(['languageCode', 'label'])
 @Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality', 'quality'])
 export class Voice {
 
@@ -53,7 +55,7 @@ export class Voice {
   @Column({ nullable: false, unique: true }) // en-US-Wavenet-D
   name: string;
 
-  @Column({ nullable: false, unique: true }) // John
+  @Column({ nullable: false }) // John
   label: string;
 
   @Column({ type: 'enum', enum: EVoiceGender, nullable: false }) // MALE or FEMALE

@@ -12,6 +12,7 @@ import languages from './database/seeds/languages';
 import { AwsSynthesizer } from './synthesizers/aws';
 import { GoogleSynthesizer } from './synthesizers/google';
 import { logger } from './utils/logger';
+// import { MicrosoftSynthesizer } from './synthesizers/microsoft';
 
 const seedLanguages = async () => {
   const loggerPrefix = 'Seeding Languages:';
@@ -67,11 +68,13 @@ const seedVoices = async () => {
   const languageRepository = getRepository(Language);
   const awsSynthesizer = new AwsSynthesizer();
   const googleSynthesizer = new GoogleSynthesizer();
+  // const microsoftSynthesizer = new MicrosoftSynthesizer();
 
   try {
-    logger.info(loggerPrefix, 'Checking for new voices at Google and AWS...');
+    logger.info(loggerPrefix, 'Checking for new voices at Google, AWS and Microsoft...');
     await googleSynthesizer.addAllVoices(loggerPrefix);
     await awsSynthesizer.addAllVoices(loggerPrefix);
+    // await microsoftSynthesizer.addAllVoices(loggerPrefix);
 
     logger.info(loggerPrefix, 'Checking which voices are not connected to a language yet...');
 
@@ -973,7 +976,7 @@ const updateVoicesLabel = async () => {
     },
     {
       name: 'vi-VN-Standard-B',
-      label: 'An',
+      label: 'Hang',
       gender: 'MALE'
     },
     {
@@ -1892,13 +1895,25 @@ const updateQualityForVoices = async () => {
       let quality = EVoiceQuality.NORMAL;
 
       // All Google WaveNet voices are "very high" quality
-      if (voice.synthesizer === 'Google' && voice.isHighestQuality) {
-        quality = EVoiceQuality.VERY_HIGH
+      if (voice.synthesizer === 'Google') {
+        if (voice.name.includes('Wavenet')) {
+          quality = EVoiceQuality.VERY_HIGH
+        }
+
+        if (voice.name.includes('Standard')) {
+          quality = EVoiceQuality.HIGH;
+        }
       }
 
-      // All Google Standard voices are "high" quality
-      if (voice.synthesizer === 'Google' && !voice.isHighestQuality) {
-        quality = EVoiceQuality.HIGH;
+      if (voice.synthesizer === 'Microsoft') {
+
+        if (voice.name.includes('Neural')) {
+          quality = EVoiceQuality.VERY_HIGH;
+        }
+
+        if (voice.name.includes('RUS')) {
+          quality = EVoiceQuality.HIGH;
+        }
       }
 
       logger.info(loggerPrefix, `Update "${voice.name}" to set quality: ${quality}`);

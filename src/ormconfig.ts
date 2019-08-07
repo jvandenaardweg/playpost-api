@@ -13,6 +13,8 @@ import { Voice } from './database/entities/voice';
 // Migrations
 import { ArticleCompatible1564467937421 } from './database/migrations/1564467937421-ArticleCompatible';
 import { VoiceQuality1564674653133 } from './database/migrations/1564674653133-VoiceQuality';
+import { MicrosoftVoices1565167596757 } from './database/migrations/1565167596757-MicrosoftVoices';
+import { VoicesLabelUniqueness1565168191744 } from './database/migrations/1565168191744-VoicesLabelUniqueness';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -41,7 +43,9 @@ const config: ConnectionOptions = {
   migrations: [
     // In order of execution is important, oldest first
     ArticleCompatible1564467937421,
-    VoiceQuality1564674653133
+    VoiceQuality1564674653133,
+    MicrosoftVoices1565167596757,
+    VoicesLabelUniqueness1565168191744
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
