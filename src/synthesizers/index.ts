@@ -7,10 +7,10 @@ import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import * as storage from '../storage/google-cloud';
 import { logger } from '../utils';
 import { getAudioFileDurationInSeconds } from '../utils/audio';
-import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGLE_CHARACTER_HARD_LIMIT, GOOGLE_CHARACTER_SOFT_LIMIT, MICROSOFT_CHARACTER_SOFT_LIMIT, MICROSOFT_CHARACTER_HARD_LIMIT } from '../utils/ssml';
+import { AWS_CHARACTER_HARD_LIMIT, AWS_CHARACTER_SOFT_LIMIT, getSSMLParts, GOOGLE_CHARACTER_HARD_LIMIT, GOOGLE_CHARACTER_SOFT_LIMIT } from '../utils/ssml';
 import { AwsSynthesizer } from './aws';
 import { GoogleAudioEncoding, GoogleSynthesizer, GoogleSynthesizerOptions } from './google';
-import { MicrosoftSynthesizer } from './microsoft';
+// import { MicrosoftSynthesizer } from './microsoft';
 
 export type SynthesizerType = 'article' | 'preview';
 export type SynthesizerAudioEncodingTypes = GoogleAudioEncoding & Polly.OutputFormat;
@@ -98,11 +98,13 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
     logger.info(loggerPrefix, 'Starting AWS Polly Synthesizing...');
     createdAudiofile = await synthesizeUsingAWS(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
     logger.info(loggerPrefix, 'Finished AWS Polly Synthesizing.');
-  } else if (voice.synthesizer === 'Microsoft') {
-    logger.info(loggerPrefix, 'Starting Microsoft Azure Synthesizing...');
-    createdAudiofile = await synthesizeUsingMicrosoft(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
-    logger.info(loggerPrefix, 'Finished Microsoft Azure Synthesizing.');
-  } else {
+  }
+  // else if (voice.synthesizer === 'Microsoft') {
+  //   logger.info(loggerPrefix, 'Starting Microsoft Azure Synthesizing...');
+  //   createdAudiofile = await synthesizeUsingMicrosoft(ssml, voice, article, audiofile, mimeType, encodingParameter, storageUploadPath);
+  //   logger.info(loggerPrefix, 'Finished Microsoft Azure Synthesizing.');
+  // }
+  else {
     const errorMessage = 'Synthesizer not supported. Please use Google or AWS.';
     logger.error(loggerPrefix, errorMessage);
     throw new Error(errorMessage);
@@ -288,88 +290,88 @@ const synthesizeUsingGoogle = async (
   return audiofile;
 };
 
-const synthesizeUsingMicrosoft = async (
-  ssml: string,
-  voice: Voice,
-  article: Article,
-  audiofile: Audiofile,
-  mimeType: AudiofileMimeType,
-  encodingParameter: SynthesizerEncoding,
-  storageUploadPath: string
-) => {
-  const loggerPrefix = 'Synthesize Using Microsoft:';
-  const microsoftSynthesizer = new MicrosoftSynthesizer();
+// const synthesizeUsingMicrosoft = async (
+//   ssml: string,
+//   voice: Voice,
+//   article: Article,
+//   audiofile: Audiofile,
+//   mimeType: AudiofileMimeType,
+//   encodingParameter: SynthesizerEncoding,
+//   storageUploadPath: string
+// ) => {
+//   const loggerPrefix = 'Synthesize Using Microsoft:';
+//   const microsoftSynthesizer = new MicrosoftSynthesizer();
 
-  logger.info(loggerPrefix, 'Starting...');
+//   logger.info(loggerPrefix, 'Starting...');
 
-  // Step 1: Split the SSML into chunks the synthesizer allows
-  const ssmlParts = getSSMLParts(ssml, {
-    softLimit: MICROSOFT_CHARACTER_SOFT_LIMIT,
-    hardLimit: MICROSOFT_CHARACTER_HARD_LIMIT
-  });
+//   // Step 1: Split the SSML into chunks the synthesizer allows
+//   const ssmlParts = getSSMLParts(ssml, {
+//     softLimit: MICROSOFT_CHARACTER_SOFT_LIMIT,
+//     hardLimit: MICROSOFT_CHARACTER_HARD_LIMIT
+//   });
 
-  logger.info(loggerPrefix, `Received ${ssmlParts.length} SSML parts to be used for the synthesizer.`);
+//   logger.info(loggerPrefix, `Received ${ssmlParts.length} SSML parts to be used for the synthesizer.`);
 
-  logger.info(loggerPrefix, 'Synthesize using voice:', voice);
+//   logger.info(loggerPrefix, 'Synthesize using voice:', voice);
 
-  // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-  const localAudiofilePaths = await microsoftSynthesizer.SSMLPartsToSpeech(
-    ssmlParts,
-    'article',
-    voice,
-    storageUploadPath
-  );
+//   // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
+//   const localAudiofilePaths = await microsoftSynthesizer.SSMLPartsToSpeech(
+//     ssmlParts,
+//     'article',
+//     voice,
+//     storageUploadPath
+//   );
 
-  logger.info(loggerPrefix, 'Received local audiofile paths:', localAudiofilePaths);
+//   logger.info(loggerPrefix, 'Received local audiofile paths:', localAudiofilePaths);
 
-  // Step 3: Combine multiple audiofiles into one
-  const concatinatedLocalAudiofilePath = await microsoftSynthesizer.concatinateAudioFiles(
-    localAudiofilePaths,
-    storageUploadPath,
-    encodingParameter
-  );
+//   // Step 3: Combine multiple audiofiles into one
+//   const concatinatedLocalAudiofilePath = await microsoftSynthesizer.concatinateAudioFiles(
+//     localAudiofilePaths,
+//     storageUploadPath,
+//     encodingParameter
+//   );
 
-  logger.info(loggerPrefix, 'Received concatinated audiofile path:', concatinatedLocalAudiofilePath);
+//   logger.info(loggerPrefix, 'Received concatinated audiofile path:', concatinatedLocalAudiofilePath);
 
-  // Step 4: Get the length of the audiofile
-  const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
+//   // Step 4: Get the length of the audiofile
+//   const audiofileLength = await getAudioFileDurationInSeconds(concatinatedLocalAudiofilePath);
 
-  logger.info(loggerPrefix, 'Received audiofile duration in seconds:', audiofileLength);
+//   logger.info(loggerPrefix, 'Received audiofile duration in seconds:', audiofileLength);
 
-  logger.info(loggerPrefix, 'Uploading the local audiofile to our storage...');
+//   logger.info(loggerPrefix, 'Uploading the local audiofile to our storage...');
 
-  // Step 5: Upload the one mp3 file to Google Cloud Storage
-  const uploadResponse = await storage.uploadArticleAudioFile(
-    voice,
-    concatinatedLocalAudiofilePath,
-    storageUploadPath,
-    mimeType,
-    article,
-    audiofile.id,
-    audiofileLength
-  );
+//   // Step 5: Upload the one mp3 file to Google Cloud Storage
+//   const uploadResponse = await storage.uploadArticleAudioFile(
+//     voice,
+//     concatinatedLocalAudiofilePath,
+//     storageUploadPath,
+//     mimeType,
+//     article,
+//     audiofile.id,
+//     audiofileLength
+//   );
 
-  logger.info(loggerPrefix, 'Audiofile successfully uploaded to our storage!');
+//   logger.info(loggerPrefix, 'Audiofile successfully uploaded to our storage!');
 
-  // Step 6: Delete the local file, we don't need it anymore
-  // const pathToRemove = `${appRootPath}/temp/${article.id}`;
-  // await fsExtra.remove(pathToRemove);
-  await microsoftSynthesizer.removeAllTempFiles();
+//   // Step 6: Delete the local file, we don't need it anymore
+//   // const pathToRemove = `${appRootPath}/temp/${article.id}`;
+//   // await fsExtra.remove(pathToRemove);
+//   await microsoftSynthesizer.removeAllTempFiles();
 
-  logger.info(loggerPrefix, 'Removed temp audiofiles.');
+//   logger.info(loggerPrefix, 'Removed temp audiofiles.');
 
-  // Step 7: Create a publicfile URL our users can use
-  const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
+//   // Step 7: Create a publicfile URL our users can use
+//   const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
 
-  logger.info(loggerPrefix, 'Got public file URL from our storage to be used for our users:', publicFileUrl);
+//   logger.info(loggerPrefix, 'Got public file URL from our storage to be used for our users:', publicFileUrl);
 
-  // Step 8: Return the audiofile properties needed for database insertion
-  audiofile.url = publicFileUrl;
-  audiofile.bucket = uploadResponse[0].bucket.name;
-  audiofile.filename = uploadResponse[0].name;
-  audiofile.length = audiofileLength;
+//   // Step 8: Return the audiofile properties needed for database insertion
+//   audiofile.url = publicFileUrl;
+//   audiofile.bucket = uploadResponse[0].bucket.name;
+//   audiofile.filename = uploadResponse[0].name;
+//   audiofile.length = audiofileLength;
 
-  logger.info(loggerPrefix, 'Finished! Returning the created audiofile.');
+//   logger.info(loggerPrefix, 'Finished! Returning the created audiofile.');
 
-  return audiofile;
-};
+//   return audiofile;
+// };

@@ -1,14 +1,12 @@
 import * as Sentry from '@sentry/node';
 import appRootPath from 'app-root-path';
 import LocaleCode from 'locale-code';
+import nodeFetch, { RequestInit } from 'node-fetch';
 import { getRepository } from 'typeorm';
 
-import nodeFetch, { RequestInit } from 'node-fetch';
-import { EVoiceGender, EVoiceSynthesizer, Voice, EVoiceQuality } from '../database/entities/voice';
+import { EVoiceGender, EVoiceQuality, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
-// import { SynthesizerType } from './index';
-import { Synthesizers } from './synthesizers';
-import { SynthesizerType } from 'synthesizers';
+import { Synthesizers, SynthesizerType } from './index';
 
 export interface MicrosoftVoice {
   Name: string;
@@ -225,8 +223,6 @@ export class MicrosoftSynthesizer extends Synthesizers {
     let ssmlPartMS = ssmlPart;
     ssmlPartMS = ssmlPartMS.replace('<speak>', `<speak version='1.0' xml:lang='${voice.languageCode}'><voice xml:lang='${voice.languageCode}' xml:gender='${voiceGender}' name='${voice.name}'>`);
     ssmlPartMS = ssmlPartMS.replace('</speak>', `</voice></speak>`);
-
-    console.log('ssmlPartMS', ssmlPartMS);
 
     const request: MicrosoftSpeechRequestHeaders = {
       method: 'post',
