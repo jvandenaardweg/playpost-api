@@ -344,6 +344,25 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Ο Άρης είναι ο τέταρτος σε απόσταση από τον Ήλιο πλανήτης του Ηλιακού μας Συστήματος, ο δεύτερος πλησιέστερος στη Γη, και ο έβδομος σε διαστάσεις και μάζα του Ηλιακού Συστήματος (ο δεύτερος μικρότερος μετά τον Ερμή).</p>
           <p>Λέγεται συχνά και «ερυθρός πλανήτης» εξαιτίας του ερυθρού χρώματος που παρουσιάζει οφειλόμενο στο τριοξείδιο του σιδήρου στην επιφάνειά του.</p>
         </speak>`
+      ],
+      Swedish: [
+        `<speak>
+          <p>Jorden är den tredje planeten från solen och den största av de så kallade stenplaneterna i solsystemet.</p>
+          <p>Jorden är hemvist för alla kända levande varelser, inklusive människan. Dess latinska namn, Tellus eller Terra, används ibland om den, och astronomer betecknar den ibland med symbolen (solkors) eller (riksäpple).</p>
+          <p>Jorden har en naturlig satellit kallad månen, eller Luna på latin.</p>
+          <p>Med flera miljoner arter är jorden den enda himlakropp där man vet att liv existerar.</p>
+        </speak>`,
+        `<speak>
+          <p>Månen är jordens enda naturliga satellit och den femte största månen i solsystemet.</p>
+          <p>Näst efter solen är månen, på grund av sin närhet, det mest klarlysande objektet på stjärnhimlen. Månen gör sig också påmind genom tidvatteneffekter på jorden i form av ebb och flod.</p>
+          <p>Med dess framträdande ställning på himlen och de regelbundna månfaserna har månen i alla tider fascinerat människan och lämnat ett stort kulturellt avtryck i den mänskliga historien.</p>
+          <p>Månen vänder alltid samma sida mot jorden eftersom den befinner sig i en bunden rotation, och roterar därmed exakt en gång runt sin egen axel för varje varv den rör sig runt jorden.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars är den fjärde planeten från solen och solsystemets näst minsta planet. Den har fått sitt namn efter den romerska krigsguden Mars och kallas ibland för "den röda planeten" på grund av sitt rödaktiga utseende.</p>
+          <p>Den röda färgen beror på stora mängder järnoxid (rost) som finns fördelat över ytan och i atmosfären.</p>
+          <p>Mars är en av de fyra stenplaneterna och har en tunn atmosfär som till största delen består av koldioxid. Ytan är täckt av kratrar av olika storlekar likt månen, men Mars har precis som jorden även många vulkaner, dalgångar, vidsträckta slätter och iskalotter vid polerna.</p>
+        </speak>`
       ]
     };
 
