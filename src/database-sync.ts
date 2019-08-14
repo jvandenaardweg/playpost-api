@@ -1087,7 +1087,8 @@ const updateIsLanguageDefaultForVoices = async () => {
     'hi-IN-Standard-B', // IN (Hindi Indian)
     // 'Ines' // PT, see BR
     'Zhiyu', // CN
-    'Bianca' // IT
+    'Bianca', // IT
+    'el-GR-Standard-A' // GR
   ];
 
   try {
