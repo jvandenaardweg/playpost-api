@@ -287,6 +287,27 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Uneori mai este numită și „planeta roșie” datorită înfățișării sale văzută de pe Pământ. Culoarea roșiatică se explică prin prezența pe suprafața sa a oxidului de fier.</p>
           <p>Marte este o planetă telurică (de tip terestru) cu o atmosferă subțire; printre caracteristicile suprafeței se numără și craterele de impact ce amintesc de Lună, dar și vulcani, văi, deșerturi și calote glaciare polare ce amintesc de Pământ.</p>
         </speak>`
+      ],
+      Norwegian: [
+        `<speak>
+          <p>Jorden eller jorda, menneskenes planet, er den tredje planeten i vårt solsystem regnet fra solen.</p>
+          <p>Det er den femte største planeten i solsystemet og planeten med størst tetthet, hvilket innebærer at dens gravitasjon kun overgås av Jupiter, Saturn og Neptun.</p>
+          <p>Jorden er den største av solsystemets fire steinplaneter, med en diameter noe større enn Venus' og om lag dobbelt så stor som Mars. Jordkloden blir også noen ganger omtalt som Verden, den blå planeten, eller som Tellus («Jord») etter dens ene latinske betegnelse.</p>
+          <p>Jorden er det eneste stedet i Universet som man med sikkerhet kan si at det finnes liv.</p>
+        </speak>`,
+        `<speak>
+          <p>Månen er den eneste naturlige satellitten i bane rundt jorden, og den femte største satellitten i solsystemet.</p>
+          <p>Sett i forhold til størrelsen på primærlegemet, er månen den største naturlige satellitten tilhørende en planet i solsystemet med en diameter som tilsvarer en fjerdedel av jordens, men bare 1/81 av massen.</p>
+          <p>Månen er den nest mest kompakte satellitten etter Io, en av Jupiters måner.</p>
+          <p>Den er i en bundet rotasjon med jorden – det vil si at den alltid har den samme siden vendt mot jorden, markert av et mørkt vulkansk hav som fyller området mellom de lyse antikke høylandene og de fremtredende nedslagskratrene.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars er den fjerde planeten fra solen i vårt solsystem og er oppkalt etter den romerske krigsguden Mars.</p>
+          <p>Planeten blir ofte beskrevet som den «røde planeten» på grunn av sitt rødlige utseende, forårsaket av jern(III)oksid på overflaten.</p>
+          <p>Mars er en steinplanet med en tynn atmosfære. Overflateegenskapene minner om både nedslagskraterne på månen og vulkanene, dalene, ørkenene og de polare iskappene på jorden.</p>
+          <p>Rotasjonsperioden og årstidssyklusene på Mars ligner også på jorden siden det er aksehelningen som fører til årstidene. Olympus Mons er det høyeste kjente fjellet i solsystemet, og Valles Marineris er det største dalsystemet.</p>
+          <p>Det flate Borealisbassenget på den nordlige halvkulen dekker ca. 40 % av planeten og kan stamme fra et gigantisk nedslag.</p>
+        </speak>`
       ]
     };
 
