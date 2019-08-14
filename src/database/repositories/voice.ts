@@ -308,6 +308,25 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Rotasjonsperioden og årstidssyklusene på Mars ligner også på jorden siden det er aksehelningen som fører til årstidene. Olympus Mons er det høyeste kjente fjellet i solsystemet, og Valles Marineris er det største dalsystemet.</p>
           <p>Det flate Borealisbassenget på den nordlige halvkulen dekker ca. 40 % av planeten og kan stamme fra et gigantisk nedslag.</p>
         </speak>`
+      ],
+      Czech: [
+        `<speak>
+          <p>Země je třetí planeta sluneční soustavy se střední vzdáleností od Slunce asi 1 Au, zároveň největší terestrická planeta v soustavě a jediné planetární těleso, na němž je dle současných vědeckých poznatků potvrzen život.</p>
+          <p>Země nejspíše vznikla před 4,6 miliardami let a krátce po svém vzniku získala svůj jediný přirozený satelit – Měsíc.</p>
+          <p>Země obíhá kolem Slunce po elipse s velmi malou excentricitou dráhy. Země jako domovský svět lidstva má mnoho názvů v závislosti na národu, mezi nejznámější patří název latinského původu Terra, či řecký název Gaia.</p>
+        </speak>`,
+        `<speak>
+          <p>Měsíc je jediná známá přirozená družice Země.</p>
+          <p>Nemá jiné formální jméno než „měsíc“, i když je občas básnicky nazýván Luna (slovanský a zároveň latinský výraz pro Měsíc).</p>
+          <p>Kromě slova lunární se podle jména starořecké bohyně Měsíce Seléné používá k odkazu na Měsíc též kmene selene nebo seleno.</p>
+          <p>Střední vzdálenost Měsíce od Země je 384 403 km. Měsíční rovníkový průměr je 3 476 km.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars je čtvrtá planeta sluneční soustavy, druhá nejmenší planeta soustavy po Merkuru.</p>
+          <p>Byla pojmenována po římském bohu války Martovi. Jedná se o planetu terestrického typu, tj. s pevným horninovým povrchem pokrytým impaktními krátery, vysokými sopkami, hlubokými kaňony a dalšími útvary.</p>
+          <p>Má dva měsíce nepravidelného tvaru nazvané Phobos a Deimos.</p>
+          <p>V období, kdy je Mars v opozici ke Slunci a Země se tak nachází mezi těmito dvěma tělesy, lze Mars vidět na obloze celou noc.</p>
+        </speak>`
       ]
     };
 
