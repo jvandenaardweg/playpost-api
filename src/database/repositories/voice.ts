@@ -267,6 +267,26 @@ export class VoiceRepository extends Repository<Voice> {
           <p>오늘날 영어에서 3월을 뜻하는 March도 여기서 생겼다. 지구와의 거리는 7800만 km이다</p>
           <p>매리너 4호가 1965년에 화성을 처음으로 근접 비행을 하기 전까지 과학계 안팎의 사람들은 화성에 대량의 물이 존재하리라고 기대하였다.</p>
         </speak>`
+      ],
+      Romanian: [
+        `<speak>
+          <p>Pământul este a treia planetă de la Soare și cea mai mare dintre planetele telurice ale Sistemului Solar, atât pentru masă, cât și pentru diametru.</p>
+          <p>Este singurul corp ceresc despre care se știe că adăpostește viață.</p>
+          <p>Conform datărilor radiometrice și a altor surse de dovezi, Pământul s-a format în urmă cu peste 4,5 miliarde de ani.</p>
+          <p>Gravitația Pământului interacționează cu alte obiecte din spațiu, în special cu Soarele și Luna, singurul satelit natural al Pământului.</p>
+          <p>Terra se învârte în jurul Soarelui în 365,26 de zile, perioadă cunoscută drept un an. În acest timp, Pământul se rotește în jurul axei sale de aproximativ 366,26 ori.</p>
+        </speak>`,
+        `<speak>
+          <p>Luna, este un corp astronomic care orbitează planeta Pământ, fiind singurul său satelit natural permanent⁠.</p>
+          <p>Este al cincilea cel mai mare⁠ satelit natural din Sistemul Solar, și cel mai mare dintre sateliți planetari relativ la dimensiunea planetei pe care o orbitează.</p>
+          <p>După satelitul lui Jupiter, Io, Luna este al doilea cel mai dens satelit dintre cei ale căror densități sunt cunoscute.</p>
+          <p>Se consideră că Luna s-a format acum circa 4,51 miliarde de ani, nu mult după Pământ⁠.</p>
+        </speak>`,
+        `<speak>
+          <p>Marte este, pornind dinspre Soare, a patra planetă a Sistemului Solar, a cărei denumire provine de la Marte, zeul roman al războiului.</p>
+          <p>Uneori mai este numită și „planeta roșie” datorită înfățișării sale văzută de pe Pământ. Culoarea roșiatică se explică prin prezența pe suprafața sa a oxidului de fier.</p>
+          <p>Marte este o planetă telurică (de tip terestru) cu o atmosferă subțire; printre caracteristicile suprafeței se numără și craterele de impact ce amintesc de Lună, dar și vulcani, văi, deșerturi și calote glaciare polare ce amintesc de Pământ.</p>
+        </speak>`
       ]
     };
 
