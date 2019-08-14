@@ -383,6 +383,28 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Mars og Jorden roterer næsten lige hurtigt, så på Mars oplever man et "mars-døgn" (soldøgn eller kun "sol"), der er godt 39 ½ minutter længere end et jorddøgn.</p>
           <p>Mars-året; den tid det tager planeten at fuldføre et kredsløb om Solen, tager 686,9601 jorddøgn, eller 1 år og ca. 10½ måned.</p>
         </speak>`
+      ],
+      Vietnamese: [
+        `<speak>
+          <p>Trái Đất là hành tinh thứ ba tính từ Mặt Trời, đồng thời cũng là hành tinh lớn nhất trong các hành tinh đất đá của hệ Mặt Trời xét về bán kính, khối lượng và mật độ vật chất.</p>
+          <p>Trái Đất còn được biết tên với các tên gọi "hành tinh xanh" hay "Địa Cầu", là nhà của hàng triệu loài sinh vật, trong đó có con người và cho đến nay đây là nơi duy nhất trong vũ trụ được biết đến là có sự sống.</p>
+          <p>Hành tinh này được hình thành cách đây 4,55 tỷ năm và sự sống xuất hiện trên bề mặt của nó khoảng 1 tỷ năm trước.</p>
+          <p>Kể từ đó, sinh quyển, bầu khí quyển của Trái Đất và các điều kiện vô cơ khác đã thay đổi đáng kể, tạo điều kiện thuận lợi cho sự phổ biến của các vi sinh vật ưa khí cũng như sự hình thành của tầng ôzôn-lớp bảo vệ quan trọng, cùng với từ trường của Trái Đất, đã ngăn chặn các bức xạ có hại và chở che cho sự sống.</p>
+        </speak>`,
+        `<speak>
+          <p>Mặt Trăng là vệ tinh tự nhiên duy nhất của Trái Đất và là vệ tinh tự nhiên lớn thứ năm trong Hệ Mặt Trời.</p>
+          <p>Khoảng cách trung bình tính từ tâm Trái Đất đến Mặt Trăng là 384.403 km, lớn khoảng 30 lần đường kính Trái Đất.</p>
+          <p>Đường kính Mặt Trăng là 3.474 km, tức hơn một phần tư đường kính Trái Đất.</p>
+          <p>Khối lượng Mặt Trăng khoảng bằng 2% khối lượng Trái Đất và lực hấp dẫn tại bề mặt Mặt Trăng bằng 17% lực hấp dẫn trên bề mặt Trái Đất.</p>
+          <p>Mặt Trăng quay một vòng quanh Trái Đất với chu kỳ quỹ đạo 27,32 ngày, và các biến đổi định kỳ trong hình học của hệ Trái Đất – Mặt Trăng – Mặt Trời là nguyên nhân gây ra các pha Mặt Trăng, lặp lại sau mỗi chu kỳ giao hội 29,53 ngày.</p>
+        </speak>`,
+        `<speak>
+          <p>Sao Hỏa còn gọi là: Hỏa tinh, là hành tinh thứ tư tính từ Mặt Trời trong Thái Dương Hệ.</p>
+          <p>Nó thường được gọi với tên khác là "Hành tinh Đỏ", do sắt ôxít có mặt rất nhiều trên bề mặt hành tinh làm cho bề mặt nó hiện lên với màu đỏ đặc trưng.</p>
+          <p>Sao Hỏa là một hành tinh đất đá với một khí quyển mỏng, có những đặc điểm trên bề mặt có nét giống với cả các hố va chạm trên Mặt Trăng và các núi lửa, thung lũng, sa mạc và chỏm băng ở cực trên của Trái Đất.</p>
+          <p>Chu kỳ tự quay và sự tuần hoàn của các mùa trên Hỏa Tinh khá giống với của Trái Đất do độ nghiêng của trục quay tạo ra.</p>
+          <p>Trên Sao Hỏa có ngọn núi Olympus Mons, ngọn núi cao nhất trong Hệ Mặt Trời, và hẻm núi Valles Marineris, hẻm núi dài và rộng nhất trong Thái Dương Hệ.</p>
+        </speak>`
       ]
     };
 
