@@ -405,6 +405,26 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Chu kỳ tự quay và sự tuần hoàn của các mùa trên Hỏa Tinh khá giống với của Trái Đất do độ nghiêng của trục quay tạo ra.</p>
           <p>Trên Sao Hỏa có ngọn núi Olympus Mons, ngọn núi cao nhất trong Hệ Mặt Trời, và hẻm núi Valles Marineris, hẻm núi dài và rộng nhất trong Thái Dương Hệ.</p>
         </speak>`
+      ],
+      Finnish: [
+        `<speak>
+          <p>Maa eli maapallo tai Tellus on aurinkokuntamme kolmas planeetta Auringosta lukien.</p>
+          <p>Maan keskietäisyys Auringosta on noin 149,6 miljoonaa kilometriä eli noin yksi astronominen yksikkö. Maa on aurinkokuntamme tihein sekä sen viidenneksi suurin planeetta niin läpimitaltaan kuin massaltaankin.</p>
+          <p>Maa syntyi noin 4,5 miljardia vuotta sitten. Maa on niin sanottu kiviplaneetta, jolla on metalleista muodostunut ydin, kiviaineksesta muodostunut sula vaippa sekä kiinteä kuori.</p>
+          <p>Maalla on myös ilmakehä, ja se on Marsin lisäksi ainoa aurinkokunnan planeetta, jolla esiintyy varmistetusti nestemäistä vettä. Maassa esiintyy runsaasti elämää.</p>
+        </speak>`,
+        `<speak>
+          <p>Kuu on Maan ainoa luonnollinen kiertolainen ja aurinkokunnan viidenneksi suurin kuu.</p>
+          <p>Sen säde on 27 prosenttia Maan säteestä, mikä tekee siitä aurinkokunnan suhteessa emoplaneettaansa suurimman kuun.</p>
+          <p>Kuun massa on 1,2 prosenttia ja tiheys 61 prosenttia Maan vastaavasta. Se kiertää Maata keskimäärin noin 384 400 kilometrin etäisyydellä.</p>
+          <p>Kuu on vuorovesilukkiutunut Maan kanssa. Tämä tarkoittaa, että Kuusta on kääntynyt Maahan päin aina sama puoli, jolloin niin sanottu Kuun pimeä puoli jää aina näkymättömiin.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars on Maan naapuriplaneetta ja aurinkokunnan neljäs planeetta Auringosta laskettuna.</p>
+          <p>Planeetta on nimetty roomalaisessa mytologiassa esiintyvän sodanjumala Marsin mukaan.</p>
+          <p>Punertavan Marsin läpimitta on noin puolet Maan läpimitasta, ja se on ihmiselle elinkelvoton. Marsissa on höyrynä, nesteenä ja jäänä esiintyvää vettä sekä hyvin ohut kaasukehä, josta suurin osa on hiilidioksidia ja loput pääasiassa typpeä.</p>
+          <p>Kaasukehän ohuus johtuu Marsin pienestä painovoimasta. Mars on lisäksi niin kylmä, että sen kaasukehän hiilidioksidi tiivistyy siellä aika ajoin napalakkeihin. Marsilla on myös kaksi pientä kuuta, Phobos ja Deimos.</p>
+        </speak>`
       ]
     };
 
