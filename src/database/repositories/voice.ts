@@ -425,6 +425,28 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Punertavan Marsin läpimitta on noin puolet Maan läpimitasta, ja se on ihmiselle elinkelvoton. Marsissa on höyrynä, nesteenä ja jäänä esiintyvää vettä sekä hyvin ohut kaasukehä, josta suurin osa on hiilidioksidia ja loput pääasiassa typpeä.</p>
           <p>Kaasukehän ohuus johtuu Marsin pienestä painovoimasta. Mars on lisäksi niin kylmä, että sen kaasukehän hiilidioksidi tiivistyy siellä aika ajoin napalakkeihin. Marsilla on myös kaksi pientä kuuta, Phobos ja Deimos.</p>
         </speak>`
+      ],
+      Turkish: [
+        `<speak>
+          <p>Dünya; Güneş Sistemi'nde Güneş'e en yakın üçüncü gezegendir. Güneş Sistemi'ndeki en yoğun ve beşinci büyük gezegendir.</p>
+          <p>Şu an için üzerinde yaşam olduğu bilinen tek gezegendir.</p>
+          <p>Katı ya da 'kaya' ağırlıklı yapısı nedeniyle üyesi bulunduğu yer benzeri gezegenler grubuna adını vermiştir.</p>
+          <p>Bu gezegen grubunun kütle ve hacim açısından en büyük üyesidir. Büyüklükte, Güneş Sistemi'nin 8 gezegeni arasında gaz devlerinin büyük farkla arkasından gelerek, beşinci sıraya yerleşir.</p>
+          <p>Tek doğal uydusu Ay'dır. Yeryüzü, Yerküre, Mavi Gezegen ya da Latince adıyla Terra olarak da anılır.</p>
+        </speak>`,
+        `<speak>
+          <p>Ay, Dünya'nın tek doğal uydusudur. Güneş Sistemi içinde beşinci büyük doğal uydudur.</p>
+          <p>Dünya ile Ay arasında ortalama merkezden merkeze uzaklık 384.403 km, yani Dünya'nın çapının yaklaşık otuz katı kadardır.</p>
+          <p>Ay'ın çapı 3.474 km'dir, bu da Dünya çapının dörtte birinden biraz fazladır. Dolayısıyla Ay'ın hacmi Dünya'nın hacminin %2'sidir.</p>
+          <p>Kütlesi Dünya kütlesinden 81,3 kat daha düşüktür. Yüzeyinde kütle çekim etkisi yer çekiminin yaklaşık %17'sidir.</p>
+          <p>Ay, Dünya'nın yörüngesinde bir turunu 27 gün 7 saatte tamamlar. Dünya, Ay ve Güneş geometrisinde görülen periyodik değişimler sonucunda her 29,5 günde tekrar eden Ay'ın evreleri oluşur.</p>
+        </speak>`,
+        `<speak>
+          <p>Latince Mars veya Arapça Merih, Güneş Sistemi'nin Güneş'ten itibâren dördüncü gezegeni.</p>
+          <p>Roma mitolojisindeki savaş tanrısı Mars'a ithâfen adlandırılmıştır. Yüzeyindeki yaygın demiroksitten dolayı kızılımsı bir görünüme sahip olduğu için Kızıl Gezegen de denir.</p>
+          <p>İnce bir atmosferi olan Mars gerek Ay'daki gibi meteor kraterlerini, gerekse Dünya'daki gibi volkan, vadi, çöl ve kutup bölgelerini içeren çehresiyle bir yerbenzeri gezegendir.</p>
+          <p>Ayrıca dönme periyodu ve mevsim dönemleri Dünya’nınkine çok benzer. 2 adet uydusu bulunmaktadır.</p>
+        </speak>`
       ]
     };
 
