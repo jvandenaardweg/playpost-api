@@ -363,6 +363,26 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Den röda färgen beror på stora mängder järnoxid (rost) som finns fördelat över ytan och i atmosfären.</p>
           <p>Mars är en av de fyra stenplaneterna och har en tunn atmosfär som till största delen består av koldioxid. Ytan är täckt av kratrar av olika storlekar likt månen, men Mars har precis som jorden även många vulkaner, dalgångar, vidsträckta slätter och iskalotter vid polerna.</p>
         </speak>`
+      ],
+      Danish: [
+        `<speak>
+          <p>Jorden er den tredje planet i solsystemet regnet fra Solen og har den største diameter, masse og tæthed af jordplaneterne.</p>
+          <p>Jorden benævnes også Verden, (Jord)kloden og Tellus efter en romersk gudinde eller Terra efter dens latinske betegnelse.</p>
+          <p>Jorden er et hjemsted for millioner af arter, herunder mennesket. Planeten blev dannet for 4,54 milliarder år siden, og livet fremkom på dens overflade inden for den første milliard år.</p>
+          <p>Siden da har Jordens biosfære i betydelig grad ændret atmosfæren og andre abiotiske betingelser på planeten, så aerobiske organismer har kunnet udbrede sig.</p>
+        </speak>`,
+        `<speak>
+          <p>Månen er Jordens eneste måne og den femtestørste naturlige satellit i solsystemet. Dens størrelse i forhold til Jorden gør den til den relativt største måne i solsystemet, som omkredser en planet.</p>
+          <p>Man regner med, at Månen er dannet som resultat af et gigantisk sammenstød mellem den unge Jord og en mindre planet kaldet Theia for 4,51 milliarder år siden.</p>
+          <p>Den gennemsnitlige afstand mellem centrum af Jorden og af Månen er 384.405 km, hvilket er omkring tredive gange Jordens diameter.</p>
+          <p>Månens diameter er 3.474 km, lidt over en fjerdedel af Jordens. Det betyder, at Månens rumfang er omkring 2 procent af Jordens.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars er den fjerde planet i Solsystemet talt fra Solen, og naboplanet til vores egen planet Jorden.</p>
+          <p>Som Jorden har Mars en atmosfære, om end denne er ganske tynd og næsten udelukkende består af kuldioxid. Mars kaldes også "den røde planet" på grund af sin karakteristiske farve.</p>
+          <p>Mars og Jorden roterer næsten lige hurtigt, så på Mars oplever man et "mars-døgn" (soldøgn eller kun "sol"), der er godt 39 ½ minutter længere end et jorddøgn.</p>
+          <p>Mars-året; den tid det tager planeten at fuldføre et kredsløb om Solen, tager 686,9601 jorddøgn, eller 1 år og ca. 10½ måned.</p>
+        </speak>`
       ]
     };
 
