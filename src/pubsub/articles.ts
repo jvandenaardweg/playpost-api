@@ -10,15 +10,32 @@ import { logger } from '../utils';
 
 const { GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE, GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE } = process.env;
 
-export const listenCrawlFullArticle = () => {
-  const loggerPrefix = 'Google PubSub Worker (Crawl Full Article):';
+export const listenCrawlFullArticle = async () => {
+  const loggerPrefix = 'Google PubSub Worker (Listen: Crawl Full Article):';
+
+  logger.info(loggerPrefix, 'Setup...');
+
   const pubsub = new PubSub(getGoogleCloudCredentials());
 
-  if (!GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) { throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set. Please add it.'); }
+  if (!GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE) {
+    const errorMessage = 'Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE" not set. Please add it.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
 
-  const subscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
+  // Verify if we are connected to pubsub by just checking if we can find the subscription
+  const subscriptions = await pubsub.getSubscriptions();
+  const hasSubscription = !!subscriptions[0].filter(subscription => subscription.name === GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
 
-  logger.info(loggerPrefix, 'Listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
+  if (!hasSubscription) {
+    const errorMessage = `Subscription "${GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE}" could not be found in the PubSub client.`;
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  logger.info(loggerPrefix, 'Connected!');
+
+  const crawlFullArticleSubscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
 
   // An array where we keep track of the retries
   // So we can remove the article from pubsub when we fail X times
@@ -90,7 +107,9 @@ export const listenCrawlFullArticle = () => {
     }
   };
 
-  subscription.on('message', messageHandler);
+  logger.info(loggerPrefix, 'Now listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_CRAWL_FULL_ARTICLE);
+
+  crawlFullArticleSubscription.on('message', messageHandler);
 };
 
 /**
@@ -101,19 +120,41 @@ export const listenCrawlFullArticle = () => {
  * @param articleUrl
  */
 export async function publishCrawlFullArticle(articleId: string, articleUrl: string) {
+  const loggerPrefix = 'Google PubSub Worker (Publish: Crawl Full Article):';
+
   try {
     const pubsub = new PubSub(getGoogleCloudCredentials());
 
-    if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) { throw new Error('Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.'); }
+    if (!GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE) {
+      const errorMessage = 'Required env variable "GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE" not set. Please add it.';
+      logger.error(loggerPrefix, errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // Verify if we are connected to pubsub by just checking if we can find the topics
+    const topics = await pubsub.getTopics();
+    const hasTopic = !!topics[0].filter(topic => topic.name === GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE);
+
+    if (!hasTopic) {
+      const errorMessage = `Topic "${GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE}" could not be found in the PubSub client.`;
+      logger.error(loggerPrefix, errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const data = {
+      articleId,
+      articleUrl
+    }
 
     const buffer = Buffer.from(
-      JSON.stringify({
-        articleId,
-        articleUrl
-      })
+      JSON.stringify(data)
     );
 
+    logger.info(loggerPrefix, 'Publishing...', data);
+
     const result = await pubsub.topic(GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE).publish(buffer);
+
+    logger.info(loggerPrefix, 'Published to:', GOOGLE_PUBSUB_TOPIC_CRAWL_FULL_ARTICLE);
 
     return result;
   } catch (err) {

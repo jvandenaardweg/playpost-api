@@ -24,18 +24,36 @@ inAppPurchase.config({
  * We use Google's PubSub for message queue purposes
  *
  */
-export const listenForAppleSubscriptionNotifications = () => {
+export const listenForAppleSubscriptionNotifications = async () => {
   const loggerPrefix = 'Google PubSub Worker (Apple Subscription Notifications):';
+
+  logger.info(loggerPrefix, 'Setup...');
 
   const pubsub = new PubSub(getGoogleCloudCredentials());
 
-  if (!GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) { throw new Error('Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set. Please add it.'); }
+  if (!GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS) {
+    const errorMessage = 'Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS" not set. Please add it.';
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
 
-  const subscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
+  // Verify if we are connected to pubsub by just checking if we can find the subscription
+  const subscriptions = await pubsub.getSubscriptions();
+  const hasSubscription = !!subscriptions[0].filter(subscription => subscription.name === GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
 
-  logger.info(loggerPrefix, 'Listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
+  if (!hasSubscription) {
+    const errorMessage = `Subscription "${GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS}" could not be found in the PubSub client.`;
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
 
-  subscription.on('message', handleMessage);
+  logger.info(loggerPrefix, 'Connected!');
+
+  const appleSubscriptionNotificationsSubscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
+
+  logger.info(loggerPrefix, 'Now listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
+
+  appleSubscriptionNotificationsSubscription.on('message', handleMessage);
 };
 
 const handleMessage = async (message: Message) => {
