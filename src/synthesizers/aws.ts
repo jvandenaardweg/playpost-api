@@ -46,6 +46,7 @@ export class AwsSynthesizer extends Synthesizers {
   addAllVoices = async (loggerPrefix: string): Promise<AWSVoice[]> => {
     logger.info(loggerPrefix, 'AWS Polly: Checking if we need to add new voices to the database...');
     const voiceRepository = getRepository(Voice);
+    const availableVoices = await voiceRepository.find();
 
     const voices = await this.getAllVoices();
 
@@ -55,13 +56,13 @@ export class AwsSynthesizer extends Synthesizers {
       const voiceLanguageCode = voice.LanguageCode;
       const voiceGender = voice.Gender === 'Male' ? EVoiceGender.MALE : EVoiceGender.FEMALE;
 
-      const foundVoice = await voiceRepository.findOne({ name: voiceId });
+      const foundVoice = availableVoices.find(availableVoice => availableVoice.name === voiceId);
 
       if (foundVoice) {
         logger.info(loggerPrefix, `AWS Polly: Voice ${voiceId} already present. We don't need to add it (again) to the database.`);
       } else {
         if (!voiceLanguageCode) {
-          logger.info(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
+          logger.warn(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
         } else {
           let countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
 
@@ -71,7 +72,7 @@ export class AwsSynthesizer extends Synthesizers {
           }
 
           if (!countryCode) {
-            logger.info(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
+            logger.warn(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
           } else {
             try {
               const voiceToCreate = await voiceRepository.create({

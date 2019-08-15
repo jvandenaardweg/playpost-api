@@ -2,10 +2,12 @@ import * as Sentry from '@sentry/node';
 import { createConnection, getCustomRepository, getRepository, In, IsNull } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
+import { Country } from './database/entities/country';
 import { InAppSubscription } from './database/entities/in-app-subscription';
 import { Language } from './database/entities/language';
 import { EVoiceQuality, EVoiceSynthesizer, Voice } from './database/entities/voice';
 import { VoiceRepository } from './database/repositories/voice';
+import countries from './database/seeds/countries';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
 // import voicesData from './database/seeds/voices';
@@ -14,45 +16,95 @@ import { GoogleSynthesizer } from './synthesizers/google';
 import { logger } from './utils/logger';
 // import { MicrosoftSynthesizer } from './synthesizers/microsoft';
 
-const seedLanguages = async () => {
-  const loggerPrefix = 'Seeding Languages:';
+const syncCountries = async () => {
+  const loggerPrefix = 'Sync Countries:';
+  const countryRepository = getRepository(Country);
+
+  try {
+    logger.info(loggerPrefix, 'Adding countries to the database...');
+
+    const countryCodes = Object.keys(countries);
+    logger.info(loggerPrefix, `Got ${countryCodes.length} countries from seed file.`);
+
+    const availableCountries = await countryRepository.find();
+    logger.info(loggerPrefix, `Found ${availableCountries.length} countries in database.`);
+
+    for (const countryCode of countryCodes) {
+      const country = countries[countryCode];
+
+      const foundCountry = availableCountries.find(availableCountry => availableCountry.code === countryCode);
+
+      const countryToSync = new Country();
+
+      countryToSync.id = (foundCountry) ? foundCountry.id : '';
+      countryToSync.code = countryCode;
+      countryToSync.name = country.name;
+      countryToSync.nativeName = country.native;
+      countryToSync.continent = country.continent;
+      countryToSync.currency = country.currency;
+
+      if (foundCountry) {
+        logger.info(loggerPrefix, 'Trying to update:', countryToSync.code, countryToSync.name, countryToSync.nativeName, '...');
+      } else {
+        logger.info(loggerPrefix, 'Trying to add:', countryToSync.code, countryToSync.name, countryToSync.nativeName, '...');
+      }
+
+      // Update, make sure it's in sync
+      await countryRepository.save(countryToSync);
+    }
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done!');
+  }
+}
+
+const syncLanguages = async () => {
+  const loggerPrefix = 'Sync Languages:';
   const languageRepository = getRepository(Language);
+  const countryRepository = getRepository(Country);
 
   try {
     logger.info(loggerPrefix, 'Adding languages to the database...');
 
     const languageCodes = Object.keys(languages);
+    logger.info(loggerPrefix, `Got ${languageCodes.length} languages from seed file.`);
+
+    const availableCountries = await countryRepository.find();
+    logger.info(loggerPrefix, `Found ${availableCountries.length} countries in database.`);
+
+    const availableLanguages = await languageRepository.find();
+    logger.info(loggerPrefix, `Found ${availableLanguages.length} languages in database.`);
 
     for (const languageCode of languageCodes) {
       const language = languages[languageCode];
+      const foundLanguage = availableLanguages.find(availableLanguage => availableLanguage.code === languageCode);
 
-      const languageData = {
-        code: languageCode,
-        name: language.name,
-        nativeName: language.native,
-        rightToLeft: !!language.rtl
-      }
-
-      logger.info(loggerPrefix, 'Trying to add:', languageCode, language.name, language.native, '...');
-
-      const existingLanguage = await languageRepository.findOne({
-        code: languageCode
+      const foundCountries = availableCountries.filter(country => {
+        const seed = countries[country.code]; // Uses the seed file
+        return seed.languages.includes(languageCode);
       });
 
-      if (existingLanguage) {
-        // Update, make sure it's in sync
-        await languageRepository.update(existingLanguage.id, languageData);
+      const languageToSync = new Language();
 
-        logger.info(loggerPrefix, 'Language already exists, we update:', languageCode, language.name, language.native, '...');
+      languageToSync.id = (foundLanguage) ? foundLanguage.id : '';
+      languageToSync.code = languageCode;
+      languageToSync.name = language.name;
+      languageToSync.nativeName = language.native;
+      languageToSync.rightToLeft = !!language.rtl;
+      languageToSync.countries = foundCountries;
+
+      if (foundLanguage) {
+        logger.info(loggerPrefix, 'Trying to update:', languageToSync.code, languageToSync.name, languageToSync.nativeName, '...');
       } else {
-        // Create the languages
-        const languageToCreate = await languageRepository.create(languageData);
-
-        // Save it
-        await languageRepository.save(languageToCreate);
-
-        logger.info(loggerPrefix, 'Successfully added:', languageCode, language.name, language.native);
+        logger.info(loggerPrefix, 'Trying to add:', languageToSync.code, languageToSync.name, languageToSync.nativeName, '...');
       }
+
+      // Update language or insert if it does not exist yet
+      await languageRepository.save(languageToSync);
+
+      logger.info(loggerPrefix, 'Successfully synced:', languageCode, language.name, language.native);
     }
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
@@ -62,10 +114,13 @@ const seedLanguages = async () => {
   }
 };
 
-const seedVoices = async () => {
-  const loggerPrefix = 'Seeding Voices:';
+const syncVoices = async () => {
+  const loggerPrefix = 'Sync Voices:';
+
   const voiceRepository = getRepository(Voice);
   const languageRepository = getRepository(Language);
+  const countryRepository = getRepository(Country);
+
   const awsSynthesizer = new AwsSynthesizer();
   const googleSynthesizer = new GoogleSynthesizer();
   // const microsoftSynthesizer = new MicrosoftSynthesizer();
@@ -76,16 +131,19 @@ const seedVoices = async () => {
     await awsSynthesizer.addAllVoices(loggerPrefix);
     // await microsoftSynthesizer.addAllVoices(loggerPrefix);
 
+    const foundCountries = await countryRepository.find();
+    logger.info(loggerPrefix, `Got ${foundCountries.length} countries from database.`);
+
+    const foundLanguages = await languageRepository.find();
+    logger.info(loggerPrefix, `Got ${foundLanguages.length} languages from database.`);
+
+    const availableVoices = await voiceRepository.find();
+    logger.info(loggerPrefix, `Got ${availableVoices.length} voices from database.`);
+
     logger.info(loggerPrefix, 'Checking which voices are not connected to a language yet...');
 
-    const voicesWithoutLanguage = await voiceRepository.find({
-      language: IsNull()
-    });
-
-    logger.info(loggerPrefix, `Found ${voicesWithoutLanguage.length} voices without a language connected.`);
-
-    for (const voice of voicesWithoutLanguage) {
-      let languageCode = voice.languageCode.split('-')[0]; // "en-US" => "en", "nl-NL" => "nl"
+    for (const availableVoice of availableVoices) {
+      let languageCode = availableVoice.languageCode.split('-')[0]; // "en-US" => "en", "nl-NL" => "nl"
 
       // It seems that Google uses "nb" for Norwegian Bokmål, we just connect that to "Norwegian"
       if (languageCode === 'nb') {
@@ -98,22 +156,19 @@ const seedVoices = async () => {
         languageCode = 'zh';
       }
 
-      logger.info(loggerPrefix, `Connecting languageCode "${languageCode}" to voice ID "${voice.id}"...`);
+      const language = foundLanguages.find(foundLanguage => foundLanguage.code === languageCode);
+      const country = foundCountries.find(foundCountry => foundCountry.code === availableVoice.countryCode);
 
-      const language = await languageRepository.findOne({ code: languageCode });
+      logger.info(loggerPrefix, 'Trying to update:', availableVoice.id, language && languageCode, country && country.code);
 
-      // Connect the voice to a language
-      await voiceRepository.update(voice.id, { language });
-
-      logger.info(loggerPrefix, `Successfully connected languageCode "${languageCode}" to voice ID "${voice.id}"!`);
+      // Connect the voice to the correct language and country
+      await voiceRepository.update(availableVoice.id, { language, country });
     }
-
-    logger.info(loggerPrefix, 'Successfully seeded!');
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
   } finally {
-    logger.info(loggerPrefix, 'Done.');
+    logger.info(loggerPrefix, 'Done!');
   }
 };
 
@@ -1023,6 +1078,36 @@ const updateVoicesLabel = async () => {
       name: 'it-IT-Wavenet-C',
       label: 'Roberto',
       gender: 'MALE'
+    },
+    {
+      name: 'cmn-CN-Standard-C',
+      label: 'Li Qiang',
+      gender: 'MALE'
+    },
+    {
+      name: 'cmn-CN-Standard-B',
+      label: 'Liu Wei',
+      gender: 'MALE'
+    },
+    {
+      name: 'cmn-CN-Standard-A',
+      label: 'Li Xiu Ying',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'cmn-CN-Wavenet-C',
+      label: 'Zhang Yong',
+      gender: 'MALE'
+    },
+    {
+      name: 'cmn-CN-Wavenet-B',
+      label: 'Zhang Wei',
+      gender: 'MALE'
+    },
+    {
+      name: 'cmn-CN-Wavenet-A',
+      label: 'Li Na',
+      gender: 'FEMALE'
     }
   ];
 
@@ -1968,7 +2053,7 @@ const updateQualityForVoices = async () => {
   }
 };
 
-const seedInAppSubscriptions = async () => {
+const syncInAppSubscriptions = async () => {
   const loggerPrefix = 'Seeding In-App Subscriptions:';
 
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
@@ -2002,7 +2087,7 @@ const seedInAppSubscriptions = async () => {
 
 const createVoicePreviews = async () => {
   const loggerPrefix = 'Create Voice Previews:';
-  const voiceRepository = getCustomRepository(VoiceRepository);
+  const customVoiceRepository = getCustomRepository(VoiceRepository);
   const languageRepository = getRepository(Language);
 
   try {
@@ -2016,7 +2101,7 @@ const createVoicePreviews = async () => {
     const languageIds = supportedLanguages.map(language => language.id);
 
     // Find the voices without an exampleAudioUrl within our active languages
-    const voicesWithoutPreview = await voiceRepository.find({
+    const voicesWithoutPreview = await customVoiceRepository.find({
       where: {
         exampleAudioUrl: IsNull(),
         language: {
@@ -2028,7 +2113,7 @@ const createVoicePreviews = async () => {
     logger.info(loggerPrefix, `Creating voice previews for ${voicesWithoutPreview.length} voices...`);
 
     for (const voice of voicesWithoutPreview) {
-      const updatedVoice = await voiceRepository.createVoicePreview(voice.id);
+      const updatedVoice = await customVoiceRepository.createVoicePreview(voice.id);
       logger.info(loggerPrefix, `Created voice preview for: ${updatedVoice.name}`);
     }
   } catch (err) {
@@ -2040,24 +2125,27 @@ const createVoicePreviews = async () => {
 };
 
 /**
- * This file ensures we have the same basic data on every environment we use
+ * This file ensures we have the same data on every environment we use
  */
 (async () => {
   try {
     await createConnection(connectionOptions());
 
-    // Run the seeders
+    // Run the syncers and seeders
+
+    // Sync countries in the database with our seed file
+    await syncCountries();
 
     // Insert the world's languages
     // We don't use them all, but insert them for completeness sake
-    await seedLanguages();
+    await syncLanguages();
 
-    // After we insert the languages, we can seed the voices
+    // After we insert the languages, and countries, we can seed the voices
     // The voices are fetched from the Google and AWS API's, so they require the API keys to be set in this project
-    await seedVoices();
+    await syncVoices();
 
     // Create some subscriptions our app uses
-    await seedInAppSubscriptions();
+    await syncInAppSubscriptions();
 
     // Run the updaters
 

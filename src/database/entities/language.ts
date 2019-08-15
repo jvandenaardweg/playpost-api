@@ -1,6 +1,7 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
+import { Country } from './country';
 import { Voice } from './voice';
 
 @Entity()
@@ -32,6 +33,10 @@ export class Language {
 
   @OneToMany(type => Article, article => article.language, { onDelete: 'NO ACTION' }) // On delete of a Article, do nothing, so don't delete the language
   articles: Article[];
+
+  @ManyToMany(type => Country, country => country.languages, { onDelete: 'RESTRICT' }) // On delete of a Article, do nothing, so don't delete the language
+  @JoinTable({ name: 'language_countries' })
+  countries: Country[];
 
   @CreateDateColumn()
   @IsDate()

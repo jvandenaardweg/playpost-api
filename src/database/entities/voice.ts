@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryG
 
 import { ColumnNumericTransformer } from '../utils';
 import { Audiofile } from './audiofile';
+import { Country } from './country';
 import { Language } from './language';
 
 export enum EVoiceGender {
@@ -107,4 +108,7 @@ export class Voice {
   // On delete of an Language, restrict the deletion if there's a voice using that language.
   // eager: true is needed so our app can determine the correct language for a voice
   language: Language;
+
+  @ManyToOne(type => Country, { nullable: true, onDelete: 'RESTRICT', eager: true })
+  country: Country;
 }

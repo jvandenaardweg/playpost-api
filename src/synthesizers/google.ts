@@ -54,6 +54,7 @@ export class GoogleSynthesizer extends Synthesizers {
     logger.info(loggerPrefix, 'Google Text To Speech: Checking if we need to add new voices to the database...');
 
     const voiceRepository = getRepository(Voice);
+    const availableVoices = await voiceRepository.find();
 
     const voices = await this.getAllVoices(loggerPrefix);
 
@@ -64,12 +65,17 @@ export class GoogleSynthesizer extends Synthesizers {
       const voiceGender = voice.ssmlGender as EVoiceGender;
       const voiceNaturalSampleRateHertz = voice.naturalSampleRateHertz;
 
-      const foundVoice = await voiceRepository.findOne({ name: voiceName });
+      const foundVoice = availableVoices.find(availableVoice => availableVoice.name === voiceName);
 
       if (foundVoice) {
-        logger.warn(loggerPrefix, `Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+        logger.info(loggerPrefix, `Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
       } else {
-        const countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+        let countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
+
+        if (voiceLanguageCode === 'cmn-CN') {
+          // cmn-CH is Chinese Mandarin
+          countryCode = LocaleCode.getCountryCode('zh-CN')
+        }
 
         if (!countryCode) {
           logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
