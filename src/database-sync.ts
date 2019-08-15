@@ -36,7 +36,11 @@ const syncCountries = async () => {
 
       const countryToSync = new Country();
 
-      countryToSync.id = (foundCountry) ? foundCountry.id : '';
+      // If the country exists, use the ID, so we can update it
+      if (foundCountry) {
+        countryToSync.id = foundCountry.id;
+      }
+
       countryToSync.code = countryCode;
       countryToSync.name = country.name;
       countryToSync.nativeName = country.native;
@@ -88,7 +92,10 @@ const syncLanguages = async () => {
 
       const languageToSync = new Language();
 
-      languageToSync.id = (foundLanguage) ? foundLanguage.id : '';
+      if (foundLanguage) {
+        languageToSync.id = foundLanguage.id;
+      }
+
       languageToSync.code = languageCode;
       languageToSync.name = language.name;
       languageToSync.nativeName = language.native;
