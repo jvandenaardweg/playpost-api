@@ -75,7 +75,7 @@ export class Article extends BaseEntity {
   // The SSML needed for Text-to-Speech services
   ssml: string;
 
-  @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['text'] }
+  @Column('text', { nullable: true, select: true }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['text'] }
   text: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['documentHtml'] }

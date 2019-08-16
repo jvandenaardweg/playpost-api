@@ -69,7 +69,7 @@ describe('Synthesizer: Google', () => {
       // Mock the Google method
       googleSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback('', exampleResponse));
 
-      const storageUploadPath = await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      const storageUploadPath = await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath, exampleSsmlPart);
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPath.includes(expectedTempLocalAudiofilePath)).toBe(true);
@@ -85,7 +85,7 @@ describe('Synthesizer: Google', () => {
       googleSynthesizer.client.synthesizeSpeech = jest.fn(({}, callback) => callback(exampleError, null));
 
       try {
-        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath, exampleSsmlPart);
       } catch (err) {
         expect(err).toEqual(exampleError);
       }
@@ -104,7 +104,7 @@ describe('Synthesizer: Google', () => {
       googleSynthesizer.saveTempFile = jest.fn().mockRejectedValue(exampleSaveFileError);
 
       try {
-        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLToSpeech(exampleIndex, exampleSsmlPart, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath, exampleSsmlPart);
       } catch (err) {
         expect(err).toEqual(exampleSaveFileError);
       }
@@ -130,7 +130,7 @@ describe('Synthesizer: Google', () => {
       // Mock the result of SSMLToSpeech
       googleSynthesizer.SSMLToSpeech = (index) => jest.fn().mockResolvedValue(`${exampleStorageUploadPath}-${index}.mp3`)();
 
-      const storageUploadPaths = await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+      const storageUploadPaths = await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath, exampleSsmlParts);
 
       // The root path is different on each environment, so just check if a part of the string is in there
       expect(storageUploadPaths[0].includes(expectedPath1)).toBe(true);
@@ -149,7 +149,7 @@ describe('Synthesizer: Google', () => {
       googleSynthesizer.SSMLToSpeech = (index) => jest.fn().mockRejectedValue(exampleError)();
 
       try {
-        await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath);
+        await googleSynthesizer.SSMLPartsToSpeech(exampleSsmlParts, 'article', '', exampleSynthesizerOptions, exampleStorageUploadPath, exampleSsmlParts);
       } catch (err) {
         expect(err).toBe(exampleError);
         expect(googleSynthesizer.removeAllTempFiles).toHaveBeenCalledTimes(1);

@@ -1,5 +1,6 @@
 // import appRootPath from 'app-root-path';
 import { Polly } from 'aws-sdk';
+import chunk from 'chunk-text';
 
 import { Article } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
@@ -231,6 +232,8 @@ const synthesizeUsingGoogle = async (
     hardLimit: GOOGLE_CHARACTER_HARD_LIMIT
   });
 
+  const textParts: string[] = chunk(article.text, GOOGLE_CHARACTER_SOFT_LIMIT);
+
   const synthesizerOptions: GoogleSynthesizerOptions = {
     audioConfig: {
       audioEncoding: encodingParameter
@@ -251,7 +254,8 @@ const synthesizeUsingGoogle = async (
     'article',
     article.id,
     synthesizerOptions,
-    storageUploadPath
+    storageUploadPath,
+    textParts
   );
 
   // Step 3: Combine multiple audiofiles into one
