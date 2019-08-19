@@ -8,12 +8,11 @@ import * as storage from '../storage/google-cloud';
 
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
-import { Voice } from '../database/entities/voice';
-
-
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
+import { Voice } from '../database/entities/voice';
 import { AudiofileRepository } from '../database/repositories/audiofile';
 import { UserRepository } from '../database/repositories/user';
+
 import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
@@ -208,9 +207,29 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // Check if the language is supported
   const articleLanguage = article && article.language;
   const articleLanguageCode = articleLanguage && articleLanguage.code;
+  const articleLanguageName = articleLanguage && articleLanguage.name;
+  const articleLanguageIsActive = articleLanguage && articleLanguage.isActive;
 
   if (!articleLanguage) {
-    const message = 'Did not receive any language information from the article.';
+    const message = 'The language of the article is unknown. We cannot create audio for this article.';
+
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      scope.setExtra('article', article);
+      scope.setExtra('userIsSubscribed', userIsSubscribed);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  // Check if the article's language is supported
+  if (!articleLanguageIsActive) {
+    const message = `The language (${articleLanguageName}) of this article is currently not supported by Playpost. We have made a note about this and will try to add support in future updates.`;
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
@@ -320,7 +339,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
   // Check if the voice or language is active
   // We only create audiofiles for languages and voices that are active
   if (userVoiceSetting && (!userVoiceSetting.voice.isActive || !userVoiceSetting.language.isActive)) {
-    const message = 'The chosen voice or voice language is not active. We cannot create audio for this.';
+    const message = `The chosen voice or language is not active. We cannot create audio for this article. Please change your voice for ${articleLanguageName} articles.`;
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
