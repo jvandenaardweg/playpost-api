@@ -5,7 +5,7 @@ import { logger } from '../utils/logger';
 
 export const findAllVoices = async (req: Request, res: Response) => {
   const loggerPrefix = 'Synthesizers Controller:';
-  const { synthesizerName }: { synthesizerName: string } = req.params;
+  const { synthesizerName } = req.params;
 
   if (!synthesizerName) {
     return res.status(400).json({ message: 'synthesizerName is required.' });

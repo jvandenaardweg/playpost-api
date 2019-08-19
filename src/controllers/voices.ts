@@ -86,7 +86,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
 
 export const deleteVoicePreview = async (req: Request, res: Response) => {
   const userEmail = req.user.email;
-  const { voiceId }: { voiceId: string } = req.params;
+  const { voiceId } = req.params;
   const voiceRepository = getRepository(Voice);
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }

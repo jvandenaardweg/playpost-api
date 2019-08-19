@@ -10,6 +10,7 @@ import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { Voice } from '../database/entities/voice';
 
+
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { AudiofileRepository } from '../database/repositories/audiofile';
 import { UserRepository } from '../database/repositories/user';
@@ -44,16 +45,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
     voiceId: string;
   }
 
-  interface IRequestParams {
-    articleId: string;
-  }
-
   const hrstart = process.hrtime();
 
   const loggerPrefix = 'Create Audiofile:';
 
   const userId = req.user.id;
-  const { articleId } = req.params as IRequestParams;
+  const { articleId } = req.params;
   const { mimeType } = req.body as IRequestBody;
 
   const articleRepository = getRepository(Article);
