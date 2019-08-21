@@ -71,9 +71,12 @@ export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudi
         // Use only if the contents of the file will never change
         // (If the contents will change, use cacheControl: 'no-cache')
         cacheControl: 'public, max-age=31536000',
-        contentLanguage: LocaleCode.getLanguageCode(voice.languageCode) // "en-US" becomes: "en"
+        contentLanguage: voice.language.code
       }
     }
+
+    logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Uploading with options:`, uploadOptions);
+
     const uploadResponse = await upload(concatinatedLocalAudiofilePath, uploadOptions);
 
     logger.info(`Google Cloud Storage (Upload Audiofile, Audiofile ID: ${audiofileId}): Uploaded file!`, uploadResponse[0].metadata.name);
@@ -142,6 +145,8 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
         contentLanguage: voice.language.code
       }
     }
+
+    logger.info(`Google Cloud Storage (Upload Voice Preview, Voice ID: ${voice.id}): Uploading with uptions:`, uploadOptions);
 
     const uploadResponse: UploadResponse = await upload(audiofilePath, uploadOptions);
 
