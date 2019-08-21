@@ -1,6 +1,5 @@
 import { DeleteFileResponse, File, Storage, UploadOptions, UploadResponse } from '@google-cloud/storage';
 import * as Sentry from '@sentry/node';
-import LocaleCode from 'locale-code';
 
 import * as request from 'request';
 import { Article } from '../database/entities/article';
