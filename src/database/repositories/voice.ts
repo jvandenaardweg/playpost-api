@@ -447,6 +447,22 @@ export class VoiceRepository extends Repository<Voice> {
           <p>İnce bir atmosferi olan Mars gerek Ay'daki gibi meteor kraterlerini, gerekse Dünya'daki gibi volkan, vadi, çöl ve kutup bölgelerini içeren çehresiyle bir yerbenzeri gezegendir.</p>
           <p>Ayrıca dönme periyodu ve mevsim dönemleri Dünya’nınkine çok benzer. 2 adet uydusu bulunmaktadır.</p>
         </speak>`
+      ],
+      Hungarian: [
+        `<speak>
+          <p>A Föld a Naptól számított harmadik bolygó a Naprendszerben. A legnagyobb átmérőjű, tömegű és sűrűségű az ismert Föld-típusú bolygók közül.</p>
+          <p>Több millió faj, köztük az ember élőhelye is. A Föld a világegyetem egyetlen olyan bolygója, amelyről tudjuk, hogy életet hordoz. Jelenlegi ismereteink szerint 4,44–4,54 milliárd éve alakult ki, és a felszínén mintegy egy milliárd év múlva az élet is megjelent.</p>
+          <p>Azóta a bioszféra jelentősen megváltoztatta az atmoszférát, és más, biotikus összetevőit.</p>
+        </speak>`,
+        `<speak>
+          <p>A Hold a Naprendszer egyik óriásholdja, a Föld egyetlen holdja. A Földtől mért átlagos távolsága 384 402 kilométer, ami nagyjából a Föld átmérőjének 30-szorosa – más mértékegységekben 0,002 CsE vagy 1,3 fénymásodperc (a Nap visszaverődő fénye 1,3 másodperc alatt jut el róla a földi megfigyelőhöz).</p>
+          <p>Átmérője 3476 kilométer, ami hozzávetőleg negyede a Földének. Ezzel a Hold a Naprendszer ötödik legnagyobb holdja a Jupiter három holdja, a Ganümédész, a Kallisztó és az Ió, valamint a Szaturnusz Titán holdja után.</p>
+        </speak>`,
+        `<speak>
+          <p>A Mars a Naptól számított negyedik bolygó a Naprendszerben. Szabad szemmel is könnyedén látható az éjszakai égbolton.</p>
+          <p>A római hadistenről nevezték el, de gyakran hívják „vörös bolygónak” is színe miatt, amit a Mars felszínét meghatározó vas-oxid okoz. A Mars a harmadik legnagyobb kőzetbolygó, számos rendkívüli felszíni képződménnyel.</p>
+          <p>Két természetes holdja van, a Phobosz és a Deimosz, mindkettő kicsi és szabálytalan alakú, valószínűleg befogott kisbolygók. Továbbá a 2000-es évek elejétől három mesterséges hold kíséri útján: Mars Odyssey, Mars Express és a Mars Reconnaissance Orbiter.</p>
+        </speak>`
       ]
     };
 
