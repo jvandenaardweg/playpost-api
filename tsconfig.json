@@ -29,10 +29,13 @@
     "plugins": [
       { "name": "typescript-tslint-plugin" }
     ],
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "paths": {
+      "*": ["src/typings/*"]
+    }
   },
   "include": [
-    "src/**/*",
+    "src/**/*"
   ],
   "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts"]
 }

@@ -84,7 +84,6 @@
     "@types/fs-extra": "^8.0.0",
     "@types/google-cloud__text-to-speech": "^0.5.0",
     "@types/helmet": "0.0.44",
-    "@types/in-app-purchase": "^1.10.0",
     "@types/ioredis": "^4.0.15",
     "@types/jest": "^24.0.18",
     "@types/joi": "^14.3.3",
