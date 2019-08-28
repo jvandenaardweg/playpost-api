@@ -5,6 +5,26 @@ export interface ICrawlFullArticleData {
   articleUrl: string;
 }
 
+// https://developer.android.com/google/play/billing/realtime_developer_notifications#json_specification
+export interface IGoogleSubscriptionNotificationRequestBody {
+  version: string;
+  packageName: string;
+  eventTimeMillis: long;
+  subscriptionNotification?: IGoogleSubscriptionNotification;
+  testNotification?: IGoogleTestNotification;
+}
+
+export interface IGoogleSubscriptionNotification {
+  version: string;
+  notificationType: int; // https://developer.android.com/google/play/billing/realtime_developer_notifications
+  purchaseToken: string;
+  subscriptionId: string;
+}
+
+export interface IGoogleTestNotification {
+  version: string;
+}
+
 // https://developer.apple.com/documentation/storekit/in-app_purchase/enabling_status_update_notifications
 //
 export interface IAppleSubscriptionNotificationRequestBody {

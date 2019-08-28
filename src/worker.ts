@@ -2,12 +2,13 @@
 const { version } = require('../package.json');
 
 import { createConnection } from 'typeorm';
+
 import { Sentry } from './sentry';
 
 import { connectionOptions } from './database/connection-options';
 
 import { listenCrawlFullArticle } from './pubsub/articles';
-import { listenForAppleSubscriptionNotifications } from './pubsub/in-app-subscriptions';
+import { listenForAppleSubscriptionNotifications, listenForGoogleSubscriptionNotifications } from './pubsub/in-app-subscriptions';
 import { logger } from './utils';
 
 logger.info('Worker init: Setting up...');
@@ -34,6 +35,7 @@ createConnection(connectionOptions('default')).then(async (connection: any) => {
     logger.info('Worker init: Ready to work!');
 
     listenForAppleSubscriptionNotifications();
+    listenForGoogleSubscriptionNotifications();
     listenCrawlFullArticle();
   } catch (err) {
     logger.error('Worker: Captured an uncaught error', err);

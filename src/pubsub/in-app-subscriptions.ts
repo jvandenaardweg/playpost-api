@@ -1,19 +1,20 @@
 import { Message, PubSub } from '@google-cloud/pubsub';
 import * as Sentry from '@sentry/node';
-import inAppPurchase from 'in-app-purchase';
 
+import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
-import { IAppleSubscriptionNotificationRequestBody } from '../typings';
+import { InAppSubscriptionService } from '../database/entities/in-app-subscription';
+import { IAppleSubscriptionNotificationRequestBody, IGoogleSubscriptionNotification, IGoogleSubscriptionNotificationRequestBody } from '../typings';
 import { logger } from '../utils';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
-const { GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS } = process.env;
+const { GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS, GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS } = process.env;
 
-inAppPurchase.config({
-  applePassword: process.env.APPLE_IAP_SHARED_SECRET, // this comes from iTunes Connect (You need this to valiate subscriptions)
-  test: process.env.NODE_ENV !== 'production', // Don't use sandbox validation on production
-  verbose: false // Output debug logs to stdout stream
-});
+if (!GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS) {
+  const errorMessage = 'Required env variable "GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS" not set. Please add it.';
+  logger.error(errorMessage);
+  throw new Error(errorMessage);
+}
 
 /**
  * Method to listen for Apple Subscription Notifications.
@@ -24,6 +25,80 @@ inAppPurchase.config({
  * We use Google's PubSub for message queue purposes
  *
  */
+export const listenForGoogleSubscriptionNotifications = async () => {
+  const loggerPrefix = 'Google PubSub Worker (Google Subscription Notifications):';
+
+  logger.info(loggerPrefix, 'Setup...');
+
+  const pubsub = new PubSub(getGoogleCloudCredentials());
+
+  // Verify if we are connected to pubsub by just checking if we can find the subscription
+  const subscriptions = await pubsub.getSubscriptions();
+  const hasSubscription = !!subscriptions[0].filter(subscription => subscription.name === GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS);
+
+  if (!hasSubscription) {
+    const errorMessage = `Subscription "${GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS}" could not be found in the PubSub client.`;
+    logger.error(loggerPrefix, errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  logger.info(loggerPrefix, 'Connected!');
+
+  const appleSubscriptionNotificationsSubscription = pubsub.subscription(GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS);
+
+  logger.info(loggerPrefix, 'Now listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_GOOGLE_SUBSCRIPTION_NOTIFICATIONS);
+
+  appleSubscriptionNotificationsSubscription.on('message', handleMessageGoogleMessage);
+};
+
+const handleMessageGoogleMessage = async (message: Message) => {
+  const loggerPrefix = 'Google PubSub Worker (Google Subscription Notifications) (message):';
+
+  let notification: IGoogleSubscriptionNotificationRequestBody;
+
+  try {
+    notification = JSON.parse(message.data.toString());
+
+    logger.info(loggerPrefix, 'Received notification:', notification);
+
+    // Ignore all notifications that don't have a notification type
+    // These could be our test messages
+    if (!notification) {
+      logger.warn(loggerPrefix, 'Received a message we cannot process. So we just Ack that message so it is deleted from the queue:', notification);
+      return message.ack();
+    }
+
+    if (notification.packageName !== APP_BUNDLE_ID) {
+      logger.warn(loggerPrefix, `Received a message we cannot process. The received message is from a different package: ${notification.packageName}. So we just Ack that message so it is deleted from the queue:`, notification);
+      return message.ack();
+    }
+
+    if (!notification.subscriptionNotification) {
+      logger.warn(loggerPrefix, `Did not receive a subscriptionNotification, we received a test notification from the Google Play Console. So we just Ack that message so it is deleted from the queue:`, notification);
+      return message.ack();
+    }
+
+    logger.info(loggerPrefix, 'Should handle: ', notification);
+
+    await handleGoogleSubscriptionStatusEvent(notification.subscriptionNotification, message, loggerPrefix);
+  } catch (err) {
+    const errorMessage = err && err.message ? err.message : 'Unknown error happened while processing this notification.';
+
+    Sentry.withScope(scope => {
+      scope.setExtra('message', JSON.parse(message.data.toString()));
+      scope.setExtra('notification', notification);
+      Sentry.captureException(err);
+    });
+
+    logger.error(loggerPrefix, errorMessage);
+
+    message.nack(); // re-deliver, so we can retry.
+    logger.info(loggerPrefix, 'Sending nack(), so we can retry...');
+
+    // TODO: Could possibly result in messages being nack'd all the time, to infinity. Find a way to resolve that later.
+  }
+};
+
 export const listenForAppleSubscriptionNotifications = async () => {
   const loggerPrefix = 'Google PubSub Worker (Apple Subscription Notifications):';
 
@@ -53,10 +128,10 @@ export const listenForAppleSubscriptionNotifications = async () => {
 
   logger.info(loggerPrefix, 'Now listening for Google PubSub messages on:', GOOGLE_PUBSUB_SUBSCRIPTION_APPLE_SUBSCRIPTION_NOTIFICATIONS);
 
-  appleSubscriptionNotificationsSubscription.on('message', handleMessage);
+  appleSubscriptionNotificationsSubscription.on('message', handleMessageAppleMessage);
 };
 
-const handleMessage = async (message: Message) => {
+const handleMessageAppleMessage = async (message: Message) => {
   const loggerPrefix = 'Google PubSub Worker (Apple Subscription Notifications) (message):';
 
   let notification = {} as any as IAppleSubscriptionNotificationRequestBody;
@@ -73,7 +148,7 @@ const handleMessage = async (message: Message) => {
       return message.ack();
     }
 
-    await handleSubscriptionStatusEvent(notification, message, loggerPrefix);
+    await handleAppleSubscriptionStatusEvent(notification, message, loggerPrefix);
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'Unknown error happened while processing this notification.';
 
@@ -101,7 +176,7 @@ const handleMessage = async (message: Message) => {
  * @param reDeliverDelayInSeconds
  * @param loggerPrefix
  */
-const handleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNotificationRequestBody, message: Message, loggerPrefix: string) => {
+const handleAppleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNotificationRequestBody, message: Message, loggerPrefix: string) => {
   const availableEvents = ['INITIAL_BUY', 'CANCEL', 'RENEWAL', 'INTERACTIVE_RENEWAL', 'DID_CHANGE_RENEWAL_PREF', 'DID_CHANGE_RENEWAL_STATUS'];
 
   logger.info(loggerPrefix, notification);
@@ -160,12 +235,59 @@ const handleSubscriptionStatusEvent = async (notification: IAppleSubscriptionNot
   const productId = getProductId(notification);
 
   try {
-    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId);
+    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.APPLE);
     return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('notification', notification);
+      scope.setExtra('latestReceipt', latestReceipt);
+      scope.setExtra('originalTransactionId', originalTransactionId);
+      Sentry.captureException(err);
+    });
+
+    throw err;
+  }
+};
+
+const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGoogleSubscriptionNotification, message: Message, loggerPrefix: string) => {
+  // https://developer.android.com/google/play/billing/realtime_developer_notifications
+  const availableNotificationTypes = {
+    '0': 'SUBSCRIPTION_RECOVERED', // A subscription was recovered from account hold.
+    '2': 'SUBSCRIPTION_RENEWED', // An active subscription was renewed.
+    '3': 'SUBSCRIPTION_CANCELED', // A subscription was either voluntarily or involuntarily cancelled. For voluntary cancellation, sent when the user cancels.
+    '4': 'SUBSCRIP￼￼TION_PURCHASED', // A new subscription was purchased.
+    '5': 'SUBSCRIPTION_ON_HOLD', // A subscription has entered account hold (if enabled).
+    '6': 'SUBSCRIPTION_IN_GRACE_PERIOD', // A subscription has entered grace period (if enabled).
+    '7': 'SUBSCRIPTION_RESTARTED', // User has reactivated their subscription from Play > Account > Subscriptions (requires opt-in for subscription restoration)
+    '8': 'SUBSCRIPTION_PRICE_CHANGE_CONFIRMED', // A subscription price change has successfully been confirmed by the user.
+    '9': 'SUBSCRIPTION_DEFERRED', // A subscription's recurrence time has been extended.
+    '12': 'SUBSCRIPTION_REVOKED', // A subscription has been revoked from the user before the expiration time.
+    '13': 'SUBSCRIPTION_EXPIRED' // A subscription has expired.
+  }
+
+  logger.info(loggerPrefix, subscriptionNotification);
+
+  // If its not an event from our availableNotificationTypes, we ignore the message
+  if (!availableNotificationTypes[subscriptionNotification.notificationType]) {
+    logger.warn(loggerPrefix, 'Received an event not in our notificationTypes list: ', subscriptionNotification.notificationType);
+    logger.warn(loggerPrefix, 'Removing the event from the queue...');
+    return message.ack();
+  }
+
+  logger.info(loggerPrefix, `Processing "${availableNotificationTypes[subscriptionNotification.notificationType]}" notification...`);
+
+  const latestReceipt = null; // Google does not give a receipt in the notification
+  const originalTransactionId = subscriptionNotification.purchaseToken; // We normalize Google's "purchaseToken" to "originalTransactionId"
+  // const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
+
+  try {
+    // await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
+    // return message.ack(); // Remove the message from the queue
+  } catch (err) {
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('subscriptionNotification', subscriptionNotification);
       scope.setExtra('latestReceipt', latestReceipt);
       scope.setExtra('originalTransactionId', originalTransactionId);
       Sentry.captureException(err);
