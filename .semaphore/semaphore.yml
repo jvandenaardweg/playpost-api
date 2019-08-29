@@ -16,9 +16,9 @@ blocks:
             - nvm use
             - node --version
             - npm --version
-            - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+            - cache restore
             - npm install
-            - cache store node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json) node_modules
+            - cache store
             - npm run build
   - name: Test
     skip:
@@ -29,7 +29,7 @@ blocks:
       prologue:
         commands:
           - checkout
-          - cache restore node-modules-$SEMAPHORE_GIT_BRANCH-$(checksum package-lock.json),node-modules-$SEMAPHORE_GIT_BRANCH,node-modules-master
+          - cache restore
           - nvm use
           - node --version
           - npm --version
