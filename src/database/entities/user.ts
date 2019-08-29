@@ -10,9 +10,9 @@ import { PlaylistItem } from './playlist-item';
 
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
+import { ApiKey } from './api-key';
 import { UserInAppSubscription } from './user-in-app-subscription';
 import { UserVoiceSetting } from './user-voice-setting';
-import { ApiKey } from './api-key';
 
 const { JWT_SECRET } = process.env;
 
