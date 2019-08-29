@@ -10,6 +10,7 @@ import { userInputValidationSchema, userVoiceSettingValidationSchema } from '../
 import { logger } from '../utils';
 
 import * as cacheKeys from '../cache/keys';
+import { ApiKey } from '../database/entities/api-key';
 import { UserRepository } from '../database/repositories/user';
 
 const MESSAGE_ME_NOT_FOUND = 'Your account is not found. This could happen when your account is (already) deleted.';
@@ -214,4 +215,89 @@ export const createSelectedVoice = async (req: Request, res: Response) => {
     Sentry.captureException(err);
     return res.status(400).json({ message: errorMessage });
   }
+};
+
+/**
+ * Returns all the API keys of the user.
+ *
+ * @param req
+ * @param res
+ */
+export const findAllApiKeys = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const keyRepository = getRepository(ApiKey);
+
+  const userKeys = await keyRepository.find({
+    user: {
+      id: userId
+    }
+  });
+
+  return res.json(userKeys);
+};
+
+/**
+ * Method to delete an API Key from the database.
+ * This could only be done by the owner of the API key.
+ *
+ * @param req
+ * @param res 
+ */
+export const deleteApiKey = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const apiKeyId = req.params.apiKeyId;
+  const apiKeyRepository = getRepository(ApiKey);
+
+  // Verify if the user has access to that key
+  const existingKey = await apiKeyRepository.findOne(apiKeyId, {
+    where: {
+      user: {
+        id: userId
+      }
+    }
+  })
+
+  if (!existingKey) {
+    return res.status(400).json({ message: 'API key could not be found, or you do not have access to use this API key.' });
+  }
+
+  await apiKeyRepository.remove(existingKey);
+
+  return res.json({ message: 'API Key is successfully deleted!' });
+};
+
+/**
+ * Method to delete an API Key from the database.
+ * This could only be done by the owner of the API key.
+ *
+ * @param req
+ * @param res 
+ */
+export const createApiKey = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { label } = req.body;
+  const apiKeyRepository = getRepository(ApiKey);
+
+  // IMPORTANT: Only show this "apiKey" and "apiSecret" to the user ONCE
+  const apiKey = ApiKey.generateApiKey();
+  const apiSecret = ApiKey.generateApiSecret();
+
+  // Store the signature in our database, so we can compare the user's API Key and API Secret when they send it to our server
+  const signature = ApiKey.generateApiKeySignature(apiKey, apiSecret);
+
+  const apiKeyToCreate = await apiKeyRepository.create({
+    key: apiKey,
+    signature,
+    label,
+    user: {
+      id: userId
+    }
+  });
+
+  await apiKeyRepository.save(apiKeyToCreate);
+
+  return res.json({
+    apiKey,
+    apiSecret
+  });
 };

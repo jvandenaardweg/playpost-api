@@ -12,6 +12,7 @@ import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../maile
 import { logger } from '../../utils';
 import { UserInAppSubscription } from './user-in-app-subscription';
 import { UserVoiceSetting } from './user-voice-setting';
+import { ApiKey } from './api-key';
 
 const { JWT_SECRET } = process.env;
 
@@ -89,6 +90,9 @@ export class User {
 
   @OneToMany(type => Audiofile, audiofile => audiofile.user)
   audiofiles: Audiofile[];
+
+  @OneToMany(type => ApiKey, apiKey => apiKey.user)
+  apiKeys: ApiKey[];
 
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
   playlistItems: PlaylistItem[];

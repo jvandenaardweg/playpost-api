@@ -28,12 +28,14 @@ import * as usersController from './controllers/users';
 import * as voicesController from './controllers/voices';
 
 import { expressRateLimitRedisStore } from './cache';
+import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
+import { getRealUserIpAddress } from './utils/ip-address';
 
 const PORT = process.env.PORT || 3000;
 
-const IS_PROTECTED = passport.authenticate('jwt', {
+const IS_PROTECTED_ENDPOINT = passport.authenticate(['jwt', 'x-api-key-secret'], {
   session: false,
   failWithError: true
 });
@@ -115,9 +117,7 @@ export const setupServer = async () => {
     max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
     keyGenerator: req => {
       const authorizationHeaders = req.headers.authorization as string;
-      const cloudflareIpAddress = req.headers['cf-connecting-ip'] as string;
-      const xForwardedForIpAddress = req.headers['x-forwarded-for'] as string;
-      const ipAddressOfUser = cloudflareIpAddress || xForwardedForIpAddress || req.ip;
+      const ipAddressOfUser = getRealUserIpAddress(req);
 
       // Create a key based on the authorization headers and the ip address
       // So we can filter on a per-user basis, so we don't block multiple users behind the same ip address
@@ -181,7 +181,12 @@ export const setupServer = async () => {
 
   // Use passport authentication
   app.use(passport.initialize());
-  require('./config/passport')(passport);
+
+  passport.use(jwtPassportStrategy);
+  passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
+
+  // passport.use()
+  // require('./config/passport')(passport);
 
   // Make express allow JSON payload bodies
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
@@ -200,54 +205,59 @@ export const setupServer = async () => {
   // Protected
 
   // v1/users
-  app.get('/v1/users', IS_PROTECTED, usersController.findAllUsers); // Admin only
-  app.delete('/v1/users/:userId', IS_PROTECTED, usersController.deleteUser); // Admin only
+  app.get('/v1/users', IS_PROTECTED_ENDPOINT, usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', IS_PROTECTED_ENDPOINT, usersController.deleteUser); // Admin only
 
   // /v1/me
-  app.get('/v1/me', IS_PROTECTED, meController.findCurrentUser);
-  app.patch('/v1/me/email', IS_PROTECTED, meController.updateEmail);
-  app.patch('/v1/me/password', IS_PROTECTED, meController.updatePassword);
-  app.post('/v1/me/voices', IS_PROTECTED, meController.createSelectedVoice); // Setting the default voice per language for the user
-  app.delete('/v1/me', IS_PROTECTED, meController.deleteCurrentUser);
+  app.get('/v1/me', IS_PROTECTED_ENDPOINT, meController.findCurrentUser);
+  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail);
+  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword);
+  app.post('/v1/me/voices', IS_PROTECTED_ENDPOINT, meController.createSelectedVoice); // Setting the default voice per language for the user
+  app.delete('/v1/me', IS_PROTECTED_ENDPOINT, meController.deleteCurrentUser);
+
+  // /v1/me/keys
+  app.get('/v1/me/keys', IS_PROTECTED_ENDPOINT, meController.findAllApiKeys);
+  app.delete('/v1/me/keys/:keyId', IS_PROTECTED_ENDPOINT, meController.deleteApiKey);
+  app.post('/v1/me/keys', IS_PROTECTED_ENDPOINT, meController.createApiKey);
 
   // Playlists => /v1/playlist
-  app.get('/v1/playlist', IS_PROTECTED, playlistController.findAllPlaylistItems);
-  app.get('/v1/playlist/favorites', IS_PROTECTED, playlistController.findAllFavoritedItems);
-  app.get('/v1/playlist/archived', IS_PROTECTED, playlistController.findAllArchivedItems);
-  app.post('/v1/playlist/articles', IS_PROTECTED, playlistController.createPlaylistItemByArticleUrl);
-  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED, playlistController.deletePlaylistItem);
-  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED, playlistController.patchPlaylistItemOrder);
-  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED, playlistController.patchPlaylistItemFavoritedAt);
-  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED, playlistController.patchPlaylistItemArchivedAt);
+  app.get('/v1/playlist', IS_PROTECTED_ENDPOINT, playlistController.findAllPlaylistItems);
+  app.get('/v1/playlist/favorites', IS_PROTECTED_ENDPOINT, playlistController.findAllFavoritedItems);
+  app.get('/v1/playlist/archived', IS_PROTECTED_ENDPOINT, playlistController.findAllArchivedItems);
+  app.post('/v1/playlist/articles', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleUrl);
+  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.deletePlaylistItem);
+  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemOrder);
+  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemFavoritedAt);
+  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
-  app.get('/v1/articles/:articleId', IS_PROTECTED, articlesController.findArticleById);
-  app.put('/v1/articles/:articleId/sync', IS_PROTECTED, articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', IS_PROTECTED, articlesController.deleteById); // Admin only
-  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED, articlesController.findAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED, audiofileController.createAudiofile);
+  app.get('/v1/articles/:articleId', IS_PROTECTED_ENDPOINT, articlesController.findArticleById);
+  app.put('/v1/articles/:articleId/sync', IS_PROTECTED_ENDPOINT, articlesController.syncArticleWithSource);
+  app.delete('/v1/articles/:articleId', IS_PROTECTED_ENDPOINT, articlesController.deleteById); // Admin only
+  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED_ENDPOINT, articlesController.findAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED_ENDPOINT, audiofileController.createAudiofile);
 
   // v1/audiofiles
-  app.get('/v1/audiofiles', IS_PROTECTED, audiofileController.findAllAudiofiles);
-  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.deleteById); // Admin only
-  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED, audiofileController.findById); // Now in use by our iOS App
+  app.get('/v1/audiofiles', IS_PROTECTED_ENDPOINT, audiofileController.findAllAudiofiles);
+  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED_ENDPOINT, audiofileController.deleteById); // Admin only
+  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED_ENDPOINT, audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', IS_PROTECTED, voicesController.findAll);
-  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED, voicesController.createVoicePreview);
-  app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED, voicesController.deleteVoicePreview);
-  app.get('/v1/voices/active', IS_PROTECTED, voicesController.findAllActive);
-  app.get('/v1/voices/active/free', IS_PROTECTED, voicesController.findAllActiveFreeVoices);
-  app.get('/v1/voices/active/premium', IS_PROTECTED, voicesController.findAllActivePremiumVoices);
+  app.get('/v1/voices', IS_PROTECTED_ENDPOINT, voicesController.findAll);
+  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.createVoicePreview);
+  app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.deleteVoicePreview);
+  app.get('/v1/voices/active', IS_PROTECTED_ENDPOINT, voicesController.findAllActive);
+  app.get('/v1/voices/active/free', IS_PROTECTED_ENDPOINT, voicesController.findAllActiveFreeVoices);
+  app.get('/v1/voices/active/premium', IS_PROTECTED_ENDPOINT, voicesController.findAllActivePremiumVoices);
 
   // v1/languages
-  app.get('/v1/languages', IS_PROTECTED, languagesController.findAll);
-  app.get('/v1/languages/active', IS_PROTECTED, languagesController.findAllActive);
+  app.get('/v1/languages', IS_PROTECTED_ENDPOINT, languagesController.findAll);
+  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive);
 
   // v1/subscriptions
-  // app.get('/v1/subscriptions', IS_PROTECTED, subscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED, inAppSubscriptionsController.findAllActive);
-  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  // app.get('/v1/subscriptions', IS_PROTECTED_ENDPOINT, subscriptionsController.findAll);
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive);
+  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
