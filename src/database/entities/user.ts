@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import { IsEmail, IsUUID } from 'class-validator';
+import { IsDate, IsEmail, IsUUID } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
 import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
@@ -105,9 +105,11 @@ export class User {
   inAppSubscriptions: UserInAppSubscription[];
 
   @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 
   @BeforeInsert()

@@ -70,9 +70,11 @@ export class ApiKey {
   lastUsedIpAddress: string;
 
   @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 
 }

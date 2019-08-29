@@ -1,4 +1,4 @@
-import { IsUUID } from 'class-validator';
+import { IsDate, IsUUID } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
 import { ColumnNumericTransformer } from '../utils';
@@ -100,9 +100,11 @@ export class Voice {
   exampleAudioUrl: string;
 
   @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 
   @OneToMany(type => Audiofile, audiofile => audiofile.voice, { onDelete: 'NO ACTION' }) // On delete of a Audiofile, don't remove the voice

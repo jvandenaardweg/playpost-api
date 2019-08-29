@@ -1,4 +1,4 @@
-import { IsUUID } from 'class-validator';
+import { IsUrl, IsUUID } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
 import { User } from './user';
@@ -22,6 +22,7 @@ export class Audiofile {
   id: string;
 
   @Column({ nullable: true })
+  @IsUrl()
   url: string;
 
   @Column({ nullable: true })
