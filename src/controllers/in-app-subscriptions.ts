@@ -5,7 +5,7 @@ import joi from 'joi';
 import { getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
-import { InAppSubscription } from '../database/entities/in-app-subscription';
+import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription';
 import { logger } from '../utils';
 
@@ -365,7 +365,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     }
 
     // @ts-ignore
-    const latestReceipt = validationResponse.latest_receipt || receipt;
+    const latestReceipt: string = validationResponse.latest_receipt || receipt;
 
     // @ts-ignore
     const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
@@ -425,7 +425,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   }
 };
 
-export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string, originalTransactionId?: string, productId?: string | null): Promise<UserInAppSubscription> => {
+export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string, originalTransactionId?: string, productId?: string | null, service?: InAppSubscriptionService): Promise<UserInAppSubscription> => {
   if (!latestReceipt) {
     throw new Error('latestReceipt not found. Which we need to update our user his subscription status in our database.');
   }
