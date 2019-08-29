@@ -40,13 +40,13 @@ export enum EVoiceAudioProfile {
 @Entity()
 @Unique(['isLanguageDefault', 'languageCode'])
 @Unique(['languageCode', 'label'])
-@Index(['languageCode', 'isActive', 'isPremium', 'isHighestQuality', 'quality'])
 export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
 
+  @Index()
   @Column({ nullable: false }) // en-US
   languageCode: string;
 
@@ -65,6 +65,7 @@ export class Voice {
   @Column({ type: 'enum', enum: EVoiceSynthesizer, nullable: false }) // Google or AWS
   synthesizer: EVoiceSynthesizer;
 
+  @Index()
   @Column({ type: 'enum', enum: EVoiceQuality, nullable: false, default: EVoiceQuality.NORMAL }) // Default is "Normal" (lowest quality)
   quality: EVoiceQuality;
 
@@ -80,12 +81,15 @@ export class Voice {
   @Column({ nullable: true })
   naturalSampleRateHertz: number;
 
+  @Index()
   @Column({ nullable: false, default: false }) // true means it is available for our users, false is unavailable for our users
   isActive: boolean;
 
+  @Index()
   @Column({ nullable: false, default: true }) // Determine if this voice requires a subscription within the app
   isPremium: boolean;
 
+  @Index()
   @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
   isHighestQuality: boolean;
 

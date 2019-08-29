@@ -21,6 +21,7 @@ import { Country1565878550451 } from './database/migrations/1565878550451-Countr
 import { LanguageCountries1565882851553 } from './database/migrations/1565882851553-LanguageCountries';
 import { VoiceCountry1565887701525 } from './database/migrations/1565887701525-VoiceCountry';
 import { ApiKeys1567094182609 } from './database/migrations/1567094182609-ApiKeys';
+import { Indexes1567101511834 } from './database/migrations/1567101511834-Indexes';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -57,7 +58,8 @@ const config: ConnectionOptions = {
     Country1565878550451,
     LanguageCountries1565882851553,
     VoiceCountry1565887701525,
-    ApiKeys1567094182609
+    ApiKeys1567094182609,
+    Indexes1567101511834
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

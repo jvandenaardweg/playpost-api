@@ -1,9 +1,8 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Language } from './language';
 
 @Entity()
-@Unique(['code'])
 export class Country {
 
   @PrimaryGeneratedColumn('uuid')
@@ -13,7 +12,7 @@ export class Country {
   @Column()
   name: string; // Netherlands
 
-  @Column()
+  @Column({ unique: true })
   code: string; // NL
 
   @Column()

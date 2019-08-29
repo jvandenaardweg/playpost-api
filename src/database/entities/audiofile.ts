@@ -16,7 +16,6 @@ export enum AudiofileMimeType {
 }
 
 @Entity()
-@Index(['article', 'user', 'createdAt'])
 export class Audiofile {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -37,15 +36,18 @@ export class Audiofile {
   @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
   mimeType: AudiofileMimeType;
 
+  @Index()
   @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;
 
   @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
   voice: Voice;
 
+  @Index()
   @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   user: User;
 
+  @Index()
   @CreateDateColumn()
   createdAt: Date;
 

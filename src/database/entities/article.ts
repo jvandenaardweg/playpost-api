@@ -18,7 +18,6 @@ export enum ArticleStatus {
 }
 
 @Entity()
-@Index(['url', 'canonicalUrl'])
 export class Article extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -30,10 +29,12 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
+  @Index()
   @Column({ unique: true })
   @IsUrl()
   url: string;
 
+  @Index()
   @Column({ unique: true, nullable: true })
   @IsUrl()
   // The "canonicalUrl" is filled in after we crawl the page. We could get redirects. The URL we end up is the "canonicalUrl", which could be different then "url".

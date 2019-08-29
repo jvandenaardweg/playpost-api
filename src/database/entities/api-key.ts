@@ -1,6 +1,6 @@
 import { IsDate, IsIP, IsUUID } from 'class-validator';
 import crypto from 'crypto';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user';
 
 /**
@@ -41,11 +41,13 @@ export class ApiKey {
   @Column({ nullable: true })
   label: string;
 
+  @Index()
   @Column({ nullable: false, unique: true })
   key: string;
 
   // A hash generated with the API Key and API Secret
   // Both API Key and API Secret is needed to compare the signature
+  @Index()
   @Column({ nullable: false, unique: true, select: false })
   signature: string;
 

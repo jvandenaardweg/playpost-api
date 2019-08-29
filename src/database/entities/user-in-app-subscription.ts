@@ -17,7 +17,6 @@ export enum InAppSubscriptionEnvironment {
 }
 
 @Entity()
-@Index(['user', 'inAppSubscription', 'latestTransactionId', 'originalTransactionId'])
 export class UserInAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
@@ -31,9 +30,11 @@ export class UserInAppSubscription {
   @IsDate()
   expiresAt: Date; // expires date
 
+  @Index()
   @Column({ nullable: true, unique: true })
   latestTransactionId: string; // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)
 
+  @Index()
   @Column({ nullable: true, unique: true })
   originalTransactionId: string; // The initial transaction the user did to purchase the subscription
 
@@ -55,11 +56,13 @@ export class UserInAppSubscription {
   @Column({ type: 'enum', enum: InAppSubscriptionEnvironment, nullable: false })
   environment: InAppSubscriptionEnvironment;
 
+  @Index()
   @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
   // When we delete a user, we keep their purchase history, so we can keep track of purchases
   // User could also be null if we receive purchase events from Apple, but we didnt register a purchase in our database
   user: User;
 
+  @Index()
   @ManyToOne(type => InAppSubscription, { onDelete: 'RESTRICT', eager: true })
   // When we try to delete a Subscription, prevent that from happening
   inAppSubscription: InAppSubscription;

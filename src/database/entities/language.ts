@@ -6,7 +6,6 @@ import { Voice } from './voice';
 
 @Entity()
 @Unique(['name', 'code']) // Only one unique code and name combination
-@Index(['code', 'isActive'])
 export class Language {
 
   @PrimaryGeneratedColumn('uuid')
@@ -19,12 +18,14 @@ export class Language {
   @Column({ nullable: true })
   nativeName: string; // French => Français
 
+  @Index()
   @Column()
   code: string; // fr, en, de, nl...
 
   @Column({ default: false })
   rightToLeft: boolean; // like Arabic reads from "right to left"
 
+  @Index()
   @Column({ default: false })
   isActive: boolean; // to allow languages to be displayed or not
 

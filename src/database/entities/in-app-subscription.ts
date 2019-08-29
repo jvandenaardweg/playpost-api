@@ -25,12 +25,12 @@ export enum InAppSubscriptionCurrency {
 
 @Entity()
 @Unique(['productId', 'service'])
-@Index(['productId', 'isActive'])
 export class InAppSubscription {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
 
+  @Index()
   @Column({ nullable: false }) // "premium"
   productId: string;
 
@@ -58,6 +58,7 @@ export class InAppSubscription {
   @Column({ nullable: false, default: 0 })
   limitSecondsPerArticle: number;
 
+  @Index()
   @Column({ nullable: false, default: false })
   isActive: boolean;
 

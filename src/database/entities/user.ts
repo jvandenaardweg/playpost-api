@@ -2,7 +2,7 @@ import bcryptjs from 'bcryptjs';
 import { IsEmail, IsUUID } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
-import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
@@ -63,6 +63,7 @@ export class User {
   @IsUUID()
   id: string;
 
+  @Index()
   @Column({ nullable: false, unique: true })
   @IsEmail()
   email: string;
