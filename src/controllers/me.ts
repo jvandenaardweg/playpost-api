@@ -103,13 +103,13 @@ export class MeController {
 
     const hashedPassword = await this.userEntity.hashPassword(password);
 
-    await this.customUserRepository .update(userId, { password: hashedPassword });
+    await this.customUserRepository.update(userId, { password: hashedPassword });
 
     // Remove the JWT verification cache as the user updated data
     const cache = await getConnection('default').queryResultCache;
     if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
-    const updatedUser = await this.customUserRepository .findOne(userId);
+    const updatedUser = await this.customUserRepository.findOne(userId);
 
     return res.json(updatedUser);
   };
@@ -154,7 +154,7 @@ export class MeController {
         throw new Error(errorMessage);
       }
 
-      const user = await this.customUserRepository .findUserDetails(userId);
+      const user = await this.customUserRepository.findUserDetails(userId);
 
       if (!user) {
         return res.status(400).json({ message: 'User not found.' });
