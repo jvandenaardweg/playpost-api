@@ -37,13 +37,214 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "GET",
 						"header": [
 							{
-								"key": "",
-								"value": "",
+								"key": "X-Api-Key",
+								"value": "3917212fa0a4db52b57bd8dacb6f152fbe27746bb42fbc1e1ab73707f1dca577",
+								"type": "text"
+							},
+							{
+								"key": "X-Api-Secret",
+								"value": "1974cbaa83cdfe4571d1c4706bf29daa846e6c0c50d607bdae9cc29bc9356836",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me"
+							]
+						},
+						"description": "Gets basic account details of the current user. It excludes the password."
+					},
+					"response": [
+						{
+							"name": "Get account details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/v1/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-DNS-Prefetch-Control",
+									"value": "off"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=15552000; includeSubDomains"
+								},
+								{
+									"key": "X-Download-Options",
+									"value": "noopen"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Content-Security-Policy",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "X-Content-Security-Policy",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "X-WebKit-CSP",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "Surrogate-Control",
+									"value": "no-store"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Permitted-Cross-Domain-Policies",
+									"value": "none"
+								},
+								{
+									"key": "Referrer-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "X-RateLimit-Limit",
+									"value": "9999"
+								},
+								{
+									"key": "X-RateLimit-Remaining",
+									"value": "9998"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 26 Jun 2019 08:40:57 GMT"
+								},
+								{
+									"key": "X-RateLimit-Reset",
+									"value": "1561538518"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2c1c-+3Tti7QUlyE7bv4vR9ejiCrmAxI\""
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								},
+								{
+									"key": "X-Response-Time",
+									"value": "69.780ms"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"34dba06f-091d-425b-90b7-66ada329e2f8\",\n    \"email\": \"jordyvandenaardweg@gmail.com\",\n    \"authenticatedAt\": \"2019-06-26T07:06:13.546Z\",\n    \"activatedAt\": null,\n    \"createdAt\": \"2019-02-27T13:31:29.376Z\",\n    \"updatedAt\": \"2019-06-26T05:06:13.561Z\",\n    \"voiceSettings\": [\n        {\n            \"id\": \"ba1df53b-4771-4030-86c9-6a3da7f3669b\",\n            \"createdAt\": \"2019-05-17T08:33:03.988Z\",\n            \"updatedAt\": \"2019-05-17T14:13:45.909Z\",\n            \"voice\": {\n                \"id\": \"8966adf6-ebf6-432e-b2ba-b6d04c332c12\",\n                \"languageCode\": \"fr-FR\",\n                \"countryCode\": \"FR\",\n                \"name\": \"Celine\",\n                \"label\": \"Céline\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/8966adf6-ebf6-432e-b2ba-b6d04c332c12.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.481Z\",\n                \"updatedAt\": \"2019-06-24T09:32:14.663Z\",\n                \"language\": {\n                    \"id\": \"be6b0434-8a3e-4747-863e-1842cf3eadd0\",\n                    \"name\": \"French\",\n                    \"nativeName\": \"Français\",\n                    \"code\": \"fr\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:56.203Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:56.203Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"be6b0434-8a3e-4747-863e-1842cf3eadd0\",\n                \"name\": \"French\",\n                \"nativeName\": \"Français\",\n                \"code\": \"fr\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:56.203Z\",\n                \"updatedAt\": \"2019-05-16T12:52:56.203Z\"\n            }\n        },\n        {\n            \"id\": \"e9c9df46-8fa4-4eef-869d-3f66e06a9f7d\",\n            \"createdAt\": \"2019-05-17T12:53:26.471Z\",\n            \"updatedAt\": \"2019-06-20T13:08:16.401Z\",\n            \"voice\": {\n                \"id\": \"b9bf2c50-205e-48e7-9a7c-e3bc91e2615b\",\n                \"languageCode\": \"es-ES\",\n                \"countryCode\": \"ES\",\n                \"name\": \"Conchita\",\n                \"label\": \"Conchita\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/b9bf2c50-205e-48e7-9a7c-e3bc91e2615b.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.574Z\",\n                \"updatedAt\": \"2019-06-24T09:34:49.951Z\",\n                \"language\": {\n                    \"id\": \"ba90fa75-e9fd-419d-a0f7-294ac5181bdd\",\n                    \"name\": \"Spanish\",\n                    \"nativeName\": \"Español\",\n                    \"code\": \"es\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:41.748Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:41.748Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"ba90fa75-e9fd-419d-a0f7-294ac5181bdd\",\n                \"name\": \"Spanish\",\n                \"nativeName\": \"Español\",\n                \"code\": \"es\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:41.748Z\",\n                \"updatedAt\": \"2019-05-16T12:52:41.748Z\"\n            }\n        },\n        {\n            \"id\": \"079f9a98-89ce-41c0-afb0-05400f3d151b\",\n            \"createdAt\": \"2019-05-17T06:03:53.958Z\",\n            \"updatedAt\": \"2019-06-20T13:12:28.280Z\",\n            \"voice\": {\n                \"id\": \"7a0adf8e-e4a1-4edd-8030-45b6623fccef\",\n                \"languageCode\": \"de-DE\",\n                \"countryCode\": \"DE\",\n                \"name\": \"Hans\",\n                \"label\": \"Hans\",\n                \"gender\": \"MALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/7a0adf8e-e4a1-4edd-8030-45b6623fccef.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.832Z\",\n                \"updatedAt\": \"2019-06-24T09:34:34.920Z\",\n                \"language\": {\n                    \"id\": \"80dacadd-8451-4d50-a3d4-b67d4870f1f9\",\n                    \"name\": \"German\",\n                    \"nativeName\": \"Deutsch\",\n                    \"code\": \"de\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:16.404Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:16.404Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"80dacadd-8451-4d50-a3d4-b67d4870f1f9\",\n                \"name\": \"German\",\n                \"nativeName\": \"Deutsch\",\n                \"code\": \"de\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:16.404Z\",\n                \"updatedAt\": \"2019-05-16T12:52:16.404Z\"\n            }\n        },\n        {\n            \"id\": \"ee9d5c97-50f7-41e3-95c1-4846f0f28dbf\",\n            \"createdAt\": \"2019-05-17T05:40:10.863Z\",\n            \"updatedAt\": \"2019-06-19T08:58:23.370Z\",\n            \"voice\": {\n                \"id\": \"d4c0973c-5a36-4950-afe1-3e2224592c20\",\n                \"languageCode\": \"nl-NL\",\n                \"countryCode\": \"NL\",\n                \"name\": \"Ruben\",\n                \"label\": \"Ruben\",\n                \"gender\": \"MALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/d4c0973c-5a36-4950-afe1-3e2224592c20.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.293Z\",\n                \"updatedAt\": \"2019-06-24T09:34:34.959Z\",\n                \"language\": {\n                    \"id\": \"cd72f71c-dc59-4be7-8a40-0143fe6f0ad9\",\n                    \"name\": \"Dutch\",\n                    \"nativeName\": \"Nederlands\",\n                    \"code\": \"nl\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:08.217Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:08.217Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"cd72f71c-dc59-4be7-8a40-0143fe6f0ad9\",\n                \"name\": \"Dutch\",\n                \"nativeName\": \"Nederlands\",\n                \"code\": \"nl\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:08.217Z\",\n                \"updatedAt\": \"2019-05-16T12:52:08.217Z\"\n            }\n        },\n        {\n            \"id\": \"5dc78d9f-7030-4819-bc46-61fafacbc7ba\",\n            \"createdAt\": \"2019-05-16T13:16:04.102Z\",\n            \"updatedAt\": \"2019-06-25T10:14:58.337Z\",\n            \"voice\": {\n                \"id\": \"1b188f84-9d15-4a5a-85c6-f27ac44699fc\",\n                \"languageCode\": \"en-US\",\n                \"countryCode\": \"US\",\n                \"name\": \"en-US-Wavenet-C\",\n                \"label\": \"Isabella\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"Google\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": 24000,\n                \"isActive\": true,\n                \"isPremium\": true,\n                \"isHighestQuality\": true,\n                \"isLanguageDefault\": null,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/1b188f84-9d15-4a5a-85c6-f27ac44699fc.wav\",\n                \"createdAt\": \"2019-04-25T07:27:13.215Z\",\n                \"updatedAt\": \"2019-06-24T09:37:10.469Z\",\n                \"language\": {\n                    \"id\": \"95f01039-fe8e-412d-a542-7089303b84c8\",\n                    \"name\": \"English\",\n                    \"nativeName\": \"English\",\n                    \"code\": \"en\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:51:57.546Z\",\n                    \"updatedAt\": \"2019-05-16T12:51:57.546Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"95f01039-fe8e-412d-a542-7089303b84c8\",\n                \"name\": \"English\",\n                \"nativeName\": \"English\",\n                \"code\": \"en\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:51:57.546Z\",\n                \"updatedAt\": \"2019-05-16T12:51:57.546Z\"\n            }\n        }\n    ],\n    \"inAppSubscriptions\": [\n        {\n            \"id\": \"e3901c8f-5a61-46bb-bebf-e7ed9f936922\",\n            \"startedAt\": \"2019-05-25T12:17:51.000Z\",\n            \"expiresAt\": \"2019-06-25T12:31:59.000Z\",\n            \"latestTransactionId\": \"1000000540452201\",\n            \"originalTransactionId\": \"1000000531243136\",\n            \"latestReceipt\": \"ewoJInNpZ25hdHVyZSIgPSAiQTBzS2R6dzAxNHlpMU55STFIbm80Sk9BMVRpRnNEemNHRTJpSS96SUU4Yjh5bkw5Y21pMlpwai9TaWVSSi9PeGVPdWRya3lXQ1VLR3ErbVIzUlpkYVdaUUdHWlRmUUd6NzFxY0FTQ0Q3ZnhnRTlvL1FCczF3bXk4WGpUdEt6MTdLUnhrSkhZWmR3UU5jcEpMSEhhWUl5VXBmOER5QjNrQlIwTXMzdTFYZXhVSE1QK25scDk5RzFnYmZCMFAxYlpHbnRrcWhmTUE0V2lHR01qMjFCY1kxbnpoaWl6YlRwb1IvMG5JaDdBMERZbldMUm9DcHpyR2xkYjd2YmlHQ1BuOEFKU2VKT1ZkL1oyTzJPaTVnYzZkWXZQSHFRYnI0SFNKeElNRmJ6NnhTZ01LZlB2eG1meUp1N2FGK2pISjBIZFN1bUVHaUNIWUF0MFY4VHM5dnBkZGR0a0FBQVdBTUlJRmZEQ0NCR1NnQXdJQkFnSUlEdXRYaCtlZUNZMHdEUVlKS29aSWh2Y05BUUVGQlFBd2daWXhDekFKQmdOVkJBWVRBbFZUTVJNd0VRWURWUVFLREFwQmNIQnNaU0JKYm1NdU1Td3dLZ1lEVlFRTERDTkJjSEJzWlNCWGIzSnNaSGRwWkdVZ1JHVjJaV3h2Y0dWeUlGSmxiR0YwYVc5dWN6RkVNRUlHQTFVRUF3dzdRWEJ3YkdVZ1YyOXliR1IzYVdSbElFUmxkbVZzYjNCbGNpQlNaV3hoZEdsdmJuTWdRMlZ5ZEdsbWFXTmhkR2x2YmlCQmRYUm9iM0pwZEhrd0hoY05NVFV4TVRFek1ESXhOVEE1V2hjTk1qTXdNakEzTWpFME9EUTNXakNCaVRFM01EVUdBMVVFQXd3dVRXRmpJRUZ3Y0NCVGRHOXlaU0JoYm1RZ2FWUjFibVZ6SUZOMGIzSmxJRkpsWTJWcGNIUWdVMmxuYm1sdVp6RXNNQ29HQTFVRUN3d2pRWEJ3YkdVZ1YyOXliR1IzYVdSbElFUmxkbVZzYjNCbGNpQlNaV3hoZEdsdmJuTXhFekFSQmdOVkJBb01Da0Z3Y0d4bElFbHVZeTR4Q3pBSkJnTlZCQVlUQWxWVE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBcGMrQi9TV2lnVnZXaCswajJqTWNqdUlqd0tYRUpzczl4cC9zU2cxVmh2K2tBdGVYeWpsVWJYMS9zbFFZbmNRc1VuR09aSHVDem9tNlNkWUk1YlNJY2M4L1cwWXV4c1FkdUFPcFdLSUVQaUY0MWR1MzBJNFNqWU5NV3lwb041UEM4cjBleE5LaERFcFlVcXNTNCszZEg1Z1ZrRFV0d3N3U3lvMUlnZmRZZUZScjZJd3hOaDlLQmd4SFZQTTNrTGl5a29sOVg2U0ZTdUhBbk9DNnBMdUNsMlAwSzVQQi9UNXZ5c0gxUEttUFVockFKUXAyRHQ3K21mNy93bXYxVzE2c2MxRkpDRmFKekVPUXpJNkJBdENnbDdaY3NhRnBhWWVRRUdnbUpqbTRIUkJ6c0FwZHhYUFEzM1k3MkMzWmlCN2o3QWZQNG83UTAvb21WWUh2NGdOSkl3SURBUUFCbzRJQjF6Q0NBZE13UHdZSUt3WUJCUVVIQVFFRU16QXhNQzhHQ0NzR0FRVUZCekFCaGlOb2RIUndPaTh2YjJOemNDNWhjSEJzWlM1amIyMHZiMk56Y0RBekxYZDNaSEl3TkRBZEJnTlZIUTRFRmdRVWthU2MvTVIydDUrZ2l2Uk45WTgyWGUwckJJVXdEQVlEVlIwVEFRSC9CQUl3QURBZkJnTlZIU01FR0RBV2dCU0lKeGNKcWJZWVlJdnM2N3IyUjFuRlVsU2p0ekNDQVI0R0ExVWRJQVNDQVJVd2dnRVJNSUlCRFFZS0tvWklodmRqWkFVR0FUQ0IvakNCd3dZSUt3WUJCUVVIQWdJd2diWU1nYk5TWld4cFlXNWpaU0J2YmlCMGFHbHpJR05sY25ScFptbGpZWFJsSUdKNUlHRnVlU0J3WVhKMGVTQmhjM04xYldWeklHRmpZMlZ3ZEdGdVkyVWdiMllnZEdobElIUm9aVzRnWVhCd2JHbGpZV0pzWlNCemRHRnVaR0Z5WkNCMFpYSnRjeUJoYm1RZ1kyOXVaR2wwYVc5dWN5QnZaaUIxYzJVc0lHTmxjblJwWm1sallYUmxJSEJ2YkdsamVTQmhibVFnWTJWeWRHbG1hV05oZEdsdmJpQndjbUZqZEdsalpTQnpkR0YwWlcxbGJuUnpMakEyQmdnckJnRUZCUWNDQVJZcWFIUjBjRG92TDNkM2R5NWhjSEJzWlM1amIyMHZZMlZ5ZEdsbWFXTmhkR1ZoZFhSb2IzSnBkSGt2TUE0R0ExVWREd0VCL3dRRUF3SUhnREFRQmdvcWhraUc5Mk5rQmdzQkJBSUZBREFOQmdrcWhraUc5dzBCQVFVRkFBT0NBUUVBRGFZYjB5NDk0MXNyQjI1Q2xtelQ2SXhETUlKZjRGelJqYjY5RDcwYS9DV1MyNHlGdzRCWjMrUGkxeTRGRkt3TjI3YTQvdncxTG56THJSZHJqbjhmNUhlNXNXZVZ0Qk5lcGhtR2R2aGFJSlhuWTR3UGMvem83Y1lmcnBuNFpVaGNvT0FvT3NBUU55MjVvQVE1SDNPNXlBWDk4dDUvR2lvcWJpc0IvS0FnWE5ucmZTZW1NL2oxbU9DK1JOdXhUR2Y4YmdwUHllSUdxTktYODZlT2ExR2lXb1IxWmRFV0JHTGp3Vi8xQ0tuUGFObVNBTW5CakxQNGpRQmt1bGhnd0h5dmozWEthYmxiS3RZZGFHNllRdlZNcHpjWm04dzdISG9aUS9PamJiOUlZQVlNTnBJcjdONFl0UkhhTFNQUWp2eWdhWndYRzU2QWV6bEhSVEJoTDhjVHFBPT0iOwoJInB1cmNoYXNlLWluZm8iID0gImV3b0pJbTl5YVdkcGJtRnNMWEIxY21Ob1lYTmxMV1JoZEdVdGNITjBJaUE5SUNJeU1ERTVMVEExTFRJMUlEQTFPakUzT2pVeElFRnRaWEpwWTJFdlRHOXpYMEZ1WjJWc1pYTWlPd29KSW5GMVlXNTBhWFI1SWlBOUlDSXhJanNLQ1NKMWJtbHhkV1V0ZG1WdVpHOXlMV2xrWlc1MGFXWnBaWElpSUQwZ0lqWkZSRVJET1VaQkxUVTVRek10TkRjNVF5MDVORU0zTFVKQk56STRRalUxUmpBMk5DSTdDZ2tpYjNKcFoybHVZV3d0Y0hWeVkyaGhjMlV0WkdGMFpTMXRjeUlnUFNBaU1UVTFPRGM0TmpZM01UQXdNQ0k3Q2draVpYaHdhWEpsY3kxa1lYUmxMV1p2Y20xaGRIUmxaQ0lnUFNBaU1qQXhPUzB3TmkweU5TQXhNam96TVRvMU9TQkZkR012UjAxVUlqc0tDU0pwY3kxcGJpMXBiblJ5YnkxdlptWmxjaTF3WlhKcGIyUWlJRDBnSW1aaGJITmxJanNLQ1NKd2RYSmphR0Z6WlMxa1lYUmxMVzF6SWlBOUlDSXhOVFl4TkRZMU5qRTVNREF3SWpzS0NTSmxlSEJwY21WekxXUmhkR1V0Wm05eWJXRjBkR1ZrTFhCemRDSWdQU0FpTWpBeE9TMHdOaTB5TlNBd05Ub3pNVG8xT1NCQmJXVnlhV05oTDB4dmMxOUJibWRsYkdWeklqc0tDU0pwY3kxMGNtbGhiQzF3WlhKcGIyUWlJRDBnSW1aaGJITmxJanNLQ1NKcGRHVnRMV2xrSWlBOUlDSXhORFkyTWpFd01qY3pJanNLQ1NKMWJtbHhkV1V0YVdSbGJuUnBabWxsY2lJZ1BTQWlPV1JrWkRVNU1XVmlNakV3WkRWa1pqSTNNV1l6T1RkaVkyUTBPREUxTkdFMU1qbGhaVFUyTVNJN0Nna2liM0pwWjJsdVlXd3RkSEpoYm5OaFkzUnBiMjR0YVdRaUlEMGdJakV3TURBd01EQTFNekV5TkRNeE16WWlPd29KSW1WNGNHbHlaWE10WkdGMFpTSWdQU0FpTVRVMk1UUTJOVGt4T1RBd01DSTdDZ2tpZEhKaGJuTmhZM1JwYjI0dGFXUWlJRDBnSWpFd01EQXdNREExTkRBME5USXlNREVpT3dvSkltSjJjbk1pSUQwZ0lqRTBOU0k3Q2draWQyVmlMVzl5WkdWeUxXeHBibVV0YVhSbGJTMXBaQ0lnUFNBaU1UQXdNREF3TURBME5USXlOVEkxTmlJN0Nna2lkbVZ5YzJsdmJpMWxlSFJsY201aGJDMXBaR1Z1ZEdsbWFXVnlJaUE5SUNJd0lqc0tDU0ppYVdRaUlEMGdJbU52YlM1aFlYSmtkMlZuYldWa2FXRXVjR3hoZVhCdmMzUWlPd29KSW5CeWIyUjFZM1F0YVdRaUlEMGdJbU52YlM1aFlYSmtkMlZuYldWa2FXRXVjR3hoZVhCdmMzUXVjSEpsYldsMWJTSTdDZ2tpY0hWeVkyaGhjMlV0WkdGMFpTSWdQU0FpTWpBeE9TMHdOaTB5TlNBeE1qb3lOam8xT1NCRmRHTXZSMDFVSWpzS0NTSndkWEpqYUdGelpTMWtZWFJsTFhCemRDSWdQU0FpTWpBeE9TMHdOaTB5TlNBd05Ub3lOam8xT1NCQmJXVnlhV05oTDB4dmMxOUJibWRsYkdWeklqc0tDU0p2Y21sbmFXNWhiQzF3ZFhKamFHRnpaUzFrWVhSbElpQTlJQ0l5TURFNUxUQTFMVEkxSURFeU9qRTNPalV4SUVWMFl5OUhUVlFpT3dwOSI7CgkiZW52aXJvbm1lbnQiID0gIlNhbmRib3giOwoJInBvZCIgPSAiMTAwIjsKCSJzaWduaW5nLXN0YXR1cyIgPSAiMCI7Cn0=\",\n            \"isTrial\": false,\n            \"isCanceled\": false,\n            \"isExpired\": true,\n            \"status\": \"expired\",\n            \"environment\": \"Sandbox\",\n            \"renewedAt\": \"2019-06-25T12:26:59.000Z\",\n            \"canceledAt\": null,\n            \"createdAt\": \"2019-06-01T08:19:58.217Z\",\n            \"updatedAt\": \"2019-06-25T12:03:14.636Z\",\n            \"inAppSubscription\": {\n                \"id\": \"7e31ec53-b7c0-4795-83ea-98432ac7754b\",\n                \"productId\": \"com.aardwegmedia.playpost.premium\",\n                \"name\": \"Premium\",\n                \"description\": \"Monthly Subscription\",\n                \"price\": 4.99,\n                \"currency\": \"eur\",\n                \"duration\": \"1m\",\n                \"service\": \"apple\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-06-01T08:16:42.873Z\",\n                \"updatedAt\": \"2019-06-01T08:16:42.873Z\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get account details  (using API key)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Api-Key",
 								"type": "text",
-								"disabled": true
+								"value": "226421e6cfcb661c408c819334ec61643f91747a419bfd9e15f8662e1956868c"
+							},
+							{
+								"key": "X-Api-Secret",
+								"type": "text",
+								"value": "6935eb65188a4b4c4c13e8a836004d48653543aaa890c7aeaab7c0ae73787796"
 							}
 						],
 						"url": {
@@ -281,6 +482,288 @@
 							"path": [
 								"v1",
 								"me"
+							]
+						},
+						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
+					},
+					"response": []
+				},
+				{
+					"name": "Get API keys",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/keys",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"keys"
+							]
+						},
+						"description": "Gets basic account details of the current user. It excludes the password."
+					},
+					"response": [
+						{
+							"name": "Get account details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/v1/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-DNS-Prefetch-Control",
+									"value": "off"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=15552000; includeSubDomains"
+								},
+								{
+									"key": "X-Download-Options",
+									"value": "noopen"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Content-Security-Policy",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "X-Content-Security-Policy",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "X-WebKit-CSP",
+									"value": "default-src 'self'; style-src 'self'"
+								},
+								{
+									"key": "Surrogate-Control",
+									"value": "no-store"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Permitted-Cross-Domain-Policies",
+									"value": "none"
+								},
+								{
+									"key": "Referrer-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "X-RateLimit-Limit",
+									"value": "9999"
+								},
+								{
+									"key": "X-RateLimit-Remaining",
+									"value": "9998"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 26 Jun 2019 08:40:57 GMT"
+								},
+								{
+									"key": "X-RateLimit-Reset",
+									"value": "1561538518"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2c1c-+3Tti7QUlyE7bv4vR9ejiCrmAxI\""
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								},
+								{
+									"key": "X-Response-Time",
+									"value": "69.780ms"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"34dba06f-091d-425b-90b7-66ada329e2f8\",\n    \"email\": \"jordyvandenaardweg@gmail.com\",\n    \"authenticatedAt\": \"2019-06-26T07:06:13.546Z\",\n    \"activatedAt\": null,\n    \"createdAt\": \"2019-02-27T13:31:29.376Z\",\n    \"updatedAt\": \"2019-06-26T05:06:13.561Z\",\n    \"voiceSettings\": [\n        {\n            \"id\": \"ba1df53b-4771-4030-86c9-6a3da7f3669b\",\n            \"createdAt\": \"2019-05-17T08:33:03.988Z\",\n            \"updatedAt\": \"2019-05-17T14:13:45.909Z\",\n            \"voice\": {\n                \"id\": \"8966adf6-ebf6-432e-b2ba-b6d04c332c12\",\n                \"languageCode\": \"fr-FR\",\n                \"countryCode\": \"FR\",\n                \"name\": \"Celine\",\n                \"label\": \"Céline\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/8966adf6-ebf6-432e-b2ba-b6d04c332c12.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.481Z\",\n                \"updatedAt\": \"2019-06-24T09:32:14.663Z\",\n                \"language\": {\n                    \"id\": \"be6b0434-8a3e-4747-863e-1842cf3eadd0\",\n                    \"name\": \"French\",\n                    \"nativeName\": \"Français\",\n                    \"code\": \"fr\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:56.203Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:56.203Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"be6b0434-8a3e-4747-863e-1842cf3eadd0\",\n                \"name\": \"French\",\n                \"nativeName\": \"Français\",\n                \"code\": \"fr\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:56.203Z\",\n                \"updatedAt\": \"2019-05-16T12:52:56.203Z\"\n            }\n        },\n        {\n            \"id\": \"e9c9df46-8fa4-4eef-869d-3f66e06a9f7d\",\n            \"createdAt\": \"2019-05-17T12:53:26.471Z\",\n            \"updatedAt\": \"2019-06-20T13:08:16.401Z\",\n            \"voice\": {\n                \"id\": \"b9bf2c50-205e-48e7-9a7c-e3bc91e2615b\",\n                \"languageCode\": \"es-ES\",\n                \"countryCode\": \"ES\",\n                \"name\": \"Conchita\",\n                \"label\": \"Conchita\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/b9bf2c50-205e-48e7-9a7c-e3bc91e2615b.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.574Z\",\n                \"updatedAt\": \"2019-06-24T09:34:49.951Z\",\n                \"language\": {\n                    \"id\": \"ba90fa75-e9fd-419d-a0f7-294ac5181bdd\",\n                    \"name\": \"Spanish\",\n                    \"nativeName\": \"Español\",\n                    \"code\": \"es\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:41.748Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:41.748Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"ba90fa75-e9fd-419d-a0f7-294ac5181bdd\",\n                \"name\": \"Spanish\",\n                \"nativeName\": \"Español\",\n                \"code\": \"es\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:41.748Z\",\n                \"updatedAt\": \"2019-05-16T12:52:41.748Z\"\n            }\n        },\n        {\n            \"id\": \"079f9a98-89ce-41c0-afb0-05400f3d151b\",\n            \"createdAt\": \"2019-05-17T06:03:53.958Z\",\n            \"updatedAt\": \"2019-06-20T13:12:28.280Z\",\n            \"voice\": {\n                \"id\": \"7a0adf8e-e4a1-4edd-8030-45b6623fccef\",\n                \"languageCode\": \"de-DE\",\n                \"countryCode\": \"DE\",\n                \"name\": \"Hans\",\n                \"label\": \"Hans\",\n                \"gender\": \"MALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/7a0adf8e-e4a1-4edd-8030-45b6623fccef.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.832Z\",\n                \"updatedAt\": \"2019-06-24T09:34:34.920Z\",\n                \"language\": {\n                    \"id\": \"80dacadd-8451-4d50-a3d4-b67d4870f1f9\",\n                    \"name\": \"German\",\n                    \"nativeName\": \"Deutsch\",\n                    \"code\": \"de\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:16.404Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:16.404Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"80dacadd-8451-4d50-a3d4-b67d4870f1f9\",\n                \"name\": \"German\",\n                \"nativeName\": \"Deutsch\",\n                \"code\": \"de\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:16.404Z\",\n                \"updatedAt\": \"2019-05-16T12:52:16.404Z\"\n            }\n        },\n        {\n            \"id\": \"ee9d5c97-50f7-41e3-95c1-4846f0f28dbf\",\n            \"createdAt\": \"2019-05-17T05:40:10.863Z\",\n            \"updatedAt\": \"2019-06-19T08:58:23.370Z\",\n            \"voice\": {\n                \"id\": \"d4c0973c-5a36-4950-afe1-3e2224592c20\",\n                \"languageCode\": \"nl-NL\",\n                \"countryCode\": \"NL\",\n                \"name\": \"Ruben\",\n                \"label\": \"Ruben\",\n                \"gender\": \"MALE\",\n                \"synthesizer\": \"AWS\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": null,\n                \"isActive\": true,\n                \"isPremium\": false,\n                \"isHighestQuality\": false,\n                \"isLanguageDefault\": true,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/d4c0973c-5a36-4950-afe1-3e2224592c20.mp3\",\n                \"createdAt\": \"2019-04-25T11:35:03.293Z\",\n                \"updatedAt\": \"2019-06-24T09:34:34.959Z\",\n                \"language\": {\n                    \"id\": \"cd72f71c-dc59-4be7-8a40-0143fe6f0ad9\",\n                    \"name\": \"Dutch\",\n                    \"nativeName\": \"Nederlands\",\n                    \"code\": \"nl\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:52:08.217Z\",\n                    \"updatedAt\": \"2019-05-16T12:52:08.217Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"cd72f71c-dc59-4be7-8a40-0143fe6f0ad9\",\n                \"name\": \"Dutch\",\n                \"nativeName\": \"Nederlands\",\n                \"code\": \"nl\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:52:08.217Z\",\n                \"updatedAt\": \"2019-05-16T12:52:08.217Z\"\n            }\n        },\n        {\n            \"id\": \"5dc78d9f-7030-4819-bc46-61fafacbc7ba\",\n            \"createdAt\": \"2019-05-16T13:16:04.102Z\",\n            \"updatedAt\": \"2019-06-25T10:14:58.337Z\",\n            \"voice\": {\n                \"id\": \"1b188f84-9d15-4a5a-85c6-f27ac44699fc\",\n                \"languageCode\": \"en-US\",\n                \"countryCode\": \"US\",\n                \"name\": \"en-US-Wavenet-C\",\n                \"label\": \"Isabella\",\n                \"gender\": \"FEMALE\",\n                \"synthesizer\": \"Google\",\n                \"audioProfile\": \"default\",\n                \"speakingRate\": 1,\n                \"pitch\": 0,\n                \"naturalSampleRateHertz\": 24000,\n                \"isActive\": true,\n                \"isPremium\": true,\n                \"isHighestQuality\": true,\n                \"isLanguageDefault\": null,\n                \"exampleAudioUrl\": \"https://storage-development.playpost.app/voices/1b188f84-9d15-4a5a-85c6-f27ac44699fc.wav\",\n                \"createdAt\": \"2019-04-25T07:27:13.215Z\",\n                \"updatedAt\": \"2019-06-24T09:37:10.469Z\",\n                \"language\": {\n                    \"id\": \"95f01039-fe8e-412d-a542-7089303b84c8\",\n                    \"name\": \"English\",\n                    \"nativeName\": \"English\",\n                    \"code\": \"en\",\n                    \"isActive\": true,\n                    \"createdAt\": \"2019-05-16T12:51:57.546Z\",\n                    \"updatedAt\": \"2019-05-16T12:51:57.546Z\"\n                }\n            },\n            \"language\": {\n                \"id\": \"95f01039-fe8e-412d-a542-7089303b84c8\",\n                \"name\": \"English\",\n                \"nativeName\": \"English\",\n                \"code\": \"en\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-05-16T12:51:57.546Z\",\n                \"updatedAt\": \"2019-05-16T12:51:57.546Z\"\n            }\n        }\n    ],\n    \"inAppSubscriptions\": [\n        {\n            \"id\": \"e3901c8f-5a61-46bb-bebf-e7ed9f936922\",\n            \"startedAt\": \"2019-05-25T12:17:51.000Z\",\n            \"expiresAt\": \"2019-06-25T12:31:59.000Z\",\n            \"latestTransactionId\": \"1000000540452201\",\n            \"originalTransactionId\": \"1000000531243136\",\n            \"latestReceipt\": \"ewoJInNpZ25hdHVyZSIgPSAiQTBzS2R6dzAxNHlpMU55STFIbm80Sk9BMVRpRnNEemNHRTJpSS96SUU4Yjh5bkw5Y21pMlpwai9TaWVSSi9PeGVPdWRya3lXQ1VLR3ErbVIzUlpkYVdaUUdHWlRmUUd6NzFxY0FTQ0Q3ZnhnRTlvL1FCczF3bXk4WGpUdEt6MTdLUnhrSkhZWmR3UU5jcEpMSEhhWUl5VXBmOER5QjNrQlIwTXMzdTFYZXhVSE1QK25scDk5RzFnYmZCMFAxYlpHbnRrcWhmTUE0V2lHR01qMjFCY1kxbnpoaWl6YlRwb1IvMG5JaDdBMERZbldMUm9DcHpyR2xkYjd2YmlHQ1BuOEFKU2VKT1ZkL1oyTzJPaTVnYzZkWXZQSHFRYnI0SFNKeElNRmJ6NnhTZ01LZlB2eG1meUp1N2FGK2pISjBIZFN1bUVHaUNIWUF0MFY4VHM5dnBkZGR0a0FBQVdBTUlJRmZEQ0NCR1NnQXdJQkFnSUlEdXRYaCtlZUNZMHdEUVlKS29aSWh2Y05BUUVGQlFBd2daWXhDekFKQmdOVkJBWVRBbFZUTVJNd0VRWURWUVFLREFwQmNIQnNaU0JKYm1NdU1Td3dLZ1lEVlFRTERDTkJjSEJzWlNCWGIzSnNaSGRwWkdVZ1JHVjJaV3h2Y0dWeUlGSmxiR0YwYVc5dWN6RkVNRUlHQTFVRUF3dzdRWEJ3YkdVZ1YyOXliR1IzYVdSbElFUmxkbVZzYjNCbGNpQlNaV3hoZEdsdmJuTWdRMlZ5ZEdsbWFXTmhkR2x2YmlCQmRYUm9iM0pwZEhrd0hoY05NVFV4TVRFek1ESXhOVEE1V2hjTk1qTXdNakEzTWpFME9EUTNXakNCaVRFM01EVUdBMVVFQXd3dVRXRmpJRUZ3Y0NCVGRHOXlaU0JoYm1RZ2FWUjFibVZ6SUZOMGIzSmxJRkpsWTJWcGNIUWdVMmxuYm1sdVp6RXNNQ29HQTFVRUN3d2pRWEJ3YkdVZ1YyOXliR1IzYVdSbElFUmxkbVZzYjNCbGNpQlNaV3hoZEdsdmJuTXhFekFSQmdOVkJBb01Da0Z3Y0d4bElFbHVZeTR4Q3pBSkJnTlZCQVlUQWxWVE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBcGMrQi9TV2lnVnZXaCswajJqTWNqdUlqd0tYRUpzczl4cC9zU2cxVmh2K2tBdGVYeWpsVWJYMS9zbFFZbmNRc1VuR09aSHVDem9tNlNkWUk1YlNJY2M4L1cwWXV4c1FkdUFPcFdLSUVQaUY0MWR1MzBJNFNqWU5NV3lwb041UEM4cjBleE5LaERFcFlVcXNTNCszZEg1Z1ZrRFV0d3N3U3lvMUlnZmRZZUZScjZJd3hOaDlLQmd4SFZQTTNrTGl5a29sOVg2U0ZTdUhBbk9DNnBMdUNsMlAwSzVQQi9UNXZ5c0gxUEttUFVockFKUXAyRHQ3K21mNy93bXYxVzE2c2MxRkpDRmFKekVPUXpJNkJBdENnbDdaY3NhRnBhWWVRRUdnbUpqbTRIUkJ6c0FwZHhYUFEzM1k3MkMzWmlCN2o3QWZQNG83UTAvb21WWUh2NGdOSkl3SURBUUFCbzRJQjF6Q0NBZE13UHdZSUt3WUJCUVVIQVFFRU16QXhNQzhHQ0NzR0FRVUZCekFCaGlOb2RIUndPaTh2YjJOemNDNWhjSEJzWlM1amIyMHZiMk56Y0RBekxYZDNaSEl3TkRBZEJnTlZIUTRFRmdRVWthU2MvTVIydDUrZ2l2Uk45WTgyWGUwckJJVXdEQVlEVlIwVEFRSC9CQUl3QURBZkJnTlZIU01FR0RBV2dCU0lKeGNKcWJZWVlJdnM2N3IyUjFuRlVsU2p0ekNDQVI0R0ExVWRJQVNDQVJVd2dnRVJNSUlCRFFZS0tvWklodmRqWkFVR0FUQ0IvakNCd3dZSUt3WUJCUVVIQWdJd2diWU1nYk5TWld4cFlXNWpaU0J2YmlCMGFHbHpJR05sY25ScFptbGpZWFJsSUdKNUlHRnVlU0J3WVhKMGVTQmhjM04xYldWeklHRmpZMlZ3ZEdGdVkyVWdiMllnZEdobElIUm9aVzRnWVhCd2JHbGpZV0pzWlNCemRHRnVaR0Z5WkNCMFpYSnRjeUJoYm1RZ1kyOXVaR2wwYVc5dWN5QnZaaUIxYzJVc0lHTmxjblJwWm1sallYUmxJSEJ2YkdsamVTQmhibVFnWTJWeWRHbG1hV05oZEdsdmJpQndjbUZqZEdsalpTQnpkR0YwWlcxbGJuUnpMakEyQmdnckJnRUZCUWNDQVJZcWFIUjBjRG92TDNkM2R5NWhjSEJzWlM1amIyMHZZMlZ5ZEdsbWFXTmhkR1ZoZFhSb2IzSnBkSGt2TUE0R0ExVWREd0VCL3dRRUF3SUhnREFRQmdvcWhraUc5Mk5rQmdzQkJBSUZBREFOQmdrcWhraUc5dzBCQVFVRkFBT0NBUUVBRGFZYjB5NDk0MXNyQjI1Q2xtelQ2SXhETUlKZjRGelJqYjY5RDcwYS9DV1MyNHlGdzRCWjMrUGkxeTRGRkt3TjI3YTQvdncxTG56THJSZHJqbjhmNUhlNXNXZVZ0Qk5lcGhtR2R2aGFJSlhuWTR3UGMvem83Y1lmcnBuNFpVaGNvT0FvT3NBUU55MjVvQVE1SDNPNXlBWDk4dDUvR2lvcWJpc0IvS0FnWE5ucmZTZW1NL2oxbU9DK1JOdXhUR2Y4YmdwUHllSUdxTktYODZlT2ExR2lXb1IxWmRFV0JHTGp3Vi8xQ0tuUGFObVNBTW5CakxQNGpRQmt1bGhnd0h5dmozWEthYmxiS3RZZGFHNllRdlZNcHpjWm04dzdISG9aUS9PamJiOUlZQVlNTnBJcjdONFl0UkhhTFNQUWp2eWdhWndYRzU2QWV6bEhSVEJoTDhjVHFBPT0iOwoJInB1cmNoYXNlLWluZm8iID0gImV3b0pJbTl5YVdkcGJtRnNMWEIxY21Ob1lYTmxMV1JoZEdVdGNITjBJaUE5SUNJeU1ERTVMVEExTFRJMUlEQTFPakUzT2pVeElFRnRaWEpwWTJFdlRHOXpYMEZ1WjJWc1pYTWlPd29KSW5GMVlXNTBhWFI1SWlBOUlDSXhJanNLQ1NKMWJtbHhkV1V0ZG1WdVpHOXlMV2xrWlc1MGFXWnBaWElpSUQwZ0lqWkZSRVJET1VaQkxUVTVRek10TkRjNVF5MDVORU0zTFVKQk56STRRalUxUmpBMk5DSTdDZ2tpYjNKcFoybHVZV3d0Y0hWeVkyaGhjMlV0WkdGMFpTMXRjeUlnUFNBaU1UVTFPRGM0TmpZM01UQXdNQ0k3Q2draVpYaHdhWEpsY3kxa1lYUmxMV1p2Y20xaGRIUmxaQ0lnUFNBaU1qQXhPUzB3TmkweU5TQXhNam96TVRvMU9TQkZkR012UjAxVUlqc0tDU0pwY3kxcGJpMXBiblJ5YnkxdlptWmxjaTF3WlhKcGIyUWlJRDBnSW1aaGJITmxJanNLQ1NKd2RYSmphR0Z6WlMxa1lYUmxMVzF6SWlBOUlDSXhOVFl4TkRZMU5qRTVNREF3SWpzS0NTSmxlSEJwY21WekxXUmhkR1V0Wm05eWJXRjBkR1ZrTFhCemRDSWdQU0FpTWpBeE9TMHdOaTB5TlNBd05Ub3pNVG8xT1NCQmJXVnlhV05oTDB4dmMxOUJibWRsYkdWeklqc0tDU0pwY3kxMGNtbGhiQzF3WlhKcGIyUWlJRDBnSW1aaGJITmxJanNLQ1NKcGRHVnRMV2xrSWlBOUlDSXhORFkyTWpFd01qY3pJanNLQ1NKMWJtbHhkV1V0YVdSbGJuUnBabWxsY2lJZ1BTQWlPV1JrWkRVNU1XVmlNakV3WkRWa1pqSTNNV1l6T1RkaVkyUTBPREUxTkdFMU1qbGhaVFUyTVNJN0Nna2liM0pwWjJsdVlXd3RkSEpoYm5OaFkzUnBiMjR0YVdRaUlEMGdJakV3TURBd01EQTFNekV5TkRNeE16WWlPd29KSW1WNGNHbHlaWE10WkdGMFpTSWdQU0FpTVRVMk1UUTJOVGt4T1RBd01DSTdDZ2tpZEhKaGJuTmhZM1JwYjI0dGFXUWlJRDBnSWpFd01EQXdNREExTkRBME5USXlNREVpT3dvSkltSjJjbk1pSUQwZ0lqRTBOU0k3Q2draWQyVmlMVzl5WkdWeUxXeHBibVV0YVhSbGJTMXBaQ0lnUFNBaU1UQXdNREF3TURBME5USXlOVEkxTmlJN0Nna2lkbVZ5YzJsdmJpMWxlSFJsY201aGJDMXBaR1Z1ZEdsbWFXVnlJaUE5SUNJd0lqc0tDU0ppYVdRaUlEMGdJbU52YlM1aFlYSmtkMlZuYldWa2FXRXVjR3hoZVhCdmMzUWlPd29KSW5CeWIyUjFZM1F0YVdRaUlEMGdJbU52YlM1aFlYSmtkMlZuYldWa2FXRXVjR3hoZVhCdmMzUXVjSEpsYldsMWJTSTdDZ2tpY0hWeVkyaGhjMlV0WkdGMFpTSWdQU0FpTWpBeE9TMHdOaTB5TlNBeE1qb3lOam8xT1NCRmRHTXZSMDFVSWpzS0NTSndkWEpqYUdGelpTMWtZWFJsTFhCemRDSWdQU0FpTWpBeE9TMHdOaTB5TlNBd05Ub3lOam8xT1NCQmJXVnlhV05oTDB4dmMxOUJibWRsYkdWeklqc0tDU0p2Y21sbmFXNWhiQzF3ZFhKamFHRnpaUzFrWVhSbElpQTlJQ0l5TURFNUxUQTFMVEkxSURFeU9qRTNPalV4SUVWMFl5OUhUVlFpT3dwOSI7CgkiZW52aXJvbm1lbnQiID0gIlNhbmRib3giOwoJInBvZCIgPSAiMTAwIjsKCSJzaWduaW5nLXN0YXR1cyIgPSAiMCI7Cn0=\",\n            \"isTrial\": false,\n            \"isCanceled\": false,\n            \"isExpired\": true,\n            \"status\": \"expired\",\n            \"environment\": \"Sandbox\",\n            \"renewedAt\": \"2019-06-25T12:26:59.000Z\",\n            \"canceledAt\": null,\n            \"createdAt\": \"2019-06-01T08:19:58.217Z\",\n            \"updatedAt\": \"2019-06-25T12:03:14.636Z\",\n            \"inAppSubscription\": {\n                \"id\": \"7e31ec53-b7c0-4795-83ea-98432ac7754b\",\n                \"productId\": \"com.aardwegmedia.playpost.premium\",\n                \"name\": \"Premium\",\n                \"description\": \"Monthly Subscription\",\n                \"price\": 4.99,\n                \"currency\": \"eur\",\n                \"duration\": \"1m\",\n                \"service\": \"apple\",\n                \"isActive\": true,\n                \"createdAt\": \"2019-06-01T08:16:42.873Z\",\n                \"updatedAt\": \"2019-06-01T08:16:42.873Z\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create API key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04c29ab7-e778-41de-901c-4fb5647c36e7",
+								"exec": [
+									"pm.test(\"Should NOT have a password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Should have an email field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.string;",
+									"});",
+									"",
+									"pm.test(\"Should have an id field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.string;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"label\": \"Test key\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/keys",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"keys"
+							]
+						},
+						"description": "Allows the current user to set a default voice per language. If none are given, the \"isLanguageDefault\" will determine the default voice to use per language."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete API key",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/me/keys/33a6e85e-3d64-422d-b23b-33bfc97f2786",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"me",
+								"keys",
+								"33a6e85e-3d64-422d-b23b-33bfc97f2786"
 							]
 						},
 						"description": "Allows the user to delete his own account. All references in the database will be deleted, including: favorites, archives, and playlists."
@@ -701,7 +1184,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demo\"\n}"
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demodemo\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/users",
@@ -782,9 +1265,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -796,7 +1276,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"info@playpost.app\",\n\t\"password\": \"demodemo\"\n}"
+							"raw": "{\n\t\"email\": \"jordyvandenaardweg@gmail.com\",\n\t\"password\": \"demodemo\"\n} "
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/auth",
@@ -838,8 +1318,8 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -893,7 +1373,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"password\": \"demo\",\n\t\"resetPasswordToken\": \"7F0BE0\"\n}"
+							"raw": "{\n\t\"password\": \"VVvuBy{42sXr(#h,ReUgE9sc86521231\",\n\t\"resetPasswordToken\": \"E109B0\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/auth/update-password",

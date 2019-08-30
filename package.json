@@ -41,7 +41,8 @@
     "tsc:watch": "tsc -p ./ --noEmit -w",
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
-    "release": "auto-changelog -p && git add CHANGELOG.md && git push && git push --tags --no-verify"
+    "release": "auto-changelog -p && git add CHANGELOG.md && git push && git push --tags --no-verify",
+    "loadtest": "ts-node-dev loadtests.ts"
   },
   "repository": {
     "type": "git",
@@ -157,6 +158,7 @@
   },
   "devDependencies": {
     "husky": "^3.0.4",
+    "loadtest": "^3.0.8",
     "tslint-config-prettier": "^1.18.0"
   }
 }
