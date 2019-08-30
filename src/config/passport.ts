@@ -1,12 +1,12 @@
+import { Request } from 'express';
 import CustomPassportStrategy from 'passport-custom';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
-import { getRepository, getCustomRepository } from 'typeorm';
+import { getCustomRepository, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
 import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
-import { getRealUserIpAddress } from '../utils/ip-address';
-import { Request } from 'express';
 import { UserRepository } from '../database/repositories/user';
+import { getRealUserIpAddress } from '../utils/ip-address';
 
 const { JWT_SECRET } = process.env;
 
