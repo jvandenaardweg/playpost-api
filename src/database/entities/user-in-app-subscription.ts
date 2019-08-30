@@ -22,24 +22,33 @@ export class UserInAppSubscription {
   @IsUUID()
   id: string;
 
+  // purchase date
   @Column({ nullable: true })
   @IsDate()
-  startedAt: Date; // purchase date
+  startedAt: Date;
 
+  // expires date
   @Column({ nullable: true })
   @IsDate()
-  expiresAt: Date; // expires date
+  expiresAt: Date;
 
+  // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)
   @Index()
   @Column({ nullable: true, unique: true })
-  latestTransactionId: string; // Subsequent transactions after the user purchased the subscription (auto-renewal transactions)
+  latestTransactionId: string;
 
+  // The initial transaction the user did to purchase the subscription
   @Index()
   @Column({ nullable: true, unique: true })
-  originalTransactionId: string; // The initial transaction the user did to purchase the subscription
+  originalTransactionId: string;
 
   @Column({ nullable: false })
   latestReceipt: string;
+
+  // To indicate if the user already used a trial
+  // Since Apple does not provide this information for us, we need to track it ourselfs
+  @Column({ nullable: true, default: false })
+  hadTrial: boolean;
 
   @Column({ nullable: false, default: false })
   isTrial: boolean;
@@ -56,20 +65,20 @@ export class UserInAppSubscription {
   @Column({ type: 'enum', enum: InAppSubscriptionEnvironment, nullable: false })
   environment: InAppSubscriptionEnvironment;
 
-  @Index()
-  @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
   // When we delete a user, we keep their purchase history, so we can keep track of purchases
   // User could also be null if we receive purchase events from Apple, but we didnt register a purchase in our database
+  @Index()
+  @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
   user: User;
 
+  // When we try to delete a Subscription, prevent that from happening
   @Index()
   @ManyToOne(type => InAppSubscription, { onDelete: 'RESTRICT', eager: true })
-  // When we try to delete a Subscription, prevent that from happening
   inAppSubscription: InAppSubscription;
 
   @Column({ nullable: true })
   @IsDate()
-  renewedAt: Date; // purchase date
+  renewedAt: Date;
 
   @Column({ nullable: true })
   @IsDate()

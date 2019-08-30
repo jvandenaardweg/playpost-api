@@ -364,6 +364,12 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       throw new Error(message);
     }
 
+    const isTrial = purchase.isTrial;
+
+    // Only set hadTrial once, if it's true
+    // Anything else won't update the database, that's why we use undefined here
+    const hadTrial = (isTrial) ? isTrial : undefined;
+
     // @ts-ignore
     const latestReceipt: string = validationResponse.latest_receipt || receipt;
 
@@ -406,7 +412,8 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       isCanceled,
       latestTransactionId: purchase.transactionId,
       originalTransactionId: purchase.originalTransactionId,
-      isTrial: purchase.isTrial,
+      isTrial,
+      hadTrial,
       ...user,
       inAppSubscription: {
         id: inAppSubscriptionId

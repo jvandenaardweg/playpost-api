@@ -22,6 +22,7 @@ import { LanguageCountries1565882851553 } from './database/migrations/1565882851
 import { VoiceCountry1565887701525 } from './database/migrations/1565887701525-VoiceCountry';
 import { ApiKeys1567094182609 } from './database/migrations/1567094182609-ApiKeys';
 import { Indexes1567101511834 } from './database/migrations/1567101511834-Indexes';
+import { HadTrial1567145416715 } from './database/migrations/1567145416715-HadTrial';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -59,7 +60,8 @@ const config: ConnectionOptions = {
     LanguageCountries1565882851553,
     VoiceCountry1565887701525,
     ApiKeys1567094182609,
-    Indexes1567101511834
+    Indexes1567101511834,
+    HadTrial1567145416715
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
