@@ -115,7 +115,7 @@ export class GoogleSynthesizer extends Synthesizers {
     return voices;
   };
 
-  SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string, textPart?: string): Promise<string> => {
+  SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string): Promise<string> => {
     const loggerPrefix = 'Google SSML Part To Speech:';
 
     return new Promise((resolve, reject) => {
@@ -123,9 +123,7 @@ export class GoogleSynthesizer extends Synthesizers {
       // Note: this seem to fix the problem we had with concurrent requests
       const ssmlPartSynthesizerOptions = {...synthesizerOptions,
         input: {
-          // ssml: undefined,
-          text: textPart as string
-          // ssml: ssmlPart
+          ssml: ssmlPart
         }
       };
 
@@ -162,15 +160,15 @@ export class GoogleSynthesizer extends Synthesizers {
     });
   };
 
-  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string, textParts: string[]) => {
+  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: GoogleSynthesizerOptions, storageUploadPath: string) => {
     const promises: Array<Promise<string>> = [];
 
     try {
-      textParts.forEach((textPart: string, index: number) => {
+      ssmlParts.forEach((ssmlPart: string, index: number) => {
         // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
         // Note: this seem to fix the problem we had with concurrent requests
         const synthesizerOptionsCopy = {...synthesizerOptions};
-        promises.push(this.SSMLToSpeech(index, '', type, identifier, synthesizerOptionsCopy, storageUploadPath, textPart));
+        promises.push(this.SSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
       });
 
       const tempLocalAudiofilePaths = await Promise.all(promises);
@@ -181,7 +179,6 @@ export class GoogleSynthesizer extends Synthesizers {
 
       return tempLocalAudiofilePaths;
     } catch (err) {
-      logger.error('Error while SSMLPartsToSpeech', err)
       // Cleanup temp files when there's an error
       await this.removeAllTempFiles();
       throw err;
