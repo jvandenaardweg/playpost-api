@@ -1,5 +1,4 @@
-import { Request } from 'express';
-import CustomPassportStrategy from 'passport-custom';
+import passportCustom from 'passport-custom';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 import { getCustomRepository, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
@@ -56,7 +55,7 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
  * Strategy to authenticate a user using an API Key and API Secret.
  * User's can create an API Key and API Secret using the API when they are logged in using their e-mail and password.
  */
-export const apiKeySecretPassportStrategy = new CustomPassportStrategy(async (req: Request, done: VerifiedCallback) => {
+export const apiKeySecretPassportStrategy = new passportCustom.Strategy(async (req, done) => {
 
   const apiKey  = req.headers['x-api-key'] as string | undefined;
   const apiSecret = req.headers['x-api-secret'] as string | undefined;
