@@ -1,10 +1,12 @@
 import CustomPassportStrategy from 'passport-custom';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { getRepository } from 'typeorm';
+import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
+import { getRepository, getCustomRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
 import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { getRealUserIpAddress } from '../utils/ip-address';
+import { Request } from 'express';
+import { UserRepository } from '../database/repositories/user';
 
 const { JWT_SECRET } = process.env;
 
@@ -18,9 +20,9 @@ interface IStrategyPayload {
   email: string
 }
 
-export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyPayload, done) => {
+export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyPayload, done: VerifiedCallback) => {
   if (!payload) {
-    return done(null, false, 'Token not valid.');
+    return done(new Error('An error happened while authenticating. The provided authentication token is not valid.'));
   }
 
   // id available in payload
@@ -29,7 +31,9 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
   // Verify if the user still exists
   // We'll cache this result for 24 hours,
   // resulting in faster API responses the next time the user does a request
+  // We only select a few columns we need
   const user = await getRepository(User).findOne(id, {
+    select: ['id', 'email'],
     cache: {
       id: cacheKeys.jwtVerifyUser(id),
       milliseconds: (24 * 3600000) // cache 24 hours
@@ -37,7 +41,12 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
     loadEagerRelations: false
   });
 
-  if (!user) { return done(null, false, 'User not found.'); }
+  if (!user) {
+    // Make sure the previously create caches are removed
+    await getCustomRepository(UserRepository).removeUserRelatedCaches(id);
+
+    return done(new Error('An error happened while authenticating. The user could not be found.'));
+  }
 
   return done(null, { id: user.id, email: user.email });
 
@@ -47,18 +56,18 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
  * Strategy to authenticate a user using an API Key and API Secret.
  * User's can create an API Key and API Secret using the API when they are logged in using their e-mail and password.
  */
-export const apiKeySecretPassportStrategy = new CustomPassportStrategy(async (req, done) => {
+export const apiKeySecretPassportStrategy = new CustomPassportStrategy(async (req: Request, done: VerifiedCallback) => {
 
-  const apiKey = req.headers['x-api-key'];
-  const apiSecret = req.headers['x-api-secret'];
+  const apiKey  = req.headers['x-api-key'] as string | undefined;
+  const apiSecret = req.headers['x-api-secret'] as string | undefined;
   const lastUsedIpAddress = getRealUserIpAddress(req);
 
   if (!apiKey) {
-    return done(null, false, 'No X-Api-Key found in header.');
+    return done(new Error('An error happened while authenticating. No X-Api-Key found in header.'));
   }
 
   if (!apiSecret) {
-    return done(null, false, 'No X-Api-Secret found in header.');
+    return done(new Error('An error happened while authenticating. No X-Api-Secret found in header.'));
   }
 
   const existingApiKey = await getRepository(ApiKey).findOne({
@@ -74,14 +83,14 @@ export const apiKeySecretPassportStrategy = new CustomPassportStrategy(async (re
   });
 
   if (!existingApiKey) {
-    return done(null, false, 'API key does not exist.');
+    return done(new Error('An error happened while authenticating. The API Key does not exist.'), false);
   }
 
   // Validate the signature using the given API Key and API Secret
   const isValidSignature = ApiKey.isValidSignature(apiKey, apiSecret, existingApiKey.signature);
 
   if (!isValidSignature) {
-    return done(null, false, 'The given API Key and API Secret do not match the signature. Either the API Key or API Secret is invalid.');
+    return done(new Error('An error happened while authenticating. The given API Key and API Secret do not match the signature. Either the API Key or API Secret is invalid.'), false);
   }
 
   // Update usage for security purposes
