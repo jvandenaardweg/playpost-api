@@ -178,7 +178,12 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
 
     if (result.validationResult) {
       isCompatible = result.validationResult.isValid;
-      compatibilityMessage = result.validationResult.message;
+
+      // Only add the compatibility message to our database if it is not compatible
+      if (!isCompatible) {
+        compatibilityMessage = result.validationResult.message;
+      }
+
     }
 
     return {
