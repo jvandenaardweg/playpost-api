@@ -21,7 +21,7 @@ import * as catchAllController from './controllers/catch-all';
 import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
-import * as meController from './controllers/me';
+import { MeController } from './controllers/me';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
 import * as usersController from './controllers/users';
@@ -209,6 +209,7 @@ export const setupServer = async () => {
   app.delete('/v1/users/:userId', IS_PROTECTED_ENDPOINT, usersController.deleteUser); // Admin only
 
   // /v1/me
+  const meController = new MeController()
   app.get('/v1/me', IS_PROTECTED_ENDPOINT, meController.findCurrentUser);
   app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail);
   app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword);
@@ -217,7 +218,7 @@ export const setupServer = async () => {
 
   // /v1/me/keys
   app.get('/v1/me/keys', IS_PROTECTED_ENDPOINT, meController.findAllApiKeys);
-  app.delete('/v1/me/keys/:keyId', IS_PROTECTED_ENDPOINT, meController.deleteApiKey);
+  app.delete('/v1/me/keys/:apiKeyId', IS_PROTECTED_ENDPOINT, meController.deleteApiKey);
   app.post('/v1/me/keys', IS_PROTECTED_ENDPOINT, meController.createApiKey);
 
   // Playlists => /v1/playlist

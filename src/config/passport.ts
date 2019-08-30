@@ -66,7 +66,11 @@ export const apiKeySecretPassportStrategy = new CustomPassportStrategy(async (re
       key: apiKey,
     },
     select: ['id', 'key', 'signature', 'user'], // Manually select the columns we need, since "signature" is not included by default
-    relations: ['user']
+    relations: ['user'],
+    cache: {
+      id: cacheKeys.apiKeyUser(apiKey),
+      milliseconds: (24 * 3600000) // cache 24 hours
+    },
   });
 
   if (!existingApiKey) {

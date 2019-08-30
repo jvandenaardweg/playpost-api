@@ -1,4 +1,5 @@
-import { EntityRepository, getCustomRepository, getRepository, Not, Repository } from 'typeorm';
+import { EntityRepository, getConnection, getCustomRepository, getRepository, Not, Repository } from 'typeorm';
+import * as cacheKeys from '../../cache/keys';
 import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
 import { AudiofileRepository } from '../repositories/audiofile';
@@ -31,6 +32,42 @@ interface IUserDetails extends Partial<User> {
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+  async removeUserRelatedCaches(userId: string) {
+    const user = await this.findOne(userId, { relations: ['apiKeys'] })
+
+    if (!user) {
+      throw new Error('User is not found.')
+    }
+
+    // Remove the JWT verification cache as the user is not there anymore
+    const cache = await getConnection('default').queryResultCache;
+    if (cache) {
+      await cache.remove([cacheKeys.jwtVerifyUser(userId)]);
+
+      // If the user has API keys, make sure they are also removed from cache
+      if (user.apiKeys.length) {
+        for (const apiKey of user.apiKeys) {
+          await cache.remove([cacheKeys.apiKeyUser(apiKey.key)]);
+        }
+      }
+    }
+  }
+
+  async removeById(userId: string) {
+    const user = await this.findOne(userId, { relations: ['apiKeys']});
+
+    if (!user) {
+      throw new Error('User to be removed could not be found.');
+    }
+
+    // First remove the caches
+    await this.removeUserRelatedCaches(user.id);
+
+    // Then remove the user
+    await this.remove(user);
+
+  }
+
   async findActiveSubscriptionLimits(userId: string): Promise<ISubscriptionLimits> {
     const user = await this.findOne(userId, {
       relations: ['inAppSubscriptions']
