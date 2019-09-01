@@ -111,6 +111,7 @@ declare module 'in-app-purchase' {
     // there are more fields depending on the used service
   }
 
+  // Android: https://developers.google.com/android-publisher/api-ref/purchases/subscriptions
   export interface PurchasedItem {
     appItemId?: string;
     transactionId: string;
@@ -128,6 +129,10 @@ declare module 'in-app-purchase' {
     // Google only
     orderId?: string;
     purchaseToken?: string;
+    startTimeMillis?: number;
+    expiryTimeMillis?: number; // Time at which the subscription was granted, in milliseconds since the Epoch.
+    purchaseType?: number; // The type of purchase of the subscription. This field is only set if this purchase was not made using the standard in-app billing flow. Possible values are: Test (i.e. purchased from a license testing account)
+    userCancellationTimeMillis? :number; // The time at which the subscription was canceled by the user, in milliseconds since the epoch. Only present if cancelReason is 0.
 
     // Apple only
     bundleId?: string;

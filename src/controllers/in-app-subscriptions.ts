@@ -499,7 +499,7 @@ const getAppleUserInAppSubscriptionData = async (
 
   const renewedAt = (purchase.purchaseDateMs && purchase.originalPurchaseDateMs && purchase.purchaseDateMs > purchase.originalPurchaseDateMs) ? new Date(purchase.purchaseDateMs.toString()).toISOString() : undefined;
 
-  const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
+  const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : undefined;
 
   return {
     latestReceipt,
@@ -536,7 +536,33 @@ const getGoogleUserInAppSubscriptionData = async (
 ): Promise<DeepPartial<UserInAppSubscription>> => {
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
+  const isActive = !isCanceled && !isExpired;
+
   const isTrial = !!purchase.isTrial;
+
+  /*
+    {"service":"google",
+    "status":0,
+    "packageName":"com.aardwegmedia.playpost",
+    "productId":"com.aardwegmedia.playpost.android.premium",
+    "purchaseToken":"pidfahlmgkeoggdkdmhcfidp.AO-J1OwO9af3Q67nqsvJ4pT0LcXVuf1xkP1Rc0jfT8SF54ySlPJbhs6EPBKRbZCr9XdwxcjTmyWSa1-pIBSql8tshD4wphks95tFabVjYggyINbRiwh0_xgv57DBa8ecD4zHgeZGymLvO2nHKxhmZ8Dcjh9Z6vP7kU1Z_UXinCTllB0QLwUFSvA","kind":"androidpublisher#subscriptionPurchase",
+    "startTimeMillis":1567360160183,
+    "expiryTimeMillis":1567362305999,
+    "autoRenewing":false,
+    "priceCurrencyCode":"EUR",
+    "priceAmountMicros":4990000,
+    "countryCode":"NL",
+    "developerPayload":null,
+    "cancelReason":1,
+    "orderId":"GPA.3373-3758-4797-38496..5",
+    "purchaseType":0,
+    "acknowledgementState":1,
+    "transactionId": "pidfahlmgkeoggdkdmhcfidp.AO-J1OwO9af3Q67nqsvJ4pT0LcXVuf1xkP1Rc0jfT8SF54ySlPJbhs6EPBKRbZCr9XdwxcjTmyWSa1-pIBSql8tshD4wphks95tFabVjYggyINbRiwh0_xgv57DBa8ecD4zHgeZGymLvO2nHKxhmZ8Dcjh9Z6vP7kU1Z_UXinCTllB0QLwUFSvA",
+    "quantity":1,
+    "expirationDate":"1567362305999",
+    "cancellationDate":"1567362305999"
+  }
+  */
 
   let status = InAppSubscriptionStatus.ACTIVE;
 
@@ -551,25 +577,31 @@ const getGoogleUserInAppSubscriptionData = async (
   // The receipt from Google is an object, or a JSON stringified object
   // If it's an object, we just stringify it so we can store it in our database as a string
   const latestReceipt: string = (typeof receipt === 'object') ? JSON.stringify(receipt) : receipt;
-  const latestTransactionId = purchase.transactionId; // Or "orderId" in Google terms (transactionId is orderId)
+
+  // TODO: we should create a seperate table for Android subscriptions, so we do not mix this up
+  const latestTransactionId = purchase.orderId; // Or "orderId" in Google terms (transactionId is orderId)
   const originalTransactionId = purchase.purchaseToken; // The purchaseToken is unique per user per subscription (Google)
 
   if (!originalTransactionId) {
     throw new Error('purchaseToken not found in purchase.');
   }
 
-  // TODO:
-  const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
+  // About "purchaseType":
+  // The type of purchase of the subscription. This field is only set if this purchase was not made using the standard in-app billing flow. Possible values are: Test (i.e. purchased from a license testing account)
+  // More info: https://developers.google.com/android-publisher/api-ref/purchases/subscriptions
+  const environment = purchase.purchaseType === 0 ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
 
-  // "purchaseDateMs" and "cancellationDateMs" are not in the types, but are available in the response
-  // So we ignore the TS errors here for now
-  const startedAt = purchase.originalPurchaseDateMs ? new Date(parseInt(purchase.originalPurchaseDateMs.toString(), 10)).toISOString() : purchase.originalPurchaseDate ? new Date(parseInt(purchase.originalPurchaseDate.toString(), 10)).toISOString() : undefined;
+  // About "startTimeMillis":
+  // Time at which the subscription was granted, in milliseconds since the Epoch.
+  const startedAt = purchase.startTimeMillis ? new Date(parseInt(purchase.startTimeMillis.toString(), 10)).toISOString() : undefined;
 
   const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
 
-  const renewedAt = (purchase.purchaseDateMs && purchase.originalPurchaseDateMs && purchase.purchaseDateMs > purchase.originalPurchaseDateMs) ? new Date(purchase.purchaseDateMs.toString()).toISOString() : undefined;
+  // TODO: find out how we set this
+  const renewedAt = (isActive && purchase.startTimeMillis && purchase.expiryTimeMillis && purchase.startTimeMillis > purchase.expiryTimeMillis) ? new Date().toISOString() : undefined;
 
-  const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
+  // Only when the package detects a "isCanceled", use the "cancellationDate"
+  const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
 
   return {
     latestReceipt,
