@@ -284,7 +284,7 @@ const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGo
   const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
 
   try {
-    // await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
+    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
     // return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope(scope => {
