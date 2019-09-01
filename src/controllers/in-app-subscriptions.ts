@@ -2,19 +2,24 @@ import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import joi from 'joi';
-import { getRepository, LessThan } from 'typeorm';
+import { DeepPartial, getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
+import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription';
 import { logger } from '../utils';
 
-const { NODE_ENV, APPLE_IAP_SHARED_SECRET } = process.env;
+const { NODE_ENV, GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY, GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL, APPLE_IAP_SHARED_SECRET } = process.env ;
 
 inAppPurchase.config({
   applePassword: APPLE_IAP_SHARED_SECRET, // this comes from iTunes Connect (You need this to valiate subscriptions)
+  googleServiceAccount: {
+    clientEmail: GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL as string,
+    privateKey: GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY as string
+  },
   test: NODE_ENV !== 'production', // Don't use sandbox validation on production
-  verbose: false // Output debug logs to stdout stream
+  verbose: true // Output debug logs to stdout stream
 });
 
 /**
@@ -104,14 +109,15 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   interface IRequestBody {
     productId: string;
     receipt: Receipt;
+    platform: 'ios' | 'android';
   }
 
   const loggerPrefix = 'Create And Validate In App Subscription: ';
-  const { receipt, productId } = req.body as IRequestBody;
+  const { receipt, productId, platform } = req.body as IRequestBody;
   const { id: userId } = req.user;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
-  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'productId'));
+  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'productId', 'platform'));
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -119,17 +125,40 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   }
 
   try {
-    logger.info(loggerPrefix, `Checking if subscription exists: ${productId}`);
+    logger.info(loggerPrefix, 'Got request body: ', req.body)
+
+    let receiptToValidate: string | object = receipt;
+
+    const service = platform === 'ios' ? InAppSubscriptionService.APPLE : platform === 'android' ? InAppSubscriptionService.GOOGLE : null;
+
+    if (!service) {
+      throw new Error(`The given platform "${platform}" is not supported.`);
+    }
+
+    if (service === InAppSubscriptionService.GOOGLE && typeof receipt === 'string') {
+      receiptToValidate = {
+        ...JSON.parse(receipt),
+        packageName: APP_BUNDLE_ID,
+        subscription: true
+      }
+    }
+
+    logger.info(loggerPrefix, receiptToValidate)
+
+    logger.info(loggerPrefix, `Checking if subscription "${productId}" exists for service "${service}".`);
 
     // First, check if the subscription exists
-    const subscription = await inAppSubscriptionRepository.findOne({ productId, isActive: true });
-    if (!subscription) { throw new Error('An active subscription could not be found.'); }
+    const subscription = await inAppSubscriptionRepository.findOne({ productId, service, isActive: true });
+
+    if (!subscription) {
+      throw new Error('An active subscription could not be found.');
+    }
 
     logger.info(loggerPrefix, 'Subscription exists! We continue...');
 
     logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
-    const userInAppSubscriptionData = await validateReceipt(receipt, productId, userId);
+    const userInAppSubscriptionData = await validateReceipt(receiptToValidate, productId, userId);
 
     logger.info(loggerPrefix, 'Got transaction data from validate receipt!');
 
@@ -236,7 +265,7 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
  *
  * @param receipt
  */
-export const validateReceipt = async (receipt: Receipt, productId?: string | null | undefined, userId?: string | null): Promise<UserInAppSubscription> => {
+export const validateReceipt = async (receipt: Receipt, productId?: string | null | undefined, userId?: string | null, service?: 'google' | 'apple'): Promise<UserInAppSubscription> => {
   const sessionId = typeof receipt === 'string' ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
@@ -253,9 +282,27 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   let purchaseData: inAppPurchase.PurchasedItem[] | null;
 
   try {
+
+    // If we have no productId, we cannot determine for which subscription this is
+    // We error...
+    if (!productId) {
+      const message = 'Cannot process this receipt because the productId is not defined.';
+
+      Sentry.withScope(scope => {
+        scope.setLevel(Sentry.Severity.Critical);
+        if (userId) { scope.setUser({ id: userId }); }
+        scope.setExtra('receipt', receipt);
+        scope.setExtra('purchaseData', purchaseData);
+        scope.setExtra('validationResponse', validationResponse);
+        Sentry.captureMessage(message);
+      });
+
+      throw new Error(message);
+    }
+
     await inAppPurchase.setup();
 
-    logger.info(loggerPrefix, 'Validating receipt...');
+    logger.info(loggerPrefix, 'Validating receipt...', receipt);
 
     validationResponse = await inAppPurchase.validate(receipt);
   } catch (err) {
@@ -299,53 +346,14 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
     logger.info(loggerPrefix, 'Got purchase:', purchase);
 
-    // Returns a boolean true if a canceled receipt is validated.
-    const isCanceled = await inAppPurchase.isCanceled(purchase);
-
-    // Returns a boolean true if a expired receipt is validated.
-    const isExpired = await inAppPurchase.isExpired(purchase);
-
-    let status = InAppSubscriptionStatus.ACTIVE;
-
-    if (isCanceled) {
-      status = InAppSubscriptionStatus.CANCELED;
-    }
-
-    if (isExpired) {
-      status = InAppSubscriptionStatus.EXPIRED;
-    }
-
-    logger.info(loggerPrefix, 'Got status:', status);
-
-    // If we have no productId, we cannot determine for which subscription this is
-    // We error...
-    if (!productId) {
-      const message = 'Cannot process this receipt because the productId is not defined.';
-
-      Sentry.withScope(scope => {
-        scope.setLevel(Sentry.Severity.Critical);
-        if (userId) { scope.setUser({ id: userId }); }
-        scope.setExtra('receipt', receipt);
-        scope.setExtra('isValid', isValid);
-        scope.setExtra('isCanceled', isCanceled);
-        scope.setExtra('isExpired', isExpired);
-        scope.setExtra('purchaseData', purchaseData);
-        scope.setExtra('purchase', purchase);
-        scope.setExtra('validationResponse', validationResponse);
-        Sentry.captureMessage(message);
-      });
-
-      throw new Error(message);
-    }
-
     // Find the subscription based on the productId
     const inAppSubscription = await inAppSubscriptionRepository.findOne({
       productId
     });
 
-    const inAppSubscriptionId = inAppSubscription ? inAppSubscription.id : null;
+    const inAppSubscriptionId = inAppSubscription ? inAppSubscription.id : undefined;
 
-    if (!inAppSubscriptionId) {
+    if (!inAppSubscription || !inAppSubscriptionId) {
       const message = 'In-App Subscription ID could not be found.';
 
       Sentry.withScope(scope => {
@@ -353,8 +361,8 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
         if (userId) { scope.setUser({ id: userId }); }
         scope.setExtra('receipt', receipt);
         scope.setExtra('isValid', isValid);
-        scope.setExtra('isCanceled', isCanceled);
-        scope.setExtra('isExpired', isExpired);
+        // scope.setExtra('isCanceled', isCanceled);
+        // scope.setExtra('isExpired', isExpired);
         scope.setExtra('purchaseData', purchaseData);
         scope.setExtra('purchase', purchase);
         scope.setExtra('validationResponse', validationResponse);
@@ -373,22 +381,11 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     // @ts-ignore
     const latestReceipt: string = validationResponse.latest_receipt || receipt;
 
-    // @ts-ignore
-    const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
+    console.log('inAppSubscription', inAppSubscription)
 
-    // "purchaseDateMs" and "cancellationDateMs" are not in the types, but are available in the response
-    // So we ignore the TS errors here for now
-    // @ts-ignore
-    const startedAt = purchase.originalPurchaseDateMs ? new Date(parseInt(purchase.originalPurchaseDateMs, 10)).toISOString() : purchase.originalPurchaseDate ? new Date(parseInt(purchase.originalPurchaseDate, 10)).toISOString() : undefined;
-
-    // @ts-ignore
-    const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate, 10)).toISOString() : undefined;
-
-    // @ts-ignore
-    const renewedAt = purchase.purchaseDateMs > purchase.originalPurchaseDateMs ? new Date(purchase.purchaseDateMs).toISOString() : undefined;
-
-    // @ts-ignore
-    const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs, 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
+    // if ([InAppSubscriptionService.APPLE, InAppSubscriptionService.GOOGLE].includes(inAppSubscription.service)) {
+    //   throw new Error('Only Apple or Google subscription services are supported.');
+    // }
 
     // Only connect to a user if we have one
     // This could be empty if we receive events from Apple, but did not created a transaction in our database yet
@@ -400,27 +397,23 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       }
       : undefined;
 
-    const userInAppSubscriptionData = await userInAppSubscriptionRepository.create({
-      status,
-      startedAt,
-      expiresAt,
-      canceledAt,
-      latestReceipt,
-      environment,
-      renewedAt,
-      isExpired,
-      isCanceled,
-      latestTransactionId: purchase.transactionId,
-      originalTransactionId: purchase.originalTransactionId,
-      isTrial,
-      hadTrial,
-      ...user,
-      inAppSubscription: {
-        id: inAppSubscriptionId
-      }
-    });
+    let userInAppSubscriptionData: DeepPartial<UserInAppSubscription> = {};
 
-    return userInAppSubscriptionData;
+    if (inAppSubscription.service === InAppSubscriptionService.APPLE) {
+      userInAppSubscriptionData = await getAppleUserInAppSubscriptionData(validationResponse, purchase, user, inAppSubscriptionId);
+    }
+
+    if (inAppSubscription.service === InAppSubscriptionService.GOOGLE) {
+      userInAppSubscriptionData = await getGoogleUserInAppSubscriptionData(validationResponse, purchase, user, inAppSubscriptionId, receipt);
+    }
+
+    if (!userInAppSubscriptionData) {
+      throw new Error('Did not receive subscription data.');
+    }
+
+    const createdUserInAppSubscriptionData = await userInAppSubscriptionRepository.create(userInAppSubscriptionData);
+
+    return createdUserInAppSubscriptionData;
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
@@ -432,7 +425,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   }
 };
 
-export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string, originalTransactionId?: string, productId?: string | null, service?: InAppSubscriptionService): Promise<UserInAppSubscription> => {
+export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string | object, originalTransactionId?: string, productId?: string | null, service?: InAppSubscription['service']): Promise<UserInAppSubscription> => {
   if (!latestReceipt) {
     throw new Error('latestReceipt not found. Which we need to update our user his subscription status in our database.');
   }
@@ -467,3 +460,139 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
 
   return result;
 };
+
+/**
+ * Method to extract data from the Apple subscription purchase to be inserted in our database.
+ *
+ * @param validationResponse
+ * @param purchase 
+ */
+const getAppleUserInAppSubscriptionData = async (
+  validationResponse: inAppPurchase.ValidationResponse,
+  purchase: inAppPurchase.PurchasedItem,
+  user: object | undefined,
+  inAppSubscriptionId: string
+): Promise<DeepPartial<UserInAppSubscription>> => {
+  const isCanceled = await inAppPurchase.isCanceled(purchase);
+  const isExpired = await inAppPurchase.isExpired(purchase);
+  const isTrial = !!purchase.isTrial;
+
+  let status = InAppSubscriptionStatus.ACTIVE;
+
+  if (isCanceled) {
+    status = InAppSubscriptionStatus.CANCELED;
+  }
+
+  if (isExpired) {
+    status = InAppSubscriptionStatus.EXPIRED;
+  }
+
+  const latestReceipt = validationResponse.latest_receipt;
+  const latestTransactionId = purchase.transactionId;
+  const originalTransactionId = purchase.originalTransactionId;
+
+  if (!originalTransactionId) {
+    throw new Error('originalTransactionId not found in purchase.');
+  }
+
+  const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
+
+  // "purchaseDateMs" and "cancellationDateMs" are not in the types, but are available in the response
+  // So we ignore the TS errors here for now
+  const startedAt = purchase.originalPurchaseDateMs ? new Date(parseInt(purchase.originalPurchaseDateMs.toString(), 10)).toISOString() : purchase.originalPurchaseDate ? new Date(parseInt(purchase.originalPurchaseDate.toString(), 10)).toISOString() : undefined;
+
+  const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
+
+  const renewedAt = (purchase.purchaseDateMs && purchase.originalPurchaseDateMs && purchase.purchaseDateMs > purchase.originalPurchaseDateMs) ? new Date(purchase.purchaseDateMs.toString()).toISOString() : undefined;
+
+  const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
+
+  return {
+    latestReceipt,
+    latestTransactionId,
+    originalTransactionId,
+    environment,
+    startedAt,
+    expiresAt,
+    renewedAt,
+    canceledAt,
+    isCanceled,
+    isExpired,
+    isTrial,
+    status,
+    ...user,
+    inAppSubscription: {
+      id: inAppSubscriptionId
+    }
+  }
+}
+
+/**
+ * Method to extract data from the Google subscription purchase to be inserted in our database.
+ *
+ * @param validationResponse
+ * @param purchase
+ */
+const getGoogleUserInAppSubscriptionData = async (
+  validationResponse: inAppPurchase.ValidationResponse,
+  purchase: inAppPurchase.PurchasedItem,
+  user: object | undefined,
+  inAppSubscriptionId: string,
+  receipt: Receipt
+): Promise<DeepPartial<UserInAppSubscription>> => {
+  const isCanceled = await inAppPurchase.isCanceled(purchase);
+  const isExpired = await inAppPurchase.isExpired(purchase);
+  const isTrial = !!purchase.isTrial;
+
+  let status = InAppSubscriptionStatus.ACTIVE;
+
+  if (isCanceled) {
+    status = InAppSubscriptionStatus.CANCELED;
+  }
+
+  if (isExpired) {
+    status = InAppSubscriptionStatus.EXPIRED;
+  }
+
+  // The receipt from Google is an object, or a JSON stringified object
+  // If it's an object, we just stringify it so we can store it in our database as a string
+  const latestReceipt: string = (typeof receipt === 'object') ? JSON.stringify(receipt) : receipt;
+  const latestTransactionId = purchase.transactionId; // Or "orderId" in Google terms (transactionId is orderId)
+  const originalTransactionId = purchase.purchaseToken; // The purchaseToken is unique per user per subscription (Google)
+
+  if (!originalTransactionId) {
+    throw new Error('purchaseToken not found in purchase.');
+  }
+
+  // TODO:
+  const environment = validationResponse.environment === 'Sandbox' ? InAppSubscriptionEnvironment.SANDBOX : validationResponse.sandbox ? InAppSubscriptionEnvironment.SANDBOX : InAppSubscriptionEnvironment.PROD;
+
+  // "purchaseDateMs" and "cancellationDateMs" are not in the types, but are available in the response
+  // So we ignore the TS errors here for now
+  const startedAt = purchase.originalPurchaseDateMs ? new Date(parseInt(purchase.originalPurchaseDateMs.toString(), 10)).toISOString() : purchase.originalPurchaseDate ? new Date(parseInt(purchase.originalPurchaseDate.toString(), 10)).toISOString() : undefined;
+
+  const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
+
+  const renewedAt = (purchase.purchaseDateMs && purchase.originalPurchaseDateMs && purchase.purchaseDateMs > purchase.originalPurchaseDateMs) ? new Date(purchase.purchaseDateMs.toString()).toISOString() : undefined;
+
+  const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : purchase.cancellationDate ? purchase.cancellationDate : undefined;
+
+  return {
+    latestReceipt,
+    latestTransactionId,
+    originalTransactionId,
+    environment,
+    startedAt,
+    expiresAt,
+    renewedAt,
+    canceledAt,
+    isCanceled,
+    isExpired,
+    isTrial,
+    status,
+    ...user,
+    inAppSubscription: {
+      id: inAppSubscriptionId
+    }
+  }
+}

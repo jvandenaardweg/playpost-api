@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
 import { InAppSubscriptionService } from '../database/entities/in-app-subscription';
-import { IAppleSubscriptionNotificationRequestBody, IGoogleSubscriptionNotification, IGoogleSubscriptionNotificationRequestBody } from '../typings';
+import { IAppleSubscriptionNotificationRequestBody, IGoogleSubscriptionNotificationRequestBody } from '../typings';
 import { logger } from '../utils';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
@@ -80,7 +80,7 @@ const handleMessageGoogleMessage = async (message: Message) => {
 
     logger.info(loggerPrefix, 'Should handle: ', notification);
 
-    await handleGoogleSubscriptionStatusEvent(notification.subscriptionNotification, message, loggerPrefix);
+    await handleGoogleSubscriptionStatusEvent(notification, message, loggerPrefix);
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'Unknown error happened while processing this notification.';
 
@@ -92,7 +92,7 @@ const handleMessageGoogleMessage = async (message: Message) => {
 
     logger.error(loggerPrefix, errorMessage);
 
-    message.nack(); // re-deliver, so we can retry.
+    message.nack(); // re-deliver
     logger.info(loggerPrefix, 'Sending nack(), so we can retry...');
 
     // TODO: Could possibly result in messages being nack'd all the time, to infinity. Find a way to resolve that later.
@@ -252,7 +252,7 @@ const handleAppleSubscriptionStatusEvent = async (notification: IAppleSubscripti
   }
 };
 
-const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGoogleSubscriptionNotification, message: Message, loggerPrefix: string) => {
+const handleGoogleSubscriptionStatusEvent = async (notification: IGoogleSubscriptionNotificationRequestBody, message: Message, loggerPrefix: string) => {
   // https://developer.android.com/google/play/billing/realtime_developer_notifications
   const availableNotificationTypes = {
     '0': 'SUBSCRIPTION_RECOVERED', // A subscription was recovered from account hold.
@@ -266,6 +266,13 @@ const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGo
     '9': 'SUBSCRIPTION_DEFERRED', // A subscription's recurrence time has been extended.
     '12': 'SUBSCRIPTION_REVOKED', // A subscription has been revoked from the user before the expiration time.
     '13': 'SUBSCRIPTION_EXPIRED' // A subscription has expired.
+  }
+
+  const { subscriptionNotification } = notification;
+
+  // TODO: handle better
+  if (!subscriptionNotification) {
+    return
   }
 
   logger.info(loggerPrefix, subscriptionNotification);
@@ -283,9 +290,17 @@ const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGo
   const originalTransactionId = subscriptionNotification.purchaseToken; // We normalize Google's "purchaseToken" to "originalTransactionId"
   const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
 
+  // Build the object needed for the in-app-purchase package
+  const receipt = {
+    packageName: notification.packageName,
+    productId: subscriptionNotification.subscriptionId,
+    purchaseToken: subscriptionNotification.purchaseToken,
+    subscription: true // We only offer in app subscriptions, so set to true
+  }
+
   try {
-    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
-    // return message.ack(); // Remove the message from the queue
+    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(receipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
+    return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);

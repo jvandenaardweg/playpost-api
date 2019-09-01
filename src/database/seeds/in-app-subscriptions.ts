@@ -26,7 +26,7 @@ export default [
     isActive: true
   },
   {
-    productId: 'com.aardwegmedia.playpost.premium',
+    productId: 'com.aardwegmedia.playpost.android.premium',
     name: 'Premium',
     description: 'Monthly Premium Subscription',
     price: 4.99,
@@ -38,7 +38,7 @@ export default [
     isActive: true
   },
   {
-    productId: 'com.aardwegmedia.playpost.subscription.plus',
+    productId: 'com.aardwegmedia.playpost.android.plus',
     name: 'Plus',
     description: 'Monthly Plus Subscription',
     price: 9.99,

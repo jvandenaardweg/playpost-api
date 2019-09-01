@@ -53,7 +53,13 @@ declare module 'in-app-purchase' {
     // this is the path to the directory containing iap-sanbox/iap-live files
     googlePublicKeyPath?: string;
 
+    googleServiceAccount: {
+      clientEmail: string;
+      privateKey: string;
+    };
+
     // optional, for Google Play subscriptions
+    googlePublicKeyStrSandBox?: string;
     googlePublicKeyStrLive?: string;
     // optional, for Google Play subscriptions
     googlePublicKeyStrSandbox?: string;
@@ -62,9 +68,9 @@ declare module 'in-app-purchase' {
     // optional, for Google Play subscritions
     googleRefToken?: string;
     // optional, for Google Play subscriptions
-    clientId?: string;
+    googleClientID?: string;
     // optional, for Google Play subscriptions
-    clientSecret?: string;
+    googleClientSecret?: string;
     // optional, for Google Play subscriptions
     refreshToken?: string;
 
