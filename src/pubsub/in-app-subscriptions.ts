@@ -246,6 +246,8 @@ const handleAppleSubscriptionStatusEvent = async (notification: IAppleSubscripti
       Sentry.captureException(err);
     });
 
+    message.nack(); // re-deliver, so we can retry.
+
     throw err;
   }
 };
@@ -292,6 +294,8 @@ const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGo
       scope.setExtra('originalTransactionId', originalTransactionId);
       Sentry.captureException(err);
     });
+
+    message.nack(); // re-deliver, so we can retry.
 
     throw err;
   }
