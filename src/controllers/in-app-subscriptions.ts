@@ -381,12 +381,6 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
     // @ts-ignore
     const latestReceipt: string = validationResponse.latest_receipt || receipt;
 
-    console.log('inAppSubscription', inAppSubscription)
-
-    // if ([InAppSubscriptionService.APPLE, InAppSubscriptionService.GOOGLE].includes(inAppSubscription.service)) {
-    //   throw new Error('Only Apple or Google subscription services are supported.');
-    // }
-
     // Only connect to a user if we have one
     // This could be empty if we receive events from Apple, but did not created a transaction in our database yet
     const user = userId
