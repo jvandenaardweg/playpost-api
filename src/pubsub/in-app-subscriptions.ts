@@ -279,9 +279,9 @@ const handleGoogleSubscriptionStatusEvent = async (subscriptionNotification: IGo
 
   logger.info(loggerPrefix, `Processing "${availableNotificationTypes[subscriptionNotification.notificationType]}" notification...`);
 
-  const latestReceipt = null; // Google does not give a receipt in the notification
+  const latestReceipt = subscriptionNotification.purchaseToken;
   const originalTransactionId = subscriptionNotification.purchaseToken; // We normalize Google's "purchaseToken" to "originalTransactionId"
-  // const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
+  const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
 
   try {
     // await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
