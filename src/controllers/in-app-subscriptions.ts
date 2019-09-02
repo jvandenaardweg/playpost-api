@@ -391,7 +391,7 @@ export const syncReceiptWithDatabase = async (
 
     validationResponse = await inAppPurchase.validate(receipt);
   } catch (err) {
-    let errorMessage = 'Error unknown happened during validation of the receipt.';
+    let errorMessage = err && err.message ? err.message : 'Error unknown happened during validation of the receipt.';
 
     if (typeof err === 'string') {
       const errorObject = JSON.parse(err);
