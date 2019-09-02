@@ -115,12 +115,10 @@ export interface AppleValidationResponse extends ValidationResponse {
 // Android: https://developers.google.com/android-publisher/api-ref/purchases/subscriptions
 // Google Types from: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/gapi.client.androidpublisher/index.d.ts#L396
 export interface PurchasedItem {
-  transactionId: string;
-  productId: string;
-  purchaseDate: number | string;
-
-  expirationDate?: number;
   quantity?: number;
+  productId?: string;
+  transactionId?: string;
+  expirationDate?: string | number; // number on IOS, string on Android
 }
 
 // export interface WindowsSubscriptionPurchase extends PurchasedItem {
@@ -132,19 +130,43 @@ export interface PurchasedItem {
 // }
 
 export interface AppleSubscriptionPurchase extends PurchasedItem {
-  bundleId?: string;
-  originalPurchaseDateMs?: number | string; // TODO: check if number OR string
-  originalPurchaseDate?: number | string; // TODO: check if number OR string
   originalTransactionId?: string;
-  purchaseDateMs?: number | string; // TODO: check if number OR string
-  cancellationDateMs?: number | string; // TODO: check if number OR string
+
+  // TODO: do these exist?
+  cancellationDate?: string;
+  cancellationDateMs?: number;
+  cancellationDatePst?: string;
+
+  purchaseDate?: string;
+  purchaseDateMs?: number;
+  purchaseDatePst?: string;
+
+  originalPurchaseDate?: string;
+  originalPurchaseDateMs?: number;
+  originalPurchaseDatePst?: string;
+
+  expiresDate?: string;
+  expiresDatePst?: string;
+  expiresDateMs?: number;
+
+  webOrderLineItemId?: number;
+
+  isTrialPeriod?: boolean;
+  isInIntroOfferPeriod?: boolean;
+
   isTrial?: boolean;
-  cancellationDate?: number;
+
+  bundleId?: string;
+
+  // expirationDate?: number; // Number on iOS, string on Android
 }
 
 export interface GoogleSubscriptionPurchase extends PurchasedItem {
-  cancellationDate?: number;
+  // expirationDate?: string; // Number on iOS, string on Android
+  cancellationDate?: string;
+  purchaseDate?: string;
   purchaseToken?: string;
+  acknowledgementState?: number;
 
   /**
    * The type of purchase of the subscription.
