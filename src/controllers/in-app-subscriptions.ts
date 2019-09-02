@@ -21,7 +21,7 @@ inAppPurchase.config({
     privateKey: GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY as string
   },
   test: NODE_ENV !== 'production', // Don't use sandbox validation on production
-  verbose: true // Output debug logs to stdout stream
+  verbose: false // Output debug logs to stdout stream
 });
 
 /**
@@ -98,7 +98,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       const userId = expiredSubscriptionGoogle.user ? expiredSubscriptionGoogle.user.id : null;
       const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
 
-      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, expiredSubscriptionGoogle.receipt, productId, userId);
+      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, expiredSubscriptionGoogle.latestReceipt, productId, userId);
 
       logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.GOOGLE}".`);
     }
@@ -675,7 +675,7 @@ const getGoogleUserInAppSubscriptionData = async (
 
   // The receipt from Google is an object, or a JSON stringified object
   // If it's an object, we just stringify it so we can store it in our database as a string
-  const receipt = (typeof purchaseReceipt === 'object') ? JSON.stringify(purchaseReceipt) : purchaseReceipt;
+  const latestReceipt = (typeof purchaseReceipt === 'object') ? JSON.stringify(purchaseReceipt) : purchaseReceipt;
 
   const orderId = purchase.orderId; // Or "orderId" in Google terms (transactionId is orderId)
   const purchaseToken = purchase.purchaseToken; // The purchaseToken is unique per user per subscription (Google)
@@ -693,13 +693,14 @@ const getGoogleUserInAppSubscriptionData = async (
   const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
 
   // Only set the renewedAt date to the expire data when we auto renew and the subscription is still active
+  // TODO: this is not going correct
   const renewedAt = (isActive && purchase.autoRenewing && purchase.expiryTimeMillis) ? new Date(parseInt(purchase.expiryTimeMillis.toString(), 10)).toISOString() : undefined;
 
   // Only when the package detects a "isCanceled", use the "cancellationDate"
   const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
 
   const createdEntity = await userInAppSubscriptionGoogleRepository.create({
-    receipt,
+    latestReceipt,
     orderId,
     purchaseToken,
     transactionId,

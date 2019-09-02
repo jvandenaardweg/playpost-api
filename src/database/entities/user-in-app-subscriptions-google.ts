@@ -34,7 +34,7 @@ export class UserInAppSubscriptionGoogle {
   purchaseToken: string;
 
   @Column({ nullable: false })
-  receipt: string;
+  latestReceipt: string;
 
   // To indicate if the user already used a trial
   // Since Apple does not provide this information for us, we need to track it ourselfs
