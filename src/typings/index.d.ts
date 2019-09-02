@@ -1,5 +1,3 @@
-import { UserInAppSubscription } from '../database/entities/user-in-app-subscription';
-
 export interface ICrawlFullArticleData {
   articleId: string;
   articleUrl: string;
@@ -23,6 +21,13 @@ export interface IGoogleSubscriptionNotification {
 
 export interface IGoogleTestNotification {
   version: string;
+}
+
+export interface IGoogleSubscriptionReceipt {
+  packageName: string;
+  productId: string;
+  purchaseToken: string;
+  subscription: boolean; // We only offer in app subscriptions, so set to true
 }
 
 // https://developer.apple.com/documentation/storekit/in-app_purchase/enabling_status_update_notifications

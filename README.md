@@ -137,7 +137,7 @@ Updating the database is strictly done using migrations.
 
 1. Do your database changes in the entity files
 2. Run `npm run build` to generate a build which the typeorm CLI can use
-3. Create a migration, example: `npm run typeorm migration:generate -- --name ArticleCompatible -d src/database/migrations`
+3. Create a migration, example: `npm run typeorm migration:generate -- --name UserInAppSubscriptionsTableRename -d src/database/migrations`
 4. Verify the migration file is correct
 5. Add the migration class to `migrations: []` in `src/database/connection-options.ts`. Make sure you use the correct order (oldest first).
 6. Restart the service

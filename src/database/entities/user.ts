@@ -11,7 +11,8 @@ import { PlaylistItem } from './playlist-item';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
 import { ApiKey } from './api-key';
-import { UserInAppSubscription } from './user-in-app-subscription';
+import { UserInAppSubscription } from './user-in-app-subscription-apple';
+import { UserInAppSubscriptionGoogle } from './user-in-app-subscriptions-google';
 import { UserVoiceSetting } from './user-voice-setting';
 
 const { JWT_SECRET } = process.env;
@@ -103,6 +104,9 @@ export class User {
 
   @OneToMany(type => UserInAppSubscription, userInAppSubscription => userInAppSubscription.user)
   inAppSubscriptions: UserInAppSubscription[];
+
+  @OneToMany(type => UserInAppSubscriptionGoogle, inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.user)
+  inAppSubscriptionsGoogle: UserInAppSubscriptionGoogle[];
 
   @CreateDateColumn()
   @IsDate()

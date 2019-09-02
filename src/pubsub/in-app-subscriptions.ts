@@ -3,8 +3,7 @@ import * as Sentry from '@sentry/node';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
-import { InAppSubscriptionService } from '../database/entities/in-app-subscription';
-import { IAppleSubscriptionNotificationRequestBody, IGoogleSubscriptionNotificationRequestBody } from '../typings';
+import { IAppleSubscriptionNotificationRequestBody, IGoogleSubscriptionNotificationRequestBody, IGoogleSubscriptionReceipt } from '../typings';
 import { logger } from '../utils';
 import { getGoogleCloudCredentials } from '../utils/credentials';
 
@@ -235,7 +234,7 @@ const handleAppleSubscriptionStatusEvent = async (notification: IAppleSubscripti
   const productId = getProductId(notification);
 
   try {
-    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId, InAppSubscriptionService.APPLE);
+    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(latestReceipt, originalTransactionId, productId);
     return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope(scope => {
@@ -286,12 +285,8 @@ const handleGoogleSubscriptionStatusEvent = async (notification: IGoogleSubscrip
 
   logger.info(loggerPrefix, `Processing "${availableNotificationTypes[subscriptionNotification.notificationType]}" notification...`);
 
-  const latestReceipt = subscriptionNotification.purchaseToken;
-  const originalTransactionId = subscriptionNotification.purchaseToken; // We normalize Google's "purchaseToken" to "originalTransactionId"
-  const productId = subscriptionNotification.subscriptionId; // We normalize Google's "subscriptionId" to "productId"
-
   // Build the object needed for the in-app-purchase package
-  const receipt = {
+  const receipt: IGoogleSubscriptionReceipt = {
     packageName: notification.packageName,
     productId: subscriptionNotification.subscriptionId,
     purchaseToken: subscriptionNotification.purchaseToken,
@@ -299,14 +294,13 @@ const handleGoogleSubscriptionStatusEvent = async (notification: IGoogleSubscrip
   }
 
   try {
-    await inAppSubscriptionsController.updateOrCreateUsingOriginalTransactionId(receipt, originalTransactionId, productId, InAppSubscriptionService.GOOGLE);
+    await inAppSubscriptionsController.updateOrCreateUsingPurchaseToken(receipt);
     return message.ack(); // Remove the message from the queue
   } catch (err) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
       scope.setExtra('subscriptionNotification', subscriptionNotification);
-      scope.setExtra('latestReceipt', latestReceipt);
-      scope.setExtra('originalTransactionId', originalTransactionId);
+      scope.setExtra('receipt', receipt);
       Sentry.captureException(err);
     });
 

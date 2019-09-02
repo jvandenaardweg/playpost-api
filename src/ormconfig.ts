@@ -8,11 +8,12 @@ import { InAppSubscription } from './database/entities/in-app-subscription';
 import { Language } from './database/entities/language';
 import { PlaylistItem } from './database/entities/playlist-item';
 import { User } from './database/entities/user';
-import { UserInAppSubscription } from './database/entities/user-in-app-subscription';
+import { UserInAppSubscription } from './database/entities/user-in-app-subscription-apple';
 import { UserVoiceSetting } from './database/entities/user-voice-setting';
 import { Voice } from './database/entities/voice';
 
 // Migrations
+import { UserInAppSubscriptionGoogle } from './database/entities/user-in-app-subscriptions-google';
 import { ArticleCompatible1564467937421 } from './database/migrations/1564467937421-ArticleCompatible';
 import { VoiceQuality1564674653133 } from './database/migrations/1564674653133-VoiceQuality';
 import { MicrosoftVoices1565167596757 } from './database/migrations/1565167596757-MicrosoftVoices';
@@ -23,6 +24,9 @@ import { VoiceCountry1565887701525 } from './database/migrations/1565887701525-V
 import { ApiKeys1567094182609 } from './database/migrations/1567094182609-ApiKeys';
 import { Indexes1567101511834 } from './database/migrations/1567101511834-Indexes';
 import { HadTrial1567145416715 } from './database/migrations/1567145416715-HadTrial';
+import { UserInAppSubscriptionsGoogle1567410354988 } from './database/migrations/1567410354988-UserInAppSubscriptionsGoogle';
+import { UserInAppSubscriptionGoogleNulls1567410626330 } from './database/migrations/1567410626330-UserInAppSubscriptionGoogleNulls';
+import { UserInAppSubscriptionGoogleEnvironment1567410969557 } from './database/migrations/1567410969557-UserInAppSubscriptionGoogleEnvironment';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -48,7 +52,8 @@ const config: ConnectionOptions = {
     UserInAppSubscription,
     InAppSubscription,
     Country,
-    ApiKey
+    ApiKey,
+    UserInAppSubscriptionGoogle
   ],
   migrations: [
     // In order of execution is important, oldest first
@@ -61,7 +66,10 @@ const config: ConnectionOptions = {
     VoiceCountry1565887701525,
     ApiKeys1567094182609,
     Indexes1567101511834,
-    HadTrial1567145416715
+    HadTrial1567145416715,
+    UserInAppSubscriptionsGoogle1567410354988,
+    UserInAppSubscriptionGoogleNulls1567410626330,
+    UserInAppSubscriptionGoogleEnvironment1567410969557
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

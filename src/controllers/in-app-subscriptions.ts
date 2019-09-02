@@ -2,12 +2,14 @@ import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import joi from 'joi';
-import { DeepPartial, getRepository, LessThan } from 'typeorm';
+import { getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
-import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription';
+import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription-apple';
+import { UserInAppSubscriptionGoogle } from '../database/entities/user-in-app-subscriptions-google';
+import { IGoogleSubscriptionReceipt } from '../typings';
 import { logger } from '../utils';
 
 const { NODE_ENV, GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY, GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL, APPLE_IAP_SHARED_SECRET } = process.env ;
@@ -62,9 +64,10 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
   }
 
   try {
-    const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
+    const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscription);
+    const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
 
-    const expiredSubscriptions = await userInAppSubscriptionRepository.find({
+    const expiredSubscriptionsApple = await userInAppSubscriptionAppleRepository.find({
       where: {
         expiresAt: LessThan(new Date()),
         status: 'active'
@@ -72,22 +75,33 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       relations: ['user', 'inAppSubscription']
     });
 
-    if (!expiredSubscriptions.length) { return res.status(200).json({ message: 'No active subscriptions found with an expiresAt date greater then the current date. Nothing to update...' }); }
+    const expiredSubscriptionsGoogle = await userInAppSubscriptionGoogleRepository.find({
+      where: {
+        expiresAt: LessThan(new Date()),
+        status: 'active'
+      },
+      relations: ['user', 'inAppSubscription']
+    });
 
-    for (const expiredSubscription of expiredSubscriptions) {
-      const userId = expiredSubscription.user ? expiredSubscription.user.id : null;
-      const productId = expiredSubscription.inAppSubscription.productId;
+    for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
+      const userId = expiredSubscriptionApple.user ? expiredSubscriptionApple.user.id : null;
+      const productId = expiredSubscriptionApple.inAppSubscription.productId;
 
-      const userInAppSubscriptionData = await validateReceipt(expiredSubscription.latestReceipt, productId, userId);
+      await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, expiredSubscriptionApple.latestReceipt, productId, userId);
 
-      logger.info(loggerPrefix, 'Update expired subscription data for');
-
-      await updateOrCreateUserInAppSubscription(userInAppSubscriptionData);
+      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.APPLE}".`);
     }
 
-    logger.info(loggerPrefix, 'Updated all expired subscriptions with the latest data from Apple.');
+    for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
+      const userId = expiredSubscriptionGoogle.user ? expiredSubscriptionGoogle.user.id : null;
+      const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
 
-    return res.json({ message: 'Updated!' });
+      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, expiredSubscriptionGoogle.receipt, productId, userId);
+
+      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.GOOGLE}".`);
+    }
+
+    return res.json({ message: 'Updated!', apple: expiredSubscriptionsApple.length, google: expiredSubscriptionsGoogle.length });
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'An unknown error happened while syncing expired subscriptions.';
 
@@ -136,6 +150,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
     }
 
     if (service === InAppSubscriptionService.GOOGLE && typeof receipt === 'string') {
+      // Manually create the receipt the package needs
       receiptToValidate = {
         ...JSON.parse(receipt),
         packageName: APP_BUNDLE_ID,
@@ -158,15 +173,11 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
-    const userInAppSubscriptionData = await validateReceipt(receiptToValidate, productId, userId);
-
-    logger.info(loggerPrefix, 'Got transaction data from validate receipt!');
-
-    const userInAppSubscriptionResult = await updateOrCreateUserInAppSubscription(userInAppSubscriptionData);
+    const userInAppSubscriptionData: UserInAppSubscription | UserInAppSubscriptionGoogle = await syncReceiptWithDatabase(service, receiptToValidate, productId, userId);
 
     logger.info(loggerPrefix, 'Finished! Returning database entry...');
 
-    return res.json({ ...userInAppSubscriptionResult });
+    return res.json(userInAppSubscriptionData);
   } catch (err) {
     const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
 
@@ -181,8 +192,8 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   }
 };
 
-export const updateOrCreateUserInAppSubscription = async (userInAppSubscription: UserInAppSubscription): Promise<UserInAppSubscription> => {
-  const loggerPrefix = 'Update Or Create User In-App Subscription: ';
+export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscription: UserInAppSubscription): Promise<UserInAppSubscription> => {
+  const loggerPrefix = 'Update Or Create User In-App Subscription (Apple): ';
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
 
   const { originalTransactionId } = userInAppSubscription;
@@ -257,6 +268,73 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
   }
 };
 
+export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscription: UserInAppSubscriptionGoogle): Promise<UserInAppSubscriptionGoogle> => {
+  const loggerPrefix = 'Update Or Create User In-App Subscription (Google): ';
+  const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
+
+  const { purchaseToken } = userInAppSubscription;
+  const userId = userInAppSubscription.user ? userInAppSubscription.user.id : null;
+
+  try {
+    const existingUserInAppSubscription = await userInAppSubscriptionGoogleRepository.findOne({
+      where: {
+        purchaseToken
+      },
+      relations: ['user']
+    });
+
+    if (!existingUserInAppSubscription) {
+      // create
+      logger.info(loggerPrefix, 'Creating database entry, using:', userInAppSubscription);
+
+      const inAppSubscriptionPurchaseToCreate = await userInAppSubscriptionGoogleRepository.create(userInAppSubscription);
+      const savedInAppSubscriptionPurchase = await userInAppSubscriptionGoogleRepository.save(inAppSubscriptionPurchaseToCreate);
+
+      logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
+
+      const existingUserInAppSubscriptionResult = await userInAppSubscriptionGoogleRepository.findOne(savedInAppSubscriptionPurchase.id);
+
+      if (!existingUserInAppSubscriptionResult) { throw new Error('Could not find just added user in app subscription.'); }
+
+      logger.info(loggerPrefix, 'Finished! Returning created database entry...');
+
+      return existingUserInAppSubscriptionResult;
+    }
+
+    // If there's already a transaction, but the user is different
+    // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
+    if (userId && existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
+      logger.info(loggerPrefix, 'Transaction already exists in the database, but it is from a different user.', `Transaction user: "${existingUserInAppSubscription.user.id}"`, `Logged in user: "${userId}"`);
+
+      logger.info(loggerPrefix, `We update the user of the transaction to: "${userId}".`);
+
+      existingUserInAppSubscription.user.id = userId;
+    }
+
+    // Update
+    logger.info(loggerPrefix, 'Transaction already exists. We just update it:', userInAppSubscription);
+    await userInAppSubscriptionGoogleRepository.update(existingUserInAppSubscription.id, userInAppSubscription);
+
+    const userInAppSubscriptionResult = await userInAppSubscriptionGoogleRepository.findOne(existingUserInAppSubscription.id);
+
+    if (!userInAppSubscriptionResult) { throw new Error('Could not find just updated user in app subscription.'); }
+
+    logger.info(loggerPrefix, 'Finished! Returning updated database entry...');
+
+    return userInAppSubscriptionResult;
+  } catch (err) {
+    const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
+    logger.error(loggerPrefix, message);
+
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Critical);
+      Sentry.captureException(err);
+    });
+
+    throw err;
+  }
+};
+
 /**
  * Validates the receipt with the Apple servers.
  *
@@ -265,10 +343,15 @@ export const updateOrCreateUserInAppSubscription = async (userInAppSubscription:
  *
  * @param receipt
  */
-export const validateReceipt = async (receipt: Receipt, productId?: string | null | undefined, userId?: string | null, service?: 'google' | 'apple'): Promise<UserInAppSubscription> => {
+export const syncReceiptWithDatabase = async (
+  service: InAppSubscriptionService,
+  receipt: Receipt,
+  productId?: string | null | undefined,
+  userId?: string | null,
+
+): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
   const sessionId = typeof receipt === 'string' ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
-  const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
   // Allow canceled and expired subscriptions in here, so we can properly use a status history inside our database
@@ -348,7 +431,8 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
 
     // Find the subscription based on the productId
     const inAppSubscription = await inAppSubscriptionRepository.findOne({
-      productId
+      productId,
+      service
     });
 
     const inAppSubscriptionId = inAppSubscription ? inAppSubscription.id : undefined;
@@ -372,9 +456,6 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       throw new Error(message);
     }
 
-    // @ts-ignore
-    const latestReceipt: string = validationResponse.latest_receipt || receipt;
-
     // Only connect to a user if we have one
     // This could be empty if we receive events from Apple, but did not created a transaction in our database yet
     const user = userId
@@ -385,23 +466,19 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       }
       : undefined;
 
-    let userInAppSubscriptionData: DeepPartial<UserInAppSubscription> = {};
-
     if (inAppSubscription.service === InAppSubscriptionService.APPLE) {
-      userInAppSubscriptionData = await getAppleUserInAppSubscriptionData(validationResponse, purchase, user, inAppSubscriptionId);
+      logger.info(loggerPrefix, 'Extract Apple subscription data from purchase...');
+      const userInAppSubscriptionAppleData = await getAppleUserInAppSubscriptionData(validationResponse, purchase, user, inAppSubscriptionId);
+      const result = await updateOrCreateUserInAppSubscriptionApple(userInAppSubscriptionAppleData);
+      return result;
+    } else if (inAppSubscription.service === InAppSubscriptionService.GOOGLE) {
+      logger.info(loggerPrefix, 'Extract Google subscription data from purchase...');
+      const userInAppSubscriptionGoogleData = await getGoogleUserInAppSubscriptionData(purchase, user, inAppSubscriptionId, receipt);
+      const result = await updateOrCreateUserInAppSubscriptionGoogle(userInAppSubscriptionGoogleData);
+      return result;
+    } else {
+      throw new Error(`Service "${inAppSubscription.service}" is not supported.`);
     }
-
-    if (inAppSubscription.service === InAppSubscriptionService.GOOGLE) {
-      userInAppSubscriptionData = await getGoogleUserInAppSubscriptionData(validationResponse, purchase, user, inAppSubscriptionId, receipt);
-    }
-
-    if (!userInAppSubscriptionData) {
-      throw new Error('Did not receive subscription data.');
-    }
-
-    const createdUserInAppSubscriptionData = await userInAppSubscriptionRepository.create(userInAppSubscriptionData);
-
-    return createdUserInAppSubscriptionData;
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, errorMessage);
@@ -413,7 +490,34 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   }
 };
 
-export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string | object, originalTransactionId?: string, productId?: string | null, service?: InAppSubscription['service']): Promise<UserInAppSubscription> => {
+export const updateOrCreateUsingPurchaseToken = async (receipt: IGoogleSubscriptionReceipt): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
+  const { purchaseToken, productId } = receipt;
+
+  if (!purchaseToken) {
+    throw new Error('purchaseToken not found. Which we need to update our user his subscription status in our database.');
+  }
+
+  const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
+
+  // Find the user's subscription based on the purchaseToken, which is unique
+  const foundUserInAppSubscription = await userInAppSubscriptionGoogleRepository.findOne({
+    where: {
+      purchaseToken
+    },
+    relations: ['user', 'inAppSubscription']
+  });
+
+  // If the transaction does not exist, the user probably does not exist either
+  const userId = foundUserInAppSubscription && foundUserInAppSubscription.user ? foundUserInAppSubscription.user.id : null;
+
+  // Validate the receipt with Google
+  // The result should be that the receipt is active
+  const userInAppSubscriptionData = await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, receipt, productId, userId);
+
+  return userInAppSubscriptionData;
+};
+
+export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string | object, originalTransactionId?: string, productId?: string | null): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
   if (!latestReceipt) {
     throw new Error('latestReceipt not found. Which we need to update our user his subscription status in our database.');
   }
@@ -424,7 +528,7 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
 
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
 
-  // Find the user's subscription
+  // Find the user's subscription using the "originalTransactionId", which is unique
   const foundUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
     where: {
       originalTransactionId
@@ -432,21 +536,14 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
     relations: ['user', 'inAppSubscription']
   });
 
-  // if (!foundUserInAppSubscription) {
-  //   throw new Error(`Could not find a user's in app subscription transaction using originalTransactionId: "${originalTransactionId}".`);
-  // }
-
   // User could be empty if we receive notifications from apple
   const userId = foundUserInAppSubscription && foundUserInAppSubscription.user ? foundUserInAppSubscription.user.id : null;
 
   // Validate the receipt with Apple
   // The result should be that the receipt is active
-  const userInAppSubscriptionData = await validateReceipt(latestReceipt, productId, userId);
+  const userInAppSubscriptionData = await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, latestReceipt, productId, userId);
 
-  // Update the subscription for the user
-  const result = await updateOrCreateUserInAppSubscription(userInAppSubscriptionData);
-
-  return result;
+  return userInAppSubscriptionData;
 };
 
 /**
@@ -460,7 +557,8 @@ const getAppleUserInAppSubscriptionData = async (
   purchase: inAppPurchase.AppleSubscriptionPurchase,
   user: object | undefined,
   inAppSubscriptionId: string
-): Promise<DeepPartial<UserInAppSubscription>> => {
+): Promise<UserInAppSubscription> => {
+  const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscription);
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
   // const isActive = !isCanceled && !isExpired;
@@ -497,9 +595,7 @@ const getAppleUserInAppSubscriptionData = async (
 
   const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : undefined;
 
-
-
-  return {
+  const createdEntity = await userInAppSubscriptionAppleRepository.create({
     latestReceipt,
     latestTransactionId,
     originalTransactionId,
@@ -517,7 +613,9 @@ const getAppleUserInAppSubscriptionData = async (
     inAppSubscription: {
       id: inAppSubscriptionId
     }
-  }
+  });
+
+  return createdEntity;
 }
 
 /**
@@ -527,12 +625,12 @@ const getAppleUserInAppSubscriptionData = async (
  * @param purchase
  */
 const getGoogleUserInAppSubscriptionData = async (
-  validationResponse: inAppPurchase.ValidationResponse,
   purchase: inAppPurchase.GoogleSubscriptionPurchase,
   user: object | undefined,
   inAppSubscriptionId: string,
-  receipt: Receipt
-): Promise<DeepPartial<UserInAppSubscription>> => {
+  purchaseReceipt: Receipt
+): Promise<UserInAppSubscriptionGoogle> => {
+  const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
   const isActive = !isCanceled && !isExpired;
@@ -575,15 +673,11 @@ const getGoogleUserInAppSubscriptionData = async (
 
   // The receipt from Google is an object, or a JSON stringified object
   // If it's an object, we just stringify it so we can store it in our database as a string
-  const latestReceipt: string = (typeof receipt === 'object') ? JSON.stringify(receipt) : receipt;
+  const receipt = (typeof purchaseReceipt === 'object') ? JSON.stringify(purchaseReceipt) : purchaseReceipt;
 
-  // TODO: we should create a seperate table for Android subscriptions, so we do not mix this up
-  const latestTransactionId = purchase.orderId; // Or "orderId" in Google terms (transactionId is orderId)
-  const originalTransactionId = purchase.purchaseToken; // The purchaseToken is unique per user per subscription (Google)
-
-  if (!originalTransactionId) {
-    throw new Error('purchaseToken not found in purchase.');
-  }
+  const orderId = purchase.orderId; // Or "orderId" in Google terms (transactionId is orderId)
+  const purchaseToken = purchase.purchaseToken; // The purchaseToken is unique per user per subscription (Google)
+  const transactionId = purchase.transactionId;
 
   // About "purchaseType":
   // The type of purchase of the subscription. This field is only set if this purchase was not made using the standard in-app billing flow. Possible values are: Test (i.e. purchased from a license testing account)
@@ -602,10 +696,11 @@ const getGoogleUserInAppSubscriptionData = async (
   // Only when the package detects a "isCanceled", use the "cancellationDate"
   const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
 
-  return {
-    latestReceipt,
-    latestTransactionId,
-    originalTransactionId,
+  const createdEntity = await userInAppSubscriptionGoogleRepository.create({
+    receipt,
+    orderId,
+    purchaseToken,
+    transactionId,
     environment,
     startedAt,
     expiresAt,
@@ -620,5 +715,8 @@ const getGoogleUserInAppSubscriptionData = async (
     inAppSubscription: {
       id: inAppSubscriptionId
     }
-  }
+  });
+
+  return createdEntity;
+
 }
