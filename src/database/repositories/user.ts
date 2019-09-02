@@ -2,6 +2,8 @@ import { EntityRepository, getConnection, getCustomRepository, getRepository, No
 import * as cacheKeys from '../../cache/keys';
 import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
+import { UserInAppSubscriptionApple } from '../entities/user-in-app-subscription-apple';
+import { UserInAppSubscriptionGoogle } from '../entities/user-in-app-subscriptions-google';
 import { AudiofileRepository } from '../repositories/audiofile';
 
 interface ISubscriptionLimits {
@@ -19,6 +21,7 @@ interface ISubscriptionAvailable {
 
 interface IUserDetails extends Partial<User> {
   isSubscribed: boolean;
+  userInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null,
   used: {
     audiofiles: ISubscriptionUsed;
   };
@@ -101,7 +104,7 @@ export class UserRepository extends Repository<User> {
 
   async findUserDetails(userId: string): Promise<IUserDetails | undefined> {
     const audiofileRepository = getCustomRepository(AudiofileRepository);
-    const user = await this.findOne(userId, { relations: ['voiceSettings', 'inAppSubscriptions'] });
+    const user = await this.findOne(userId, { relations: ['voiceSettings', 'inAppSubscriptions', 'inAppSubscriptionsGoogle'] });
 
     if (!user) { return undefined; }
 
@@ -124,11 +127,24 @@ export class UserRepository extends Repository<User> {
       audiofiles: subscriptionLimits
     };
 
-    const isSubscribed = !!user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
+    // Find the user's active subscriptions
+    const activeSubscriptionApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.status === 'active');
+    const activeSubscriptionGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.status === 'active');
+
+    // Just show one active subscription
+    const userInAppSubscription = activeSubscriptionApple || activeSubscriptionGoogle || null;
+
+    const isSubscribedApple = !!activeSubscriptionApple;
+    const isSubscribedGoogle = !!activeSubscriptionGoogle;
+    const isSubscribed = isSubscribedApple || isSubscribedGoogle;
+
+    delete user.inAppSubscriptionsGoogle;
+    delete user.inAppSubscriptions;
 
     return {
       ...user,
       isSubscribed,
+      userInAppSubscription,
       used,
       available,
       limits
