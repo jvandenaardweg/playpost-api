@@ -11,7 +11,7 @@ import { PlaylistItem } from './playlist-item';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
 import { ApiKey } from './api-key';
-import { UserInAppSubscription } from './user-in-app-subscription-apple';
+import { UserInAppSubscriptionApple } from './user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from './user-in-app-subscriptions-google';
 import { UserVoiceSetting } from './user-voice-setting';
 
@@ -102,8 +102,8 @@ export class User {
   @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
   voiceSettings: UserVoiceSetting[];
 
-  @OneToMany(type => UserInAppSubscription, userInAppSubscription => userInAppSubscription.user)
-  inAppSubscriptions: UserInAppSubscription[];
+  @OneToMany(type => UserInAppSubscriptionApple, userInAppSubscription => userInAppSubscription.user)
+  inAppSubscriptions: UserInAppSubscriptionApple[];
 
   @OneToMany(type => UserInAppSubscriptionGoogle, inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.user)
   inAppSubscriptionsGoogle: UserInAppSubscriptionGoogle[];

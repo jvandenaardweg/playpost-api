@@ -7,7 +7,7 @@ import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
-import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscription } from '../database/entities/user-in-app-subscription-apple';
+import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscriptionApple } from '../database/entities/user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from '../database/entities/user-in-app-subscriptions-google';
 import { IGoogleSubscriptionReceipt } from '../typings';
 import { logger } from '../utils';
@@ -49,7 +49,7 @@ export const findAllActive = async (req: Request, res: Response) => {
 };
 
 /**
- * Method to sync receipts in our database with Apple.
+ * Method to sync receipts in our database with Apple and Google.
  * So we always have up-to-date Receipt data in our database.
  *
  * This is a controller method we should use for polling.
@@ -64,7 +64,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
   }
 
   try {
-    const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscription);
+    const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
     const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
 
     const expiredSubscriptionsApple = await userInAppSubscriptionAppleRepository.find({
@@ -83,6 +83,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       relations: ['user', 'inAppSubscription']
     });
 
+    // Sync the Apple subscriptions
     for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
       const userId = expiredSubscriptionApple.user ? expiredSubscriptionApple.user.id : null;
       const productId = expiredSubscriptionApple.inAppSubscription.productId;
@@ -92,6 +93,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
       logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.APPLE}".`);
     }
 
+    // Sync the Google subscriptions
     for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
       const userId = expiredSubscriptionGoogle.user ? expiredSubscriptionGoogle.user.id : null;
       const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
@@ -117,7 +119,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
 };
 
 /**
- * A method to validate the purchase receipt from our users with Apple/Google servers
+ * A method to validate the purchase receipt from our users with Apple and Google servers
  */
 export const validateInAppSubscriptionReceipt = async (req: Request, res: Response) => {
   interface IRequestBody {
@@ -173,7 +175,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
     logger.info(loggerPrefix, `Starting for user: ${userId}`);
 
-    const userInAppSubscriptionData: UserInAppSubscription | UserInAppSubscriptionGoogle = await syncReceiptWithDatabase(service, receiptToValidate, productId, userId);
+    const userInAppSubscriptionData: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle = await syncReceiptWithDatabase(service, receiptToValidate, productId, userId);
 
     logger.info(loggerPrefix, 'Finished! Returning database entry...');
 
@@ -192,9 +194,9 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   }
 };
 
-export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscription: UserInAppSubscription): Promise<UserInAppSubscription> => {
+export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscription: UserInAppSubscriptionApple): Promise<UserInAppSubscriptionApple> => {
   const loggerPrefix = 'Update Or Create User In-App Subscription (Apple): ';
-  const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
+  const userInAppSubscriptionRepository = getRepository(UserInAppSubscriptionApple);
 
   const { originalTransactionId } = userInAppSubscription;
   const userId = userInAppSubscription.user ? userInAppSubscription.user.id : null;
@@ -349,7 +351,7 @@ export const syncReceiptWithDatabase = async (
   productId?: string | null | undefined,
   userId?: string | null,
 
-): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
+): Promise<UserInAppSubscriptionApple | UserInAppSubscriptionGoogle> => {
   const sessionId = typeof receipt === 'string' ? receipt.substring(0, 20) : null;
   const loggerPrefix = `Validate Receipt (${sessionId}): `;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
@@ -490,7 +492,7 @@ export const syncReceiptWithDatabase = async (
   }
 };
 
-export const updateOrCreateUsingPurchaseToken = async (receipt: IGoogleSubscriptionReceipt): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
+export const updateOrCreateUsingPurchaseToken = async (receipt: IGoogleSubscriptionReceipt): Promise<UserInAppSubscriptionApple | UserInAppSubscriptionGoogle> => {
   const { purchaseToken, productId } = receipt;
 
   if (!purchaseToken) {
@@ -517,7 +519,7 @@ export const updateOrCreateUsingPurchaseToken = async (receipt: IGoogleSubscript
   return userInAppSubscriptionData;
 };
 
-export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string | object, originalTransactionId?: string, productId?: string | null): Promise<UserInAppSubscription | UserInAppSubscriptionGoogle> => {
+export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: string | object, originalTransactionId?: string, productId?: string | null): Promise<UserInAppSubscriptionApple | UserInAppSubscriptionGoogle> => {
   if (!latestReceipt) {
     throw new Error('latestReceipt not found. Which we need to update our user his subscription status in our database.');
   }
@@ -526,7 +528,7 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
     throw new Error('originalTransactionId not found. Which we need to update our user his subscription status in our database.');
   }
 
-  const userInAppSubscriptionRepository = getRepository(UserInAppSubscription);
+  const userInAppSubscriptionRepository = getRepository(UserInAppSubscriptionApple);
 
   // Find the user's subscription using the "originalTransactionId", which is unique
   const foundUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
@@ -557,8 +559,8 @@ const getAppleUserInAppSubscriptionData = async (
   purchase: inAppPurchase.AppleSubscriptionPurchase,
   user: object | undefined,
   inAppSubscriptionId: string
-): Promise<UserInAppSubscription> => {
-  const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscription);
+): Promise<UserInAppSubscriptionApple> => {
+  const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
   // const isActive = !isCanceled && !isExpired;

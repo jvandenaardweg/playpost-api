@@ -8,7 +8,7 @@ import { InAppSubscription } from './database/entities/in-app-subscription';
 import { Language } from './database/entities/language';
 import { PlaylistItem } from './database/entities/playlist-item';
 import { User } from './database/entities/user';
-import { UserInAppSubscription } from './database/entities/user-in-app-subscription-apple';
+import { UserInAppSubscriptionApple } from './database/entities/user-in-app-subscription-apple';
 import { UserVoiceSetting } from './database/entities/user-voice-setting';
 import { Voice } from './database/entities/voice';
 
@@ -49,7 +49,7 @@ const config: ConnectionOptions = {
     Voice,
     Language,
     UserVoiceSetting,
-    UserInAppSubscription,
+    UserInAppSubscriptionApple,
     InAppSubscription,
     Country,
     ApiKey,

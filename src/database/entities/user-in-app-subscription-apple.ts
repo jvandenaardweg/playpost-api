@@ -16,8 +16,8 @@ export enum InAppSubscriptionEnvironment {
   PROD = 'PROD'
 }
 
-@Entity()
-export class UserInAppSubscription {
+@Entity("user_in_app_subscription") // We have renamed this entity later to "UserInAppSubscriptionApple", but we want to keep the database table name the same
+export class UserInAppSubscriptionApple {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   id: string;
