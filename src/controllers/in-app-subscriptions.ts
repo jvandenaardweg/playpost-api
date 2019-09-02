@@ -85,20 +85,27 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
 
     // Sync the Apple subscriptions
     for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
+      logger.info(loggerPrefix, `Trying to sync expired Apple Subscription:`, expiredSubscriptionApple);
       const userId = expiredSubscriptionApple.user ? expiredSubscriptionApple.user.id : null;
       const productId = expiredSubscriptionApple.inAppSubscription.productId;
+      const receipt = expiredSubscriptionApple.latestReceipt;
 
-      await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, expiredSubscriptionApple.latestReceipt, productId, userId);
+      await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, receipt, productId, userId);
 
       logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.APPLE}".`);
     }
 
     // Sync the Google subscriptions
     for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
+      logger.info(loggerPrefix, `Trying to sync expired Google Subscription:`, expiredSubscriptionGoogle);
+
       const userId = expiredSubscriptionGoogle.user ? expiredSubscriptionGoogle.user.id : null;
       const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
 
-      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, expiredSubscriptionGoogle.latestReceipt, productId, userId);
+      // Make sure we pass in a JSON object
+      const receipt = (typeof expiredSubscriptionGoogle.latestReceipt === 'string') ? JSON.parse(expiredSubscriptionGoogle.latestReceipt) : expiredSubscriptionGoogle.latestReceipt;
+
+      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, receipt, productId, userId);
 
       logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.GOOGLE}".`);
     }
