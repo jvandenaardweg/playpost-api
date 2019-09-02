@@ -279,7 +279,7 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
   };
 
   let validationResponse: inAppPurchase.ValidationResponse;
-  let purchaseData: inAppPurchase.PurchasedItem[] | null;
+  let purchaseData: inAppPurchase.AppleSubscriptionPurchase[] | inAppPurchase.GoogleSubscriptionPurchase[] | null;
 
   try {
 
@@ -372,12 +372,6 @@ export const validateReceipt = async (receipt: Receipt, productId?: string | nul
       throw new Error(message);
     }
 
-    const isTrial = purchase.isTrial;
-
-    // Only set hadTrial once, if it's true
-    // Anything else won't update the database, that's why we use undefined here
-    const hadTrial = (isTrial) ? isTrial : undefined;
-
     // @ts-ignore
     const latestReceipt: string = validationResponse.latest_receipt || receipt;
 
@@ -462,14 +456,16 @@ export const updateOrCreateUsingOriginalTransactionId = async (latestReceipt?: s
  * @param purchase 
  */
 const getAppleUserInAppSubscriptionData = async (
-  validationResponse: inAppPurchase.ValidationResponse,
-  purchase: inAppPurchase.PurchasedItem,
+  validationResponse: inAppPurchase.AppleValidationResponse,
+  purchase: inAppPurchase.AppleSubscriptionPurchase,
   user: object | undefined,
   inAppSubscriptionId: string
 ): Promise<DeepPartial<UserInAppSubscription>> => {
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
+  // const isActive = !isCanceled && !isExpired;
   const isTrial = !!purchase.isTrial;
+  const hadTrial = isTrial || undefined;
 
   let status = InAppSubscriptionStatus.ACTIVE;
 
@@ -501,6 +497,8 @@ const getAppleUserInAppSubscriptionData = async (
 
   const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : undefined;
 
+
+
   return {
     latestReceipt,
     latestTransactionId,
@@ -514,6 +512,7 @@ const getAppleUserInAppSubscriptionData = async (
     isExpired,
     isTrial,
     status,
+    hadTrial,
     ...user,
     inAppSubscription: {
       id: inAppSubscriptionId
@@ -529,7 +528,7 @@ const getAppleUserInAppSubscriptionData = async (
  */
 const getGoogleUserInAppSubscriptionData = async (
   validationResponse: inAppPurchase.ValidationResponse,
-  purchase: inAppPurchase.PurchasedItem,
+  purchase: inAppPurchase.GoogleSubscriptionPurchase,
   user: object | undefined,
   inAppSubscriptionId: string,
   receipt: Receipt
@@ -537,8 +536,8 @@ const getGoogleUserInAppSubscriptionData = async (
   const isCanceled = await inAppPurchase.isCanceled(purchase);
   const isExpired = await inAppPurchase.isExpired(purchase);
   const isActive = !isCanceled && !isExpired;
-
-  const isTrial = !!purchase.isTrial;
+  const isTrial = purchase.paymentState === 2;
+  const hadTrial = isTrial || undefined;
 
   /*
     {"service":"google",
@@ -597,8 +596,8 @@ const getGoogleUserInAppSubscriptionData = async (
 
   const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
 
-  // TODO: find out how we set this
-  const renewedAt = (isActive && purchase.startTimeMillis && purchase.expiryTimeMillis && purchase.startTimeMillis > purchase.expiryTimeMillis) ? new Date().toISOString() : undefined;
+  // Only set the renewedAt date to the expire data when we auto renew and the subscription is still active
+  const renewedAt = (isActive && purchase.autoRenewing && purchase.expiryTimeMillis) ? new Date(parseInt(purchase.expiryTimeMillis.toString(), 10)).toISOString() : undefined;
 
   // Only when the package detects a "isCanceled", use the "cancellationDate"
   const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
@@ -616,6 +615,7 @@ const getGoogleUserInAppSubscriptionData = async (
     isExpired,
     isTrial,
     status,
+    hadTrial,
     ...user,
     inAppSubscription: {
       id: inAppSubscriptionId
