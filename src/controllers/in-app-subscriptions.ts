@@ -565,7 +565,7 @@ const getAppleUserInAppSubscriptionData = async (
   const isExpired = await inAppPurchase.isExpired(purchase);
   // const isActive = !isCanceled && !isExpired;
   const isTrial = !!purchase.isTrial;
-  const hadTrial = isTrial || undefined;
+  const hadTrial = (isTrial === true) ? isTrial : undefined;
 
   let status = InAppSubscriptionStatus.ACTIVE;
 
@@ -637,7 +637,7 @@ const getGoogleUserInAppSubscriptionData = async (
   const isExpired = await inAppPurchase.isExpired(purchase);
   const isActive = !isCanceled && !isExpired;
   const isTrial = purchase.paymentState === 2;
-  const hadTrial = isTrial || undefined;
+  const hadTrial = (isTrial === true) ? isTrial : undefined;
 
   /*
     {"service":"google",
