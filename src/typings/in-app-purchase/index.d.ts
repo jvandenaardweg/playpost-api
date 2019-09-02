@@ -123,13 +123,13 @@ export interface PurchasedItem {
   quantity?: number;
 }
 
-export interface WindowsSubscriptionPurchase extends PurchasedItem {
+// export interface WindowsSubscriptionPurchase extends PurchasedItem {
 
-}
+// }
 
-export interface AmazonSubscriptionPurchase extends PurchasedItem {
+// export interface AmazonSubscriptionPurchase extends PurchasedItem {
 
-}
+// }
 
 export interface AppleSubscriptionPurchase extends PurchasedItem {
   bundleId?: string;
@@ -150,7 +150,7 @@ export interface GoogleSubscriptionPurchase extends PurchasedItem {
    * The type of purchase of the subscription.
    * This field is only set if this purchase was not made using the standard in-app billing flow. Possible values are:
    * Test (i.e. purchased from a license testing account)
-   * */
+   */
   purchaseType?: number;
 
   /** Whether the subscription will automatically be renewed when it reaches its current expiry time. */
