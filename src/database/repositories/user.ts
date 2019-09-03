@@ -2,8 +2,6 @@ import { EntityRepository, getConnection, getCustomRepository, getRepository, No
 import * as cacheKeys from '../../cache/keys';
 import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
-import { UserInAppSubscriptionApple } from '../entities/user-in-app-subscription-apple';
-import { UserInAppSubscriptionGoogle } from '../entities/user-in-app-subscriptions-google';
 import { AudiofileRepository } from '../repositories/audiofile';
 
 interface ISubscriptionLimits {
@@ -21,7 +19,8 @@ interface ISubscriptionAvailable {
 
 interface IUserDetails extends Partial<User> {
   isSubscribed: boolean;
-  userInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null,
+  activeInAppSubscription: InAppSubscription | null;
+  usedInAppSubscriptionTrial: string[];
   used: {
     audiofiles: ISubscriptionUsed;
   };
@@ -131,20 +130,42 @@ export class UserRepository extends Repository<User> {
     const activeSubscriptionApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.status === 'active');
     const activeSubscriptionGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.status === 'active');
 
+    // Find out if the user already used a trial option in the app
+    const trialPurchaseApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.hadTrial);
+    const trialPurchaseGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.hadTrial);
+
     // Just show one active subscription
-    const userInAppSubscription = activeSubscriptionApple || activeSubscriptionGoogle || null;
+    // const activeInAppSubscriptions = activeSubscriptionApple || activeSubscriptionGoogle || null;
 
     const isSubscribedApple = !!activeSubscriptionApple;
     const isSubscribedGoogle = !!activeSubscriptionGoogle;
     const isSubscribed = isSubscribedApple || isSubscribedGoogle;
+    const usedInAppSubscriptionTrial: string[] = [];
 
+    if (trialPurchaseApple) {
+      usedInAppSubscriptionTrial.push(trialPurchaseApple.inAppSubscription.productId)
+    }
+
+    if (trialPurchaseGoogle) {
+      usedInAppSubscriptionTrial.push(trialPurchaseGoogle.inAppSubscription.productId)
+    }
+
+    // We offer subscriptions per platform, but the user only needs one active
+    // Just return the active subscription product Id
+    // const activeInAppSubscriptionProductId = (activeSubscriptionApple) ? activeSubscriptionApple.inAppSubscription.productId : (activeSubscriptionGoogle) ? activeSubscriptionGoogle.inAppSubscription.productId : null;
+    const activeInAppSubscription = (activeSubscriptionApple) ? activeSubscriptionApple.inAppSubscription : (activeSubscriptionGoogle) ? activeSubscriptionGoogle.inAppSubscription : null;
+
+    // We do not need the whole purchase history
     delete user.inAppSubscriptionsGoogle;
-    delete user.inAppSubscriptions;
+
+    // Delete this later, iOS App 1.1.3 and below depend on this
+    // delete user.inAppSubscriptions;
 
     return {
       ...user,
       isSubscribed,
-      userInAppSubscription,
+      activeInAppSubscription,
+      usedInAppSubscriptionTrial,
       used,
       available,
       limits
