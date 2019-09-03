@@ -64,53 +64,8 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
   }
 
   try {
-    const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
-    const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
-
-    const expiredSubscriptionsApple = await userInAppSubscriptionAppleRepository.find({
-      where: {
-        expiresAt: LessThan(new Date()),
-        status: 'active'
-      },
-      relations: ['user', 'inAppSubscription']
-    });
-
-    const expiredSubscriptionsGoogle = await userInAppSubscriptionGoogleRepository.find({
-      where: {
-        expiresAt: LessThan(new Date()),
-        status: 'active'
-      },
-      relations: ['user', 'inAppSubscription']
-    });
-
-    // Sync the Apple subscriptions
-    for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
-      logger.info(loggerPrefix, `Trying to sync expired Apple Subscription:`, expiredSubscriptionApple);
-      const userId = expiredSubscriptionApple.user ? expiredSubscriptionApple.user.id : null;
-      const productId = expiredSubscriptionApple.inAppSubscription.productId;
-      const receipt = expiredSubscriptionApple.latestReceipt;
-
-      await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, receipt, productId, userId);
-
-      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.APPLE}".`);
-    }
-
-    // Sync the Google subscriptions
-    for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
-      logger.info(loggerPrefix, `Trying to sync expired Google Subscription:`, expiredSubscriptionGoogle);
-
-      const userId = expiredSubscriptionGoogle.user ? expiredSubscriptionGoogle.user.id : null;
-      const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
-
-      // Make sure we pass in a JSON object
-      const receipt = (typeof expiredSubscriptionGoogle.latestReceipt === 'string') ? JSON.parse(expiredSubscriptionGoogle.latestReceipt) : expiredSubscriptionGoogle.latestReceipt;
-
-      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, receipt, productId, userId);
-
-      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.GOOGLE}".`);
-    }
-
-    return res.json({ message: 'Updated!', apple: expiredSubscriptionsApple.length, google: expiredSubscriptionsGoogle.length });
+    const result = await syncExpiredSubscriptionsWithService();
+    return res.json(result);
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'An unknown error happened while syncing expired subscriptions.';
 
@@ -729,4 +684,68 @@ const getGoogleUserInAppSubscriptionData = async (
 
   return createdEntity;
 
+}
+
+export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
+  const loggerPrefix = '(Sync Expired In App Subscriptions With Service): ';
+
+  // If a userId is given, use that to search the user's subscriptions
+  const user = userId ? {
+    user: {
+      id: userId
+    }
+  } : undefined;
+
+  try {
+    const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
+    const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
+
+    const expiredSubscriptionsApple = await userInAppSubscriptionAppleRepository.find({
+      where: {
+        expiresAt: LessThan(new Date()),
+        status: 'active',
+        user
+      },
+      relations: ['user', 'inAppSubscription']
+    });
+
+    const expiredSubscriptionsGoogle = await userInAppSubscriptionGoogleRepository.find({
+      where: {
+        expiresAt: LessThan(new Date()),
+        status: 'active',
+        user
+      },
+      relations: ['user', 'inAppSubscription']
+    });
+
+    // Sync the Apple subscriptions
+    for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
+      logger.info(loggerPrefix, `Trying to sync expired Apple Subscription:`, expiredSubscriptionApple);
+      const subscriptionUserId = expiredSubscriptionApple.user.id;
+      const productId = expiredSubscriptionApple.inAppSubscription.productId;
+      const receipt = expiredSubscriptionApple.latestReceipt;
+
+      await syncReceiptWithDatabase(InAppSubscriptionService.APPLE, receipt, productId, subscriptionUserId);
+
+      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.APPLE}".`);
+    }
+
+    // Sync the Google subscriptions
+    for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
+      logger.info(loggerPrefix, `Trying to sync expired Google Subscription:`, expiredSubscriptionGoogle);
+      const subscriptionUserId = expiredSubscriptionGoogle.user.id;
+      const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
+
+      // Make sure we pass in a JSON object
+      const receipt = (typeof expiredSubscriptionGoogle.latestReceipt === 'string') ? JSON.parse(expiredSubscriptionGoogle.latestReceipt) : expiredSubscriptionGoogle.latestReceipt;
+
+      await syncReceiptWithDatabase(InAppSubscriptionService.GOOGLE, receipt, productId, subscriptionUserId);
+
+      logger.info(loggerPrefix, `Update expired subscription data for "${InAppSubscriptionService.GOOGLE}".`);
+    }
+
+    return { message: 'Updated!', apple: expiredSubscriptionsApple.length, google: expiredSubscriptionsGoogle.length };
+  } catch (err) {
+    throw err;
+  }
 }

@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import joi from 'joi';
 import { getConnection, getCustomRepository, getRepository, Repository } from 'typeorm';
 
+import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
 import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
@@ -36,6 +37,10 @@ export class MeController {
 
   findCurrentUser = async (req: Request, res: Response) => {
     const userId = req.user.id;
+
+    // On each request of the user's own details, make sure all his subscriptions are correctly synced
+    // So we can always provide the user with an up-to-date status of his subscriptions
+    await inAppSubscriptionsController.syncExpiredSubscriptionsWithService(userId);
 
     const user = await this.customUserRepository.findUserDetails(userId);
 

@@ -127,8 +127,13 @@ export class UserRepository extends Repository<User> {
     };
 
     // Find the user's active subscriptions
-    const activeSubscriptionApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.status === 'active');
-    const activeSubscriptionGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.status === 'active');
+    const activeSubscriptionApple = user.inAppSubscriptions
+    .sort((a, b) => b.startedAt.toISOString().localeCompare(a.startedAt.toISOString())) // Sort by startedAt, so if the user upgrades, we get the correct active subscription
+    .find(inAppSubscriptionsApple => inAppSubscriptionsApple.status === 'active');
+
+    const activeSubscriptionGoogle = user.inAppSubscriptionsGoogle
+    .sort((a, b) => b.startedAt.toISOString().localeCompare(a.startedAt.toISOString())) // Sort by startedAt, so if the user upgrades, we get the correct active subscription
+    .find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.status === 'active');
 
     // Find out if the user already used a trial option in the app
     const trialPurchaseApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.hadTrial);
