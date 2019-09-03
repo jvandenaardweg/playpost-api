@@ -28,6 +28,7 @@ export class UserInAppSubscriptionApple {
   startedAt: Date;
 
   // expires date
+  @Index()
   @Column({ nullable: true })
   @IsDate()
   expiresAt: Date;
@@ -59,6 +60,7 @@ export class UserInAppSubscriptionApple {
   @Column({ nullable: false })
   isExpired: boolean;
 
+  @Index()
   @Column({ type: 'enum', enum: InAppSubscriptionStatus, nullable: false })
   status: InAppSubscriptionStatus;
 

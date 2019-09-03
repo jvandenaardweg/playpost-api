@@ -27,6 +27,8 @@ import { HadTrial1567145416715 } from './database/migrations/1567145416715-HadTr
 import { UserInAppSubscriptionsGoogle1567410354988 } from './database/migrations/1567410354988-UserInAppSubscriptionsGoogle';
 import { UserInAppSubscriptionGoogleNulls1567410626330 } from './database/migrations/1567410626330-UserInAppSubscriptionGoogleNulls';
 import { UserInAppSubscriptionGoogleEnvironment1567410969557 } from './database/migrations/1567410969557-UserInAppSubscriptionGoogleEnvironment';
+import { UserInAppSubscriptionsExpiresIndex1567537078927 } from './database/migrations/1567537078927-UserInAppSubscriptionsExpiresIndex';
+import { UserInAppSubscriptionsStatusIndex1567537213827 } from './database/migrations/1567537213827-UserInAppSubscriptionsStatusIndex';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -69,7 +71,9 @@ const config: ConnectionOptions = {
     HadTrial1567145416715,
     UserInAppSubscriptionsGoogle1567410354988,
     UserInAppSubscriptionGoogleNulls1567410626330,
-    UserInAppSubscriptionGoogleEnvironment1567410969557
+    UserInAppSubscriptionGoogleEnvironment1567410969557,
+    UserInAppSubscriptionsExpiresIndex1567537078927,
+    UserInAppSubscriptionsStatusIndex1567537213827
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

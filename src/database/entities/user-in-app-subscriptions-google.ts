@@ -16,6 +16,7 @@ export class UserInAppSubscriptionGoogle {
   startedAt: Date;
 
   // expires date
+  @Index()
   @Column({ nullable: true })
   @IsDate()
   expiresAt: Date;
@@ -50,6 +51,7 @@ export class UserInAppSubscriptionGoogle {
   @Column({ nullable: false })
   isExpired: boolean;
 
+  @Index()
   @Column({ type: 'enum', enum: InAppSubscriptionStatus, nullable: false })
   status: InAppSubscriptionStatus;
 
