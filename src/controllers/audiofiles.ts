@@ -79,7 +79,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   if (!user) { return res.status(400).json({ message: 'User not found.' }); }
 
-  const userIsSubscribed = user.isSubscribed;
+  const userIsSubscribed = !!user.activeUserInAppSubscription;
   const userSubscriptionLimits = user.limits.audiofiles;
   const userAudiofilesUsage = user.used.audiofiles;
 

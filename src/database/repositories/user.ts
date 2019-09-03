@@ -2,9 +2,9 @@ import { EntityRepository, getConnection, getCustomRepository, getRepository, No
 import * as cacheKeys from '../../cache/keys';
 import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
+import { UserInAppSubscriptionApple } from '../entities/user-in-app-subscription-apple';
+import { UserInAppSubscriptionGoogle } from '../entities/user-in-app-subscriptions-google';
 import { AudiofileRepository } from '../repositories/audiofile';
-import { UserInAppSubscriptionApple } from 'database/entities/user-in-app-subscription-apple';
-import { UserInAppSubscriptionGoogle } from 'database/entities/user-in-app-subscriptions-google';
 
 interface ISubscriptionLimits {
   limitSecondsPerMonth: number;
@@ -20,7 +20,6 @@ interface ISubscriptionAvailable {
 }
 
 interface IUserDetails extends Partial<User> {
-  isSubscribed: boolean;
   activeUserInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null;
   usedInAppSubscriptionTrial: string[];
   used: {
@@ -144,9 +143,6 @@ export class UserRepository extends Repository<User> {
     // Just show one active subscription
     // const activeInAppSubscriptions = activeSubscriptionApple || activeSubscriptionGoogle || null;
 
-    const isSubscribedApple = !!activeSubscriptionApple;
-    const isSubscribedGoogle = !!activeSubscriptionGoogle;
-    const isSubscribed = isSubscribedApple || isSubscribedGoogle;
     const usedInAppSubscriptionTrial: string[] = [];
 
     if (trialPurchaseApple) {
@@ -170,7 +166,6 @@ export class UserRepository extends Repository<User> {
 
     return {
       ...user,
-      isSubscribed,
       activeUserInAppSubscription,
       usedInAppSubscriptionTrial,
       used,
@@ -193,7 +188,7 @@ export class UserRepository extends Repository<User> {
     if (!user) { return undefined; }
 
     // If the user is not subscribed, return the first paid subscription options
-    if (!user.isSubscribed) {
+    if (!user.activeUserInAppSubscription) {
       const unsubscribedOtherAvailableSubscriptions = await inAppSubscriptionRepository.find({
         isActive: true,
         productId: Not('free')

@@ -179,7 +179,7 @@ export class MeController {
 
       // If a user is not subscribed, but tries to change to a premium voice
       // Notify the user he cannot do this
-      if (!user.isSubscribed && voice.isPremium) {
+      if (!user.activeUserInAppSubscription && voice.isPremium) {
         const errorMessage = 'It appears you do not have an active Premium subscription to use this voice. If you want to use this voice, please upgrade to a Premium subscription.';
         logger.warn(loggerPrefix, errorMessage);
         throw new Error(errorMessage);
