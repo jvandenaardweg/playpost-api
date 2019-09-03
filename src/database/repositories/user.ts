@@ -158,7 +158,7 @@ export class UserRepository extends Repository<User> {
     // We do not need the whole purchase history
     delete user.inAppSubscriptionsGoogle;
 
-    // Delete this later, iOS App 1.1.3 and below depend on this
+    // TODO: Delete this later, iOS App 1.1.3 and below depend on this
     // delete user.inAppSubscriptions;
 
     return {
