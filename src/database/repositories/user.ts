@@ -3,6 +3,8 @@ import * as cacheKeys from '../../cache/keys';
 import { InAppSubscription } from '../entities/in-app-subscription';
 import { User } from '../entities/user';
 import { AudiofileRepository } from '../repositories/audiofile';
+import { UserInAppSubscriptionApple } from 'database/entities/user-in-app-subscription-apple';
+import { UserInAppSubscriptionGoogle } from 'database/entities/user-in-app-subscriptions-google';
 
 interface ISubscriptionLimits {
   limitSecondsPerMonth: number;
@@ -19,7 +21,7 @@ interface ISubscriptionAvailable {
 
 interface IUserDetails extends Partial<User> {
   isSubscribed: boolean;
-  activeInAppSubscription: InAppSubscription | null;
+  activeUserInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null;
   usedInAppSubscriptionTrial: string[];
   used: {
     audiofiles: ISubscriptionUsed;
@@ -158,7 +160,7 @@ export class UserRepository extends Repository<User> {
     // We offer subscriptions per platform, but the user only needs one active
     // Just return the active subscription product Id
     // const activeInAppSubscriptionProductId = (activeSubscriptionApple) ? activeSubscriptionApple.inAppSubscription.productId : (activeSubscriptionGoogle) ? activeSubscriptionGoogle.inAppSubscription.productId : null;
-    const activeInAppSubscription = (activeSubscriptionApple) ? activeSubscriptionApple.inAppSubscription : (activeSubscriptionGoogle) ? activeSubscriptionGoogle.inAppSubscription : null;
+    const activeUserInAppSubscription = (activeSubscriptionApple) ? activeSubscriptionApple : (activeSubscriptionGoogle) ? activeSubscriptionGoogle : null;
 
     // We do not need the whole purchase history
     delete user.inAppSubscriptionsGoogle;
@@ -169,7 +171,7 @@ export class UserRepository extends Repository<User> {
     return {
       ...user,
       isSubscribed,
-      activeInAppSubscription,
+      activeUserInAppSubscription,
       usedInAppSubscriptionTrial,
       used,
       available,
