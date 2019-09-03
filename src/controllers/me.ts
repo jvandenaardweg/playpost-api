@@ -51,74 +51,88 @@ export class MeController {
     return res.json(user);
   }
 
+  /**
+   * Deprecated endpoint. In use in iOS app 1.1.3 and below.
+   */
   updateEmail = async (req: Request, res: Response) => {
-    const { email } = req.body;
-    const userId = req.user.id;
-    const loggerPrefix = 'User Update E-mail: ';
-
-    const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
-
-    if (error) {
-      const messageDetails = error.details.map(detail => detail.message).join(' and ');
-      return res.status(400).json({ message: messageDetails });
-    }
-
-    const emailAddressNormalized = this.userEntity.normalizeEmail(email);
-
-    logger.info(loggerPrefix, `Try updating for user ID "${userId}"...`);
-
-    const existingUser = await this.customUserRepository.findOne({
-      where: {
-        email: emailAddressNormalized
-      },
-      relations: ['apiKeys']
-    });
-
-    if (existingUser && existingUser.id !== userId) {
-      logger.info(loggerPrefix, `User ID "${userId}" tried to update his e-mail address, but it\s already in use by an other user.`);
-      return res.status(400).json({ message: 'This e-mail address is already in use by an other user.' });
-    }
-
-    logger.info(loggerPrefix, `User ID "${userId}" is allowed to update to this e-mail address. Updating now...`);
-
-    await this.customUserRepository.update(userId, { email: emailAddressNormalized });
-
-    logger.info(loggerPrefix, 'Updated!');
-
-    // Make sure we remove caches from the user where the e-mail address might be in
-    await this.customUserRepository.removeUserRelatedCaches(userId);
-
-    const updatedUser = await this.customUserRepository.findOne(userId);
-
-    if (!updatedUser) { return res.status(400).json({ message: 'Could not find your user details after updating the e-mail address.' }); }
-
-    return res.json(updatedUser);
+    return res.status(400).json({ message: 'Please update the App to the latest version to change your e-mail address.' });
   };
 
+  /**
+   * Deprecated endpoint. In use in iOS app 1.1.3 and below.
+   */
   updatePassword = async (req: Request, res: Response) => {
-    const { password } = req.body;
-    const userId = req.user.id;
+    return res.status(400).json({ message: 'Please update the App to the latest version to change your password.' });
+  };
 
-    const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('password'));
+  /**
+   * Patches some fields of the user table.
+   * For example, allow the user to update his "email" address or "password".
+   *
+   */
+  patchMe = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const userId = req.user.id;
+    const loggerPrefix = 'Patch User: ';
+
+    const { error } = joi.validate(req.body, userInputValidationSchema.optionalKeys('email', 'password'));
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
       return res.status(400).json({ message: messageDetails });
     }
 
-    const hashedPassword = await this.userEntity.hashPassword(password);
+    if (!email && !password) {
+      return res.status(400).json({ message: 'The given field is not patchable.' });
+    }
 
-    await this.customUserRepository.update(userId, { password: hashedPassword });
+    const user = await this.customUserRepository.findOne(userId);
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found.' })
+    }
+
+    const patchObject = this.customUserRepository.create(user)
+
+    if (email) {
+      const emailAddressNormalized = this.userEntity.normalizeEmail(email);
+
+      // First, find out if the user can use this e-mail address
+      const existingUser = await this.customUserRepository.findOne({
+        where: {
+          email: emailAddressNormalized
+        }
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        logger.info(loggerPrefix, `User ID "${userId}" tried to update his e-mail address, but it\s already in use by an other user.`);
+        return res.status(400).json({ message: 'This e-mail address is already in use by an other user.' });
+      }
+
+      patchObject.email = emailAddressNormalized
+    }
+
+    if (password) {
+      const hashedPassword = await this.userEntity.hashPassword(password);
+      patchObject.password = hashedPassword
+    }
+
+    await this.customUserRepository.save(patchObject)
 
     // Remove the JWT verification cache as the user updated data
     const cache = await getConnection('default').queryResultCache;
     if (cache) { await cache.remove([cacheKeys.jwtVerifyUser(userId)]); }
 
-    const updatedUser = await this.customUserRepository.findOne(userId);
+    const updatedUser = await this.customUserRepository.findUserDetails(userId)
 
     return res.json(updatedUser);
   };
 
+  /**
+   * Allows the loggedin user to completely delete his account and all related database data.
+   *
+   * The only thing we do not delete, is the purchase history.
+   */
   deleteCurrentUser = async (req: Request, res: Response) => {
     const userId = req.user.id;
 
@@ -131,8 +145,6 @@ export class MeController {
    * Method where the user can set a default voice per language.
    * This default voice will then be used for articles with the same language.
    *
-   * @param req
-   * @param res
    */
   createSelectedVoice = async (req: Request, res: Response) => {
     const loggerPrefix = 'User Create Selected Voice Setting:';
@@ -232,8 +244,6 @@ export class MeController {
   /**
    * Returns all the API keys of the user.
    *
-   * @param req
-   * @param res
    */
   findAllApiKeys = async (req: Request, res: Response) => {
     const userId = req.user.id;
