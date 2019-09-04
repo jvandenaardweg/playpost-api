@@ -21,7 +21,7 @@ interface ISubscriptionAvailable {
 
 interface IUserDetails extends Partial<User> {
   activeUserInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null;
-  usedInAppSubscriptionTrial: string[];
+  usedInAppSubscriptionTrials: InAppSubscription[];
   used: {
     audiofiles: ISubscriptionUsed;
   };
@@ -137,20 +137,19 @@ export class UserRepository extends Repository<User> {
     .find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.status === 'active');
 
     // Find out if the user already used a trial option in the app
+    // So we can properly promote free trials in the app if the user has not used it before
+    // To make it simple: show per platform if the user already used a free trial
     const trialPurchaseApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.hadTrial);
     const trialPurchaseGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.hadTrial);
 
-    // Just show one active subscription
-    // const activeInAppSubscriptions = activeSubscriptionApple || activeSubscriptionGoogle || null;
-
-    const usedInAppSubscriptionTrial: string[] = [];
+    const usedInAppSubscriptionTrials: InAppSubscription[] = [];
 
     if (trialPurchaseApple) {
-      usedInAppSubscriptionTrial.push(trialPurchaseApple.inAppSubscription.productId)
+      usedInAppSubscriptionTrials.push(trialPurchaseApple.inAppSubscription)
     }
 
     if (trialPurchaseGoogle) {
-      usedInAppSubscriptionTrial.push(trialPurchaseGoogle.inAppSubscription.productId)
+      usedInAppSubscriptionTrials.push(trialPurchaseGoogle.inAppSubscription)
     }
 
     // We offer subscriptions per platform, but the user only needs one active
@@ -167,7 +166,7 @@ export class UserRepository extends Repository<User> {
     return {
       ...user,
       activeUserInAppSubscription,
-      usedInAppSubscriptionTrial,
+      usedInAppSubscriptionTrials,
       used,
       available,
       limits
