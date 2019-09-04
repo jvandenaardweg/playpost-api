@@ -139,8 +139,8 @@ export class UserRepository extends Repository<User> {
     // Find out if the user already used a trial option in the app
     // So we can properly promote free trials in the app if the user has not used it before
     // To make it simple: show per platform if the user already used a free trial
-    const trialPurchaseApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.hadTrial);
-    const trialPurchaseGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.hadTrial);
+    const trialPurchaseApple = user.inAppSubscriptions.find(inAppSubscriptionsApple => inAppSubscriptionsApple.hadTrial || inAppSubscriptionsApple.isTrial);
+    const trialPurchaseGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.hadTrial || inAppSubscriptionsGoogle.isTrial);
 
     const usedInAppSubscriptionTrials: InAppSubscription[] = [];
 
