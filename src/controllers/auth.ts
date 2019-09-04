@@ -171,18 +171,37 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   // Important: keep this production URL
   // As iOS universal links pick it up correctly for all other environments
   // Make sure this URL is displaying a fallback
-  const resetPasswordUrl = `https://playpost.app/login/reset-password/${resetPasswordToken}`;
+  // const resetPasswordUrl = `https://playpost.app/login/reset-password/${resetPasswordToken}`;
+
+  // const htmlBody = `
+  //   <h1>Reset your password</h1>
+  //   <p>You have requested to reset your password. You can use the code below to change your password within the Playpost App.</p>
+  //   <p>Your reset password code:<br /><h1><strong>${resetPasswordToken}</strong></h1></p>
+  //   <p><a href="${resetPasswordUrl}">Open in Playpost App</a>
+  //   <br /><br /><br /><br /><br /><br />
+  //   <h3>How to change my password?</h3>
+  //   <p>It's very easy. Click the link above, this will open the Playpost App in the Reset Password screen.</p>
+  //   <h3>How to change my password manually?</h3>
+  //   <p>Below are the manual steps to change your password within the app:</p>
+  //   <ol>
+  //     <li>Open the Playpost App</li>
+  //     <li>Go to the Login screen</li>
+  //     <li>Select "Forgot password"</li>
+  //     <li>Select "Already have reset password code"</li>
+  //     <li>Fill in your Reset password code: ${resetPasswordToken}</li>
+  //     <li>Fill in your new password</li>
+  //     <li>Save your new password and you're done!</li>
+  //   </ol>
+  //   <p>Need more help? E-mail us at info@playpost.app. We are happy to help you!</p>
+  // `;
 
   const htmlBody = `
     <h1>Reset your password</h1>
     <p>You have requested to reset your password. You can use the code below to change your password within the Playpost App.</p>
     <p>Your reset password code:<br /><h1><strong>${resetPasswordToken}</strong></h1></p>
-    <p><a href="${resetPasswordUrl}">Open in Playpost App</a>
-    <br /><br /><br /><br /><br /><br />
+    <p>Copy and paste this in the Playpost App.</p>
+    <br /><br /><br />
     <h3>How to change my password?</h3>
-    <p>It's very easy. Click the link above, this will open the Playpost App in the Reset Password screen.</p>
-    <h3>How to change my password manually?</h3>
-    <p>Below are the manual steps to change your password within the app:</p>
     <ol>
       <li>Open the Playpost App</li>
       <li>Go to the Login screen</li>
@@ -194,6 +213,7 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
     </ol>
     <p>Need more help? E-mail us at info@playpost.app. We are happy to help you!</p>
   `;
+
 
   // Send e-mail using AWS SES
   await AWSSes.sendTransactionalEmail(user.email, 'Reset your password', htmlBody);
