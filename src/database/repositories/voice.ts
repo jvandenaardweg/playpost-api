@@ -461,6 +461,22 @@ export class VoiceRepository extends Repository<Voice> {
           <p>أطلق عليه بالعربية "المريخ" اسم مشتق من كلمة "أمرخ" أي ذو البقع الحمراء، فيقال ثور أَمرخ أي به بقع حمراء، وهو باللاتينية مارس الذي اتخذه الرومان إلهً للحرب، وهو يلقب في الوقت الحالي بالكوكب الأحمر بسبب لونه المائل إلى الحمرة بفعل نسبة غبار أكسيد الحديد الثلاثي العالية على سطحه وفي جوه.</p>
           <p>يبلغ قطر المريخ حوالي 6800 كلم وهو بذلك مساو لنصف قطر الأرض وثاني أصغر كواكب النظام الشمسي بعد عطارد. تقدّر مساحته بربع مساحة الأرض. يدور المريخ حول الشمس في مدار يبعد عنها بمعدل 228 مليون كلم تقريبا، أي 1.5 مرات من المسافة الفاصلة بين مدار الأرض والشمس.</p>
         </speak>`
+      ],
+      Hungarian: [
+        `<speak>
+          <p>A Föld a Naptól számított harmadik bolygó a Naprendszerben. A legnagyobb átmérőjű, tömegű és sűrűségű az ismert Föld-típusú bolygók közül.</p>
+          <p>Több millió faj, köztük az ember élőhelye is. A Föld a világegyetem egyetlen olyan bolygója, amelyről tudjuk, hogy életet hordoz. Jelenlegi ismereteink szerint 4,44–4,54 milliárd éve alakult ki, és a felszínén mintegy egy milliárd év múlva az élet is megjelent.</p>
+          <p>Azóta a bioszféra jelentősen megváltoztatta az atmoszférát, és más, biotikus összetevőit.</p>
+        </speak>`,
+        `<speak>
+          <p>A Hold a Naprendszer egyik óriásholdja, a Föld egyetlen holdja. A Földtől mért átlagos távolsága 384 402 kilométer, ami nagyjából a Föld átmérőjének 30-szorosa – más mértékegységekben 0,002 CsE vagy 1,3 fénymásodperc (a Nap visszaverődő fénye 1,3 másodperc alatt jut el róla a földi megfigyelőhöz).</p>
+          <p>Átmérője 3476 kilométer, ami hozzávetőleg negyede a Földének. Ezzel a Hold a Naprendszer ötödik legnagyobb holdja a Jupiter három holdja, a Ganümédész, a Kallisztó és az Ió, valamint a Szaturnusz Titán holdja után.</p>
+        </speak>`,
+        `<speak>
+          <p>A Mars a Naptól számított negyedik bolygó a Naprendszerben. Szabad szemmel is könnyedén látható az éjszakai égbolton.</p>
+          <p>A római hadistenről nevezték el, de gyakran hívják „vörös bolygónak” is színe miatt, amit a Mars felszínét meghatározó vas-oxid okoz. A Mars a harmadik legnagyobb kőzetbolygó, számos rendkívüli felszíni képződménnyel.</p>
+          <p>Két természetes holdja van, a Phobosz és a Deimosz, mindkettő kicsi és szabálytalan alakú, valószínűleg befogott kisbolygók. Továbbá a 2000-es évek elejétől három mesterséges hold kíséri útján: Mars Odyssey, Mars Express és a Mars Reconnaissance Orbiter.</p>
+        </speak>`
       ]
     };
 

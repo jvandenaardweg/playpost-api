@@ -1292,6 +1292,9 @@ const updateIsActiveIsPremiumForVoices = async () => {
     },
     {
       "languageCode": "ar-XA"
+    },
+    {
+      "languageCode": "hu-HU"
     }
   ]
 
