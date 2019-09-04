@@ -690,7 +690,7 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
   const loggerPrefix = '(Sync Expired In App Subscriptions With Service): ';
 
   // If a userId is given, use that to search the user's subscriptions
-  const user = userId ? { id: userId } : undefined;
+  const user = userId ? { user: { id: userId } } : undefined;
 
   try {
     const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
@@ -700,7 +700,7 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
       where: {
         expiresAt: LessThan(new Date()),
         status: InAppSubscriptionStatus.ACTIVE,
-        user
+        ...user
       },
       relations: ['user', 'inAppSubscription']
     });
@@ -709,7 +709,7 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
       where: {
         expiresAt: LessThan(new Date()),
         status: InAppSubscriptionStatus.ACTIVE,
-        user
+        ...user
       },
       relations: ['user', 'inAppSubscription']
     });
