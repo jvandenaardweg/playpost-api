@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import joi from 'joi';
-import { getRepository, LessThan } from 'typeorm';
+import { getRepository, LessThan, FindManyOptions } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
@@ -692,27 +692,24 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
   // If a userId is given, use that to search the user's subscriptions
   const user = userId ? { user: { id: userId } } : undefined;
 
+  const findOptions: FindManyOptions<UserInAppSubscriptionApple> | FindManyOptions<UserInAppSubscriptionGoogle> = {
+    where: {
+      expiresAt: LessThan(new Date()),
+      status: InAppSubscriptionStatus.ACTIVE,
+      ...user
+    },
+    relations: ['user', 'inAppSubscription']
+  }
+
   try {
     const userInAppSubscriptionAppleRepository = getRepository(UserInAppSubscriptionApple);
     const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
 
-    const expiredSubscriptionsApple = await userInAppSubscriptionAppleRepository.find({
-      where: {
-        expiresAt: LessThan(new Date()),
-        status: InAppSubscriptionStatus.ACTIVE,
-        ...user
-      },
-      relations: ['user', 'inAppSubscription']
-    });
-
-    const expiredSubscriptionsGoogle = await userInAppSubscriptionGoogleRepository.find({
-      where: {
-        expiresAt: LessThan(new Date()),
-        status: InAppSubscriptionStatus.ACTIVE,
-        ...user
-      },
-      relations: ['user', 'inAppSubscription']
-    });
+    // Use a promise.all to get both the results quicker
+    const [expiredSubscriptionsApple, expiredSubscriptionsGoogle] = await Promise.all([
+      await userInAppSubscriptionAppleRepository.find(findOptions as FindManyOptions<UserInAppSubscriptionApple>),
+      await userInAppSubscriptionGoogleRepository.find(findOptions as FindManyOptions<UserInAppSubscriptionGoogle>)
+    ])
 
     // Sync the Apple subscriptions
     for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
