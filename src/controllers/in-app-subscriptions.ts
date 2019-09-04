@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import joi from 'joi';
-import { getRepository, LessThan, FindManyOptions } from 'typeorm';
+import { FindManyOptions, getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
