@@ -714,7 +714,7 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
     // Sync the Apple subscriptions
     for (const expiredSubscriptionApple of expiredSubscriptionsApple) {
       logger.info(loggerPrefix, `Trying to sync expired Apple Subscription:`, expiredSubscriptionApple);
-      const subscriptionUserId = expiredSubscriptionApple.user.id;
+      const subscriptionUserId = (expiredSubscriptionApple.user) ? expiredSubscriptionApple.user.id : null;
       const productId = expiredSubscriptionApple.inAppSubscription.productId;
       const receipt = expiredSubscriptionApple.latestReceipt;
 
@@ -726,7 +726,7 @@ export const syncExpiredSubscriptionsWithService = async (userId?: string) => {
     // Sync the Google subscriptions
     for (const expiredSubscriptionGoogle of expiredSubscriptionsGoogle) {
       logger.info(loggerPrefix, `Trying to sync expired Google Subscription:`, expiredSubscriptionGoogle);
-      const subscriptionUserId = expiredSubscriptionGoogle.user.id;
+      const subscriptionUserId = (expiredSubscriptionGoogle.user) ? expiredSubscriptionGoogle.user.id : null;
       const productId = expiredSubscriptionGoogle.inAppSubscription.productId;
 
       // Make sure we pass in a JSON object
