@@ -86,12 +86,12 @@
     "@types/fs-extra": "^8.0.0",
     "@types/google-cloud__text-to-speech": "^0.5.0",
     "@types/helmet": "0.0.44",
-    "@types/ioredis": "^4.0.15",
+    "@types/ioredis": "^4.0.16",
     "@types/jest": "^24.0.18",
     "@types/joi": "^14.3.3",
     "@types/jsonwebtoken": "^8.3.3",
     "@types/md5": "^2.1.33",
-    "@types/node": "^12.7.3",
+    "@types/node": "^12.7.4",
     "@types/node-fetch": "^2.5.0",
     "@types/passport": "^1.0.0",
     "@types/passport-jwt": "^3.0.1",
@@ -101,8 +101,8 @@
     "@types/uuid": "^3.4.5",
     "@types/ws": "^6.0.3",
     "app-root-path": "^2.2.1",
-    "auto-changelog": "^1.15.0",
-    "aws-sdk": "^2.520.0",
+    "auto-changelog": "^1.16.0",
+    "aws-sdk": "^2.522.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "class-validator": "^0.10.0",
@@ -117,7 +117,7 @@
     "express-brute-redis": "0.0.1",
     "express-cluster": "0.0.5",
     "express-rate-limit": "^5.0.0",
-    "express-validator": "^6.1.1",
+    "express-validator": "^6.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "forever": "^1.0.0",
     "fs-extra": "^8.1.0",
@@ -157,7 +157,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "husky": "^3.0.4",
+    "husky": "^3.0.5",
     "loadtest": "^3.0.8",
     "tslint-config-prettier": "^1.18.0"
   }
