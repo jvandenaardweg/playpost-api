@@ -516,7 +516,7 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Obiehajú ho dva mesiace nepravidelného tvaru pomenované Fobos a Deimos.</p>
         </speak>`
       ],
-      Ukranian: [
+      Ukrainian: [
         `<speak>
           <p>Земля́ — третя від Сонця планета Сонячної системи, єдина планета, на якій відоме життя, домівка людства.</p>
           <p>Земля належить до планет земної групи і є найбільшою з цих планет у Сонячній системі. Землю іноді називають світом, латинською назвою Терра або грецькою — Гея.</p>
@@ -533,6 +533,24 @@ export class VoiceRepository extends Repository<Voice> {
           <p>Марс — планета земного типу з розрідженою атмосферою. На Марсі є метеоритні кратери, як на Місяці, вулкани, долини і пустелі, подібні до земних. Тут розташована гора Олімп (22 456 м), найвища відома гора в Сонячній системі, і Долини Марінера — величезна рифтоподібна система каньйонів.</p>
           <p>На додаток до особливостей — період обертання Марса і сезонні цикли також подібні до земних.</p>
         </speak>`
+      ],
+      Icelandic: [
+        `<speak>
+          <p>Jörðin er þriðja reikistjarnan frá sólu, sú stærsta af innri reikistjörnum og sú fimmta stærsta af þeim öllum.</p>
+          <p>Jörðin, sem talin er hafa myndast fyrir um 4,55 milljörðum ára, er sá eini hnöttur sem vitað er til að líf þrífist á. Tunglið er eini fylgihnöttur jarðar og hefur fylgt henni í að minnsta kosti 4,5 milljarða ára.</p>
+          <p>Ef jörðin er skoðuð utan úr geimnum lítur hún út ekki ósvipað og djúpblá marmarakúla með hvítri slikju sem þekur hana hér og þar. Blái liturinn kemur til vegna úthafanna, en sá hvíti vegna skýja, sem að öllu jöfnu þekja talsverðan hluta hennar.</p>
+          <p>Jörðin er talsvert björt, og af innri reikistjörnunum er það einvörðungu Venus sem endurkastar stærri hluta af því ljósi sem á hana fellur.</p>
+        </speak>`,
+        `<speak>
+          <p>Tunglið eða máninn er eini fylgihnöttur jarðar. Meðalfjarlægð tungls og jarðar er 384.400 km og þvermál þess er 3.476 km. Það hefur bundinn möndulsnúning, þ.e. tunglið snýr alltaf sömu hlið að jörðinni.</p>
+          <p>Tunglið fer einn hring umhverfis jörðina á u. þ. b. einum mánuði og á hverri klukkustund færist það um 0,5° á himinhvelfingunni, miðað við fastastjörnunar, eða um fjarlægð sem er u.þ.b. jöfn sýndarþvermáli þess.</p>
+          <p>Tunglmyrkvi verður þegar tunglið fer inn í alskugga jarðar, þ. a jörðin skyggir á sólu frá tunglinu séð.</p>
+        </speak>`,
+        `<speak>
+          <p>Mars (sem áður fyrr var stundum nefnd Þrekstjarna) er fjórða reikistjarnan frá sólu talið og sú ysta af innri reikistjörnunum.</p>
+          <p>Mars er nefndur eftir rómverska stríðsguðinum, sökum hins rauða litar sem prýðir yfirborðið, en stafar af járnríku bergi og ryki sem hefur oxast („ryðgað“). Vegna hins rauða litar er hún einnig oft kölluð „Rauða plánetan“. Yfirborð Mars einkennist af miklum gljúfrum og stórum eldfjöllum.</p>
+          <p>Í kínverskri, japanskri, kóreskri og víetnamskri menningu er hún kölluð Eldstjarnan, byggt á frumefnunum fimm.</p>
+        </speak>`
       ]
     };
 
@@ -540,7 +558,7 @@ export class VoiceRepository extends Repository<Voice> {
     const randomIndex = Math.floor(Math.random() * 3);
     const previewSsml = (ssml[voice.language.name]) ? ssml[voice.language.name][randomIndex] : null;
 
-    if (!previewSsml) { throw new Error('Cannot create a voice preview, because there is no SSML for this language.'); }
+    if (!previewSsml) { throw new Error(`Cannot create a voice preview, because there is no SSML for "${voice.language.name}".`); }
 
     if (!['Google', 'AWS'].includes(voice.synthesizer)) { throw new Error('Voice synthesizer not supported.'); }
 
