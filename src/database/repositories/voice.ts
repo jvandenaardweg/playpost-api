@@ -498,6 +498,23 @@ export class VoiceRepository extends Repository<Voice> {
           <p>火星は地球型惑星に分類される、いわゆる硬い岩石の地表を持った惑星である。火星が赤く見えるのは、その表面に地球のような水の海が無く、地表に酸化鉄（赤さび）が大量に含まれているためである。</p>
           <p>直径は地球の半分ほどで、質量は地球の約 10分の1に過ぎないため、火星の地表での重力の強さは地球の40パーセントほどしかない。</p>
         </speak>`
+      ],
+      Slovak: [
+        `<speak>
+          <p>Zem je v poradí tretia planéta slnečnej sústavy. Je to zároveň jediná planéta, na ktorej je podľa súčasných vedeckých poznatkov voda v kvapalnom skupenstve a život.</p>
+          <p>Zem je predmetom skúmania napríklad kozmogónie, geológie, paleontológie či geografie. V strede Zeme sa nachádza horúce husté jadro, ktoré obklopuje chladnejší plášť z roztavených hornín. Na povrchu je kôra, ktorá dosahuje rôznu hrúbku v závislosti od miesta (pod oceánmi je všeobecne tenšia ako pod kontinentmi).</p>
+          <p>Vďaka pevnému povrchu a vnútornému zloženiu Zem zaraďujeme medzi terestriálne planéty.</p>
+        </speak>`,
+        `<speak>
+          <p>Mesiac s veľkým začiatočným písmenom označuje vesmírne teleso obiehajúce okolo Zeme.</p>
+          <p>Je jej jediným prirodzeným satelitom. Nemá iné formálne meno ako „Mesiac“, aj keď sa občas nazýva Luna (latinský výraz pre Mesiac), aby bol odlíšený od bežných „mesiacov“.</p>
+          <p>Okrem slova lunárny sa k odkazu na Mesiac používa aj kmeň selen- (z gr. σελήνη, grécky výraz pre Mesiac a bohyňu Mesiaca Seléné).</p>
+        </speak>`,
+        `<speak>
+          <p>Mars je štvrtá planéta slnečnej sústavy v poradí od Slnka.</p>
+          <p>Je to druhá najmenšia planéta (po Merkúre). Pomenovaná je po Marsovi, starorímskom bohovi vojny. Jeho dráha sa nachádza až za dráhou Zeme. Ide o planétu terestrického typu, to znamená, že má pevný horninový povrch pokrytý impaktnými krátermi, vysokými sopkami, hlbokými kaňonmi a ďalšími útvarmi.</p>
+          <p>Obiehajú ho dva mesiace nepravidelného tvaru pomenované Fobos a Deimos.</p>
+        </speak>`
       ]
     };
 
