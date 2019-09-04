@@ -105,7 +105,6 @@
     "aws-sdk": "^2.520.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
-    "chunk-text": "^1.0.5",
     "class-validator": "^0.10.0",
     "compression": "^1.7.4",
     "copyfiles": "^2.1.1",
