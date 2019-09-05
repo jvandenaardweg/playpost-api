@@ -42,7 +42,9 @@
     "tsc:watch": "tsc -p ./ --noEmit -w",
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
-    "release": "auto-changelog -p && git add CHANGELOG.md && git commit -m 'Updated changelog' && git push && git push --tags --no-verify",
+    "preversion": "npm test",
+    "version": "auto-changelog -p && git add CHANGELOG.md",
+    "postversion": "git push && git push --tags --no-verify",
     "loadtest": "ts-node-dev loadtests.ts"
   },
   "repository": {
