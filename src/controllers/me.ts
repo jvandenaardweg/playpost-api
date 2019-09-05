@@ -302,7 +302,9 @@ export class MeController {
    */
   createApiKey = async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const { label } = req.body;
+    const { label, allowedDomain } = req.body;
+
+    // TODO: validate "allowedDomain" with class validator
 
     const { error } = joi.validate(req.body, apiKeyInputValidationSchema);
 
@@ -318,9 +320,12 @@ export class MeController {
     // Store the signature in our database, so we can compare the user's API Key and API Secret when they send it to our server
     const signature = this.apiKeyEntity.generateApiKeySignature(apiKey, apiSecret);
 
+    const normalizedAllowedDomain = allowedDomain ? allowedDomain.toLowerCase() : undefined;
+
     const apiKeyToCreate = await this.apiKeyRepository.create({
       key: apiKey,
       signature,
+      allowedDomain: normalizedAllowedDomain,
       label,
       user: {
         id: userId

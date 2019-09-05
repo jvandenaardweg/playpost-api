@@ -1,4 +1,4 @@
-import { IsDate, IsIP, IsUUID } from 'class-validator';
+import { IsDate, IsIP, IsUUID, IsFQDN } from 'class-validator';
 import crypto from 'crypto';
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user';
@@ -68,6 +68,13 @@ export class ApiKey {
   @Column({ nullable: true })
   @IsIP()
   lastUsedIpAddress: string;
+
+  // If a user fills this in, it can restrict access from only the domain given
+  // For example: if the user fills in google.com, then the api/embed/application must be embedded into that domain
+  // Possible values: "localhost", "nos.nl", "cnn.com" etc...
+  @Column({ nullable: true })
+  @IsFQDN()
+  allowedDomain: string;
 
   @CreateDateColumn()
   @IsDate()
