@@ -1,4 +1,4 @@
-import { IsDate, IsIP, IsUUID, IsFQDN } from 'class-validator';
+import { IsDate, IsFQDN, IsIP, IsUUID } from 'class-validator';
 import crypto from 'crypto';
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user';
