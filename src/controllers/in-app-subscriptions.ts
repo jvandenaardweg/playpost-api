@@ -655,8 +655,8 @@ const getGoogleUserInAppSubscriptionData = async (
   const expiresAt = purchase.expirationDate ? new Date(parseInt(purchase.expirationDate.toString(), 10)).toISOString() : undefined;
 
   // Only set the renewedAt date to the expire data when we auto renew and the subscription is still active
-  // TODO: this is not going correct
-  const renewedAt = (isActive && purchase.autoRenewing && purchase.expiryTimeMillis) ? new Date(parseInt(purchase.expiryTimeMillis.toString(), 10)).toISOString() : undefined;
+  // Set the current date as the renewed date
+  const renewedAt = (isActive && purchase.autoRenewing && purchase.expiryTimeMillis) ? new Date().toISOString() : undefined;
 
   // Only when the package detects a "isCanceled", use the "cancellationDate"
   const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
