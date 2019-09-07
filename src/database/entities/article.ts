@@ -109,7 +109,8 @@ export class Article extends BaseEntity {
       // Should get the full article details, like ssml, text and html
       logger.info(loggerPrefix, '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
 
-      await ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+      // Important: do not await this, we do not want the user to wait for this publish to happen, as that delays it with 1 second
+      ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
     } catch (err) {
       const errorMessage = err && err.message ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
       logger.error(loggerPrefix, errorMessage);

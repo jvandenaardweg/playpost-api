@@ -272,7 +272,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   } else {
     // If we do not have an article yet, create one in the database...
     // ...so our crawler tries to fetch the article in the background
-    const articleToCreate = await articleRepository.create({
+    const articleToCreate = articleRepository.create({
       documentHtml: stringifiedDocumentHtml, // Add the html string if we have it
       url: normalizedUrl,
       user: {
@@ -287,7 +287,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   // TODO: put article creation and playlist item creation in transaction
 
-  const playlistItemToCreate = await playlistItemRepository.create({
+  const playlistItemToCreate = playlistItemRepository.create({
     article: {
       id: articleId
     },
