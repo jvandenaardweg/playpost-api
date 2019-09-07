@@ -184,7 +184,7 @@ export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscrip
       // create
       logger.info(loggerPrefix, 'Creating database entry, using:', userInAppSubscription);
 
-      const inAppSubscriptionPurchaseToCreate = await userInAppSubscriptionRepository.create(userInAppSubscription);
+      const inAppSubscriptionPurchaseToCreate = userInAppSubscriptionRepository.create(userInAppSubscription);
       const savedInAppSubscriptionPurchase = await userInAppSubscriptionRepository.save(inAppSubscriptionPurchaseToCreate);
 
       logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
@@ -251,7 +251,7 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
       // create
       logger.info(loggerPrefix, 'Creating database entry, using:', userInAppSubscription);
 
-      const inAppSubscriptionPurchaseToCreate = await userInAppSubscriptionGoogleRepository.create(userInAppSubscription);
+      const inAppSubscriptionPurchaseToCreate = userInAppSubscriptionGoogleRepository.create(userInAppSubscription);
       const savedInAppSubscriptionPurchase = await userInAppSubscriptionGoogleRepository.save(inAppSubscriptionPurchaseToCreate);
 
       logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
@@ -559,7 +559,7 @@ const getAppleUserInAppSubscriptionData = async (
 
   const canceledAt = purchase.cancellationDateMs ? new Date(parseInt(purchase.cancellationDateMs.toString(), 10)).toISOString() : undefined;
 
-  const createdEntity = await userInAppSubscriptionAppleRepository.create({
+  const createdEntity = userInAppSubscriptionAppleRepository.create({
     latestReceipt,
     latestTransactionId,
     originalTransactionId,
@@ -661,7 +661,7 @@ const getGoogleUserInAppSubscriptionData = async (
   // Only when the package detects a "isCanceled", use the "cancellationDate"
   const canceledAt = (isCanceled && purchase.cancellationDate) ? new Date(parseInt(purchase.cancellationDate.toString(), 10)).toISOString() : undefined;
 
-  const createdEntity = await userInAppSubscriptionGoogleRepository.create({
+  const createdEntity = userInAppSubscriptionGoogleRepository.create({
     latestReceipt,
     orderId,
     purchaseToken,

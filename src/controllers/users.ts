@@ -39,7 +39,7 @@ export const createUser = [
 
     // Create the user
     // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
-    const newUserToSave = await userRepository.create(userToCreate);
+    const newUserToSave = userRepository.create(userToCreate);
     const createdUser = await userRepository.save(newUserToSave);
 
     // Get the created user and return it

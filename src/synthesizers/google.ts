@@ -81,7 +81,7 @@ export class GoogleSynthesizer extends Synthesizers {
           logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
         } else {
           try {
-            const voiceToCreate = await voiceRepository.create({
+            const voiceToCreate = voiceRepository.create({
               countryCode,
               languageCode: voiceLanguageCode,
               name: voiceName,

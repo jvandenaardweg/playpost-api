@@ -216,7 +216,7 @@ export class MeController {
         });
       } else {
         // Create a new setting
-        const userVoiceSettingToCreate = await this.userVoiceSettingRepository.create({
+        const userVoiceSettingToCreate = this.userVoiceSettingRepository.create({
           language: {
             id: voiceLanguageId
           },
@@ -322,7 +322,7 @@ export class MeController {
 
     const normalizedAllowedDomain = allowedDomain ? allowedDomain.toLowerCase() : undefined;
 
-    const apiKeyToCreate = await this.apiKeyRepository.create({
+    const apiKeyToCreate = this.apiKeyRepository.create({
       key: apiKey,
       signature,
       allowedDomain: normalizedAllowedDomain,

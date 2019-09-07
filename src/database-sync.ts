@@ -2095,7 +2095,7 @@ const syncInAppSubscriptions = async () => {
         logger.info(loggerPrefix, `Subscription with productId ${inAppSubscription.productId} updated!`);
       } else {
         logger.info(loggerPrefix, 'Creating subscription:', inAppSubscription.name);
-        const subscriptionToCreate = await inAppSubscriptionRepository.create(inAppSubscription);
+        const subscriptionToCreate = inAppSubscriptionRepository.create(inAppSubscription);
         await inAppSubscriptionRepository.save(subscriptionToCreate);
         logger.info(loggerPrefix, 'Successfully created subscription:', inAppSubscription.name);
       }

@@ -170,7 +170,7 @@ export class MicrosoftSynthesizer extends Synthesizers {
             logger.info(loggerPrefix, `Microsoft Azure: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`, voice);
           } else {
             try {
-              const voiceToCreate = await voiceRepository.create({
+              const voiceToCreate = voiceRepository.create({
                 countryCode,
                 languageCode: voiceLanguageCode,
                 name: voiceName,

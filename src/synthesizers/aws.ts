@@ -75,7 +75,7 @@ export class AwsSynthesizer extends Synthesizers {
             logger.warn(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
           } else {
             try {
-              const voiceToCreate = await voiceRepository.create({
+              const voiceToCreate = voiceRepository.create({
                 countryCode,
                 languageCode: voiceLanguageCode,
                 name: voiceId,

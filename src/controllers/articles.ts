@@ -518,7 +518,7 @@ const enforceUniqueArticle = async (articleToUpdate: Article, currentUrl: string
       logger.info(loggerPrefix, `(enforcing) User already has a playlistItem with the article ID ${existingArticleId}. We don't create a new playlistItem.`);
     } else {
       // Create the new playlist item using the existing article ID
-      const playlistItemToCreate = await playlistItemRepository.create({
+      const playlistItemToCreate = playlistItemRepository.create({
         user: {
           id: userId
         },

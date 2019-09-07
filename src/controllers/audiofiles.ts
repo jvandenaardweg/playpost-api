@@ -447,7 +447,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Creating audiofile placeholder...');
 
     // Prepare the audiofile
-    const audiofile = await audiofileRepository.create({
+    const audiofile = audiofileRepository.create({
       id: audiofileId,
       article: {
         id: articleId
