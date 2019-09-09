@@ -205,7 +205,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message);
     });
 
-    return res.status(400).json({ message });
+    // status code 402 = "Payment Required"
+    return res.status(402).json({ message });
   }
 
   // Check to see of the current article length length will go above the user's monthly limit
