@@ -215,9 +215,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const limitInMinutesPerArticle = userSubscriptionLimits.limitSecondsPerArticle / 60;
 
     // Check if there's a higher subscription available for the user
-    // const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
-    // const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
-    const message = `This article's audio exceeds the limit of ${limitInMinutesPerArticle} minutes per article. We cannot create audio for this article.`;
+    const message = `This article's audio exceeds the limit of ${limitInMinutesPerArticle} minutes per article. We cannot create audio for this article. Please contact our support to enable higher limits.`;
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
