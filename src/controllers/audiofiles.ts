@@ -89,10 +89,26 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check to see if the current user is already above it's monthly limit
   if (userAudiofilesUsage.currentMonthInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
+    const limitInMinutesPerMonth = userSubscriptionLimits.limitSecondsPerMonth / 60;
+
     // Check if there's a higher subscription available for the user
     const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
-    const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
-    const message = `You have reached the monthly limit of ${userSubscriptionLimits.limitSecondsPerMonth} minutes of audio. ${upgradeMessagePart}`;
+    const isEligibleForTrial = !user.usedInAppSubscriptionTrials.length;
+
+    // Fallback message, this happens when there is no upgrade option (probably when the user is already on Plus)
+    // When this happens, we probably should introduce an unlimited subscription option
+    let upgradeMessagePart = `Please contact our support to have a chat about more audio minutes.`;
+
+    if (subscriptionUpgradeOption) {
+      // tslint:disable-next-line: prefer-conditional-expression
+      if (!isEligibleForTrial) {
+        upgradeMessagePart =  `To continue using Playpost you can upgrade to a "${subscriptionUpgradeOption.name}" subscription for more minutes.`;
+      } else {
+        upgradeMessagePart = `To continue using Playpost start your free "${subscriptionUpgradeOption.name}" trial today!`;
+      }
+    }
+
+    const message = `You have reached the monthly limit of ${limitInMinutesPerMonth} minutes of audio. ${upgradeMessagePart}`;
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
@@ -104,7 +120,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
       Sentry.captureMessage(message);
     });
 
-    return res.status(400).json({ message });
+    // status code 402 = "Payment Required"
+    return res.status(402).json({ message });
   }
 
   // Fetch the article (without SSML)
@@ -159,7 +176,21 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
     // Check if there's a higher subscription available for the user
     const subscriptionUpgradeOption = await userRepository.findSubscriptionUpgradeOption(userId);
-    const upgradeMessagePart = subscriptionUpgradeOption ? `You can buy a "${subscriptionUpgradeOption.name}" subscription for more minutes.` : null;
+    const isEligibleForTrial = !user.usedInAppSubscriptionTrials.length;
+
+    // Fallback message, this happens when there is no upgrade option (probably when the user is already on Plus)
+    // When this happens, we probably should introduce an unlimited subscription option
+    let upgradeMessagePart = `Please contact our support to have a chat about more audio minutes.`;
+
+    if (subscriptionUpgradeOption) {
+      // tslint:disable-next-line: prefer-conditional-expression
+      if (!isEligibleForTrial) {
+        upgradeMessagePart =  `To continue using Playpost you can upgrade to a "${subscriptionUpgradeOption.name}" subscription for more minutes.`;
+      } else {
+        upgradeMessagePart = `To continue using Playpost start your free "${subscriptionUpgradeOption.name}" trial today!`;
+      }
+    }
+
     const message = `This article's audio exceeds your monthly limit of ${limitInMinutesPerMonth} minutes per month. ${upgradeMessagePart}`;
 
     Sentry.withScope(scope => {
