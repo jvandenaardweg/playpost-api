@@ -537,6 +537,16 @@ const updateVoicesLabel = async () => {
       gender: 'MALE'
     },
     {
+      name: 'fr-FR-Standard-E',
+      label: 'Juliette',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'fr-FR-Wavenet-E',
+      label: 'Francine',
+      gender: 'FEMALE'
+    },
+    {
       name: 'hi-IN-Standard-A',
       label: 'Shresta',
       gender: 'FEMALE'
@@ -1114,6 +1124,16 @@ const updateVoicesLabel = async () => {
     {
       name: 'cmn-CN-Wavenet-A',
       label: 'Li Na',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'cmn-CN-Standard-D',
+      label: 'Mei',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'cmn-CN-Wavenet-D',
+      label: 'Jiao',
       gender: 'FEMALE'
     }
   ];
