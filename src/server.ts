@@ -265,7 +265,7 @@ export const setupServer = async () => {
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
-  app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
+  app.get('/v1/synthesizers/:synthesizerName/voices/:status?', synthesizersController.findAllVoices);
 
   app.get('/health', healthController.getHealthStatus);
 
