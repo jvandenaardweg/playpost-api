@@ -4,12 +4,13 @@ import { AwsSynthesizer } from '../synthesizers/aws';
 import { GoogleSynthesizer } from '../synthesizers/google';
 import { MicrosoftSynthesizer } from '../synthesizers/microsoft';
 
-import { Voice, EVoiceSynthesizer } from '../database/entities/voice';
+import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
 
 export const findAllVoices = async (req: Request, res: Response) => {
   const loggerPrefix = 'Synthesizers Controller:';
-  const { synthesizerName, status } = req.params;
+  const { synthesizerName } = req.params;
+  const { status }: { status: string } = req.query;
 
   if (!synthesizerName) {
     return res.status(400).json({ message: 'synthesizerName is required.' });
@@ -21,19 +22,31 @@ export const findAllVoices = async (req: Request, res: Response) => {
       const googleSynthesizer = new GoogleSynthesizer();
       const voices = await googleSynthesizer.getAllVoices(loggerPrefix);
 
-      if (status === 'new') {
+      if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({
           where: {
             synthesizer: EVoiceSynthesizer.GOOGLE
           }
         })
 
-        // Only display the voices that are not in the database yet
-        const newVoices = voices.filter(voice => {
-          return !savedVoices.find(savedVoice => savedVoice.name !== voice.name)
-        })
+        if (status === 'new') {
+          // Only display the voices that are not in the database yet
+          const newVoices = voices.filter(voice => {
+            return !savedVoices.find(savedVoice => savedVoice.name !== voice.name)
+          })
 
-        return res.json(newVoices)
+          return res.json(newVoices)
+        }
+
+        if (status === 'inactive') {
+          // Only display the voices that are in the database, but seem to not be available anymore at the synthesizer
+          const inactiveVoices = savedVoices.filter(savedVoice => {
+            return !voices.find(voice => voice.name === savedVoice.name)
+          })
+
+          return res.json(inactiveVoices)
+        }
+
       }
 
       return res.json(voices)
@@ -43,19 +56,30 @@ export const findAllVoices = async (req: Request, res: Response) => {
       const awsSynthesizer = new AwsSynthesizer();
       const voices = await awsSynthesizer.getAllVoices();
 
-      if (status === 'new') {
+      if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({
           where: {
             synthesizer: EVoiceSynthesizer.AWS
           }
         })
 
-        // Only display the voices that are not in the database yet
-        const newVoices = voices.filter(voice => {
-          return !savedVoices.find(savedVoice => savedVoice.name !== voice.Name)
-        })
+        if (status === 'new') {
+          // Only display the voices that are not in the database yet
+          const newVoices = voices.filter(voice => {
+            return !savedVoices.find(savedVoice => savedVoice.name !== voice.Id)
+          })
 
-        return res.json(newVoices)
+          return res.json(newVoices)
+        }
+
+        if (status === 'inactive') {
+          // Only display the voices that are in the database, but seem to not be available anymore at the synthesizer
+          const inactiveVoices = savedVoices.filter(savedVoice => {
+            return !voices.find(voice => voice.Id === savedVoice.name)
+          })
+
+          return res.json(inactiveVoices)
+        }
       }
 
       return res.json(voices)
@@ -65,19 +89,30 @@ export const findAllVoices = async (req: Request, res: Response) => {
       const microsoftSynthesizer = new MicrosoftSynthesizer();
       const voices = await microsoftSynthesizer.getAllVoices();
 
-      if (status === 'new') {
+      if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({
           where: {
             synthesizer: EVoiceSynthesizer.MICROSOFT
           }
         })
 
-        // Only display the voices that are not in the database yet
-        const newVoices = voices.filter(voice => {
-          return !savedVoices.find(savedVoice => savedVoice.name !== voice.Name)
-        })
+        if (status === 'new') {
+          // Only display the voices that are not in the database yet
+          const newVoices = voices.filter(voice => {
+            return !savedVoices.find(savedVoice => savedVoice.name !== voice.ShortName)
+          })
 
-        return res.json(newVoices)
+          return res.json(newVoices)
+        }
+
+        if (status === 'inactive') {
+          // Only display the voices that are in the database, but seem to not be available anymore at the synthesizer
+          const inactiveVoices = savedVoices.filter(savedVoice => {
+            return !!voices.find(voice => voice.ShortName === savedVoice.name)
+          })
+
+          return res.json(inactiveVoices)
+        }
       }
 
       return res.json(voices);
