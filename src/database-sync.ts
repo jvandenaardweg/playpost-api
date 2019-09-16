@@ -1,3 +1,4 @@
+/* tslint:disable:no-unused-variable */
 import * as Sentry from '@sentry/node';
 import { createConnection, getCustomRepository, getRepository, In, IsNull } from 'typeorm';
 
@@ -182,7 +183,7 @@ const syncVoices = async () => {
 /**
  * Method to make sure we have the same label's for voices on every environment
  */
-const updateVoicesLabel = async () => {
+const updateGoogleVoicesLabel = async () => {
   const loggerPrefix = 'Label Voices:';
   const voiceRepository = getRepository(Voice);
 
@@ -1145,18 +1146,22 @@ const updateVoicesLabel = async () => {
       }
     });
 
-    logger.warn(loggerPrefix, `Found ${googleVoices.length} Google voices to label.`);
+    const voicesToSave = googleVoices.map(voice => {
+      const voiceMap = voiceLabelMapping.find(voiceLabelMap => voiceLabelMap.name === voice.name);
+      const label = voiceMap ? voiceMap.label : voice.name;
 
-    // Do the updates
-    for (const voice of googleVoices) {
-      const voiceMape = voiceLabelMapping.find(voiceMap => voiceMap.name === voice.name);
-      const label = voiceMape ? voiceMape.label : voice.name;
+      logger.info(loggerPrefix, `Update "${voice.name}" with label=${label}.`);
 
-      if (label === voice.name) { logger.warn(loggerPrefix, `Skipped "${voice.name}". No label found in mapping.`); }
-      await voiceRepository.update(voice.id, { label });
+      return {
+        id: voice.id,
+        label
+      }
+    })
 
-      logger.info(loggerPrefix, `Updated "${voice.name}" with label: ${label}.`);
-    }
+    const savedVoices = await voiceRepository.save(voicesToSave);
+
+    logger.warn(loggerPrefix, `Saved ${savedVoices.length} voices.`);
+
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
@@ -1204,14 +1209,25 @@ const updateIsLanguageDefaultForVoices = async () => {
   ];
 
   try {
-    // Do the updates
-    for (const voiceName of voiceLanguageDefaultMapping) {
-      logger.info(loggerPrefix, `Update "${voiceName}" to set as isLanguageDefault.`);
+    const voices = await voiceRepository.find();
 
-      await voiceRepository.update({ name: voiceName }, { isLanguageDefault: true });
+    const voicesToSave = voices.map(voiceMap => {
+      const isLanguageDefault = !!voiceLanguageDefaultMapping[voiceMap.name] || undefined;
+      const isUnsubscribedLanguageDefault = !!voiceLanguageDefaultMapping[voiceMap.name] || undefined;
 
-      logger.info(loggerPrefix, `Updated "${voiceName}" with isLanguageDefault: true.`);
-    }
+      logger.info(loggerPrefix, `Update "${voiceMap.name}" with isLanguageDefault=${isLanguageDefault} and isUnsubscribedLanguageDefault=${isUnsubscribedLanguageDefault}.`);
+
+      return {
+        id: voiceMap.id,
+        isLanguageDefault,
+        isUnsubscribedLanguageDefault
+      }
+    })
+
+    const savedVoices = await voiceRepository.save(voicesToSave);
+
+    logger.info(loggerPrefix, `Saved "${savedVoices.length}" voices.`);
+
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
@@ -1952,56 +1968,167 @@ const updateIsActiveIsPremiumForVoices = async () => {
     },
     {
       "name" : "ar-XA-Wavenet-C"
+    },
+    {
+      "name": "fr-FR-Wavenet-E"
+    },
+    {
+      "name": "cmn-CN-Wavenet-B"
+    },
+    {
+      "name": "cmn-CN-Wavenet-C",
+    },
+    {
+      "name": "cmn-CN-Wavenet-A"
+    },
+    {
+      "name": "cmn-CN-Wavenet-D"
     }
   ]
 
   try {
-    for (const voice of isActiveMapping) {
-      logger.info(loggerPrefix, `Update voices with languageCode "${voice.languageCode}" to be isActive.`);
-      // Set voice isActive to true based on the language code
-      await voiceRepository.update(
-        {
-          languageCode: voice.languageCode
-        },
-        {
-          isActive: true
-        }
-      );
-      logger.info(loggerPrefix, `Updated voice with languageCode "${voice.languageCode}"!`);
+    const voices = await voiceRepository.find();
+
+    const voicesToSave = voices.map(voice => {
+      const isActive = !!isActiveMapping.find(mapping => mapping.languageCode === voice.languageCode);
+      const isPremium = !!premiumVoicesMapping.find(mapping => mapping.name === voice.name);
+
+      logger.info(loggerPrefix, `Update voice "${voice.name}" to be isActive=${isActive} and isPremium=${isPremium}.`);
+
+      return {
+        id: voice.id,
+        isActive,
+        isPremium
+      }
+    })
+
+    const savedVoices = await voiceRepository.save(voicesToSave)
+
+    logger.info(loggerPrefix, `Saved "${savedVoices.length}" voices.`);
+
+  } catch (err) {
+    logger.error(loggerPrefix, 'An error happened.', err);
+    throw err;
+  } finally {
+    logger.info(loggerPrefix, 'Done.');
+  }
+};
+
+const updateIsSubscribedLanguageDefault = async () => {
+  const loggerPrefix = 'Update isSubscribedLanguageDefault Voices:';
+  const voiceRepository = getRepository(Voice);
+
+  const voices = await voiceRepository.find()
+
+  // An array of voice name's that should be considered the preferred highest quality voice
+  const isSubscribedLanguageDefaultMapping = [
+    {
+      "name" : "en-US-Wavenet-F" // Emily
+    },
+    {
+      "name": "sk-SK-Wavenet-A" // Nora
+    },
+    {
+      "name": "fi-FI-Wavenet-A" // Aava
+    },
+    {
+      "name": "pl-PL-Wavenet-D" // Mariola
+    },
+    {
+      "name": "hi-IN-Wavenet-C" // Narenda
+    },
+    {
+      "name": "tr-TR-Wavenet-D" // Eylül
+    },
+    {
+      "name": "de-DE-Wavenet-C" // Edith
+    },
+    {
+      "name": "pt-PT-Wavenet-D" // Maria
+    },
+    {
+      "name": "vi-VN-Wavenet-D" // Anh Dung
+    },
+    {
+      "name": "cs-CZ-Wavenet-A" // Adrianka
+    },
+    {
+      "name": "el-GR-Wavenet-A" // Lydia
+    },
+    {
+      "name": "da-DK-Wavenet-A" // Diana
+    },
+    {
+      "name": "ja-JP-Wavenet-D" // Kenzou
+    },
+    {
+      "name": "ar-XA-Wavenet-C" // Saabir
+    },
+    {
+      "name": "fr-FR-Wavenet-C" // Esmee
+    },
+    {
+      "name": "uk-UA-Wavenet-A" // Oleksander
+    },
+    {
+      "name": "sv-SE-Wavenet-A" // Anja
+    },
+    {
+      "name": "id-ID-Wavenet-C" // Panuta
+    },
+    {
+      "name": "ru-RU-Wavenet-D" // Danil
+    },
+    {
+      "name": "nl-NL-Wavenet-D" // Ineke
+    },
+    {
+      "name": "nb-no-Wavenet-E" // Hilma
+    },
+    {
+      "name": "ko-KR-Wavenet-D" // Jung
+    },
+    {
+      "name": "cmn-CN-Wavenet-D" // Jiao
+    },
+    {
+      "name": "it-IT-Wavenet-D" // Marco
+    },
+    {
+      "name": "Karl"
+    },
+    {
+      "name": "hu-HU-Wavenet-A"
+    },
+    {
+      "name": "Carmen"
+    },
+    {
+      "name": "Conchita"
+    },
+    {
+      "name": "Gwyneth"
     }
 
-    for (const voice of premiumVoicesMapping) {
-      logger.info(loggerPrefix, `Update voices with name "${voice.name}" to be isPremium.`);
-      // Set voice isPremium to true based on the voice name
-      await voiceRepository.update(
-        {
-          name: voice.name
-        },
-        {
-          isPremium: true
-        }
-      );
-      logger.info(loggerPrefix, `Updated voice with name "${voice.name}"!`);
-    }
+  ]
 
-    // Do the updates
-    // for (const voice of voicesData) {
-    //   logger.info(loggerPrefix, `Update "${voice.name}" to set isActive isPremium.`);
+  try {
+    logger.info(loggerPrefix, `Update ${isSubscribedLanguageDefaultMapping.length} voices to be isSubscribedLanguageDefault.`);
 
-    //   const updatedColumns = {
-    //     isActive: voice.isActive,
-    //     isPremium: voice.isPremium
-    //   };
+    const voicesToSave = voices.map(voice => {
+      const isSubscribedLanguageDefault = !!isSubscribedLanguageDefaultMapping.find(mapping => mapping.name === voice.name) || undefined;
+      logger.info(loggerPrefix, `Should save ${voice.name} isSubscribedLanguageDefault to be: ${isSubscribedLanguageDefault}`);
 
-    //   await voiceRepository.update(
-    //     {
-    //       name: voice.name
-    //     },
-    //     updatedColumns
-    //   );
+      return {
+        id: voice.id,
+        isSubscribedLanguageDefault
+      }
+    })
 
-    //   logger.info(loggerPrefix, `Updated "${voice.name}" with: ${JSON.stringify(updatedColumns)}`);
-    // }
+    const savedVoices = await voiceRepository.save(voicesToSave);
+
+    logger.info(loggerPrefix, `Saved ${savedVoices.length} voices.`);
+
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
@@ -2017,23 +2144,26 @@ const updateIsHighestQualityForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    // Do the updates
-    for (const voice of voices) {
-      if (voice.synthesizer !== EVoiceSynthesizer.GOOGLE) {
-        logger.info(loggerPrefix, `"${voice.name}" is not a Google voice, cannot set isHighestQuality to true.`);
+    const voicesToSave = voices.map(voice => {
+      const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
+
+      // If there's a need to update
+      if (isHighestQuality !== voice.isHighestQuality) {
+        logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
       } else {
-        const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
-
-        // If there's a need to update
-        if (isHighestQuality !== voice.isHighestQuality) {
-          await voiceRepository.update(voice.id, { isHighestQuality });
-
-          logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
-        } else {
-          logger.info(loggerPrefix, `No update for "${voice.name}"`);
-        }
+        logger.info(loggerPrefix, `No update for "${voice.name}"`);
       }
-    }
+
+      return {
+        id: voice.id,
+        isHighestQuality
+      }
+    })
+
+    const savedVoices = await voiceRepository.save(voicesToSave);
+
+    logger.info(loggerPrefix, `Saved ${savedVoices.length} voices.`);
+
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
@@ -2049,9 +2179,7 @@ const updateQualityForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    // Do the updates
-    for (const voice of voices) {
-
+    const voicesToSave = voices.map(voice => {
       // AWS Polly and everything else is "normal" quality
       let quality = EVoiceQuality.NORMAL;
 
@@ -2079,17 +2207,16 @@ const updateQualityForVoices = async () => {
 
       logger.info(loggerPrefix, `Update "${voice.name}" to set quality: ${quality}`);
 
-      await voiceRepository.update(
-        {
-          id: voice.id
-        },
-        {
-          quality
-        }
-      );
+      return {
+        id: voice.id,
+        quality
+      }
+    })
 
-      logger.info(loggerPrefix, `Updated "${voice.name}" with: ${quality}`);
-    }
+    const savedVoices = await voiceRepository.save(voicesToSave);
+
+    logger.info(loggerPrefix, `Saved ${savedVoices.length} voices`);
+
   } catch (err) {
     logger.error(loggerPrefix, 'An error happened.', err);
     throw err;
@@ -2195,7 +2322,7 @@ const createVoicePreviews = async () => {
     // Run the updaters
 
     // Connect labels to our voices, to make sure they are the same on every environment
-    await updateVoicesLabel();
+    await updateGoogleVoicesLabel();
 
     // Set default voices for languages
     await updateIsLanguageDefaultForVoices();
@@ -2208,6 +2335,8 @@ const createVoicePreviews = async () => {
 
     // Set quality for voices
     await updateQualityForVoices();
+
+    await updateIsSubscribedLanguageDefault();
 
     // Creates voice previews for the active voices inside a language
     // Important: uses the Text To Speech API's

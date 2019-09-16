@@ -121,7 +121,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     // status code 402 = "Payment Required"
-    return res.status(402).json({ message });
+    return res.status(402).json({ message, isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth });
   }
 
   // Fetch the article (without SSML)
@@ -206,7 +206,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     // status code 402 = "Payment Required"
-    return res.status(402).json({ message });
+    return res.status(402).json({ message, isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth });
   }
 
   // Check to see of the current article length length will go above the user's monthly limit
@@ -386,36 +386,75 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  // If there's no voice set, get the default voice for this language
+  // If there's no voice set, the user is probably unsubscribed
+  // Determine if the user has high quality previews left, else, get the default voice for this language
   if (!userVoiceSetting) {
-    logger.info(loggerPrefix, 'User has no voice set for this language, we fallback to the default one...');
+    const hasUsedIntroductionHighQualityVoices = !userIsSubscribed && user.hasUsedIntroductionHighQualityVoices;
+    const isSubscribedLanguageDefault = userIsSubscribed || hasUsedIntroductionHighQualityVoices;
 
-    // Get the default voice for the language
-    voice = await voiceRepository.findOne({
-      isLanguageDefault: true,
-      isActive: true,
-      language: {
-        id: articleLanguage.id
-      }
-    });
+    // A new (unsubscribed) user can use a Very High quality voice for his first X articles
+    if (hasUsedIntroductionHighQualityVoices) {
+      logger.info(loggerPrefix, `User is not subscribed has high quality voice previews left. We use a the default high quality voice for this article language.`);
+    }
 
-    if (!voice) {
-      const message = `Could not get the active default voice for language: ${articleLanguageCode}`;
-
-      Sentry.withScope(scope => {
-        scope.setLevel(Sentry.Severity.Error);
-        scope.setExtra('body', req.body);
-        scope.setExtra('params', req.params);
-        scope.setUser(req.user);
-        scope.setExtra('article', article);
-        scope.setExtra('voice', voice);
-        scope.setExtra('userIsSubscribed', userIsSubscribed);
-        scope.setExtra('userVoiceSetting', userVoiceSetting);
-        Sentry.captureMessage(message);
+    if (isSubscribedLanguageDefault) {
+      // Get the the highest quality previewable voice for the language
+      voice = await voiceRepository.findOne({
+        isSubscribedLanguageDefault: true,
+        isActive: true,
+        language: {
+          id: articleLanguage.id
+        }
       });
 
-      logger.error(loggerPrefix, message);
-      return res.status(400).json({ message });
+      if (!voice) {
+        const message = `Could not find the highest quality voice for language: ${articleLanguageCode}. Please contact our support.`;
+
+        Sentry.withScope(scope => {
+          scope.setLevel(Sentry.Severity.Error);
+          scope.setExtra('body', req.body);
+          scope.setExtra('params', req.params);
+          scope.setUser(req.user);
+          scope.setExtra('article', article);
+          scope.setExtra('voice', voice);
+          scope.setExtra('userIsSubscribed', userIsSubscribed);
+          scope.setExtra('userVoiceSetting', userVoiceSetting);
+          Sentry.captureMessage(message);
+        });
+
+        logger.error(loggerPrefix, message);
+        return res.status(400).json({ message });
+      }
+    } else {
+      logger.info(loggerPrefix, 'User is not subscribed and has no previews left. We fallback to the default voice for the article language...');
+
+      // Get the cheapest voice for the language for users on a free account
+      voice = await voiceRepository.findOne({
+        isUnsubscribedLanguageDefault: true,
+        isActive: true,
+        language: {
+          id: articleLanguage.id
+        }
+      });
+
+      if (!voice) {
+        const message = `Could not get the active default voice for language: ${articleLanguageCode}. Please contact our support.`;
+
+        Sentry.withScope(scope => {
+          scope.setLevel(Sentry.Severity.Error);
+          scope.setExtra('body', req.body);
+          scope.setExtra('params', req.params);
+          scope.setUser(req.user);
+          scope.setExtra('article', article);
+          scope.setExtra('voice', voice);
+          scope.setExtra('userIsSubscribed', userIsSubscribed);
+          scope.setExtra('userVoiceSetting', userVoiceSetting);
+          Sentry.captureMessage(message);
+        });
+
+        logger.error(loggerPrefix, message);
+        return res.status(400).json({ message });
+      }
     }
   }
 

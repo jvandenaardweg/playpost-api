@@ -22,6 +22,8 @@ interface ISubscriptionAvailable {
 interface IUserDetails extends Partial<User> {
   activeUserInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null;
   usedInAppSubscriptionTrials: InAppSubscription[];
+  totalUsageHighQualityVoices: number;
+  hasUsedIntroductionHighQualityVoices: boolean;
   used: {
     audiofiles: ISubscriptionUsed;
   };
@@ -110,6 +112,11 @@ export class UserRepository extends Repository<User> {
 
     const subscriptionLimits = await this.findActiveSubscriptionLimits(userId);
     const currentMonthAudiofileUsageInSeconds = await audiofileRepository.findAudiofileUsageInCurrentMonth(userId);
+    const highQualityAudiofileUsageInSeconds = await audiofileRepository.findHighQualityAudiofileUsageInSeconds(userId);
+
+    // A user has a introduction of our highest quality voices, the same minutes as he gets on a free account
+    const introductionLimitInSeconds = subscriptionLimits.limitSecondsPerMonth;
+    const hasUsedIntroductionHighQualityVoices = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
 
     const used = {
       audiofiles: {
@@ -167,6 +174,7 @@ export class UserRepository extends Repository<User> {
       ...user,
       activeUserInAppSubscription,
       usedInAppSubscriptionTrials,
+      hasUsedIntroductionHighQualityVoices,
       used,
       available,
       limits

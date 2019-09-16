@@ -38,8 +38,10 @@ export enum EVoiceAudioProfile {
 }
 
 @Entity()
-@Unique(['isLanguageDefault', 'languageCode'])
-@Unique(['languageCode', 'label'])
+@Unique(['languageCode', 'label']) // Only one label per languageCode
+@Unique(['isLanguageDefault', 'languageCode']) // Only one default per language, TODO: replace this one with isUnsubscribedLanguageDefault
+// @Unique(['isUnsubscribedLanguageDefault', 'language']) // Only one default per language
+// @Unique(['isSubscribedLanguageDefault', 'language']) // Only one default per language
 export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
@@ -91,10 +93,20 @@ export class Voice {
 
   @Index()
   @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
-  isHighestQuality: boolean;
+  isHighestQuality: boolean; // TODO: remove, not needed
 
   @Column({ nullable: true }) // Determine if this voice is the default for the language
   isLanguageDefault: boolean;
+
+  // For now, the same as isLanguageDefault
+  // We should phase out isLanguageDefault and use this one
+  @Column({ nullable: true })
+  isUnsubscribedLanguageDefault: boolean;
+
+  // When a user is on a "free" subscription, he is allowed a certain amount of articles using a high quality voice. To give the user a better introduction.
+  // isForPreview is true for "Very High" quality voices that allow a certain amount of previews, when not subscribed
+  @Column({ nullable: true })
+  isSubscribedLanguageDefault: boolean;
 
   @Column({ nullable: true }) // A URL to an audiofile with an example
   exampleAudioUrl: string;

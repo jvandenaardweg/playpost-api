@@ -1,6 +1,7 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
 import { Between, EntityRepository, Repository } from 'typeorm';
 import { Audiofile } from '../entities/audiofile';
+import { EVoiceQuality } from '../entities/voice';
 
 @EntityRepository(Audiofile)
 export class AudiofileRepository extends Repository<Audiofile> {
@@ -32,6 +33,30 @@ export class AudiofileRepository extends Repository<Audiofile> {
     if (!userAudiofilesInCurrentMonth) { return 0; }
 
     const totalUsageCurrentMonthInSeconds = userAudiofilesInCurrentMonth.reduce((length, audiofile) => {
+      // tslint:disable no-parameter-reassignment
+      length = length + audiofile.length;
+      return length;
+    }, 0);
+
+    return totalUsageCurrentMonthInSeconds;
+  }
+
+  /**
+   * Returns the total usage in seconds the user used our highest quality voices.
+   *
+   * @param userId
+   */
+  async findHighQualityAudiofileUsageInSeconds(userId: string): Promise<number> {
+    const audiofilesVeryHighQuality = await this
+    .createQueryBuilder('audiofile')
+      .leftJoinAndSelect('audiofile.voice', 'voice')
+        .where('audiofile.user = :userId', { userId })
+        .andWhere('voice.quality = :quality', { quality: EVoiceQuality.VERY_HIGH })
+    .getMany();
+
+    if (!audiofilesVeryHighQuality.length) { return 0; }
+
+    const totalUsageCurrentMonthInSeconds = audiofilesVeryHighQuality.reduce((length, audiofile) => {
       // tslint:disable no-parameter-reassignment
       length = length + audiofile.length;
       return length;

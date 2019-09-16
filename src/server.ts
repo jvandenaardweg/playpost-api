@@ -182,7 +182,7 @@ export const setupServer = async () => {
   // Use passport authentication
   app.use(passport.initialize());
 
-  passport.use(jwtPassportStrategy);
+  passport.use('jwt', jwtPassportStrategy);
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
 
   // passport.use()

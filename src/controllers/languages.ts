@@ -36,9 +36,10 @@ export const findAllActive = async (req: Request, res: Response) => {
   // const activeLanguages = await languageRepository
   //   .createQueryBuilder('language')
   //   .leftJoinAndSelect('language.voices', 'voice')
+  //   .leftJoin('voice.language', 'user_voice_setting')
   //     .where('language.isActive = :isActive', { isActive: true })
   //       .andWhere('voice.isActive = :isActive', { isActive: true })
-  //   .cache('languages_active', CACHE_ONE_DAY)
+  //   // .cache('languages_active', CACHE_ONE_DAY)
   //   .getMany();
 
   return res.json(activeLanguages);
