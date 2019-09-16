@@ -56,6 +56,13 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
  * User's can create an API Key and API Secret using the API when they are logged in using their e-mail and password.
  */
 export const apiKeySecretPassportStrategy = new passportCustom.Strategy(async (req, done) => {
+  const authHeader = req.headers['authorization'] as string | undefined;
+
+  // If we find the auth headers if we end up in this strategy, just return unauthorized
+  // User must return ONLY "x-api-key" and "x-api-secret"
+  if (authHeader) {
+    return done(new Error('Unauthorized'))
+  }
 
   const apiKey  = req.headers['x-api-key'] as string | undefined;
   const apiSecret = req.headers['x-api-secret'] as string | undefined;
