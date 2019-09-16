@@ -22,8 +22,7 @@ interface ISubscriptionAvailable {
 interface IUserDetails extends Partial<User> {
   activeUserInAppSubscription: UserInAppSubscriptionApple | UserInAppSubscriptionGoogle | null;
   usedInAppSubscriptionTrials: InAppSubscription[];
-  totalUsageHighQualityVoices: number;
-  hasUsedIntroductionHighQualityVoices: boolean;
+  hasUsedFreeIntroduction: boolean; // Shows true if the user already used a certain amount of high quality voices, for free
   used: {
     audiofiles: ISubscriptionUsed;
   };
@@ -114,9 +113,10 @@ export class UserRepository extends Repository<User> {
     const currentMonthAudiofileUsageInSeconds = await audiofileRepository.findAudiofileUsageInCurrentMonth(userId);
     const highQualityAudiofileUsageInSeconds = await audiofileRepository.findHighQualityAudiofileUsageInSeconds(userId);
 
-    // A user has a introduction of our highest quality voices, the same minutes as he gets on a free account
+    // When a user signs up, he gets a free introduction of our high quality voices
+    // The amount of seconds he gets for free is the same as the "free" in app subscription "limitSecondsPerMonth"
     const introductionLimitInSeconds = subscriptionLimits.limitSecondsPerMonth;
-    const hasUsedIntroductionHighQualityVoices = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
+    const hasUsedFreeIntroduction = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
 
     const used = {
       audiofiles: {
@@ -161,20 +161,19 @@ export class UserRepository extends Repository<User> {
 
     // We offer subscriptions per platform, but the user only needs one active
     // Just return the active subscription product Id
-    // const activeInAppSubscriptionProductId = (activeSubscriptionApple) ? activeSubscriptionApple.inAppSubscription.productId : (activeSubscriptionGoogle) ? activeSubscriptionGoogle.inAppSubscription.productId : null;
     const activeUserInAppSubscription = (activeSubscriptionApple) ? activeSubscriptionApple : (activeSubscriptionGoogle) ? activeSubscriptionGoogle : null;
 
     // We do not need the whole purchase history
     delete user.inAppSubscriptionsGoogle;
 
-    // TODO: Delete this later, iOS App 1.1.3 and below depend on this
-    // delete user.inAppSubscriptions;
+    // Note: iOS 1.1.3 and below use this
+    delete user.inAppSubscriptions;
 
     return {
       ...user,
       activeUserInAppSubscription,
       usedInAppSubscriptionTrials,
-      hasUsedIntroductionHighQualityVoices,
+      hasUsedFreeIntroduction,
       used,
       available,
       limits

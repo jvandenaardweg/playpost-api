@@ -121,7 +121,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     // status code 402 = "Payment Required"
-    return res.status(402).json({ message, isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth });
+    return res.status(402).json({ message, subscriptionStatus: { isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth } });
   }
 
   // Fetch the article (without SSML)
@@ -206,7 +206,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     });
 
     // status code 402 = "Payment Required"
-    return res.status(402).json({ message, isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth });
+    return res.status(402).json({ message, subscriptionStatus: { isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth } });
   }
 
   // Check to see of the current article length length will go above the user's monthly limit
@@ -386,18 +386,20 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  // If there's no voice set, the user is probably unsubscribed
-  // Determine if the user has high quality previews left, else, get the default voice for this language
+  // If there's no voice set, the user is probably unsubscribed or the user just did not set up a voice as a default for a language
   if (!userVoiceSetting) {
-    const hasUsedIntroductionHighQualityVoices = !userIsSubscribed && user.hasUsedIntroductionHighQualityVoices;
-    const isSubscribedLanguageDefault = userIsSubscribed || hasUsedIntroductionHighQualityVoices;
 
-    // A new (unsubscribed) user can use a Very High quality voice for his first X articles
-    if (hasUsedIntroductionHighQualityVoices) {
-      logger.info(loggerPrefix, `User is not subscribed has high quality voice previews left. We use a the default high quality voice for this article language.`);
-    }
+    // Check to see if the user can use our the subscribed language default voices
 
-    if (isSubscribedLanguageDefault) {
+    // A unsubscribed user can use a Very High quality voice for his first X minutes
+    // A subscribed user can always use the default voice for the current article language
+    if (userIsSubscribed || !user.hasUsedFreeIntroduction) {
+      if (!user.hasUsedFreeIntroduction) {
+        logger.info(loggerPrefix, `User is has high quality voice previews left. We use a the default high quality voice for this article language.`);
+      }
+
+      logger.info(loggerPrefix, `Getting the default voice for subscribed users and users who have free introductions left...`);
+
       // Get the the highest quality previewable voice for the language
       voice = await voiceRepository.findOne({
         isSubscribedLanguageDefault: true,
@@ -426,6 +428,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
         return res.status(400).json({ message });
       }
     } else {
+      // User is not subscribed or user has used his free introduction
+
       logger.info(loggerPrefix, 'User is not subscribed and has no previews left. We fallback to the default voice for the article language...');
 
       // Get the cheapest voice for the language for users on a free account
