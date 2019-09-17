@@ -128,7 +128,6 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
     }
 
     let ssml: string | undefined;
-    let text: string | undefined;
     let html: string | undefined;
     let url: string = '';
     let readingTime: number | undefined;
@@ -143,7 +142,6 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
     let compatibilityMessage: string | undefined;
 
     if (result.ssml) { ssml = result.ssml; }
-    if (result.articleText) { text = result.articleText; }
     if (result.articleHTML) { html = result.articleHTML; }
     if (result.readingTimeInSeconds) {
       readingTime = result.readingTimeInSeconds;
@@ -188,7 +186,6 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
 
     return {
       ssml,
-      text,
       html,
       readingTime,
       imageUrl,
@@ -242,7 +239,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, text, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
+  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
@@ -254,11 +251,6 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   if (!ssml) {
     return res.status(400).json({
       message: 'The information we got from crawling the page was not enough. Missing ssml.'
-    });
-  }
-  if (!text) {
-    return res.status(400).json({
-      message: 'The information we got from crawling the page was not enough. Missing text.'
     });
   }
   if (!html) {
@@ -300,7 +292,6 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   await articleRepository.update(article.id, {
     title,
     ssml,
-    text,
     html,
     readingTime,
     description,
@@ -357,7 +348,6 @@ export const updateArticleToFull = async (articleId: string) => {
   // About 2 seconds for already visited websites
   const {
     ssml,
-    text,
     html,
     readingTime,
     imageUrl,
@@ -381,9 +371,6 @@ export const updateArticleToFull = async (articleId: string) => {
   // TODO: make re-usable with line 203
   if (!ssml) {
     throw new Error('The information we got from crawling the page was not enough. Missing ssml.');
-  }
-  if (!text) {
-    throw new Error('The information we got from crawling the page was not enough. Missing text.');
   }
   if (!html) {
     throw new Error('The information we got from crawling the page was not enough. Missing html.');
@@ -425,7 +412,6 @@ export const updateArticleToFull = async (articleId: string) => {
   const updatedArticle = await articleRepository.update(articleToUpdate.id, {
     title,
     ssml,
-    text,
     html,
     readingTime,
     description,
