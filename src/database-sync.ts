@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 import * as Sentry from '@sentry/node';
-import { createConnection, getCustomRepository, getRepository, In, IsNull, DeepPartial } from 'typeorm';
+import { createConnection, DeepPartial, getCustomRepository, getRepository, In, IsNull } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
 import { Country } from './database/entities/country';
