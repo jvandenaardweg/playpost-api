@@ -40,8 +40,8 @@ export enum EVoiceAudioProfile {
 @Entity()
 @Unique(['languageCode', 'label']) // Only one label per languageCode
 @Unique(['isLanguageDefault', 'languageCode']) // Only one default per language, TODO: replace this one with isUnsubscribedLanguageDefault
-// @Unique(['isUnsubscribedLanguageDefault', 'language']) // Only one default per language
-// @Unique(['isSubscribedLanguageDefault', 'language']) // Only one default per language
+@Unique(['isUnsubscribedLanguageDefault', 'language']) // Only one default per language
+@Unique(['isSubscribedLanguageDefault', 'language']) // Only one default per language
 export class Voice {
 
   @PrimaryGeneratedColumn('uuid')
