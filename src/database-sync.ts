@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 import * as Sentry from '@sentry/node';
-import { createConnection, getCustomRepository, getRepository, In, IsNull } from 'typeorm';
+import { createConnection, getCustomRepository, getRepository, In, IsNull, DeepPartial } from 'typeorm';
 
 import { connectionOptions } from './database/connection-options';
 import { Country } from './database/entities/country';
@@ -1146,7 +1146,7 @@ const updateGoogleVoicesLabel = async () => {
       }
     });
 
-    const voicesToSave = googleVoices.map(voice => {
+    const voicesToSave: Array<DeepPartial<Voice>> = googleVoices.map(voice => {
       const voiceMap = voiceLabelMapping.find(voiceLabelMap => voiceLabelMap.name === voice.name);
       const label = voiceMap ? voiceMap.label : voice.name;
 
@@ -1211,14 +1211,14 @@ const updateIsLanguageDefaultForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave = voices.map(voiceMap => {
-      const isLanguageDefault = !!voiceLanguageDefaultMapping[voiceMap.name] || undefined;
-      const isUnsubscribedLanguageDefault = !!voiceLanguageDefaultMapping[voiceMap.name] || undefined;
+    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
+      const isLanguageDefault = !!voiceLanguageDefaultMapping.find(voiceName => voiceName === voice.name) || undefined;
+      const isUnsubscribedLanguageDefault = !!voiceLanguageDefaultMapping.find(voiceName => voiceName === voice.name) || undefined;
 
-      logger.info(loggerPrefix, `Update "${voiceMap.name}" with isLanguageDefault=${isLanguageDefault} and isUnsubscribedLanguageDefault=${isUnsubscribedLanguageDefault}.`);
+      logger.info(loggerPrefix, `Update "${voice.name}" with isLanguageDefault=${isLanguageDefault} and isUnsubscribedLanguageDefault=${isUnsubscribedLanguageDefault}.`);
 
       return {
-        id: voiceMap.id,
+        id: voice.id,
         isLanguageDefault,
         isUnsubscribedLanguageDefault
       }
@@ -1989,7 +1989,7 @@ const updateIsActiveIsPremiumForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave = voices.map(voice => {
+    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
       const isActive = !!isActiveMapping.find(mapping => mapping.languageCode === voice.languageCode);
       const isPremium = !!premiumVoicesMapping.find(mapping => mapping.name === voice.name);
 
@@ -2115,7 +2115,7 @@ const updateIsSubscribedLanguageDefault = async () => {
   try {
     logger.info(loggerPrefix, `Update ${isSubscribedLanguageDefaultMapping.length} voices to be isSubscribedLanguageDefault.`);
 
-    const voicesToSave = voices.map(voice => {
+    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
       const isSubscribedLanguageDefault = !!isSubscribedLanguageDefaultMapping.find(mapping => mapping.name === voice.name) || undefined;
       logger.info(loggerPrefix, `Should save ${voice.name} isSubscribedLanguageDefault to be: ${isSubscribedLanguageDefault}`);
 
@@ -2144,7 +2144,7 @@ const updateIsHighestQualityForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave = voices.map(voice => {
+    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
       const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
 
       // If there's a need to update
@@ -2179,7 +2179,7 @@ const updateQualityForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave = voices.map(voice => {
+    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
       // AWS Polly and everything else is "normal" quality
       let quality = EVoiceQuality.NORMAL;
 
