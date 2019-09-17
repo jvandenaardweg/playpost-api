@@ -63,7 +63,6 @@ export class GoogleSynthesizer extends Synthesizers {
       // @ts-ignore
       const voiceLanguageCode = voice.languageCodes[0];
       const voiceGender = voice.ssmlGender as EVoiceGender;
-      const voiceNaturalSampleRateHertz = voice.naturalSampleRateHertz;
 
       const foundVoice = availableVoices.find(availableVoice => availableVoice.name === voiceName);
 
@@ -87,9 +86,7 @@ export class GoogleSynthesizer extends Synthesizers {
               name: voiceName,
               label: voiceName,
               gender: voiceGender,
-              synthesizer: EVoiceSynthesizer.GOOGLE,
-              naturalSampleRateHertz: voiceNaturalSampleRateHertz,
-              isHighestQuality: voiceName.toLowerCase().includes('wavenet') ? true : false
+              synthesizer: EVoiceSynthesizer.GOOGLE
             });
 
             const createdVoice = await voiceRepository.save(voiceToCreate);

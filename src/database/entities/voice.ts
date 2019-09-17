@@ -1,7 +1,6 @@
 import { IsDate, IsUUID } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
-import { ColumnNumericTransformer } from '../utils';
 import { Audiofile } from './audiofile';
 import { Country } from './country';
 import { Language } from './language';
@@ -71,18 +70,6 @@ export class Voice {
   @Column({ type: 'enum', enum: EVoiceQuality, nullable: false, default: EVoiceQuality.NORMAL }) // Default is "Normal" (lowest quality)
   quality: EVoiceQuality;
 
-  @Column({ type: 'enum', enum: EVoiceAudioProfile, nullable: false, default: EVoiceAudioProfile.DEFAULT }) // Default
-  audioProfile: EVoiceAudioProfile;
-
-  @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer(), default: 1 })
-  speakingRate: number;
-
-  @Column({ type: 'decimal', nullable: false, transformer: new ColumnNumericTransformer(), default: 0 })
-  pitch: number;
-
-  @Column({ nullable: true })
-  naturalSampleRateHertz: number;
-
   @Index()
   @Column({ nullable: false, default: false }) // true means it is available for our users, false is unavailable for our users
   isActive: boolean;
@@ -90,10 +77,6 @@ export class Voice {
   @Index()
   @Column({ nullable: false, default: true }) // Determine if this voice requires a subscription within the app
   isPremium: boolean;
-
-  @Index()
-  @Column({ nullable: false, default: false }) // Google's Wavenet are high quality
-  isHighestQuality: boolean; // TODO: remove, not needed
 
   @Column({ nullable: true }) // Determine if this voice is the default for the language
   isLanguageDefault: boolean;

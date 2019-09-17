@@ -2137,41 +2137,6 @@ const updateIsSubscribedLanguageDefault = async () => {
   }
 };
 
-const updateIsHighestQualityForVoices = async () => {
-  const loggerPrefix = 'Update isHighestQuality Voices:';
-  const voiceRepository = getRepository(Voice);
-
-  try {
-    const voices = await voiceRepository.find();
-
-    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
-      const isHighestQuality = voice.name.toLowerCase().includes('wavenet') ? true : false;
-
-      // If there's a need to update
-      if (isHighestQuality !== voice.isHighestQuality) {
-        logger.info(loggerPrefix, `Updated "${voice.name}" with isHighestQuality: ${isHighestQuality}`);
-      } else {
-        logger.info(loggerPrefix, `No update for "${voice.name}"`);
-      }
-
-      return {
-        id: voice.id,
-        isHighestQuality
-      }
-    })
-
-    const savedVoices = await voiceRepository.save(voicesToSave);
-
-    logger.info(loggerPrefix, `Saved ${savedVoices.length} voices.`);
-
-  } catch (err) {
-    logger.error(loggerPrefix, 'An error happened.', err);
-    throw err;
-  } finally {
-    logger.info(loggerPrefix, 'Done.');
-  }
-};
-
 const updateQualityForVoices = async () => {
   const loggerPrefix = 'Update quality column for Voices:';
   const voiceRepository = getRepository(Voice);
@@ -2329,9 +2294,6 @@ const createVoicePreviews = async () => {
 
     // Set isActive and isPremium for voices
     await updateIsActiveIsPremiumForVoices();
-
-    // Set isHighestQuality for voices
-    await updateIsHighestQualityForVoices();
 
     // Set quality for voices
     await updateQualityForVoices();
