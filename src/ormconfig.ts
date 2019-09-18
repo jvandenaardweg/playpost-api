@@ -33,6 +33,7 @@ import { ApiKeyAllowedDomain1567661196464 } from './database/migrations/15676611
 import { VoicesSubscriptionLanguageDefault1568386709347 } from './database/migrations/1568386709347-VoicesSubscriptionLanguageDefault';
 import { RemoveArticleText1568723124112 } from './database/migrations/1568723124112-RemoveArticleText';
 import { RemoveUnusedVoiceProperties1568723707634 } from './database/migrations/1568723707634-RemoveUnusedVoiceProperties';
+import { InAppSubscriptionsUpgradeFrom1568799387018 } from './database/migrations/1568799387018-InAppSubscriptionsUpgradeFrom';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -81,7 +82,8 @@ const config: ConnectionOptions = {
     ApiKeyAllowedDomain1567661196464,
     VoicesSubscriptionLanguageDefault1568386709347,
     RemoveArticleText1568723124112,
-    RemoveUnusedVoiceProperties1568723707634
+    RemoveUnusedVoiceProperties1568723707634,
+    InAppSubscriptionsUpgradeFrom1568799387018
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
