@@ -1,5 +1,5 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 
 import { ColumnNumericTransformer } from '../utils';
 
