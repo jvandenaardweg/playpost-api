@@ -185,15 +185,21 @@ export const setupServer = async () => {
   passport.use('jwt', jwtPassportStrategy);
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
 
-  // passport.use()
-  // require('./config/passport')(passport);
-
   // Make express allow JSON payload bodies
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
   app.use(bodyParser.json({ limit: '5mb' })); // We upped the limit because an Apple receipt string is a bit large
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true, parameterLimit: 5000 }));
 
+  // Load controllers
+  const meController = new MeController();
+
   // API Endpoints
+
+  // TODO: Deprecated endpoints, remove later
+  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
   // Use expressBrute to increase the delay between each requests
@@ -202,32 +208,25 @@ export const setupServer = async () => {
   app.post('/v1/auth/update-password', authController.updatePasswordUsingToken);
   app.post('/v1/users', usersController.createUser);
 
-  // Protected
+  // Protected by login
 
   // v1/users
   app.get('/v1/users', IS_PROTECTED_ENDPOINT, usersController.findAllUsers); // Admin only
   app.delete('/v1/users/:userId', IS_PROTECTED_ENDPOINT, usersController.deleteUser); // Admin only
 
   // /v1/me
-  const meController = new MeController()
   app.get('/v1/me', IS_PROTECTED_ENDPOINT, meController.findCurrentUser);
   app.patch('/v1/me', IS_PROTECTED_ENDPOINT, meController.patchMe);
   app.post('/v1/me/voices', IS_PROTECTED_ENDPOINT, meController.createSelectedVoice); // Setting the default voice per language for the user
   app.delete('/v1/me', IS_PROTECTED_ENDPOINT, meController.deleteCurrentUser);
-
-  // Deprecated endpoints, remove later
-  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
 
   // /v1/me/api-keys
   app.get('/v1/me/api-keys', IS_PROTECTED_ENDPOINT, meController.findAllApiKeys);
   app.delete('/v1/me/api-keys/:apiKeyId', IS_PROTECTED_ENDPOINT, meController.deleteApiKey);
   app.post('/v1/me/api-keys', IS_PROTECTED_ENDPOINT, meController.createApiKey);
 
-  // Playlists => /v1/playlist
+  // /v1/playlist
   app.get('/v1/playlist', IS_PROTECTED_ENDPOINT, playlistController.findAllPlaylistItems);
-  app.get('/v1/playlist/favorites', IS_PROTECTED_ENDPOINT, playlistController.findAllFavoritedItems);
-  app.get('/v1/playlist/archived', IS_PROTECTED_ENDPOINT, playlistController.findAllArchivedItems);
   app.post('/v1/playlist/articles', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleUrl);
   app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.deletePlaylistItem);
   app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemOrder);
@@ -253,12 +252,10 @@ export const setupServer = async () => {
 
   // v1/languages
   app.get('/v1/languages', IS_PROTECTED_ENDPOINT, languagesController.findAll);
-  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED_ENDPOINT, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
   app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically

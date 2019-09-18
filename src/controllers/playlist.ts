@@ -30,25 +30,6 @@ export const findAllPlaylistItems = async (req: Request, res: Response) => {
   return res.json(playlistItems);
 };
 
-export const findAllFavoritedItems = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const playlistItemRepository = getRepository(PlaylistItem);
-
-  const favoritedPlaylistItems = await playlistItemRepository.find({
-    where: {
-      user: {
-        id: userId
-      },
-      favoritedAt: MoreThan(new Date(2000, 12, 31, 23, 59, 59, 0)) // Some past date
-    },
-    order: {
-      favoritedAt: 'ASC'
-    }
-  });
-
-  return res.json(favoritedPlaylistItems);
-};
-
 export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { articleId } = req.params;
@@ -177,25 +158,6 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
     archivedAt: new Date()
   });
   return res.json({ message: 'Playlist item is added to your archive!' });
-};
-
-export const findAllArchivedItems = async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const playlistItemRepository = getRepository(PlaylistItem);
-
-  const archivedPlaylistItems = await playlistItemRepository.find({
-    where: {
-      user: {
-        id: userId
-      },
-      archivedAt: MoreThan(new Date(2000, 12, 31, 23, 59, 59, 0)) // Some past date
-    },
-    order: {
-      archivedAt: 'ASC'
-    }
-  });
-
-  return res.json(archivedPlaylistItems);
 };
 
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
