@@ -51,7 +51,16 @@ export const findAllActive = async (req: Request, res: Response) => {
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
   const subscriptions = await inAppSubscriptionRepository.find({
-    isActive: true
+    where: {
+      isActive: true
+    },
+    order: {
+      price: 'ASC'
+    },
+    cache: {
+      id: `${InAppSubscription.name}:active`,
+      milliseconds: CACHE_ONE_DAY
+    }
   });
 
   return res.json(subscriptions);

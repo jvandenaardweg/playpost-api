@@ -16,7 +16,7 @@ export const findAll = async (req: Request, res: Response) => {
   const voices = await voiceRepository.find({
     relations: ['language'],
     cache: {
-      id: 'voices_all',
+      id: `${Voice.name}:all`,
       milliseconds: CACHE_ONE_DAY
     }
   });
@@ -32,7 +32,7 @@ export const findAllActive = async (req: Request, res: Response) => {
       isActive: true,
     },
     cache: {
-      id: 'voices_active',
+      id: `${Voice.name}:active`,
       milliseconds: CACHE_ONE_DAY
     }
   });
@@ -49,7 +49,7 @@ export const findAllActivePremiumVoices = async (req: Request, res: Response) =>
       isActive: true
     },
     cache: {
-      id: 'voices_active_premium',
+      id: `${Voice.name}:active:premium`,
       milliseconds: CACHE_ONE_DAY
     }
   });
@@ -66,7 +66,7 @@ export const findAllActiveFreeVoices = async (req: Request, res: Response) => {
       isActive: true
     },
     cache: {
-      id: 'voices_active_free',
+      id: `${Voice.name}:active:free`,
       milliseconds: CACHE_ONE_DAY
     }
   });

@@ -9,7 +9,11 @@ export const findAll = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
 
   const languages = await languageRepository.find({
-    relations: ['voices']
+    relations: ['voices'],
+    cache: {
+      id: `${Language.name}:all`,
+      milliseconds: CACHE_ONE_DAY
+    }
   });
 
   return res.json(languages);
@@ -28,7 +32,7 @@ export const findAllActive = async (req: Request, res: Response) => {
       isActive: true
     },
     cache: {
-      id: 'languages_active',
+      id: `${Language.name}:active`,
       milliseconds: CACHE_ONE_DAY
     }
   });

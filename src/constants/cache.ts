@@ -1,1 +1,2 @@
 export const CACHE_ONE_DAY = 86400000;
+export const CACHE_FOREVER = CACHE_ONE_DAY * 999;

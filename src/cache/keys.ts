@@ -1,2 +1,2 @@
-export const jwtVerifyUser = (userId: string) => `jwt:verify:user:${userId}`;
-export const apiKeyUser = (apiKey: string) => `apikey:${apiKey}:user`;
+export const jwtVerifyUser = (userId: string) => `User:jwt:verify:${userId}`;
+export const apiKeyUser = (apiKey: string) => `ApiKey:${apiKey}:user`;

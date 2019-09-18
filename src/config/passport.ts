@@ -2,6 +2,7 @@ import passportCustom from 'passport-custom';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 import { getCustomRepository, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
+import { CACHE_ONE_DAY } from '../constants/cache';
 import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { UserRepository } from '../database/repositories/user';
@@ -35,7 +36,7 @@ export const jwtPassportStrategy = new Strategy(opts, async (payload: IStrategyP
     select: ['id', 'email'],
     cache: {
       id: cacheKeys.jwtVerifyUser(id),
-      milliseconds: (24 * 3600000) // cache 24 hours
+      milliseconds: CACHE_ONE_DAY
     },
     loadEagerRelations: false
   });
@@ -84,7 +85,7 @@ export const apiKeySecretPassportStrategy = new passportCustom.Strategy(async (r
     relations: ['user'],
     cache: {
       id: cacheKeys.apiKeyUser(apiKey),
-      milliseconds: (24 * 3600000) // cache 24 hours
+      milliseconds: CACHE_ONE_DAY // cache 24 hours
     },
   });
 
