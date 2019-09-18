@@ -260,7 +260,8 @@ export const setupServer = async () => {
 
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED_ENDPOINT, subscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive);
+  app.get('/v1/in-app-subscriptions', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAll);
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove available iOS app 1.2.x and below
   app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically

@@ -6,6 +6,7 @@ import { FindManyOptions, getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
+import { CACHE_ONE_DAY } from '../constants/cache';
 import { InAppSubscription, InAppSubscriptionService } from '../database/entities/in-app-subscription';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus, UserInAppSubscriptionApple } from '../database/entities/user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from '../database/entities/user-in-app-subscriptions-google';
@@ -30,7 +31,15 @@ inAppPurchase.config({
 export const findAll = async (req: Request, res: Response) => {
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
-  const subscriptions = await inAppSubscriptionRepository.find();
+  const subscriptions = await inAppSubscriptionRepository.find({
+    order: {
+      price: 'ASC'
+    },
+    cache: {
+      id: `${InAppSubscription.name}:all`,
+      milliseconds: CACHE_ONE_DAY
+    }
+  });
 
   return res.json(subscriptions);
 };
