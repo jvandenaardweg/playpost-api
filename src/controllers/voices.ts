@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import joi from 'joi';
-import { getCustomRepository, getRepository } from 'typeorm';
+import { FindConditions, getCustomRepository, getRepository } from 'typeorm';
 
 import { Voice } from '../database/entities/voice';
 
@@ -12,66 +12,26 @@ import { voiceInputValidationSchema } from '../database/validators';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
+  const { isActive }: {isActive: string } = req.query;
+
+  const where: FindConditions<Voice> = {}
+
+  if (isActive) {
+    where.isActive = isActive === 'true' ? true : isActive === 'false' ? false : undefined
+  }
+
+  const cacheKey = JSON.stringify(where);
 
   const voices = await voiceRepository.find({
+    where,
     relations: ['language'],
     cache: {
-      id: `${Voice.name}:all`,
+      id: `${Voice.name}:${cacheKey}`,
       milliseconds: CACHE_ONE_DAY
     }
   });
 
   return res.json(voices);
-};
-
-export const findAllActive = async (req: Request, res: Response) => {
-  const voiceRepository = getRepository(Voice);
-
-  const activeVoices = await voiceRepository.find({
-    where: {
-      isActive: true,
-    },
-    cache: {
-      id: `${Voice.name}:active`,
-      milliseconds: CACHE_ONE_DAY
-    }
-  });
-
-  return res.json(activeVoices);
-};
-
-export const findAllActivePremiumVoices = async (req: Request, res: Response) => {
-  const voiceRepository = getRepository(Voice);
-
-  const activePremiumVoices = await voiceRepository.find({
-    where: {
-      isPremium: true,
-      isActive: true
-    },
-    cache: {
-      id: `${Voice.name}:active:premium`,
-      milliseconds: CACHE_ONE_DAY
-    }
-  });
-
-  return res.json(activePremiumVoices);
-};
-
-export const findAllActiveFreeVoices = async (req: Request, res: Response) => {
-  const voiceRepository = getRepository(Voice);
-
-  const activeFreeVoices = await voiceRepository.find({
-    where: {
-      isPremium: false,
-      isActive: true
-    },
-    cache: {
-      id: `${Voice.name}:active:free`,
-      milliseconds: CACHE_ONE_DAY
-    }
-  });
-
-  return res.json(activeFreeVoices);
 };
 
 export const createVoicePreview = async (req: Request, res: Response) => {

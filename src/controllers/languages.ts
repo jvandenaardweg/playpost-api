@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { FindConditions, getRepository } from 'typeorm';
 
 import { Language } from '../database/entities/language';
 
@@ -9,48 +9,23 @@ export const findAll = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
   const { isActive }: {isActive: string } = req.query;
 
-  if (isActive === 'true') {
-    const activeLanguages = await languageRepository.find({
-      relations: ['voices'],
-      where: {
-        isActive: true
-      },
-      cache: {
-        id: `${Language.name}:active`,
-        milliseconds: CACHE_ONE_DAY
-      }
-    });
+  const where: FindConditions<Language> = {}
 
-    return res.json(activeLanguages);
+  if (isActive) {
+    where.isActive = isActive === 'true' ? true : isActive === 'false' ? false : undefined
   }
 
-  if (isActive === 'false') {
-    const inactiveLanguages = await languageRepository.find({
-      relations: ['voices'],
-      where: {
-        isActive: false
-      },
-      cache: {
-        id: `${Language.name}:inactive`,
-        milliseconds: CACHE_ONE_DAY
-      }
-    });
+  const cacheKey = JSON.stringify(where);
 
-    return res.json(inactiveLanguages);
-  }
-
-  const allLanguages = await languageRepository.find({
+  const languages = await languageRepository.find({
     relations: ['voices'],
     cache: {
-      id: `${Language.name}:all`,
+      id: `${Language.name}:${cacheKey}`,
       milliseconds: CACHE_ONE_DAY
     }
   });
 
-  return res.json(allLanguages);
-
-
-
+  return res.json(languages);
 };
 
 /**

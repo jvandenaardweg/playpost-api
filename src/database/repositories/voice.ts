@@ -6,6 +6,7 @@ import { AwsSynthesizer } from '../../synthesizers/aws';
 import { GoogleSynthesizer } from '../../synthesizers/google';
 import { getAudioFileDurationInSeconds } from '../../utils/audio';
 import { AudiofileMimeType } from '../entities/audiofile';
+import { Language } from '../entities/language';
 import { Voice } from '../entities/voice';
 
 @EntityRepository(Voice)
@@ -643,7 +644,7 @@ export class VoiceRepository extends Repository<Voice> {
 
     // When we have updated a voice, remove all related caches
     const cache = await getConnection('default').queryResultCache;
-    if (cache) { await cache.remove(['voices_all', 'voices_active', 'voices_active_free', 'voices_active_premium']); }
+    if (cache) { await cache.remove([`${Language.name}:*`, `${Voice.name}:*`]); }
 
     const updatedVoice = await this.findOne(voice.id);
 

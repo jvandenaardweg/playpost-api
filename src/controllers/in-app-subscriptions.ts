@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
 import joi from 'joi';
-import { FindManyOptions, getRepository, LessThan } from 'typeorm';
+import { FindConditions, FindManyOptions, getRepository, LessThan } from 'typeorm';
 import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
@@ -30,13 +30,23 @@ inAppPurchase.config({
  */
 export const findAll = async (req: Request, res: Response) => {
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
+  const { isActive }: {isActive: string } = req.query;
+
+  const where: FindConditions<InAppSubscription> = {}
+
+  if (isActive) {
+    where.isActive = isActive === 'true' ? true : isActive === 'false' ? false : undefined
+  }
+
+  const cacheKey = JSON.stringify(where);
 
   const subscriptions = await inAppSubscriptionRepository.find({
+    where,
     order: {
       price: 'ASC'
     },
     cache: {
-      id: `${InAppSubscription.name}:all`,
+      id: `${InAppSubscription.name}:${cacheKey}`,
       milliseconds: CACHE_ONE_DAY
     }
   });

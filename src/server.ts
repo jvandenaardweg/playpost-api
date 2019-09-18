@@ -250,9 +250,6 @@ export const setupServer = async () => {
   app.get('/v1/voices', IS_PROTECTED_ENDPOINT, voicesController.findAll);
   app.post('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.createVoicePreview);
   app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.deleteVoicePreview);
-  app.get('/v1/voices/active', IS_PROTECTED_ENDPOINT, voicesController.findAllActive);
-  app.get('/v1/voices/active/free', IS_PROTECTED_ENDPOINT, voicesController.findAllActiveFreeVoices);
-  app.get('/v1/voices/active/premium', IS_PROTECTED_ENDPOINT, voicesController.findAllActivePremiumVoices);
 
   // v1/languages
   app.get('/v1/languages', IS_PROTECTED_ENDPOINT, languagesController.findAll);
