@@ -18,6 +18,7 @@ export const findAll = async (req: Request, res: Response) => {
   const cacheKey = JSON.stringify(where);
 
   const languages = await languageRepository.find({
+    where,
     relations: ['voices'],
     cache: {
       id: `${Language.name}:${cacheKey}`,
