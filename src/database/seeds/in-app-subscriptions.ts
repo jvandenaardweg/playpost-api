@@ -37,7 +37,7 @@ export default [
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 300 * 60, // 300 minutes
     limitSecondsPerArticle: hardLimitSecondsPerArticle, // 30 minutes
-    isActive: true
+    isActive: false
   },
   {
     productId: 'com.aardwegmedia.playpost.android.plus',
@@ -49,7 +49,7 @@ export default [
     service: InAppSubscriptionService.GOOGLE,
     limitSecondsPerMonth: 300 * 60, // 300 minutes
     limitSecondsPerArticle: hardLimitSecondsPerArticle, // 30 minutes
-    isActive: true
+    isActive: false
   },
   {
     productId: 'com.aardwegmedia.playpost.subscription.unlimited',
