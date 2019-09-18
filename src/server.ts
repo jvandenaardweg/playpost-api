@@ -216,8 +216,8 @@ export const setupServer = async () => {
   app.delete('/v1/me', IS_PROTECTED_ENDPOINT, meController.deleteCurrentUser);
 
   // Deprecated endpoints, remove later
-  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail); // TODO: remove, available in iOS app 1.1.3 and below
-  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword); // TODO: remove, available in iOS app 1.1.3 and below
+  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
 
   // /v1/me/api-keys
   app.get('/v1/me/api-keys', IS_PROTECTED_ENDPOINT, meController.findAllApiKeys);
@@ -256,12 +256,12 @@ export const setupServer = async () => {
 
   // v1/languages
   app.get('/v1/languages', IS_PROTECTED_ENDPOINT, languagesController.findAll);
-  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive);
+  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // v1/subscriptions
   // app.get('/v1/subscriptions', IS_PROTECTED_ENDPOINT, subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove available iOS app 1.2.x and below
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
   app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically

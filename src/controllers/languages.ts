@@ -7,8 +7,39 @@ import { CACHE_ONE_DAY } from '../constants/cache';
 
 export const findAll = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
+  const { isActive }: {isActive: string } = req.query;
 
-  const languages = await languageRepository.find({
+  if (isActive === 'true') {
+    const activeLanguages = await languageRepository.find({
+      relations: ['voices'],
+      where: {
+        isActive: true
+      },
+      cache: {
+        id: `${Language.name}:active`,
+        milliseconds: CACHE_ONE_DAY
+      }
+    });
+
+    return res.json(activeLanguages);
+  }
+
+  if (isActive === 'false') {
+    const inactiveLanguages = await languageRepository.find({
+      relations: ['voices'],
+      where: {
+        isActive: false
+      },
+      cache: {
+        id: `${Language.name}:inactive`,
+        milliseconds: CACHE_ONE_DAY
+      }
+    });
+
+    return res.json(inactiveLanguages);
+  }
+
+  const allLanguages = await languageRepository.find({
     relations: ['voices'],
     cache: {
       id: `${Language.name}:all`,
@@ -16,7 +47,10 @@ export const findAll = async (req: Request, res: Response) => {
     }
   });
 
-  return res.json(languages);
+  return res.json(allLanguages);
+
+
+
 };
 
 /**
