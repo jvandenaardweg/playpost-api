@@ -348,7 +348,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     // So he cannot use this Premium voice anymore
     if (!userIsSubscribed) {
       const languageName = article.language ? article.language.name : 'Unknown';
-      const message = `You do not have an active subscription to use this Premium voice. Please upgrade or choose a different voice for this ${languageName} article.`;
+      const message = `You do not have an active subscription to use the "${userVoiceSetting.voice.label}" voice. Please upgrade or choose a different voice for this ${languageName} article.`;
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Error);
