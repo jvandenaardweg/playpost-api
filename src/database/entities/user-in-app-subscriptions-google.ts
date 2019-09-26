@@ -4,6 +4,7 @@ import { InAppSubscription } from './in-app-subscription';
 import { User } from './user';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus } from './user-in-app-subscription-apple';
 import { UserVoiceSetting } from './user-voice-setting';
+import { logger } from '../../utils';
 
 @Entity()
 export class UserInAppSubscriptionGoogle {
@@ -92,12 +93,21 @@ export class UserInAppSubscriptionGoogle {
    *
    */
   async deleteExpiredVoiceSettings() {
-    if (this.isExpired) {
-      await getRepository(UserVoiceSetting).delete({
+    const loggerPrefix = 'Delete Expired Voice Settings:';
+    const userId = this.user.id;
+
+    if (![InAppSubscriptionStatus.ACTIVE, InAppSubscriptionStatus.LAPSED].includes(this.status)) {
+      logger.info(loggerPrefix, `Removing voice settings for user ID "${userId}"...`);
+
+      const deleteResult = await getRepository(UserVoiceSetting).delete({
         user: {
           id: this.user.id
         }
       })
+
+      logger.info(loggerPrefix, `Removed ${deleteResult.affected} voice settings for user ID "${userId}"!`);
+    } else {
+      logger.info(loggerPrefix, `No voice settings to delete for user ID "${userId}"...`);
     }
   }
 }

@@ -189,16 +189,8 @@ export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscrip
   const userInAppSubscriptionRepository = getRepository(UserInAppSubscriptionApple);
 
   const { originalTransactionId } = userInAppSubscription;
-  const userId = userInAppSubscription.user ? userInAppSubscription.user.id : null;
 
   try {
-    // If we receive a sandbox subscription on the prod environment, just error
-    // This should only happen for beta users
-    // We've disabled below check, because appareantly the Apple Reviewe also uses the Sandbox environment
-    // if (userInAppSubscription && userInAppSubscription.environment === InAppSubscriptionEnvironment.SANDBOX && process.env.NODE_ENV === 'production') {
-    //   throw new Error('The previously purchased subscription is not valid for this environment. You should use your own Apple ID when purchasing.');
-    // }
-
     const existingUserInAppSubscription = await userInAppSubscriptionRepository.findOne({
       where: {
         originalTransactionId
@@ -206,47 +198,24 @@ export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscrip
       relations: ['user']
     });
 
-    // let userInAppSubscriptionId = '';
-
-    if (!existingUserInAppSubscription) {
-      // create
-      logger.info(loggerPrefix, 'Creating database entry, using:', userInAppSubscription);
-
-      const inAppSubscriptionPurchaseToCreate = userInAppSubscriptionRepository.create(userInAppSubscription);
-      const savedInAppSubscriptionPurchase = await userInAppSubscriptionRepository.save(inAppSubscriptionPurchaseToCreate);
-
-      logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
-
-      const existingUserInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(savedInAppSubscriptionPurchase.id);
-
-      if (!existingUserInAppSubscriptionResult) { throw new Error('Could not find just added user in app subscription.'); }
-
-      logger.info(loggerPrefix, 'Finished! Returning created database entry...');
-
-      return existingUserInAppSubscriptionResult;
-    }
-
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
-    if (userId && existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
-      logger.info(loggerPrefix, 'Transaction already exists in the database, but it is from a different user.', `Transaction user: "${existingUserInAppSubscription.user.id}"`, `Logged in user: "${userId}"`);
-
-      logger.info(loggerPrefix, `We update the user of the transaction to: "${userId}".`);
-
-      existingUserInAppSubscription.user.id = userId;
+    if (existingUserInAppSubscription) {
+      logger.info(loggerPrefix, 'Transaction already exists in the database. So we update it.');
     }
 
-    // Update
-    logger.info(loggerPrefix, 'Transaction already exists. We just update it:', userInAppSubscription);
-    await userInAppSubscriptionRepository.update(existingUserInAppSubscription.id, userInAppSubscription);
+    const toUpdateOrCreate = userInAppSubscriptionRepository.create({
+        id: existingUserInAppSubscription ? existingUserInAppSubscription.id : undefined,
+        ...userInAppSubscription
+    })
 
-    const userInAppSubscriptionResult = await userInAppSubscriptionRepository.findOne(existingUserInAppSubscription.id);
-
-    if (!userInAppSubscriptionResult) { throw new Error('Could not find just updated user in app subscription.'); }
+    // Save, or update
+    // If ID does not exist, it will create a new entry
+    const saveResult = await userInAppSubscriptionRepository.save(toUpdateOrCreate)
 
     logger.info(loggerPrefix, 'Finished! Returning updated database entry...');
 
-    return userInAppSubscriptionResult;
+    return saveResult;
   } catch (err) {
     const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, message);
@@ -265,7 +234,6 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
   const userInAppSubscriptionGoogleRepository = getRepository(UserInAppSubscriptionGoogle);
 
   const { purchaseToken } = userInAppSubscription;
-  const userId = userInAppSubscription.user ? userInAppSubscription.user.id : null;
 
   try {
     const existingUserInAppSubscription = await userInAppSubscriptionGoogleRepository.findOne({
@@ -275,45 +243,24 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
       relations: ['user']
     });
 
-    if (!existingUserInAppSubscription) {
-      // create
-      logger.info(loggerPrefix, 'Creating database entry, using:', userInAppSubscription);
-
-      const inAppSubscriptionPurchaseToCreate = userInAppSubscriptionGoogleRepository.create(userInAppSubscription);
-      const savedInAppSubscriptionPurchase = await userInAppSubscriptionGoogleRepository.save(inAppSubscriptionPurchaseToCreate);
-
-      logger.info(loggerPrefix, 'Created database entry!', savedInAppSubscriptionPurchase);
-
-      const existingUserInAppSubscriptionResult = await userInAppSubscriptionGoogleRepository.findOne(savedInAppSubscriptionPurchase.id);
-
-      if (!existingUserInAppSubscriptionResult) { throw new Error('Could not find just added user in app subscription.'); }
-
-      logger.info(loggerPrefix, 'Finished! Returning created database entry...');
-
-      return existingUserInAppSubscriptionResult;
-    }
-
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
-    if (userId && existingUserInAppSubscription.user && existingUserInAppSubscription.user.id !== userId) {
-      logger.info(loggerPrefix, 'Transaction already exists in the database, but it is from a different user.', `Transaction user: "${existingUserInAppSubscription.user.id}"`, `Logged in user: "${userId}"`);
-
-      logger.info(loggerPrefix, `We update the user of the transaction to: "${userId}".`);
-
-      existingUserInAppSubscription.user.id = userId;
+    if (existingUserInAppSubscription) {
+      logger.info(loggerPrefix, 'Transaction already exists in the database. So we update it.');
     }
 
-    // Update
-    logger.info(loggerPrefix, 'Transaction already exists. We just update it:', userInAppSubscription);
-    await userInAppSubscriptionGoogleRepository.update(existingUserInAppSubscription.id, userInAppSubscription);
+    const toUpdateOrCreate = userInAppSubscriptionGoogleRepository.create({
+        id: existingUserInAppSubscription ? existingUserInAppSubscription.id : undefined,
+        ...userInAppSubscription
+    })
 
-    const userInAppSubscriptionResult = await userInAppSubscriptionGoogleRepository.findOne(existingUserInAppSubscription.id);
-
-    if (!userInAppSubscriptionResult) { throw new Error('Could not find just updated user in app subscription.'); }
+    // Save, or update
+    // If ID does not exist, it will create a new entry
+    const saveResult = await userInAppSubscriptionGoogleRepository.save(toUpdateOrCreate)
 
     logger.info(loggerPrefix, 'Finished! Returning updated database entry...');
 
-    return userInAppSubscriptionResult;
+    return saveResult;
   } catch (err) {
     const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, message);

@@ -1,5 +1,6 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { AfterUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn, BeforeUpdate } from 'typeorm';
+import { logger } from '../../utils';
 import { InAppSubscription } from './in-app-subscription';
 import { User } from './user';
 import { UserVoiceSetting } from './user-voice-setting';
@@ -101,12 +102,21 @@ export class UserInAppSubscriptionApple {
    *
    */
   async deleteExpiredVoiceSettings() {
-    if (this.isExpired) {
-      await getRepository(UserVoiceSetting).delete({
+    const loggerPrefix = 'Delete Expired Voice Settings:';
+    const userId = this.user.id;
+
+    if (![InAppSubscriptionStatus.ACTIVE, InAppSubscriptionStatus.LAPSED].includes(this.status)) {
+      logger.info(loggerPrefix, `Removing voice settings for user ID "${userId}"...`);
+
+      const deleteResult = await getRepository(UserVoiceSetting).delete({
         user: {
           id: this.user.id
         }
       })
+
+      logger.info(loggerPrefix, `Removed ${deleteResult.affected} voice settings for user ID "${userId}"!`);
+    } else {
+      logger.info(loggerPrefix, `No voice settings to delete for user ID "${userId}"...`);
     }
   }
 }
