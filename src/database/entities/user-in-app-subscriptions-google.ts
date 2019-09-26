@@ -1,10 +1,10 @@
 import { IsDate, IsUUID } from 'class-validator';
 import { AfterUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { logger } from '../../utils';
 import { InAppSubscription } from './in-app-subscription';
 import { User } from './user';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus } from './user-in-app-subscription-apple';
 import { UserVoiceSetting } from './user-voice-setting';
-import { logger } from '../../utils';
 
 @Entity()
 export class UserInAppSubscriptionGoogle {
