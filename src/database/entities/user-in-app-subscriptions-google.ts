@@ -1,8 +1,9 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { InAppSubscription } from './in-app-subscription';
 import { User } from './user';
 import { InAppSubscriptionEnvironment, InAppSubscriptionStatus } from './user-in-app-subscription-apple';
+import { UserVoiceSetting } from './user-voice-setting';
 
 @Entity()
 export class UserInAppSubscriptionGoogle {
@@ -84,4 +85,19 @@ export class UserInAppSubscriptionGoogle {
   @UpdateDateColumn()
   @IsDate()
   updatedAt: Date;
+
+  @AfterUpdate()
+  /**
+   * Method to delete the user his voice settings when his subscription expires.
+   *
+   */
+  async deleteExpiredVoiceSettings() {
+    if (this.isExpired) {
+      await getRepository(UserVoiceSetting).delete({
+        user: {
+          id: this.user.id
+        }
+      })
+    }
+  }
 }
