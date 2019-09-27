@@ -116,29 +116,6 @@ export class UserRepository extends Repository<User> {
     const currentMonthAudiofileUsageInSeconds = await audiofileRepository.findAudiofileUsageInCurrentMonth(userId);
     const highQualityAudiofileUsageInSeconds = await audiofileRepository.findHighQualityAudiofileUsageInSeconds(userId);
 
-    // When a user signs up, he gets a free introduction of our high quality voices
-    // The amount of seconds he gets for free is the same as the "free" in app subscription "limitSecondsPerMonth"
-    const introductionLimitInSeconds = subscriptionLimits.limitSecondsPerMonth;
-    const hasUsedFreeIntroduction = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
-    const isUnlimited = subscriptionLimits.limitSecondsPerMonth === 0
-    const virtualUnlimitedLimit = 9999;
-
-    const used = {
-      audiofiles: {
-        currentMonthInSeconds: currentMonthAudiofileUsageInSeconds
-      }
-    };
-
-    const available = {
-      audiofiles: {
-        currentMonthInSeconds: isUnlimited ? virtualUnlimitedLimit : subscriptionLimits.limitSecondsPerMonth - currentMonthAudiofileUsageInSeconds
-      }
-    };
-
-    const limits = {
-      audiofiles: subscriptionLimits
-    };
-
     // Find the user's active subscriptions
     const activeSubscriptionApple = user.inAppSubscriptions
     .sort((a, b) => b.startedAt.toISOString().localeCompare(a.startedAt.toISOString())) // Sort by startedAt, so if the user upgrades, we get the correct active subscription
@@ -167,6 +144,30 @@ export class UserRepository extends Repository<User> {
     // We offer subscriptions per platform, but the user only needs one active
     // Just return the active subscription product Id
     const activeUserInAppSubscription = (activeSubscriptionApple) ? activeSubscriptionApple : (activeSubscriptionGoogle) ? activeSubscriptionGoogle : null;
+
+    const isUnlimited = activeUserInAppSubscription && ['com.aardwegmedia.playpost.android.unlimited', 'com.aardwegmedia.playpost.subscription.unlimited'].includes(activeUserInAppSubscription.inAppSubscription.productId);
+
+    // When a user signs up, he gets a free introduction of our high quality voices
+    // The amount of seconds he gets for free is the same as the "free" in app subscription "limitSecondsPerMonth"
+    const introductionLimitInSeconds = subscriptionLimits.limitSecondsPerMonth;
+    const hasUsedFreeIntroduction = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
+    const virtualUnlimitedLimit = 9999;
+
+    const used = {
+      audiofiles: {
+        currentMonthInSeconds: currentMonthAudiofileUsageInSeconds
+      }
+    };
+
+    const available = {
+      audiofiles: {
+        currentMonthInSeconds: isUnlimited ? virtualUnlimitedLimit : subscriptionLimits.limitSecondsPerMonth - currentMonthAudiofileUsageInSeconds
+      }
+    };
+
+    const limits = {
+      audiofiles: subscriptionLimits
+    };
 
     // We do not need the whole purchase history
     delete user.inAppSubscriptionsGoogle;

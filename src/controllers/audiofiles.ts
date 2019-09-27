@@ -80,6 +80,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
   if (!user) { return res.status(400).json({ message: 'User not found.' }); }
 
   const userIsSubscribed = !!user.activeUserInAppSubscription;
+  const userHasUnlimitedPlan = user.activeUserInAppSubscription && ['com.aardwegmedia.playpost.android.unlimited', 'com.aardwegmedia.playpost.subscription.unlimited'].includes(user.activeUserInAppSubscription.inAppSubscription.productId);
+
   const userSubscriptionLimits = user.limits.audiofiles;
   const userAudiofilesUsage = user.used.audiofiles;
 
@@ -88,7 +90,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, `User "${userId}" current month audiofile usage in seconds:`, userAudiofilesUsage.currentMonthInSeconds);
 
   // Check to see if the current user is already above it's monthly limit
-  if (userAudiofilesUsage.currentMonthInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
+  // Note: unlimited users do not have this limitation
+  if (!userHasUnlimitedPlan && userAudiofilesUsage.currentMonthInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
     const limitInMinutesPerMonth = userSubscriptionLimits.limitSecondsPerMonth / 60;
 
     // Check if there's a higher subscription available for the user
@@ -171,7 +174,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const articleReadingTimeInSeconds = article.readingTime && article.readingTime;
 
   // Check to see of the current article readingtime length will go above the user's monthly limit
-  if (userAudiofilesUsage.currentMonthInSeconds + articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
+  // Note: unlimited users do not have this limitation
+  if (!userHasUnlimitedPlan && userAudiofilesUsage.currentMonthInSeconds + articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerMonth) {
     const limitInMinutesPerMonth = userSubscriptionLimits.limitSecondsPerMonth / 60;
 
     // Check if there's a higher subscription available for the user
@@ -209,7 +213,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(402).json({ message, subscriptionStatus: { isEligibleForTrial, subscriptionUpgradeOption, limitInMinutesPerMonth } });
   }
 
-  // Check to see of the current article length length will go above the user's monthly limit
+  // Check to see if the articles reading time is within our limitations per article
   // Important: there might be some slack, because the readingtime could be different then the final audiofile length in seconds, but that doesnt matter
   if (articleReadingTimeInSeconds > userSubscriptionLimits.limitSecondsPerArticle) {
     const limitInMinutesPerArticle = userSubscriptionLimits.limitSecondsPerArticle / 60;
