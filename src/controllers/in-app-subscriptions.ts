@@ -260,7 +260,6 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
 
     return saveResult;
   } catch (err) {
-    console.log(err)
     const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, message);
 
