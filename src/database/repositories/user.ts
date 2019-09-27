@@ -74,12 +74,15 @@ export class UserRepository extends Repository<User> {
 
   async findActiveSubscriptionLimits(userId: string): Promise<ISubscriptionLimits> {
     const user = await this.findOne(userId, {
-      relations: ['inAppSubscriptions']
+      relations: ['inAppSubscriptions', 'inAppSubscriptionsGoogle']
     });
 
     if (!user) { throw new Error('Could not find user for subscription limits.'); }
 
-    const activeSubscription = user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
+    const activeSubscriptionApple = user.inAppSubscriptions.find(inAppSubscription => inAppSubscription.status === 'active');
+    const activeSubscriptionGoogle = user.inAppSubscriptionsGoogle.find(inAppSubscriptionGoogle => inAppSubscriptionGoogle.status === 'active');
+
+    const activeSubscription = activeSubscriptionApple || activeSubscriptionGoogle;
 
     // Free account
     if (!activeSubscription) {
