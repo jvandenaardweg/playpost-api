@@ -202,12 +202,11 @@ export const updateOrCreateUserInAppSubscriptionApple = async (userInAppSubscrip
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
     if (existingUserInAppSubscription) {
       logger.info(loggerPrefix, 'Transaction already exists in the database. So we update it.');
+
+      userInAppSubscription.id = existingUserInAppSubscription.id
     }
 
-    const toUpdateOrCreate = userInAppSubscriptionRepository.create({
-        id: existingUserInAppSubscription ? existingUserInAppSubscription.id : undefined,
-        ...userInAppSubscription
-    })
+    const toUpdateOrCreate = userInAppSubscriptionRepository.create(userInAppSubscription)
 
     // Save, or update
     // If ID does not exist, it will create a new entry
@@ -246,13 +245,12 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
     // If there's already a transaction, but the user is different
     // For example: when a subscription is purchased from one account. And the same user logs into an other account (on the same device)
     if (existingUserInAppSubscription) {
-      logger.info(loggerPrefix, 'Transaction already exists in the database. So we update it.');
+      logger.info(loggerPrefix, 'Transaction already exists in the database. So we update it.', existingUserInAppSubscription);
+
+      userInAppSubscription.id = existingUserInAppSubscription.id
     }
 
-    const toUpdateOrCreate = userInAppSubscriptionGoogleRepository.create({
-        id: existingUserInAppSubscription ? existingUserInAppSubscription.id : undefined,
-        ...userInAppSubscription
-    })
+    const toUpdateOrCreate = userInAppSubscriptionGoogleRepository.create(userInAppSubscription)
 
     // Save, or update
     // If ID does not exist, it will create a new entry
@@ -262,6 +260,7 @@ export const updateOrCreateUserInAppSubscriptionGoogle = async (userInAppSubscri
 
     return saveResult;
   } catch (err) {
+    console.log(err)
     const message = err && err.message ? err.message : 'Error happened while getting the purchase data.';
     logger.error(loggerPrefix, message);
 

@@ -103,9 +103,9 @@ export class UserInAppSubscriptionApple {
    */
   async deleteExpiredVoiceSettings() {
     const loggerPrefix = 'Delete Expired Voice Settings:';
-    const userId = this.user.id;
+    const userId = this.user ? this.user.id : null;
 
-    if (![InAppSubscriptionStatus.ACTIVE, InAppSubscriptionStatus.LAPSED].includes(this.status)) {
+    if (userId && ![InAppSubscriptionStatus.ACTIVE, InAppSubscriptionStatus.LAPSED].includes(this.status)) {
       logger.info(loggerPrefix, `Removing voice settings for user ID "${userId}"...`);
 
       const deleteResult = await getRepository(UserVoiceSetting).delete({
