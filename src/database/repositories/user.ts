@@ -120,6 +120,8 @@ export class UserRepository extends Repository<User> {
     // The amount of seconds he gets for free is the same as the "free" in app subscription "limitSecondsPerMonth"
     const introductionLimitInSeconds = subscriptionLimits.limitSecondsPerMonth;
     const hasUsedFreeIntroduction = !!(highQualityAudiofileUsageInSeconds >= introductionLimitInSeconds)
+    const isUnlimited = subscriptionLimits.limitSecondsPerMonth === 0
+    const virtualUnlimitedLimit = 9999;
 
     const used = {
       audiofiles: {
@@ -129,7 +131,7 @@ export class UserRepository extends Repository<User> {
 
     const available = {
       audiofiles: {
-        currentMonthInSeconds: subscriptionLimits.limitSecondsPerMonth - currentMonthAudiofileUsageInSeconds
+        currentMonthInSeconds: isUnlimited ? virtualUnlimitedLimit : subscriptionLimits.limitSecondsPerMonth - currentMonthAudiofileUsageInSeconds
       }
     };
 
