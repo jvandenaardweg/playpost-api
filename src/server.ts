@@ -186,20 +186,20 @@ export const setupServer = async () => {
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
 
   // Temporary measure to make sure users update
-  app.all('*', (req, res, next) => {
-    const appVersionHeader = req.headers['app-version'] as string;
-    const deviceManufacturer = req.headers['device-manufacturer'] as string;
+  // app.all('*', (req, res, next) => {
+  //   const appVersionHeader = req.headers['app-version'] as string;
+  //   const deviceManufacturer = req.headers['device-manufacturer'] as string;
 
-    if (appVersionHeader && ['1.2.2', '1.2.0', '1.1.0', '1.0.0'].includes(appVersionHeader)) {
-      const storeName = deviceManufacturer === 'Apple' ? 'the App Store' : 'Google Play';
+  //   if (appVersionHeader && ['1.2.2', '1.2.0', '1.1.0', '1.0.0'].includes(appVersionHeader)) {
+  //     const storeName = deviceManufacturer === 'Apple' ? 'the App Store' : 'Google Play';
 
-      return res.status(400).json({
-        message: `There is a new required Playpost app update available. Please update to the latest version using ${storeName}!`
-      })
-    }
+  //     return res.status(400).json({
+  //       message: `There is a new required Playpost app update available. Please update to the latest version using ${storeName}!`
+  //     })
+  //   }
 
-    return next()
-  });
+  //   return next()
+  // });
 
   // Make express allow JSON payload bodies
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
