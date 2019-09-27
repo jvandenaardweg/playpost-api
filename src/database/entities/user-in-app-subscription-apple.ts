@@ -1,5 +1,5 @@
 import { IsDate, IsUUID } from 'class-validator';
-import { AfterUpdate, BeforeUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterUpdate, Column, CreateDateColumn, Entity, getRepository, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { logger } from '../../utils';
 import { InAppSubscription } from './in-app-subscription';
 import { User } from './user';
