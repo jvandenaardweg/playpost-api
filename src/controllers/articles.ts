@@ -237,7 +237,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(article.url);
+  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url, isCompatible, compatibilityMessage } = await fetchFullArticleContents(article.url);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
@@ -298,7 +298,9 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     canonicalUrl: currentUrl,
     status: ArticleStatus.FINISHED,
     language: foundLanguage,
-    sourceName: siteName
+    sourceName: siteName,
+    isCompatible,
+    compatibilityMessage
   });
 
   const updatedArticle = await articleRepository.findOne(articleId);
