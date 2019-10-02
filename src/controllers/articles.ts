@@ -231,15 +231,13 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const articleUrl = article.canonicalUrl ? article.canonicalUrl : article.url;
-
-  if (!articleUrl) {
+  if (!article.url) {
     const errorMessage = 'Cannot sync article, because it has no URLs.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(articleUrl);
+  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url } = await fetchFullArticleContents(article.url);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
