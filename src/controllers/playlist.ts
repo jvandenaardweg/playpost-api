@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import joi from 'joi';
-import { getManager, getRepository, Not } from 'typeorm';
+import { getManager, getRepository, Not, DeepPartial } from 'typeorm';
 import { playlistInputValidationSchema } from '../database/validators';
 
 import { Article, ArticleStatus } from '../database/entities/article';
@@ -192,7 +192,7 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
   }
 
   // Get the article, but only the ID. We only need the ID
-  const article = await articleRepository.findOne(articleId, { select: ['id'] });
+  const article: DeepPartial<Article> | undefined = await articleRepository.findOne(articleId, { select: ['id'] });
 
   if (!article) {
     return res.status(404).json({ message: 'The article to add to your playlist could not be found.' })
@@ -282,7 +282,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const { stringifiedDocumentHtml } = JSON.parse(JSON.stringify({ stringifiedDocumentHtml: documentHtml }));
 
   // Find the article by "url" OR "canonicalUrl"
-  const article = await articleRepository.findOne({
+  const article: DeepPartial<Article> | undefined = await articleRepository.findOne({
+    select: ['id', 'url', 'canonicalUrl'],
     where: [{ url: normalizedUrl }, { canonicalUrl: normalizedUrl }]
   });
 
