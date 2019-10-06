@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import joi from 'joi';
-import { getManager, getRepository, Not, DeepPartial } from 'typeorm';
+import { DeepPartial, getManager, getRepository, Not } from 'typeorm';
 import { playlistInputValidationSchema } from '../database/validators';
 
 import { Article, ArticleStatus } from '../database/entities/article';
