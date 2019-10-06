@@ -191,7 +191,8 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
     return res.status(400).json({ message });
   }
 
-  const article = await articleRepository.findOne(articleId);
+  // Get the article, but only the ID. We only need the ID
+  const article = await articleRepository.findOne(articleId, { select: ['id'] });
 
   if (!article) {
     return res.status(404).json({ message: 'The article to add to your playlist could not be found.' })
