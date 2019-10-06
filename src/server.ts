@@ -244,6 +244,7 @@ export const setupServer = async () => {
   // /v1/playlist
   app.get('/v1/playlist', IS_PROTECTED_ENDPOINT, playlistController.findAllPlaylistItems);
   app.post('/v1/playlist/articles', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleUrl);
+  app.post('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleId);
   app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.deletePlaylistItem);
   app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemOrder);
   app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemFavoritedAt);

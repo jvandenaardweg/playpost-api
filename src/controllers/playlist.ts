@@ -160,6 +160,90 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
   return res.json({ message: 'Playlist item is added to your archive!' });
 };
 
+/**
+ * Creates a playlist item by using a known article ID.
+ *
+ * @param req
+ * @param res 
+ */
+export const createPlaylistItemByArticleId = async (req: Request, res: Response) => {
+  const loggerPrefix = 'Create Playlist Item By Article ID:';
+  const userId = req.user.id;
+  const { articleId } = req.params;
+
+  const playlistItemRepository = getRepository(PlaylistItem);
+  const articleRepository = getRepository(Article);
+
+  const { error } = joi.validate(req.params, playlistInputValidationSchema.requiredKeys('articleId'));
+
+  if (error) {
+    const message = error.details.map(detail => detail.message).join(' and ');
+
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setUser(req.user);
+      Sentry.captureMessage(message);
+    });
+
+    logger.error(loggerPrefix, message);
+    return res.status(400).json({ message });
+  }
+
+  const article = await articleRepository.findOne(articleId);
+
+  if (!article) {
+    return res.status(404).json({ message: 'The article to add to your playlist could not be found.' })
+  }
+
+  // Find if the playlist item already exists
+  const playlistItem = await playlistItemRepository.findOne({
+    relations: ['user'],
+    where: {
+      user: {
+        id: userId
+      },
+      article: {
+        id: article.id
+      }
+    }
+  });
+
+  if (playlistItem) {
+    Sentry.withScope(scope => {
+      scope.setLevel(Sentry.Severity.Error);
+      scope.setUser(req.user);
+      scope.setExtra('body', req.body);
+      scope.setExtra('params', req.params);
+      scope.setExtra('article', article);
+      scope.setExtra('playlistItem', playlistItem);
+      Sentry.captureMessage(MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST);
+    });
+
+    return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
+  }
+
+  // Create the playlist item
+  const playlistItemToCreate = playlistItemRepository.create({
+    article: {
+      id: articleId
+    },
+    user: {
+      id: userId
+    },
+    order: -1
+  });
+
+  const createdPlaylistItem = await playlistItemRepository.save(playlistItemToCreate);
+
+  // Move the newly created playlistItem to the first position and re-order all the other playlist items
+  // await reOrderPlaylistItem(createdPlaylistItem.id, 0, -1, userId);
+  await reOrderPlaylistItems(userId);
+
+  return res.json(createdPlaylistItem);
+}
+
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const loggerPrefix = 'Create Playlist Item By Article URL:';
   const userId = req.user.id;
