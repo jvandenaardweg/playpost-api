@@ -25,3 +25,11 @@ export const emptyAllCaches = () => {
     });
   });
 };
+
+export const removeCacheByKeys = (keys: string[]) => {
+  return redisClient.del(...keys)
+};
+
+export const getCacheKey = (entity: string, params: string) => {
+  return `${entity}:${params}`
+};

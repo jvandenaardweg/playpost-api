@@ -1,9 +1,11 @@
 import { IsUrl, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { logger } from '../../utils';
 import { Article } from './article';
 import { User } from './user';
 import { Voice } from './voice';
 
+import * as cache from '../../cache';
 import { ColumnNumericTransformer } from '../utils';
 
 // encoding formats supported by Google and AWS Polly
@@ -38,14 +40,14 @@ export class Audiofile {
   mimeType: AudiofileMimeType;
 
   @Index()
-  @ManyToOne(type => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
+  @ManyToOne(() => Article, { onDelete: 'CASCADE' }) // On delete of an Article, delete the Audiofile
   article: Article;
 
-  @ManyToOne(type => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
+  @ManyToOne(() => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
   voice: Voice;
 
   @Index()
-  @ManyToOne(type => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
+  @ManyToOne(() => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   user: User;
 
   @Index()
@@ -54,4 +56,30 @@ export class Audiofile {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  /**
+   * When removing or updating an audiofile in the database, make sure the caches are deleted
+   */
+  @BeforeUpdate()
+  @BeforeRemove()
+  async beforeRemove() {
+    const loggerPrefix = 'Database Entity (Audiofile) beforeUpdate/beforeRemove:';
+
+    const audiofileId = this.id;
+    const articleId = this.article.id;
+
+    const cacheKeys = [
+      cache.getCacheKey('Audiofile', audiofileId),
+      cache.getCacheKey('Article', articleId)
+    ]
+
+    logger.info(loggerPrefix, 'Should delete caches:', cacheKeys.join(', '))
+
+    if (cacheKeys) {
+      await cache.removeCacheByKeys(cacheKeys)
+      logger.info(loggerPrefix, 'Deleted caches:', cacheKeys.join(', '))
+    }
+
+    return this
+  }
 }

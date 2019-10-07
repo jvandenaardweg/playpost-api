@@ -1,10 +1,11 @@
 import { IsUrl, IsUUID } from 'class-validator';
-import { AfterInsert, BaseEntity, Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterInsert, BaseEntity, BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 import { User } from './user';
 
+import * as cache from '../../cache';
 import * as ArticlesPubSub from '../../pubsub/articles';
 import { logger } from '../../utils';
 import { ColumnNumericTransformer } from '../utils';
@@ -80,16 +81,16 @@ export class Article extends BaseEntity {
   // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
   documentHtml: string;
 
-  @ManyToOne(type => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
+  @ManyToOne(() => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
   user: User;
 
-  @ManyToOne(type => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
+  @ManyToOne(() => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
   language: Language;
 
-  @OneToMany(type => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
+  @OneToMany(() => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
   audiofiles: Audiofile[];
 
-  @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'NO ACTION' }) // On delete of a PlaylistItem, don't remove the Article
+  @OneToMany(() => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'NO ACTION' }) // On delete of a PlaylistItem, don't remove the Article
   playlistItems: PlaylistItem[];
 
   @CreateDateColumn()
@@ -114,4 +115,32 @@ export class Article extends BaseEntity {
       throw err;
     }
   }
+
+  /**
+   * When removing or updating an article in the database, make sure the caches are deleted
+   */
+  @BeforeUpdate()
+  @BeforeRemove()
+  async beforeRemove() {
+    const loggerPrefix = 'Database Entity (Article) beforeUpdate/beforeRemove:';
+
+    const articleId = this.id;
+    const audiofileIds = this.audiofiles.map(audiofile => audiofile.id);
+    const audiofileCacheKeys = audiofileIds.map(audiofileId => cache.getCacheKey('Audiofile', audiofileId))
+
+    const cacheKeys = [
+      ...audiofileCacheKeys,
+      cache.getCacheKey('Article', articleId)
+    ]
+
+    logger.info(loggerPrefix, 'Should delete caches:', cacheKeys.join(', '))
+
+    if (cacheKeys) {
+      await cache.removeCacheByKeys(cacheKeys)
+      logger.info(loggerPrefix, 'Deleted caches:', cacheKeys.join(', '))
+    }
+
+    return this
+  }
+
 }

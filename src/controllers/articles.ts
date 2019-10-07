@@ -4,6 +4,8 @@ import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
 import urlParse from 'url-parse';
 
+import * as cache from '../cache';
+import { CACHE_FOREVER } from '../constants/cache';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Language } from '../database/entities/language';
 import { PlaylistItem } from '../database/entities/playlist-item';
@@ -23,7 +25,11 @@ export const findArticleById = async (req: Request, res: Response) => {
   }
 
   const article = await articleRepository.findOne(articleId, {
-    relations: ['audiofiles']
+    relations: ['audiofiles'],
+    cache: {
+      id: cache.getCacheKey('Article', articleId),
+      milliseconds: CACHE_FOREVER // Delete cache when we update an article or when
+    }
   });
 
   if (!article) {
