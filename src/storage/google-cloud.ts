@@ -294,8 +294,7 @@ export const deleteAllArticleAudiofiles = async (articleId?: string) => {
     const files = await getFiles(prefix);
 
     if (!files.length) {
-      logger.error(loggerPrefix, `No files found for: "${prefix}"...`);
-      throw new Error(`${loggerPrefix} No files found to be deleted.`);
+      logger.warn(loggerPrefix, `No files found for: "${prefix}"...`);
     }
 
     // Create delete file promises for each file
