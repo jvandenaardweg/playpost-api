@@ -35,7 +35,12 @@ import { getRealUserIpAddress } from './utils/ip-address';
 
 const PORT = process.env.PORT || 3000;
 
-const IS_PROTECTED_ENDPOINT = passport.authenticate(['jwt', 'x-api-key-secret'], {
+const IS_PROTECTED_APIKEY = passport.authenticate(['jwt', 'x-api-key-secret'], {
+  session: false,
+  failWithError: true
+});
+
+const IS_PROTECTED_JWT = passport.authenticate(['jwt'], {
   session: false,
   failWithError: true
 });
@@ -212,10 +217,10 @@ export const setupServer = async () => {
   // API Endpoints
 
   // TODO: Deprecated endpoints, remove later
-  app.patch('/v1/me/email', IS_PROTECTED_ENDPOINT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.patch('/v1/me/password', IS_PROTECTED_ENDPOINT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.get('/v1/languages/active', IS_PROTECTED_ENDPOINT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  app.patch('/v1/me/email', IS_PROTECTED_JWT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.patch('/v1/me/password', IS_PROTECTED_JWT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.get('/v1/languages/active', IS_PROTECTED_JWT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_JWT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
   // Use expressBrute to increase the delay between each requests
@@ -227,53 +232,53 @@ export const setupServer = async () => {
   // Protected by login
 
   // v1/users
-  app.get('/v1/users', IS_PROTECTED_ENDPOINT, usersController.findAllUsers); // Admin only
-  app.delete('/v1/users/:userId', IS_PROTECTED_ENDPOINT, usersController.deleteUser); // Admin only
+  app.get('/v1/users', IS_PROTECTED_JWT, usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', IS_PROTECTED_JWT, usersController.deleteUser); // Admin only
 
   // /v1/me
-  app.get('/v1/me', IS_PROTECTED_ENDPOINT, meController.findCurrentUser);
-  app.patch('/v1/me', IS_PROTECTED_ENDPOINT, meController.patchMe);
-  app.post('/v1/me/voices', IS_PROTECTED_ENDPOINT, meController.createSelectedVoice); // Setting the default voice per language for the user
-  app.delete('/v1/me', IS_PROTECTED_ENDPOINT, meController.deleteCurrentUser);
+  app.get('/v1/me', IS_PROTECTED_JWT, meController.findCurrentUser);
+  app.patch('/v1/me', IS_PROTECTED_JWT, meController.patchMe);
+  app.post('/v1/me/voices', IS_PROTECTED_JWT, meController.createSelectedVoice); // Setting the default voice per language for the user
+  app.delete('/v1/me', IS_PROTECTED_JWT, meController.deleteCurrentUser);
 
   // /v1/me/api-keys
-  app.get('/v1/me/api-keys', IS_PROTECTED_ENDPOINT, meController.findAllApiKeys);
-  app.delete('/v1/me/api-keys/:apiKeyId', IS_PROTECTED_ENDPOINT, meController.deleteApiKey);
-  app.post('/v1/me/api-keys', IS_PROTECTED_ENDPOINT, meController.createApiKey);
+  app.get('/v1/me/api-keys', IS_PROTECTED_JWT, meController.findAllApiKeys);
+  app.delete('/v1/me/api-keys/:apiKeyId', IS_PROTECTED_JWT, meController.deleteApiKey);
+  app.post('/v1/me/api-keys', IS_PROTECTED_JWT, meController.createApiKey);
 
   // /v1/playlist
-  app.get('/v1/playlist', IS_PROTECTED_ENDPOINT, playlistController.findAllPlaylistItems);
-  app.post('/v1/playlist/articles', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleUrl);
-  app.post('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.createPlaylistItemByArticleId);
-  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_ENDPOINT, playlistController.deletePlaylistItem);
-  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemOrder);
-  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemFavoritedAt);
-  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED_ENDPOINT, playlistController.patchPlaylistItemArchivedAt);
+  app.get('/v1/playlist', IS_PROTECTED_JWT, playlistController.findAllPlaylistItems);
+  app.post('/v1/playlist/articles', IS_PROTECTED_JWT, playlistController.createPlaylistItemByArticleUrl);
+  app.post('/v1/playlist/articles/:articleId', IS_PROTECTED_JWT, playlistController.createPlaylistItemByArticleId);
+  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_JWT, playlistController.deletePlaylistItem);
+  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_JWT, playlistController.patchPlaylistItemOrder);
+  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED_JWT, playlistController.patchPlaylistItemFavoritedAt);
+  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED_JWT, playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
-  app.get('/v1/articles/:articleId', IS_PROTECTED_ENDPOINT, articlesController.findArticleById);
-  app.put('/v1/articles/:articleId/sync', IS_PROTECTED_ENDPOINT, articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', IS_PROTECTED_ENDPOINT, articlesController.deleteById); // Admin only
-  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED_ENDPOINT, articlesController.findAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED_ENDPOINT, audiofileController.createAudiofile);
+  app.get('/v1/articles/:articleId', IS_PROTECTED_APIKEY, articlesController.findArticleById);
+  app.put('/v1/articles/:articleId/sync', IS_PROTECTED_JWT, articlesController.syncArticleWithSource);
+  app.delete('/v1/articles/:articleId', IS_PROTECTED_JWT, articlesController.deleteById); // Admin only
+  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED_JWT, articlesController.findAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED_JWT, audiofileController.createAudiofile);
 
   // v1/audiofiles
-  app.get('/v1/audiofiles', IS_PROTECTED_ENDPOINT, audiofileController.findAllAudiofiles);
-  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED_ENDPOINT, audiofileController.deleteById); // Admin only
-  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED_ENDPOINT, audiofileController.findById); // Now in use by our iOS App
+  app.get('/v1/audiofiles', IS_PROTECTED_JWT, audiofileController.findAllAudiofiles);
+  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED_JWT, audiofileController.deleteById); // Admin only
+  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED_JWT, audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', IS_PROTECTED_ENDPOINT, voicesController.findAll);
-  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.createVoicePreview);
-  app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED_ENDPOINT, voicesController.deleteVoicePreview);
+  app.get('/v1/voices', IS_PROTECTED_JWT, voicesController.findAll);
+  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED_JWT, voicesController.createVoicePreview);
+  app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED_JWT, voicesController.deleteVoicePreview);
 
   // v1/languages
-  app.get('/v1/languages', IS_PROTECTED_ENDPOINT, languagesController.findAll);
+  app.get('/v1/languages', IS_PROTECTED_JWT, languagesController.findAll);
 
   // v1/subscriptions
-  // app.get('/v1/subscriptions', IS_PROTECTED_ENDPOINT, subscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.findAll);
-  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_ENDPOINT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  // app.get('/v1/subscriptions', IS_PROTECTED_JWT, subscriptionsController.findAll);
+  app.get('/v1/in-app-subscriptions', IS_PROTECTED_JWT, inAppSubscriptionsController.findAll);
+  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_JWT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
   app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
