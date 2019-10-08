@@ -41,6 +41,35 @@ export const findArticleById = async (req: Request, res: Response) => {
   return res.json(article);
 };
 
+export const findAllArticles = async (req: Request, res: Response) => {
+  const { url } = req.query;
+  const articleRepository = getRepository(Article);
+
+  const { error } = joi.validate(req.query, audiofileInputValidationSchema.requiredKeys('url'));
+
+  if (error) {
+    const messageDetails = error.details.map(detail => detail.message).join(' and ');
+    return res.status(400).json({ message: messageDetails });
+  }
+
+  const article = await articleRepository.findOne({
+    relations: ['audiofiles'],
+    where: [{ url }, { canonicalUrl: url }],
+    cache: {
+      id: cache.getCacheKey('Articles', url),
+      milliseconds: CACHE_FOREVER // Delete cache when we update an article or when
+    }
+  });
+
+  if (!article) {
+    return res.status(404).json({
+      message: `Could not find any article with that url.`
+    });
+  }
+
+  return res.json(article);
+};
+
 export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);

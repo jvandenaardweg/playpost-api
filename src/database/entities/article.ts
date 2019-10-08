@@ -130,7 +130,9 @@ export class Article extends BaseEntity {
 
     const cacheKeys = [
       ...audiofileCacheKeys,
-      cache.getCacheKey('Article', articleId)
+      cache.getCacheKey('Article', articleId),
+      cache.getCacheKey('Article', this.url),
+      cache.getCacheKey('Article', this.canonicalUrl)
     ]
 
     logger.info(loggerPrefix, 'Should delete caches:', cacheKeys.join(', '))

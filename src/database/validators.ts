@@ -11,6 +11,7 @@ export const audiofileInputValidationSchema = joi.object().keys({
   articleId: joi.string().uuid(),
   voiceId: joi.string().uuid(),
   name: joi.string(),
+  url: joi.string().uri(),
   articleUrl: joi.string().uri(),
   audiofileId: joi.string().uuid(),
   mimeType: joi.string()

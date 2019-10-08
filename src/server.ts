@@ -238,6 +238,7 @@ export const setupServer = async () => {
   app.patch('/v1/playlist/articles/:articleId/archivedat', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
+  app.get('/v1/articles', IS_PROTECTED_APIKEY, articlesController.findAllArticles);
   app.get('/v1/articles/:articleId', IS_PROTECTED_APIKEY, articlesController.findArticleById);
   app.put('/v1/articles/:articleId/sync', [rateLimited, IS_PROTECTED_JWT], articlesController.syncArticleWithSource);
   app.delete('/v1/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], articlesController.deleteById); // Admin only
