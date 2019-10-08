@@ -27,7 +27,6 @@ import * as synthesizersController from './controllers/synthesizers';
 import * as usersController from './controllers/users';
 import * as voicesController from './controllers/voices';
 
-import { expressRateLimitRedisStore } from './cache';
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
@@ -102,24 +101,10 @@ export const setupServer = async () => {
     throw new Error('Required environment variable "AWS_REGION" not set.');
   }
 
-  // const bruteforce = new ExpressBrute(expressBruteRedisStore, {
-  //   freeRetries: process.env.NODE_ENV === 'production' ? 5 : 10, // 5 retries, because some auth endpoints depend on each other
-  //   minWait: 1000 * 60 * 5, // 5 minutes
-  //   failCallback: (req: Request, res: Response, next: NextFunction, nextValidRequestDate: Date) => {
-  //     logger.warn('Express Brute: ', 'Prevented after 5 tries.');
-  //     return res.status(400).json({
-  //       message: `Hold your horses! Too many requests. Please try again later at: ${nextValidRequestDate}`
-  //     });
-  //   },
-  //   handleStoreError: (err: any) => {
-  //     logger.error('Express Brute Store error: ', err);
-  //   }
-  // });
-
-  const rateLimiter = new ExpressRateLimit({
-    store: expressRateLimitRedisStore,
+  const rateLimited = new ExpressRateLimit({
+    // We'll use the in-memory cache, not Redis
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: process.env.NODE_ENV === 'production' ? 30 : 9999999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    max: process.env.NODE_ENV === 'production' ? 30 : 999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
     keyGenerator: req => {
       const authorizationHeaders = req.headers.authorization as string;
       const ipAddressOfUser = getRealUserIpAddress(req);
@@ -160,9 +145,6 @@ export const setupServer = async () => {
   app.use(helmet.noCache()); // https://helmetjs.github.io/docs/nocache/
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
-
-  // Use a rate limiter to limit api calls per second
-  app.use(rateLimiter);
 
   // Return real response time inside the headers, for debugging slow connections
   app.use(responseTime());
@@ -217,10 +199,10 @@ export const setupServer = async () => {
   // API Endpoints
 
   // TODO: Deprecated endpoints, remove later
-  app.patch('/v1/me/email', IS_PROTECTED_JWT, meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.patch('/v1/me/password', IS_PROTECTED_JWT, meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.get('/v1/languages/active', IS_PROTECTED_JWT, languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
-  app.get('/v1/in-app-subscriptions/active', IS_PROTECTED_JWT, inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  app.patch('/v1/me/email', [rateLimited, IS_PROTECTED_JWT], meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.patch('/v1/me/password', [rateLimited, IS_PROTECTED_JWT], meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
+  app.get('/v1/languages/active', [rateLimited, IS_PROTECTED_JWT], languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  app.get('/v1/in-app-subscriptions/active', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
   // Use expressBrute to increase the delay between each requests
@@ -232,62 +214,62 @@ export const setupServer = async () => {
   // Protected by login
 
   // v1/users
-  app.get('/v1/users', IS_PROTECTED_JWT, usersController.findAllUsers); // Admin only
-  app.delete('/v1/users/:userId', IS_PROTECTED_JWT, usersController.deleteUser); // Admin only
+  app.get('/v1/users', [rateLimited, IS_PROTECTED_JWT], usersController.findAllUsers); // Admin only
+  app.delete('/v1/users/:userId', [rateLimited, IS_PROTECTED_JWT], usersController.deleteUser); // Admin only
 
   // /v1/me
-  app.get('/v1/me', IS_PROTECTED_JWT, meController.findCurrentUser);
-  app.patch('/v1/me', IS_PROTECTED_JWT, meController.patchMe);
-  app.post('/v1/me/voices', IS_PROTECTED_JWT, meController.createSelectedVoice); // Setting the default voice per language for the user
-  app.delete('/v1/me', IS_PROTECTED_JWT, meController.deleteCurrentUser);
+  app.get('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.findCurrentUser);
+  app.patch('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.patchMe);
+  app.post('/v1/me/voices', [rateLimited, IS_PROTECTED_JWT], meController.createSelectedVoice); // Setting the default voice per language for the user
+  app.delete('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.deleteCurrentUser);
 
   // /v1/me/api-keys
-  app.get('/v1/me/api-keys', IS_PROTECTED_JWT, meController.findAllApiKeys);
-  app.delete('/v1/me/api-keys/:apiKeyId', IS_PROTECTED_JWT, meController.deleteApiKey);
-  app.post('/v1/me/api-keys', IS_PROTECTED_JWT, meController.createApiKey);
+  app.get('/v1/me/api-keys', [rateLimited, IS_PROTECTED_JWT], meController.findAllApiKeys);
+  app.delete('/v1/me/api-keys/:apiKeyId', [rateLimited, IS_PROTECTED_JWT], meController.deleteApiKey);
+  app.post('/v1/me/api-keys', [rateLimited, IS_PROTECTED_JWT], meController.createApiKey);
 
   // /v1/playlist
-  app.get('/v1/playlist', IS_PROTECTED_JWT, playlistController.findAllPlaylistItems);
-  app.post('/v1/playlist/articles', IS_PROTECTED_JWT, playlistController.createPlaylistItemByArticleUrl);
-  app.post('/v1/playlist/articles/:articleId', IS_PROTECTED_JWT, playlistController.createPlaylistItemByArticleId);
-  app.delete('/v1/playlist/articles/:articleId', IS_PROTECTED_JWT, playlistController.deletePlaylistItem);
-  app.patch('/v1/playlist/articles/:articleId/order', IS_PROTECTED_JWT, playlistController.patchPlaylistItemOrder);
-  app.patch('/v1/playlist/articles/:articleId/favoritedat', IS_PROTECTED_JWT, playlistController.patchPlaylistItemFavoritedAt);
-  app.patch('/v1/playlist/articles/:articleId/archivedat', IS_PROTECTED_JWT, playlistController.patchPlaylistItemArchivedAt);
+  app.get('/v1/playlist', [rateLimited, IS_PROTECTED_JWT], playlistController.findAllPlaylistItems);
+  app.post('/v1/playlist/articles', [rateLimited, IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleUrl);
+  app.post('/v1/playlist/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleId);
+  app.delete('/v1/playlist/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], playlistController.deletePlaylistItem);
+  app.patch('/v1/playlist/articles/:articleId/order', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemOrder);
+  app.patch('/v1/playlist/articles/:articleId/favoritedat', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemFavoritedAt);
+  app.patch('/v1/playlist/articles/:articleId/archivedat', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
   app.get('/v1/articles/:articleId', IS_PROTECTED_APIKEY, articlesController.findArticleById);
-  app.put('/v1/articles/:articleId/sync', IS_PROTECTED_JWT, articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', IS_PROTECTED_JWT, articlesController.deleteById); // Admin only
-  app.get('/v1/articles/:articleId/audiofiles', IS_PROTECTED_JWT, articlesController.findAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', IS_PROTECTED_JWT, audiofileController.createAudiofile);
+  app.put('/v1/articles/:articleId/sync', [rateLimited, IS_PROTECTED_JWT], articlesController.syncArticleWithSource);
+  app.delete('/v1/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], articlesController.deleteById); // Admin only
+  app.get('/v1/articles/:articleId/audiofiles', [rateLimited, IS_PROTECTED_JWT], articlesController.findAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', [rateLimited, IS_PROTECTED_JWT], audiofileController.createAudiofile);
 
   // v1/audiofiles
-  app.get('/v1/audiofiles', IS_PROTECTED_JWT, audiofileController.findAllAudiofiles);
-  app.delete('/v1/audiofiles/:audiofileId', IS_PROTECTED_JWT, audiofileController.deleteById); // Admin only
-  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED_JWT, audiofileController.findById); // Now in use by our iOS App
+  app.get('/v1/audiofiles', [rateLimited, IS_PROTECTED_JWT], audiofileController.findAllAudiofiles);
+  app.delete('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.deleteById); // Admin only
+  app.get('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', IS_PROTECTED_JWT, voicesController.findAll);
-  app.post('/v1/voices/:voiceId/preview', IS_PROTECTED_JWT, voicesController.createVoicePreview);
-  app.delete('/v1/voices/:voiceId/preview', IS_PROTECTED_JWT, voicesController.deleteVoicePreview);
+  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.findAll);
+  app.post('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.createVoicePreview);
+  app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteVoicePreview);
 
   // v1/languages
-  app.get('/v1/languages', IS_PROTECTED_JWT, languagesController.findAll);
+  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.findAll);
 
   // v1/subscriptions
-  // app.get('/v1/subscriptions', IS_PROTECTED_JWT, subscriptionsController.findAll);
-  app.get('/v1/in-app-subscriptions', IS_PROTECTED_JWT, inAppSubscriptionsController.findAll);
-  app.post('/v1/in-app-subscriptions/validate', IS_PROTECTED_JWT, inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  // app.get('/v1/subscriptions', [rateLimited, IS_PROTECTED_JWT], subscriptionsController.findAll);
+  app.get('/v1/in-app-subscriptions', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
+  app.post('/v1/in-app-subscriptions/validate', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
-  app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
+  app.get('/v1/in-app-subscriptions/sync', rateLimited, inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
-  app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
+  app.get('/v1/synthesizers/:synthesizerName/voices', rateLimited, synthesizersController.findAllVoices);
 
-  app.get('/health', healthController.getHealthStatus);
+  app.get('/health', rateLimited, healthController.getHealthStatus);
 
   // Endpoint for uptime monitoring
-  app.get('/v1/status', (req, res) => {
+  app.get('/v1/status', rateLimited, (req, res) => {
     return res.status(200).json({ message: 'OK' });
   });
 
