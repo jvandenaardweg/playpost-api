@@ -33,7 +33,7 @@ export const findArticleById = async (req: Request, res: Response) => {
   });
 
   if (!article) {
-    return res.status(400).json({
+    return res.status(404).json({
       message: `Could not get the article, bacause article with ID ${articleId} is not found.`
     });
   }
