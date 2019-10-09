@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import joi from 'joi';
 import nodeFetch from 'node-fetch';
-import { getRepository } from 'typeorm';
+import { getRepository, Not } from 'typeorm';
 import urlParse from 'url-parse';
 
 import * as cache from '../cache';
@@ -249,6 +249,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
   const articleRepository = getRepository(Article);
   const languageRepository = getRepository(Language);
+  const playlistItemRepository = getRepository(PlaylistItem);
   const { articleId } = req.params;
 
   const { error } = joi.validate(req.params, articleInputValidationSchema.requiredKeys('articleId'));
@@ -258,15 +259,15 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const article = await articleRepository.findOne(articleId);
+  const currentArticle = await articleRepository.findOne(articleId);
 
-  if (!article || !article.id) {
+  if (!currentArticle || !currentArticle.id) {
     const errorMessage = 'Cannot sync article, because the article is not found.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
-  if (!article.url) {
+  if (!currentArticle.url) {
     const errorMessage = 'Cannot sync article, because it has no URLs.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
@@ -277,6 +278,43 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, 'Got data from crawler.');
 
   const currentUrl = canonicalUrl || url;
+
+  // Find an article with the same "url" or "canonicalUrl"
+  // But which is not the same as the current article
+  const existingOtherArticleWithSameUrl = await articleRepository.findOne({
+    where: [
+      { id: Not(currentArticle.id) },
+      { url },
+      { canonicalUrl: url }],
+  });
+
+  // If there is already an article with the same, just replace the user his playlist item with the current article
+  if (existingOtherArticleWithSameUrl) {
+    const playlistItem = await playlistItemRepository.findOne({
+      where: {
+        article: {
+          id: currentArticle.id
+        }
+      }
+    })
+
+    if (!playlistItem) {
+      logger.error(loggerPrefix, `Playlist item not found using article ID: ${currentArticle.id}. So we cannot replace the user his playlist item with an existing article ID.`)
+      return;
+    }
+
+    // Update the user his playlist item with the already available article
+    await playlistItemRepository.update(playlistItem.id, {
+      article: {
+        id: existingOtherArticleWithSameUrl.id
+      }
+    })
+
+    // Remove the article we do not need anymore
+    await articleRepository.remove(currentArticle)
+
+    return res.json(existingOtherArticleWithSameUrl)
+  }
 
   // Set minimum required data for the article to update
   // As without this data, we can do nothing
@@ -320,9 +358,9 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
-  logger.info(loggerPrefix, 'Updating article ID:', article.id);
+  logger.info(loggerPrefix, 'Updating article ID:', currentArticle.id);
 
-  await articleRepository.update(article.id, {
+  await articleRepository.update(currentArticle.id, {
     title,
     ssml,
     html,
