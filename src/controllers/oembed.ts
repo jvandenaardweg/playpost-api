@@ -60,7 +60,7 @@ export class OembedController {
         author_name: foundArticle.sourceName,
         author_url: foundArticle.canonicalUrl || foundArticle.url,
         thumbnail_url: foundArticle.imageUrl,
-        html: `<iframe src="https://player.playpost.app/article/${foundArticle.id}/audiofiles/${foundAudiofile.id}" width="100%" height="110" frameborder="0" scrolling="no"></iframe>`
+        html: `<iframe src="https://player.playpost.app/articles/${foundArticle.id}/audiofiles/${foundAudiofile.id}" width="100%" height="110" frameborder="0" scrolling="no"></iframe>`
       }
 
       return res.json(responseToSend);
