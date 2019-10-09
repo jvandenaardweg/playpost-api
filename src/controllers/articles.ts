@@ -273,7 +273,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url, isCompatible, compatibilityMessage } = await fetchFullArticleContents(article.url);
+  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url, isCompatible, compatibilityMessage } = await fetchFullArticleContents(currentArticle.url);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
