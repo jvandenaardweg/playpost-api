@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
+import joi from 'joi'
 import { getRepository, Repository } from 'typeorm'
 import { Article } from '../database/entities/article'
+import { oembedInputValidationSchema } from '../database/validators'
 
 export class OembedController {
   articleRepository: Repository<Article>
@@ -19,9 +21,15 @@ export class OembedController {
       })
     }
 
-    if (!url) {
+    const { error } = joi.validate({ url }, oembedInputValidationSchema.requiredKeys('url'));
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    if (!url.startsWith('https://player.playpost.app')) {
       return res.status(400).json({
-        message: 'Please specify a url.'
+        message: 'We only allow urls from https://player.playpost.app'
       })
     }
 
@@ -32,6 +40,16 @@ export class OembedController {
 
       const articleId = articleAndAudiofileIds[0];
       const audiofileId = articleAndAudiofileIds[1];
+
+      const { error } = joi.validate({
+        articleId,
+        audiofileId
+      }, oembedInputValidationSchema.requiredKeys('articleId', 'audiofileId'));
+
+      if (error) {
+        const messageDetails = error.details.map(detail => detail.message).join(' and ');
+        return res.status(400).json({ message: messageDetails });
+      }
 
       const foundArticle = await this.articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 

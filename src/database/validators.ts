@@ -5,6 +5,12 @@ export const articleInputValidationSchema = joi.object().keys({
   articleId: joi.string().uuid()
 });
 
+export const oembedInputValidationSchema = joi.object().keys({
+  articleId: joi.string().uuid(),
+  audiofileId: joi.string().uuid(),
+  url: joi.string().uri()
+});
+
 export const audiofileInputValidationSchema = joi.object().keys({
   userId: joi.string().uuid(),
   playlistId: joi.string().uuid(),
