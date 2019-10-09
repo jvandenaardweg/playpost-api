@@ -304,11 +304,21 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     }
 
     // Update the user his playlist item with the already available article
-    await playlistItemRepository.update(playlistItem.id, {
-      article: {
-        id: existingOtherArticleWithSameUrl.id
+    // TODO: handle situation where playlist_item with same article ID already exists
+    try {
+      await playlistItemRepository.update(playlistItem.id, {
+        article: {
+          id: existingOtherArticleWithSameUrl.id
+        }
+      })
+    } catch (err) {
+      // If it's not a constraint error, we throw the error
+      if (err.code !== '23505') {
+        throw err;
       }
-    })
+
+      // If we end up here, the article ID already exists in the user his playlist, we can ignore the error and continue
+    }
 
     // Remove the article we do not need anymore
     await articleRepository.remove(currentArticle)
