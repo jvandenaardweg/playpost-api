@@ -125,8 +125,8 @@ export class Article extends BaseEntity {
     const loggerPrefix = 'Database Entity (Article) beforeUpdate/beforeRemove:';
 
     const articleId = this.id;
-    const audiofileIds = this.audiofiles.map(audiofile => audiofile.id);
-    const audiofileCacheKeys = audiofileIds.map(audiofileId => cache.getCacheKey('Audiofile', audiofileId))
+    const audiofileIds = (this.audiofiles && this.audiofiles.length) ? this.audiofiles.map(audiofile => audiofile.id) : [];
+    const audiofileCacheKeys = (audiofileIds && audiofileIds.length) ? audiofileIds.map(audiofileId => cache.getCacheKey('Audiofile', audiofileId)) : [];
 
     const cacheKeys = [
       ...audiofileCacheKeys,
