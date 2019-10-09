@@ -22,12 +22,14 @@ import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
 import { MeController } from './controllers/me';
+import { OembedController } from './controllers/oembed';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
 import * as usersController from './controllers/users';
 import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
+
 import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
@@ -195,6 +197,7 @@ export const setupServer = async () => {
 
   // Load controllers
   const meController = new MeController();
+  const oembedController = new OembedController();
 
   // API Endpoints
 
@@ -268,6 +271,8 @@ export const setupServer = async () => {
   app.get('/v1/synthesizers/:synthesizerName/voices', rateLimited, synthesizersController.findAllVoices);
 
   app.get('/health', rateLimited, healthController.getHealthStatus);
+
+  app.get('/v1/oembed', rateLimited, oembedController.getOembedCode);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', rateLimited, (req, res) => {
