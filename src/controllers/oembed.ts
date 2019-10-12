@@ -41,6 +41,7 @@ export class OembedController {
       const articleId = articleAndAudiofileIds[0];
       const audiofileId = articleAndAudiofileIds[1];
 
+      // tslint:disable-next-line: no-shadowed-variable
       const { error } = joi.validate({
         articleId,
         audiofileId
