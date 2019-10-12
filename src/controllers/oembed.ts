@@ -77,9 +77,9 @@ export class OembedController {
         height: 115, // Height in frontend/Player/index.scss
         title: foundArticle.title,
         author_name: foundArticle.sourceName,
-        author_url: foundArticle.canonicalUrl || foundArticle.url,
+        author_url: 'https://playpost.app', // Do not use article's source, medium will show the article as an embed then
         thumbnail_url: foundArticle.imageUrl,
-        html: `<iframe src="https://player.playpost.app/articles/${foundArticle.id}/audiofiles/${foundAudiofile.id}" width="100%" height="110" frameborder="0" scrolling="no"></iframe>`
+        html: `<iframe src="https://player.playpost.app/articles/${foundArticle.id}/audiofiles/${foundAudiofile.id}" width="100%" height="115" frameborder="0" scrolling="no"></iframe>`
       }
 
       return res.json(responseToSend);
