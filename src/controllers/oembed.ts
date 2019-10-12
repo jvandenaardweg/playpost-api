@@ -21,6 +21,10 @@ export class OembedController {
       })
     }
 
+    // Make sure we pass through the extra query parameters
+    const fullQueryUrl = Object.keys(req.query).map(key => key + '=' + req.query[key]).join('&').replace('url=', '');
+    const urlWithoutQueryParams = url.split('?')[0]
+
     const { error } = joi.validate({ url }, oembedInputValidationSchema.requiredKeys('url'));
 
     if (error) {
@@ -34,7 +38,7 @@ export class OembedController {
     }
 
     try {
-      const articleAndAudiofileIds: string[] = url.split('/').filter((urlPart: string) => {
+      const articleAndAudiofileIds: string[] = urlWithoutQueryParams.split('/').filter((urlPart: string) => {
         return !['https:', 'http:', '', 'player.playpost.app', 'localhost', 'localhost:8080', 'articles', 'audiofiles'].includes(urlPart)
       })
 
@@ -79,7 +83,7 @@ export class OembedController {
         author_name: foundArticle.sourceName,
         author_url: 'https://playpost.app', // Do not use article's source, medium will show the article as an embed then
         thumbnail_url: foundArticle.imageUrl,
-        html: `<iframe src="https://player.playpost.app/articles/${foundArticle.id}/audiofiles/${foundAudiofile.id}" width="100%" height="115" frameborder="0" scrolling="no"></iframe>`
+        html: `<iframe src="${fullQueryUrl}" width="100%" height="115" frameborder="0" scrolling="no"></iframe>`
       }
 
       return res.json(responseToSend);
