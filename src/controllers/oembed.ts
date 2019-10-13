@@ -56,6 +56,7 @@ export class OembedController {
         return res.status(400).json({ message: messageDetails });
       }
 
+      // TODO: add caching
       const foundArticle = await this.articleRepository.findOne(articleId, { relations: ['audiofiles'] });
 
       if (!foundArticle) {
@@ -83,6 +84,7 @@ export class OembedController {
         author_name: foundArticle.sourceName,
         author_url: 'https://playpost.app', // Do not use article's source, medium will show the article as an embed then
         thumbnail_url: foundArticle.imageUrl,
+        thumbnail_height: 115, // Heigth of player
         html: `<iframe src="${fullQueryUrl}" width="100%" height="115" frameborder="0" scrolling="no"></iframe>`
       }
 
