@@ -540,9 +540,8 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
 
   // Check if the playlistItem has a failed or processing article
   // If so, we delete it
-  const failedArticle = await articleRepository.findOne({
+  const failedArticle = await articleRepository.findOne(articleId, {
     where: {
-      id: playlistItem.article.id,
       status: Not(ArticleStatus.FINISHED)
     }
   });
