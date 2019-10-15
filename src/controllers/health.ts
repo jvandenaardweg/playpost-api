@@ -4,18 +4,53 @@ const { version } = require('../../package.json');
 import { Request, Response } from 'express';
 import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
+
 import { redisClient } from '../cache';
 import { Language } from '../database/entities/language';
+import { AwsSynthesizer } from '../synthesizers/aws';
+import { GoogleSynthesizer } from '../synthesizers/google';
 
 export const getHealthStatus = async (req: Request, res: Response) => {
   let crawlerStatus = 'fail';
   let crawlerMessage = '';
+  let googleTTSStatus = 'fail';
+  let googleTTSMessage = '';
+  let awsPollyStatus = 'fail';
+  let awsPollyMessage = '';
   let databaseStatus = 'fail';
   let databaseMessage = '';
   let redisStatus = 'fail';
   let redisMessage = '';
 
   // TODO: check pubsub status
+
+  try {
+    const googleSynthesizer = new GoogleSynthesizer();
+    const voices = await googleSynthesizer.getAllVoices();
+
+    if (voices.length) {
+      googleTTSStatus = 'ok'
+    } else {
+      googleTTSMessage = 'Did not get the available voices'
+    }
+  } catch (err) {
+    googleTTSStatus = 'fail';
+    googleTTSMessage = err
+  }
+
+  try {
+    const awsSynthesizer = new AwsSynthesizer();
+    const voices = await awsSynthesizer.getAllVoices();
+
+    if (voices.length) {
+      awsPollyStatus = 'ok'
+    } else {
+      awsPollyMessage = 'Did not get the available voices'
+    }
+  } catch (err) {
+    awsPollyStatus = 'fail';
+    awsPollyMessage = err
+  }
 
   // Check if crawler is reachable
   try {
@@ -67,12 +102,16 @@ export const getHealthStatus = async (req: Request, res: Response) => {
     services: {
       database: databaseStatus,
       redis: redisStatus,
-      crawler: crawlerStatus
+      crawler: crawlerStatus,
+      googleTTS: googleTTSStatus,
+      awsPolly: awsPollyStatus
     },
     messages: {
       database: databaseMessage,
       redis: redisMessage,
-      crawler: crawlerMessage
+      crawler: crawlerMessage,
+      googleTTS: googleTTSMessage,
+      awsPolly: awsPollyMessage
     }
   });
 };
