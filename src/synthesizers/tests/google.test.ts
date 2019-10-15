@@ -27,7 +27,7 @@ describe('Synthesizer: Google', () => {
       // Mock the Google method
       googleSynthesizer.client.listVoices = jest.fn().mockResolvedValue([{ voices: mockedGoogleVoices }]);
 
-      const voices = await googleSynthesizer.getAllVoices('test');
+      const voices = await googleSynthesizer.getAllVoices();
 
       expect(voices).toEqual(mockedGoogleVoices);
     });
@@ -40,7 +40,7 @@ describe('Synthesizer: Google', () => {
       googleSynthesizer.client.listVoices = jest.fn().mockRejectedValue(exampleErrorMessage);
 
       try {
-        await googleSynthesizer.getAllVoices('test');
+        await googleSynthesizer.getAllVoices();
       } catch (err) {
         expect(err).toEqual(exampleErrorMessage);
       }
