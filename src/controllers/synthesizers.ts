@@ -20,7 +20,7 @@ export const findAllVoices = async (req: Request, res: Response) => {
 
     if (synthesizerName === 'google') {
       const googleSynthesizer = new GoogleSynthesizer();
-      const voices = await googleSynthesizer.getAllVoices(loggerPrefix);
+      const voices = await googleSynthesizer.getAllVoices();
 
       if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({

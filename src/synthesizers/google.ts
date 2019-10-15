@@ -31,15 +31,15 @@ export class GoogleSynthesizer extends Synthesizers {
     this.client = new GoogleTextToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
   }
 
-  getAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
+  getAllVoices = async (): Promise<GoogleVoice[]> => {
     try {
-      logger.info(loggerPrefix, 'Google Text To Speech: Getting all Google Text To Speech voices from the API...');
+      logger.info('Google Text To Speech: Getting all Google Text To Speech voices from the API...');
       const result = await this.client.listVoices({});
       const voices: GoogleVoice[] = result[0]['voices'];
-      logger.info(loggerPrefix, `Google Text To Speech: Got ${voices.length} voices from the API...`);
+      logger.info(`Google Text To Speech: Got ${voices.length} voices from the API...`);
       return voices;
     } catch (err) {
-      logger.error(loggerPrefix, 'Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
+      logger.error('Google Text To Speech: Error while getting all the Google Text To Speech voices from the API.', err);
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
@@ -50,13 +50,13 @@ export class GoogleSynthesizer extends Synthesizers {
     }
   };
 
-  addAllVoices = async (loggerPrefix: string): Promise<GoogleVoice[]> => {
-    logger.info(loggerPrefix, 'Google Text To Speech: Checking if we need to add new voices to the database...');
+  addAllVoices = async (): Promise<GoogleVoice[]> => {
+    logger.info('Google Text To Speech: Checking if we need to add new voices to the database...');
 
     const voiceRepository = getRepository(Voice);
     const availableVoices = await voiceRepository.find();
 
-    const voices = await this.getAllVoices(loggerPrefix);
+    const voices = await this.getAllVoices();
 
     for (const voice of voices) {
       const voiceName = voice.name;
@@ -67,7 +67,7 @@ export class GoogleSynthesizer extends Synthesizers {
       const foundVoice = availableVoices.find(availableVoice => availableVoice.name === voiceName);
 
       if (foundVoice) {
-        logger.info(loggerPrefix, `Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
+        logger.info(`Google Text To Speech: Voice ${voiceName} already present. We don't need to add it (again) to the database.`);
       } else {
         let countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
 
@@ -77,7 +77,7 @@ export class GoogleSynthesizer extends Synthesizers {
         }
 
         if (!countryCode) {
-          logger.warn(loggerPrefix, `Google Text To Speech: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
+          logger.warn(`Google Text To Speech: Cannot determine countryCode for ${voiceName}. We don't add it to the database.`);
         } else {
           try {
             const voiceToCreate = voiceRepository.create({
@@ -91,9 +91,9 @@ export class GoogleSynthesizer extends Synthesizers {
 
             const createdVoice = await voiceRepository.save(voiceToCreate);
 
-            logger.info(loggerPrefix, 'Google Text To Speech: Added new voice to database: ', createdVoice.name);
+            logger.info('Google Text To Speech: Added new voice to database: ', createdVoice.name);
           } catch (err) {
-            logger.error(loggerPrefix, 'Google Text To Speech: Failed to create the voice in the database', err);
+            logger.error('Google Text To Speech: Failed to create the voice in the database', err);
 
             Sentry.withScope(scope => {
               scope.setLevel(Sentry.Severity.Critical);
@@ -136,7 +136,7 @@ export class GoogleSynthesizer extends Synthesizers {
 
       const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
 
-      logger.info(`Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.voice.languageCode}' speech using '${ssmlPartSynthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
+      logger.info(loggerPrefix, `Google Text To Speech: Synthesizing ${type} ID '${identifier}' SSML part ${index} to '${ssmlPartSynthesizerOptions.voice.languageCode}' speech using '${ssmlPartSynthesizerOptions.voice.name}' at: ${tempLocalAudiofilePath}`);
 
       // Performs the Text-to-Speech request
       return this.client.synthesizeSpeech(ssmlPartSynthesizerOptions, async (err: any, response: any) => {

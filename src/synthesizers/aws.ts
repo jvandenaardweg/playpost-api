@@ -43,8 +43,8 @@ export class AwsSynthesizer extends Synthesizers {
     });
   }
 
-  addAllVoices = async (loggerPrefix: string): Promise<AWSVoice[]> => {
-    logger.info(loggerPrefix, 'AWS Polly: Checking if we need to add new voices to the database...');
+  addAllVoices = async (): Promise<AWSVoice[]> => {
+    logger.info('AWS Polly: Checking if we need to add new voices to the database...');
     const voiceRepository = getRepository(Voice);
     const availableVoices = await voiceRepository.find();
 
@@ -59,10 +59,10 @@ export class AwsSynthesizer extends Synthesizers {
       const foundVoice = availableVoices.find(availableVoice => availableVoice.name === voiceId);
 
       if (foundVoice) {
-        logger.info(loggerPrefix, `AWS Polly: Voice ${voiceId} already present. We don't need to add it (again) to the database.`);
+        logger.info(`AWS Polly: Voice ${voiceId} already present. We don't need to add it (again) to the database.`);
       } else {
         if (!voiceLanguageCode) {
-          logger.warn(loggerPrefix, `AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
+          logger.warn(`AWS Polly: Got no LanguageCode for ${voiceId}. We don't add it to the database.`);
         } else {
           let countryCode = LocaleCode.getCountryCode(voiceLanguageCode);
 
@@ -72,7 +72,7 @@ export class AwsSynthesizer extends Synthesizers {
           }
 
           if (!countryCode) {
-            logger.warn(loggerPrefix, `AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
+            logger.warn(`AWS Polly: Cannot determine countryCode for ${voiceId}. We don't add it to the database.`, voice);
           } else {
             try {
               const voiceToCreate = voiceRepository.create({
@@ -86,9 +86,9 @@ export class AwsSynthesizer extends Synthesizers {
 
               const createdVoice = await voiceRepository.save(voiceToCreate);
 
-              logger.info(loggerPrefix, 'AWS Polly: Added new voice to database: ', createdVoice.name);
+              logger.info('AWS Polly: Added new voice to database: ', createdVoice.name);
             } catch (err) {
-              logger.error(loggerPrefix, 'AWS Polly: Failed to create the voice in the database', err);
+              logger.error('AWS Polly: Failed to create the voice in the database', err);
 
               Sentry.withScope(scope => {
                 scope.setLevel(Sentry.Severity.Critical);
