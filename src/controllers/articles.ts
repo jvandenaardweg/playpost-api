@@ -283,13 +283,16 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   // But which is not the same as the current article
   const existingOtherArticleWithSameUrl = await articleRepository.findOne({
     where: [
-      { id: Not(currentArticle.id) },
       { url },
-      { canonicalUrl: url }],
+      { canonicalUrl: url },
+    ]
   });
 
   // If there is already an article with the same, just replace the user his playlist item with the current article
-  if (existingOtherArticleWithSameUrl) {
+  if (existingOtherArticleWithSameUrl && existingOtherArticleWithSameUrl.id !== currentArticle.id) {
+    logger.info(loggerPrefix, `Article found with same "url" or "canonicalUrl" which has a different article ID...`);
+
+    // Find the playlist item matching this article ID
     const playlistItem = await playlistItemRepository.findOne({
       where: {
         article: {
@@ -303,9 +306,13 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
       return;
     }
 
+    logger.info(loggerPrefix, `Found playlist item by using the currentArticle ID: `, playlistItem);
+
     // Update the user his playlist item with the already available article
     // TODO: handle situation where playlist_item with same article ID already exists
     try {
+      logger.info(loggerPrefix, `Update playlistItem to use this article ID: `, existingOtherArticleWithSameUrl.id);
+
       await playlistItemRepository.update(playlistItem.id, {
         article: {
           id: existingOtherArticleWithSameUrl.id
@@ -319,6 +326,8 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
 
       // If we end up here, the article ID already exists in the user his playlist, we can ignore the error and continue
     }
+
+    logger.info(loggerPrefix, `We remove the currentArticle with ID: `, currentArticle.id);
 
     // Remove the article we do not need anymore
     await articleRepository.remove(currentArticle)
