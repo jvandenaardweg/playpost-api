@@ -259,21 +259,21 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     return res.status(400).json({ message: messageDetails });
   }
 
-  const currentArticle = await articleRepository.findOne(articleId);
+  const articleToSync = await articleRepository.findOne(articleId);
 
-  if (!currentArticle || !currentArticle.id) {
+  if (!articleToSync || !articleToSync.id) {
     const errorMessage = 'Cannot sync article, because the article is not found.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
-  if (!currentArticle.url) {
+  if (!articleToSync.url) {
     const errorMessage = 'Cannot sync article, because it has no URLs.';
     logger.error(loggerPrefix, errorMessage);
     return res.status(400).json({ message: errorMessage });
   }
 
-  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url, isCompatible, compatibilityMessage } = await fetchFullArticleContents(currentArticle.url, currentArticle.documentHtml);
+  const { ssml, html, readingTime, imageUrl, authorName, description, canonicalUrl, language, title, siteName, url, isCompatible, compatibilityMessage } = await fetchFullArticleContents(articleToSync.url, articleToSync.documentHtml);
 
   logger.info(loggerPrefix, 'Got data from crawler.');
 
@@ -288,21 +288,21 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     ]
   });
 
-  // If there is already an article with the same, just replace the user his playlist item with the current article
-  if (existingOtherArticleWithSameUrl && existingOtherArticleWithSameUrl.id !== currentArticle.id) {
+  // If there is already an article with the same url or canonical, just replace the user his playlist item with the current article
+  if (existingOtherArticleWithSameUrl && existingOtherArticleWithSameUrl.id !== articleToSync.id) {
     logger.info(loggerPrefix, `Article found with same "url" or "canonicalUrl" which has a different article ID...`);
 
     // Find the playlist item matching this article ID
     const playlistItem = await playlistItemRepository.findOne({
       where: {
         article: {
-          id: currentArticle.id
+          id: articleToSync.id
         }
       }
     })
 
     if (!playlistItem) {
-      logger.error(loggerPrefix, `Playlist item not found using article ID: ${currentArticle.id}. So we cannot replace the user his playlist item with an existing article ID.`)
+      logger.error(loggerPrefix, `Playlist item not found using article ID: ${articleToSync.id}. So we cannot replace the user his playlist item with an existing article ID.`)
       return;
     }
 
@@ -313,6 +313,7 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     try {
       logger.info(loggerPrefix, `Update playlistItem to use this article ID: `, existingOtherArticleWithSameUrl.id);
 
+      // Replace the user's playlist item with the existing article
       await playlistItemRepository.update(playlistItem.id, {
         article: {
           id: existingOtherArticleWithSameUrl.id
@@ -327,10 +328,10 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
       // If we end up here, the article ID already exists in the user his playlist, we can ignore the error and continue
     }
 
-    logger.info(loggerPrefix, `We remove the currentArticle with ID: `, currentArticle.id);
+    logger.info(loggerPrefix, `We remove the currentArticle with ID: `, articleToSync.id);
 
     // Remove the article we do not need anymore
-    await articleRepository.remove(currentArticle)
+    await articleRepository.remove(articleToSync)
 
     return res.json(existingOtherArticleWithSameUrl)
   }
@@ -377,9 +378,9 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Language found:', foundLanguage.code);
   }
 
-  logger.info(loggerPrefix, 'Updating article ID:', currentArticle.id);
+  logger.info(loggerPrefix, 'Updating article ID:', articleToSync.id);
 
-  await articleRepository.update(currentArticle.id, {
+  await articleRepository.update(articleToSync.id, {
     title,
     ssml,
     html,
@@ -392,7 +393,8 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
     language: foundLanguage,
     sourceName: siteName,
     isCompatible,
-    compatibilityMessage
+    compatibilityMessage,
+    documentHtml: undefined
   });
 
   const updatedArticle = await articleRepository.findOne(articleId);
