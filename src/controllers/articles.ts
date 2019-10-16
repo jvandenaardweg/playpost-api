@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import joi from 'joi';
 import nodeFetch from 'node-fetch';
-import { getRepository, Not } from 'typeorm';
+import { getRepository } from 'typeorm';
 import urlParse from 'url-parse';
 
 import * as cache from '../cache';
