@@ -1,8 +1,9 @@
 import pollySsmlSplit from 'polly-ssml-split';
 import { logger } from '../utils';
 
-export const GOOGLE_CHARACTER_HARD_LIMIT = 4800; // just below google's api limit of 5000
-export const GOOGLE_CHARACTER_SOFT_LIMIT = 3500;
+export const GOOGLE_CHARACTER_FINAL_LIMIT = 5000;
+export const GOOGLE_CHARACTER_HARD_LIMIT = 4500; // just below google's api limit of 5000
+export const GOOGLE_CHARACTER_SOFT_LIMIT = 3000;
 
 export const AWS_CHARACTER_HARD_LIMIT = 3000;
 export const AWS_CHARACTER_SOFT_LIMIT = 1500;
