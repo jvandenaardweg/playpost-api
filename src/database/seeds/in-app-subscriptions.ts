@@ -1,6 +1,7 @@
 import { InAppSubscription, InAppSubscriptionCurrency, InAppSubscriptionDuration, InAppSubscriptionService } from '../entities/in-app-subscription';
 
 const hardLimitSecondsPerArticle = 30 * 60 // 30 minutes
+const hardLimitSecondsPerArticleUnlimited = 60 * 60 // 60 minutes
 
 export default [
   {
@@ -60,7 +61,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.APPLE,
     limitSecondsPerMonth: 0, // 0 minutes = no limit
-    limitSecondsPerArticle: hardLimitSecondsPerArticle, // 30 minutes
+    limitSecondsPerArticle: hardLimitSecondsPerArticleUnlimited, // 60 minutes
     isActive: true
   },
   {
@@ -72,7 +73,7 @@ export default [
     duration: InAppSubscriptionDuration.ONE_MONTH,
     service: InAppSubscriptionService.GOOGLE,
     limitSecondsPerMonth: 0, // 0 minutes = no limit
-    limitSecondsPerArticle: hardLimitSecondsPerArticle, // 30 minutes
+    limitSecondsPerArticle: hardLimitSecondsPerArticleUnlimited, // 60 minutes
     isActive: true
   },
   {
