@@ -12,6 +12,9 @@ export class OembedController {
   }
 
   getOembedCode = async (req: Request, res: Response) => {
+    const playerBaseUrl = 'https://player.playpost.app';
+    const oembedThumbnailUrl = playerBaseUrl + '/oembed.png';
+
     // Example url: https://player.playpost.app/articles/c3baaf54-28a5-47d1-b752-07f21bd8a7bc/audiofiles/72dc6da2-798a-4b14-a5e2-c0fbf4039788
     const { url, format } = req.query;
 
@@ -31,9 +34,9 @@ export class OembedController {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    if (!url.startsWith('https://player.playpost.app')) {
+    if (!url.startsWith(playerBaseUrl)) {
       return res.status(400).json({
-        message: 'We only allow urls from https://player.playpost.app'
+        message: `We only allow urls from ${playerBaseUrl}`
       })
     }
 
@@ -83,7 +86,7 @@ export class OembedController {
         title: foundArticle.title,
         author_name: foundArticle.sourceName,
         author_url: 'https://playpost.app', // Do not use article's source, medium will show the article as an embed then
-        thumbnail_url: foundArticle.imageUrl,
+        thumbnail_url: oembedThumbnailUrl,
         thumbnail_height: 115, // Heigth of player
         html: `<iframe src="${fullQueryUrl}" width="100%" height="115" frameborder="0" scrolling="no"></iframe>`
       }
