@@ -55,7 +55,7 @@ export const getHealthStatus = async (req: Request, res: Response) => {
   // Check if crawler is reachable
   try {
     // TODO: check response time
-    const responseOk = await nodeFetch(`${process.env.CRAWLER_BASE_URL}`, { method: 'head' }).then((response) => response.ok);
+    const responseOk = await nodeFetch(`${process.env.CRAWLER_BASE_URL}/status`, { method: 'head' }).then((response) => response.ok);
     if (responseOk) {
       crawlerStatus = 'ok';
     } else {
