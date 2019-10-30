@@ -42,7 +42,7 @@ export class OembedController {
 
     try {
       const articleAndAudiofileIds: string[] = urlWithoutQueryParams.split('/').filter((urlPart: string) => {
-        return !['https:', 'http:', '', 'player.playpost.app', 'localhost', 'localhost:8080', 'articles', 'audiofiles'].includes(urlPart)
+        return !['https:', 'http:', '', 'player.playpost.app', 'localhost', 'localhost:8080', 'v1', 'articles', 'audiofiles'].includes(urlPart)
       })
 
       const articleId = articleAndAudiofileIds[0];
