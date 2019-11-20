@@ -306,7 +306,7 @@ export const syncReceiptWithDatabase = async (
     // If we have no productId, we cannot determine for which subscription this is
     // We error...
     if (!productId) {
-      const message = 'Cannot process this receipt because the productId is not defined.';
+      const errorMessage = 'Could not process your purchase because there is not product ID defined. Please contact our support when this happens.';
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
@@ -314,10 +314,10 @@ export const syncReceiptWithDatabase = async (
         scope.setExtra('receipt', receipt);
         scope.setExtra('purchaseData', purchaseData);
         scope.setExtra('validationResponse', validationResponse);
-        Sentry.captureMessage(message);
+        Sentry.captureMessage(errorMessage);
       });
 
-      throw new Error(message);
+      throw new Error(errorMessage);
     }
 
     await inAppPurchase.setup();
@@ -326,19 +326,15 @@ export const syncReceiptWithDatabase = async (
 
     validationResponse = await inAppPurchase.validate(receipt);
   } catch (err) {
-    let errorMessage = err && err.message ? err.message : 'Error unknown happened during validation of the receipt.';
-
-    if (typeof err === 'string') {
-      const errorObject = JSON.parse(err);
-
-      if (errorObject && errorObject.message) {
-        errorMessage = errorObject.message;
-      }
-    }
+    const errorMessage = 'Failed to validate your purchase. Please contact our support when this happens.';
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Critical);
+      scope.setExtra('receipt', receipt);
+      scope.setExtra('purchaseData', purchaseData);
+      scope.setExtra('validationResponse', validationResponse);
       Sentry.captureException(err);
+      Sentry.captureMessage(errorMessage);
     });
 
     logger.error(loggerPrefix, errorMessage, err);
@@ -350,14 +346,14 @@ export const syncReceiptWithDatabase = async (
     const isValid = await inAppPurchase.isValidated(validationResponse);
 
     if (!isValid) {
-      throw new Error('The given receipt validation response is not valid.');
+      throw new Error('Failed to validate your purchase because the validation response is not valid. Please contact our support when this happens.');
     }
 
     // validatedData contains sandbox: true/false for Apple and Amazon
     purchaseData = await inAppPurchase.getPurchaseData(validationResponse, getPurchaseDataOptions);
 
     if (!purchaseData || !purchaseData.length) {
-      const message = 'No purchase data received. Probably because the subscription is expired or canceled.';
+      const message = 'Failed to get the correct purchase data out of your purchase for validation. Probably because the subscription is expired or canceled.';
       logger.error(loggerPrefix, message);
       throw new Error(message);
     }
@@ -375,15 +371,13 @@ export const syncReceiptWithDatabase = async (
     const inAppSubscriptionId = inAppSubscription ? inAppSubscription.id : undefined;
 
     if (!inAppSubscription || !inAppSubscriptionId) {
-      const message = 'In-App Subscription ID could not be found.';
+      const message = 'Failed to get the In-App Subscription ID from the purchase. Please contact our support when this happens.';
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Critical);
         if (userId) { scope.setUser({ id: userId }); }
         scope.setExtra('receipt', receipt);
         scope.setExtra('isValid', isValid);
-        // scope.setExtra('isCanceled', isCanceled);
-        // scope.setExtra('isExpired', isExpired);
         scope.setExtra('purchaseData', purchaseData);
         scope.setExtra('purchase', purchase);
         scope.setExtra('validationResponse', validationResponse);
