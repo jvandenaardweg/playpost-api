@@ -151,7 +151,7 @@ export const fetchFullArticleContents = async (articleUrl: string, documentHtml?
         body: JSON.stringify(body)
       }).then(response => response.json());
 
-      logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!', result);
+      logger.info(loggerPrefix, 'Successfully got article data using given documentHtml!');
     } else {
       logger.info(loggerPrefix, 'Get article data using given articleUrl...', articleUrl);
       result = await nodeFetch(`${process.env.CRAWLER_BASE_URL}/browser?url=${articleUrl}`).then(response => response.json());
