@@ -133,6 +133,8 @@ const synthesizeUsingAWS = async (
 
   logger.info(loggerPrefix, 'Starting...');
 
+  logger.info(loggerPrefix, 'SSML to synthesize:', ssml);
+
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
     softLimit: AWS_CHARACTER_SOFT_LIMIT,
@@ -224,6 +226,8 @@ const synthesizeUsingGoogle = async (
   storageUploadPath: string
 ) => {
   const googleSynthesizer = new GoogleSynthesizer();
+
+  logger.info('Synthesize Using Google:', 'SSML to synthesize:', ssml);
 
   // Step 1: Split the SSML into chunks the synthesizer allows
   const ssmlParts = getSSMLParts(ssml, {
