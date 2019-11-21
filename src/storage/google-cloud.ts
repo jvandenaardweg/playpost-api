@@ -56,7 +56,7 @@ export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudi
       gzip: false, // Important: We need to keep gzip false, so our audio works streaming on Safari browsers using "byte range" requests. More on that here: https://cloud.google.com/cdn/docs/caching
       metadata: {
         metadata: {
-          audiofileLength,
+          audiofileLength: audiofileLength.toString(), // Google Cloud requires numbers to be string in metadata
           audiofileId,
           audiofileSynthesizer: voice.synthesizer,
           audiofileLanguageCode: voice.languageCode,
@@ -134,7 +134,7 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
       gzip: false, // Important: We need to keep gzip false, so our audio works streaming on Safari browsers using "byte range" requests. More on that here: https://cloud.google.com/cdn/docs/caching
       metadata: {
         metadata: {
-          audiofileLength,
+          audiofileLength: audiofileLength.toString(), // Google Cloud requires numbers to be string in metadata
           voiceId: voice.id,
           voiceSynthesizer: voice.synthesizer,
           voiceLanguageCode: voice.languageCode,
