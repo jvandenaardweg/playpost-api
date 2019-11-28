@@ -192,8 +192,8 @@ export const setupServer = async () => {
 
   // Make express allow JSON payload bodies
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
-  app.use(bodyParser.json({ limit: '5mb' })); // We upped the limit because an Apple receipt string is a bit large
-  app.use(bodyParser.urlencoded({ limit: '5mb', extended: true, parameterLimit: 5000 }));
+  app.use(bodyParser.json({ limit: '20mb' })); // We upped the limit because an Apple receipt string is a bit large
+  app.use(bodyParser.urlencoded({ limit: '20mb', extended: true, parameterLimit: 5000 }));
 
   // Load controllers
   const meController = new MeController();
