@@ -4,6 +4,7 @@ const { version } = require('../package.json');
 import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import ExpressRateLimit from 'express-rate-limit';
@@ -13,7 +14,6 @@ import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
-import cors from 'cors';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
@@ -31,10 +31,10 @@ import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
+import { AnalyticsController } from './controllers/analytics';
 import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
-import { AnalyticsController } from './controllers/analytics';
 
 const PORT = process.env.PORT || 3000;
 
