@@ -8,6 +8,10 @@ This repository includes the API for the Playpost App.
 - Node 10.0.0+
 - Docker
 
+## Requirements server:
+
+- Large File Upload Limit: `20m`, for documentHtml strings. https://github.com/dokku/dokku/blob/master/docs/configuration/nginx.md
+
 ## Setup for development
 
 1. Use the correct node version, run: `nvm use`

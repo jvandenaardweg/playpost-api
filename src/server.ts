@@ -34,6 +34,7 @@ import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/pass
 import { connectionOptions } from './database/connection-options';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { AnalyticsController } from './controllers/analytics';
 
 const PORT = process.env.PORT || 3000;
 
@@ -214,6 +215,7 @@ export const setupServer = async () => {
   // Load controllers
   const meController = new MeController();
   const oembedController = new OembedController();
+  const analyticsController = new AnalyticsController();
 
   // API Endpoints
 
@@ -288,7 +290,9 @@ export const setupServer = async () => {
 
   app.get('/health', rateLimited, healthController.getHealthStatus);
 
-  app.get('/v1/oembed', rateLimited, oembedController.getOembedCode);
+  app.get('/v1/oembed', oembedController.getOembedCode);
+
+  app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', rateLimited, (req, res) => {
