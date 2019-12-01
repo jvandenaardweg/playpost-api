@@ -13,6 +13,7 @@ import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
+import cors from 'cors';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
@@ -134,6 +135,21 @@ export const setupServer = async () => {
 
   const app: express.Application = express();
 
+  // include before other routes
+  // This allows pre-flight OPTIONS requests
+  const corsWhitelist = ['https://playpost.app', 'https://publisher.playpost.app', 'https://player.playpost.app', 'http://localhost:8080'];
+
+  const corsOptions = {
+    origin: (origin: string, callback: any) => {
+      // Note: Our React Native app has no origin, we allow it
+      if (!origin || corsWhitelist.indexOf(origin) !== -1) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed'))
+      }
+    }
+  }
+
   // Set trust proxy for CloudFlare and nginx on production
   app.set('trust proxy', ['loopback']);
 
@@ -175,7 +191,7 @@ export const setupServer = async () => {
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
 
   // Temporary measure to make sure users update
-  app.all('*', (req, res, next) => {
+  app.all('*', cors(corsOptions), (req, res, next) => {
     const appVersionHeader = req.headers['app-version'] as string;
     const deviceManufacturer = req.headers['device-manufacturer'] as string;
 
