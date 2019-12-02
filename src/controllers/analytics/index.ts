@@ -8,6 +8,8 @@ export class AnalyticsController {
     const eventData = req.body as AnalyticsEventRequestBody
 
     logger.info('Store in BigQuery:', eventData);
+
+    return res.json({ message: 'OK!', eventData })
   }
 
   getEvents = async (req: Request, res: Response) => {
@@ -25,6 +27,8 @@ export class AnalyticsController {
     // - get all plays from all articles from a publisher within 2019-01-01 till 2019-11-29
     // - get all plays from a specific article from a publisher within 2019-01-01 till 2019-11-29
     logger.info('Get from BigQuery:', req.query);
+
+    return res.json({ message: 'OK!', params: req.query })
 
   }
 }
