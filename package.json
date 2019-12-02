@@ -79,6 +79,7 @@
     "@types/app-root-path": "^1.2.4",
     "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.0.1",
+    "@types/cors": "^2.8.6",
     "@types/express": "^4.17.1",
     "@types/express-brute": "0.0.37",
     "@types/express-brute-redis": "0.0.1",

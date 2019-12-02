@@ -4,7 +4,7 @@ const { version } = require('../package.json');
 import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import ExpressRateLimit from 'express-rate-limit';
@@ -143,17 +143,18 @@ export const setupServer = async () => {
     'https://publisher.playpost.app',
     'https://player.playpost.app',
     'http://localhost:8080',
-    'chrome-extension://ifnpinjadbboilclldkikcggajgpcdgm',
-    'moz-extension://b300508c-46b1-554a-bbfb-276de7e8de91'
+    'chrome-extension://ifnpinjadbboilclldkikcggajgpcdgm', // Chrome extension: https://chrome.google.com/webstore/detail/save-to-playpost/ifnpinjadbboilclldkikcggajgpcdgm?hl=en
+    'moz-extension://b300508c-46b1-554a-bbfb-276de7e8de91', // Firefox extension: https://addons.mozilla.org/en-US/firefox/addon/playpost/
+    'chrome-extension://mjknkekpfeobbnlkmigfaiokdecnmadl' // Opera extension: https://addons.opera.com/en/extensions/details/save-to-playpost/
   ];
 
-  const corsOptions = {
+  const corsOptions: CorsOptions = {
     origin: (origin: string, callback: any) => {
       // Note: Our React Native app has no origin, we allow it
       if (!origin || corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
-        const errorMessage = 'Not allowed';
+        const errorMessage = `"${origin}" is not allowed to do requests.`;
 
         Sentry.withScope(scope => {
           scope.setLevel(Sentry.Severity.Error);
