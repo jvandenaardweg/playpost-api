@@ -294,17 +294,6 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     if (playlistItem) {
-      Sentry.withScope(scope => {
-        scope.setLevel(Sentry.Severity.Error);
-        scope.setUser(req.user);
-        scope.setExtra('body', req.body);
-        scope.setExtra('params', req.params);
-        scope.setExtra('article', article);
-        scope.setExtra('playlistItem', playlistItem);
-        scope.setExtra('normalizedUrl', normalizedUrl);
-        Sentry.captureMessage(MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST);
-      });
-
       return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
     }
   } else {
