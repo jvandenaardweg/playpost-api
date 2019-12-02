@@ -69,14 +69,6 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
 
   // TODO: Log tries for security
   if (!isValidPassword) {
-    Sentry.configureScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(user);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(MESSAGE_AUTH_PASSWORD_INCORRECT);
-    });
-
     logger.error(loggerPrefix, MESSAGE_AUTH_PASSWORD_INCORRECT);
 
     return res.status(400).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
