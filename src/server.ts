@@ -138,7 +138,14 @@ export const setupServer = async () => {
 
   // include before other routes
   // This allows pre-flight OPTIONS requests
-  const corsWhitelist = ['https://playpost.app', 'https://publisher.playpost.app', 'https://player.playpost.app', 'http://localhost:8080'];
+  const corsWhitelist = [
+    'https://playpost.app',
+    'https://publisher.playpost.app',
+    'https://player.playpost.app',
+    'http://localhost:8080',
+    'chrome-extension://ifnpinjadbboilclldkikcggajgpcdgm',
+    'moz-extension://b300508c-46b1-554a-bbfb-276de7e8de91'
+  ];
 
   const corsOptions = {
     origin: (origin: string, callback: any) => {
@@ -146,7 +153,15 @@ export const setupServer = async () => {
       if (!origin || corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
-        callback(new Error('Not allowed'))
+        const errorMessage = 'Not allowed';
+
+        Sentry.withScope(scope => {
+          scope.setLevel(Sentry.Severity.Error);
+          scope.setExtra('origin', origin);
+          Sentry.captureMessage(errorMessage);
+        });
+
+        callback(new Error(errorMessage))
       }
     }
   }
