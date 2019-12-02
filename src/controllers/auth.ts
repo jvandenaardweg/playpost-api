@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import joi from 'joi';
 import passport from 'passport';
@@ -34,13 +33,6 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.configureScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(message);
-    });
-
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
@@ -53,13 +45,6 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   const user = await userRepository.findOne({ email: emailAddressNormalized }, { select: ['id', 'email', 'password'] });
 
   if (!user) {
-    Sentry.configureScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(MESSAGE_AUTH_USER_NOT_FOUND);
-    });
-
     logger.error(loggerPrefix, MESSAGE_AUTH_USER_NOT_FOUND);
 
     return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
@@ -128,13 +113,6 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(message);
-    });
-
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
@@ -143,13 +121,6 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
 
   if (!user) {
     const message = 'The given e-mail address does not exist. Are you sure you already have an account?';
-
-    Sentry.withScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(message);
-    });
 
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
@@ -240,13 +211,6 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
 
-    Sentry.withScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(message);
-    });
-
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
   }
@@ -255,13 +219,6 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
 
   if (!user) {
     const message = `Password reset code "${resetPasswordToken}" could not be found. If you think this is incorrect, try resetting your password again.`;
-
-    Sentry.withScope(scope => {
-      scope.setLevel(Sentry.Severity.Error);
-      scope.setExtra('body', req.body);
-      scope.setExtra('params', req.params);
-      Sentry.captureMessage(message);
-    });
 
     logger.error(loggerPrefix, message);
     return res.status(400).json({ message });
