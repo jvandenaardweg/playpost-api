@@ -142,16 +142,22 @@ export const setupServer = async () => {
     'https://playpost.app',
     'https://publisher.playpost.app',
     'https://player.playpost.app',
-    'http://localhost:8080',
-    'chrome-extension://ifnpinjadbboilclldkikcggajgpcdgm', // Chrome extension: https://chrome.google.com/webstore/detail/save-to-playpost/ifnpinjadbboilclldkikcggajgpcdgm?hl=en
-    'moz-extension://b300508c-46b1-554a-bbfb-276de7e8de91', // Firefox extension: https://addons.mozilla.org/en-US/firefox/addon/playpost/
-    'chrome-extension://mjknkekpfeobbnlkmigfaiokdecnmadl' // Opera extension: https://addons.opera.com/en/extensions/details/save-to-playpost/
+    'http://localhost:8080'
   ];
+
+  // It seems we cannot differentiate between our extensions as the ID is randomly
+  // So just use the start of the origin
+  const extensionsWhitelist = [
+    'chrome-extension://',
+    'moz-extension://',
+  ]
 
   const corsOptions: CorsOptions = {
     origin: (origin: string, callback: any) => {
+      const isExtension = extensionsWhitelist.some(list => origin.startsWith(list));
+
       // Note: Our React Native app has no origin, we allow it
-      if (!origin || corsWhitelist.indexOf(origin) !== -1) {
+      if (!origin || isExtension || corsWhitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
         const errorMessage = `"${origin}" is not allowed to do requests.`;
