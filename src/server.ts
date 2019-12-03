@@ -153,8 +153,8 @@ export const setupServer = async () => {
   ]
 
   const corsOptions: CorsOptions = {
-    origin: (origin: string, callback: any) => {
-      const isExtension = extensionsWhitelist.some(list => origin.startsWith(list));
+    origin: (origin: string | undefined, callback: any) => {
+      const isExtension = origin && extensionsWhitelist.some(list => origin.startsWith(list));
 
       // Note: Our React Native app has no origin, we allow it
       if (!origin || isExtension || corsWhitelist.indexOf(origin) !== -1) {
