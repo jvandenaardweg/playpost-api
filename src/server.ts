@@ -1,7 +1,6 @@
 // tslint:disable-next-line
 const { version } = require('../package.json');
 
-import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors, { CorsOptions } from 'cors';
@@ -9,7 +8,6 @@ import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import ExpressRateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-// import ExpressBrute from 'express-brute-cloudflare';
 import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
@@ -33,6 +31,7 @@ import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/pass
 
 import { AnalyticsController } from './controllers/analytics';
 import { connectionOptions } from './database/connection-options';
+import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
 
@@ -154,10 +153,11 @@ export const setupServer = async () => {
 
   const corsOptions: CorsOptions = {
     origin: (origin: string | undefined, callback: any) => {
-      const isExtension = origin && extensionsWhitelist.some(list => origin.startsWith(list));
+      const hasNoOrigin = !origin; // Note: Our React Native app has no origin, we allow it
+      const isOnExtensionWhitelist = origin && extensionsWhitelist.some(extensionOriginPart => origin.startsWith(extensionOriginPart));
+      const isOnCorsWhitelist = origin && corsWhitelist.some(corsItemUrl => origin === corsItemUrl);
 
-      // Note: Our React Native app has no origin, we allow it
-      if (!origin || isExtension || corsWhitelist.indexOf(origin) !== -1) {
+      if (hasNoOrigin || isOnExtensionWhitelist || isOnCorsWhitelist) {
         callback(null, true)
       } else {
         const errorMessage = `"${origin}" is not allowed to do requests.`;
@@ -357,10 +357,19 @@ export const setupServer = async () => {
         });
       }
 
-      // Return a general error to the user
+      // Return a specific error message when on dev mode
+      if (process.env.NODE_ENV !== 'production') {
+        return res.status(500).json({
+          message: err && err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
+        });
+      }
+
+      // Show a general error message to our users on Production
+      // Our users do not need to know what goes wrong in the error message
       return res.status(500).json({
-        message: err && err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
+        message: 'An unexpected error occurred. Please try again or contact us when this happens again.'
       });
+
     }
 
     return next(err);
