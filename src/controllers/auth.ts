@@ -296,7 +296,7 @@ export const postUserResetPassword = async (req: Request, res: Response) => {
     <h1>Forgot your password?</h1>
     <p>We got a request to change the password for your Playpost account.</p>
     <p>If you don't want to reset your password, you can ignore this email.</p>
-    <a href="${process.env.DASHBOARD_BASE_URL}/auth/forgot/${resetPasswordToken}">Reset your password</a>
+    <a href="${process.env.PUBLISHERS_BASE_URL}/auth/forgot/${resetPasswordToken}">Reset your password</a>
     <p>If you didn't request this change, you may want to review your account security.</p>
     <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
   `;

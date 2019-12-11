@@ -105,8 +105,8 @@ export const setupServer = async () => {
   if (!process.env.AWS_REGION) {
     throw new Error('Required environment variable "AWS_REGION" not set.');
   }
-  if (!process.env.DASHBOARD_BASE_URL) {
-    throw new Error('Required environment variable "DASHBOARD_BASE_URL" not set.');
+  if (!process.env.PUBLISHERS_BASE_URL) {
+    throw new Error('Required environment variable "PUBLISHERS_BASE_URL" not set.');
   }
 
   const rateLimited = new ExpressRateLimit({
