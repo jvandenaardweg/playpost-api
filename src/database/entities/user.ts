@@ -2,15 +2,17 @@ import bcryptjs from 'bcryptjs';
 import { IsDate, IsEmail, IsUUID } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
-import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
+import * as AWSSes from '../../mailers/aws-ses';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
 import { ApiKey } from './api-key';
+import { Publisher } from './publisher';
 import { UserInAppSubscriptionApple } from './user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from './user-in-app-subscriptions-google';
 import { UserVoiceSetting } from './user-voice-setting';
@@ -39,6 +41,11 @@ export class User {
     return crypto.randomBytes(40).toString('hex');
   }
 
+  static generateRandomActivationToken = (): string => {
+    const length = 32;
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+  }
+
   static generateRandomResetPasswordToken = (): string => {
     const length = 6;
     return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
@@ -47,6 +54,18 @@ export class User {
   static verifyJWTAccessToken = (accessToken: string): object | string => {
     if (!JWT_SECRET) { throw new Error('Please set the JWT_SECRET environment variable.'); }
     return jsonwebtoken.verify(accessToken, JWT_SECRET);
+  }
+
+  static sendActivationEmail = (activationToken: string, email: string) => {
+    const htmlBody = `
+      <h1>Activate your account</h1>
+      <p>You are one step away from an activated Playpost account.</p>
+      <a href="${process.env.DASHBOARD_BASE_URL}/auth/activate/${activationToken}">Activate account</a>
+      <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
+    `;
+
+    // Send e-mail using AWS SES
+    return AWSSes.sendTransactionalEmail(email, 'Activate your Playpost account', htmlBody);
   }
 
   /**
@@ -75,6 +94,9 @@ export class User {
   @Column('varchar', { length: 6, nullable: true, select: false })
   resetPasswordToken: string;
 
+  @Column('varchar', { length: 32, nullable: true, select: false })
+  activationToken: string;
+
   @Column({ nullable: true })
   authenticatedAt: Date;
 
@@ -99,7 +121,7 @@ export class User {
   @OneToMany(type => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'SET NULL' }) // On delete of a PlaylistItem, don't remove the User
   playlistItems: PlaylistItem[];
 
-  @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user, { eager: true })
+  @OneToMany(type => UserVoiceSetting, userVoiceSetting => userVoiceSetting.user)
   voiceSettings: UserVoiceSetting[];
 
   @OneToMany(type => UserInAppSubscriptionApple, userInAppSubscription => userInAppSubscription.user)
@@ -107,6 +129,15 @@ export class User {
 
   @OneToMany(type => UserInAppSubscriptionGoogle, inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.user)
   inAppSubscriptionsGoogle: UserInAppSubscriptionGoogle[];
+
+  // A Publisher is optional for a User
+  // A User owns a Publisher
+  // A User can only have one Publisher
+  // On delete of a Publisher, do not delete the User. Because the user his account is also tied to our mobile app, which is for non-publishers
+  // Use cascade: ['insert'] to automatically insert and attach a new publisher to a user
+  @OneToOne(type => Publisher, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
+  @JoinColumn()
+  publisher: Publisher;
 
   @CreateDateColumn()
   @IsDate()
@@ -117,23 +148,29 @@ export class User {
   updatedAt: Date;
 
   @BeforeInsert()
-  lowercaseEmail() {
-    this.email = this.email.toLowerCase();
+  beforeInsert() {
+    this.email = User.normalizeEmail(this.email);
+    this.activationToken = User.generateRandomActivationToken();
   }
 
   @AfterInsert()
   async afterInsert() {
-    const loggerPrefix = 'Database Entity (User): @AfterInsert():';
+    const loggerPrefix = 'Database Entity (User): @afterInsert():';
 
-    // Don't add our integration test account to Mailchimp
-    if (!this.email.includes('integrationtest-1337')) {
-      try {
-        logger.info(loggerPrefix, `Adding "${this.email}" to Mailchimp list.`);
-        await addEmailToMailchimpList(this.email);
-      } catch (err) {
-        logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
-        throw err;
-      }
+    try {
+      logger.info(loggerPrefix, `Adding "${this.email}" to Mailchimp list.`);
+      await addEmailToMailchimpList(this.email);
+    } catch (err) {
+      logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
+      throw err;
+    }
+
+    try {
+      logger.info(loggerPrefix, `Sending activation email to: ${this.email} using token: ${this.activationToken}`);
+      await User.sendActivationEmail(this.activationToken, this.email);
+    } catch (err) {
+      logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
+      throw err;
     }
   }
 

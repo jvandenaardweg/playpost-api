@@ -30,11 +30,11 @@ export class Country {
   // eager: true is needed so our app can determine the correct language for a voice
   languages: Language[]; // A country can have multiple languages
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   @IsDate()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   @IsDate()
   updatedAt: Date;
 }

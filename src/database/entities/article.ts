@@ -10,6 +10,7 @@ import * as ArticlesPubSub from '../../pubsub/articles';
 import { logger } from '../../utils';
 import { ColumnNumericTransformer } from '../utils';
 import { Language } from './language';
+import { Publisher } from './publisher';
 
 export enum ArticleStatus {
   CRAWLING = 'crawling',
@@ -81,8 +82,17 @@ export class Article extends BaseEntity {
   // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
   documentHtml: string;
 
-  @ManyToOne(() => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Article in the database, but set its userId to NULL
+  // A User can add an article, but is not the owner. A Publisher is the owner of an Article
+  // On delete of a User, keep the Article in the database, but set its userId to NULL
+  @ManyToOne(() => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' })
   user: User;
+
+  // An Article is owned by a Publisher
+  // On delete of a Publisher, also delete it's articles
+  // TODO: also remove the audiofiles
+  // A publisher can be an owner of an article, as user cannot be an owner
+  @ManyToOne(() => Publisher, publisher => publisher.articles, { nullable: true, onDelete: 'CASCADE' })
+  publisher: Publisher;
 
   @ManyToOne(() => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
   language: Language;

@@ -30,10 +30,12 @@ import * as voicesController from './controllers/voices';
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
 import { AnalyticsController } from './controllers/analytics';
+import { PublishersController } from './controllers/publishers';
 import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { UserController } from './controllers/user';
 
 const PORT = process.env.PORT || 3000;
 
@@ -102,6 +104,9 @@ export const setupServer = async () => {
   }
   if (!process.env.AWS_REGION) {
     throw new Error('Required environment variable "AWS_REGION" not set.');
+  }
+  if (!process.env.DASHBOARD_BASE_URL) {
+    throw new Error('Required environment variable "DASHBOARD_BASE_URL" not set.');
   }
 
   const rateLimited = new ExpressRateLimit({
@@ -238,6 +243,8 @@ export const setupServer = async () => {
   const meController = new MeController();
   const oembedController = new OembedController();
   const analyticsController = new AnalyticsController();
+  const publishersController = new PublishersController();
+  const userController = new UserController();
 
   // API Endpoints
 
@@ -252,6 +259,8 @@ export const setupServer = async () => {
   app.post('/v1/auth', authController.getAuthenticationToken);
   app.post('/v1/auth/reset-password', authController.getResetPasswordToken);
   app.post('/v1/auth/update-password', authController.updatePasswordUsingToken);
+  app.patch('/v1/auth/activate', authController.patchUserActivate);
+
   app.post('/v1/users', usersController.createUser);
 
   // Protected by login
@@ -315,6 +324,15 @@ export const setupServer = async () => {
   app.get('/v1/oembed', oembedController.getOembedCode);
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
+
+  app.get('/v1/publishers', IS_PROTECTED_JWT, publishersController.getPublishers);
+  app.post('/v1/publishers', IS_PROTECTED_JWT, publishersController.createPublisher);
+  app.get('/v1/publishers/:publisherId', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisher);
+  app.get('/v1/publishers/:publisherId/articles', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisherArticles);
+  app.post('/v1/publishers/:publisherId/articles', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.createPublisherArticle);
+  app.get('/v1/publishers/:publisherId/articles/:articleId', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisherArticle);
+
+  app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 
   // Endpoint for uptime monitoring
   app.get('/v1/status', rateLimited, (req, res) => {

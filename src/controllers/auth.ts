@@ -236,3 +236,30 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
 
   return res.json({ message: 'Your password is updated. You can now login again.' });
 };
+
+/**
+ * Public route to allow activation of the user using an activation token.
+ */
+export const patchUserActivate = async (req: Request, res: Response) => {
+  const { activationToken } = req.body;
+  const userRepository = getRepository(User);
+
+  const userToActivate = await userRepository.findOne({
+    where: {
+      activationToken
+    }
+  });
+
+  if (!userToActivate) {
+    return res.status(404).json({
+      message: 'No account found to activate. You probably already activated your account.'
+    })
+  }
+
+  await userRepository.update(userToActivate.id, {
+    activationToken: undefined,
+    activatedAt: new Date()
+  })
+
+  return res.status(200).send();
+}

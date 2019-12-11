@@ -2,19 +2,20 @@ import { Request, Response } from 'express';
 import joi from 'joi';
 import { getConnection, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
+import { Publisher } from '../database/entities/publisher';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
 import { routeIsProtected } from './auth';
 
-const MESSAGE_USER_EMAIL_EXISTS = 'E-mail address already exists.';
+const MESSAGE_USER_EMAIL_EXISTS = 'There is already an account with this e-mail address. You can login using this e-mail address.';
 const MESSAGE_USER_NOT_FOUND = 'No user found';
 const MESSAGE_USER_DELETED = 'User is deleted! This cannot be undone.';
 const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
 export const createUser = [
   async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, publisher } = req.body;
     const userRepository = getRepository(User);
 
     const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
@@ -31,11 +32,29 @@ export const createUser = [
 
     const hashedPassword = await User.hashPassword(password);
 
-    const userToCreate = { email: emailAddressNormalized, password: hashedPassword };
+    const userToCreate: Partial<User> = { email: emailAddressNormalized, password: hashedPassword };
 
     // Validate the input
     const validationResult = await validateInput(User, userToCreate);
     if (validationResult.errors.length) { return res.status(400).json(validationResult); }
+
+    // If a publisher name is giving during signup, create the publisher and attach it to the user
+    if (publisher && publisher.name) {
+      const publisherToCreate = new Publisher();
+
+      publisherToCreate.name = publisher.name;
+
+      // Validate the input with our entity
+      const validationResultPublisher = await validateInput(Publisher, publisherToCreate);
+      if (validationResult.errors.length) { return res.status(400).json(validationResultPublisher); }
+
+      // All good, create the publisher
+      // const createdPublisher = await publisherRepository.save({
+      //   name: publisher.name
+      // })
+
+      userToCreate.publisher = publisherToCreate;
+    }
 
     // Create the user
     // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
@@ -45,7 +64,9 @@ export const createUser = [
     // Get the created user and return it
     // Important: don't return the createdUser, as this contains the hashed password
     // Our findOne method exclude sensitive fields, like the password
-    const user = await userRepository.findOne(createdUser.id);
+    const user = await userRepository.findOne(createdUser.id, {
+      relations: ['publisher']
+    });
 
     return res.json(user);
   }
@@ -94,3 +115,4 @@ export const findAllUsers = [
     return res.json(users);
   }
 ];
+

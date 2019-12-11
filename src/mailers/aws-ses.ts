@@ -5,6 +5,8 @@ import { logger } from '../utils';
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
+const client = new AWS.SES({ apiVersion: '2010-12-01' });
+
 export const sendTransactionalEmail = async (toEmail: string, title: string, htmlBody: string) => {
   const loggerPrefix = 'AWS SES Send Mail:';
 
@@ -35,7 +37,7 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
 
   try {
     // Create the promise and SES service object
-    const sendMail = new AWS.SES({ apiVersion: '2010-12-01' }).sendEmail(params);
+    const sendMail = client.sendEmail(params);
 
     const result = await sendMail.promise();
 

@@ -13,6 +13,7 @@ import { UserVoiceSetting } from './database/entities/user-voice-setting';
 import { Voice } from './database/entities/voice';
 
 // Migrations
+import { Publisher } from './database/entities/publisher';
 import { UserInAppSubscriptionGoogle } from './database/entities/user-in-app-subscriptions-google';
 import { ArticleCompatible1564467937421 } from './database/migrations/1564467937421-ArticleCompatible';
 import { VoiceQuality1564674653133 } from './database/migrations/1564674653133-VoiceQuality';
@@ -34,6 +35,10 @@ import { VoicesSubscriptionLanguageDefault1568386709347 } from './database/migra
 import { RemoveArticleText1568723124112 } from './database/migrations/1568723124112-RemoveArticleText';
 import { RemoveUnusedVoiceProperties1568723707634 } from './database/migrations/1568723707634-RemoveUnusedVoiceProperties';
 import { InAppSubscriptionsUpgradeFrom1568799387018 } from './database/migrations/1568799387018-InAppSubscriptionsUpgradeFrom';
+import { Publisher1575731651969 } from './database/migrations/1575731651969-Publisher';
+import { PublisherArticles1575734771138 } from './database/migrations/1575734771138-PublisherArticles';
+import { PublisherChanges1576010672013 } from './database/migrations/1576010672013-PublisherChanges';
+import { UserActivationToken1576045108205 } from './database/migrations/1576045108205-UserActivationToken';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -60,7 +65,8 @@ const config: ConnectionOptions = {
     InAppSubscription,
     Country,
     ApiKey,
-    UserInAppSubscriptionGoogle
+    UserInAppSubscriptionGoogle,
+    Publisher
   ],
   migrations: [
     // In order of execution is important, oldest first
@@ -83,7 +89,11 @@ const config: ConnectionOptions = {
     VoicesSubscriptionLanguageDefault1568386709347,
     RemoveArticleText1568723124112,
     RemoveUnusedVoiceProperties1568723707634,
-    InAppSubscriptionsUpgradeFrom1568799387018
+    InAppSubscriptionsUpgradeFrom1568799387018,
+    Publisher1575731651969,
+    PublisherArticles1575734771138,
+    PublisherChanges1576010672013,
+    UserActivationToken1576045108205
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

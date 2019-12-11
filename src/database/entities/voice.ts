@@ -94,11 +94,11 @@ export class Voice {
   @Column({ nullable: true }) // A URL to an audiofile with an example
   exampleAudioUrl: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   @IsDate()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   @IsDate()
   updatedAt: Date;
 

@@ -39,11 +39,11 @@ export class Language {
   @JoinTable({ name: 'language_countries' })
   countries: Country[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   @IsDate()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   @IsDate()
   updatedAt: Date;
 }
