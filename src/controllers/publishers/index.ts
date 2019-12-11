@@ -4,7 +4,6 @@ import { getCustomRepository } from 'typeorm';
 import { ArticleRepository } from '../../database/repositories/article';
 import { PublisherRepository } from '../../database/repositories/publisher';
 import { UserRepository } from '../../database/repositories/user';
-import { Publisher } from '../../database/entities/publisher';
 
 export class PublishersController {
   publisherRepository: PublisherRepository;

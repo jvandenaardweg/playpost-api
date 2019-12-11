@@ -31,11 +31,11 @@ import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/pass
 
 import { AnalyticsController } from './controllers/analytics';
 import { PublishersController } from './controllers/publishers';
+import { UserController } from './controllers/user';
 import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
-import { UserController } from './controllers/user';
 
 const PORT = process.env.PORT || 3000;
 
