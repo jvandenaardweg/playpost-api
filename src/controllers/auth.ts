@@ -9,8 +9,8 @@ import { UserRepository } from '../database/repositories/user';
 import * as AWSSes from '../mailers/aws-ses';
 import { logger } from '../utils';
 
-const MESSAGE_AUTH_USER_NOT_FOUND = 'No user found or password is incorrect.';
-const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Password is incorrect.';
+const MESSAGE_AUTH_USER_NOT_FOUND = 'Sorry, we couldn\'t find an account with that email address.';
+const MESSAGE_AUTH_PASSWORD_INCORRECT = 'Sorry, that password isn\'t right.';
 
 export const routeIsProtected = passport.authenticate('jwt', { session: false, failWithError: true });
 
@@ -47,7 +47,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   if (!user) {
     logger.error(loggerPrefix, MESSAGE_AUTH_USER_NOT_FOUND);
 
-    return res.status(400).json({ message: MESSAGE_AUTH_USER_NOT_FOUND });
+    return res.status(401).json({ message: MESSAGE_AUTH_USER_NOT_FOUND, field: 'email' });
   }
 
   const isValidPassword = await User.comparePassword(password, user.password);
@@ -56,7 +56,7 @@ export const getAuthenticationToken = async (req: Request, res: Response) => {
   if (!isValidPassword) {
     logger.error(loggerPrefix, MESSAGE_AUTH_PASSWORD_INCORRECT);
 
-    return res.status(400).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT });
+    return res.status(401).json({ message: MESSAGE_AUTH_PASSWORD_INCORRECT, field: 'password' });
   }
 
   logger.info(loggerPrefix, 'Password is valid!');
@@ -127,7 +127,7 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
   }
 
   // User exists, generate a random token
-  const resetPasswordToken = User.generateRandomResetPasswordToken();
+  const resetPasswordToken = User.generateRandomResetPasswordTokenMobileApp();
 
   await userRepository.update(user.id, { resetPasswordToken, requestResetPasswordAt: new Date() });
 
@@ -262,4 +262,47 @@ export const patchUserActivate = async (req: Request, res: Response) => {
   })
 
   return res.status(200).send();
+}
+
+/**
+ * Public route to allow password reset using an email address.
+ */
+export const postUserResetPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const userRepository = getRepository(User);
+
+  const user = await userRepository.findOne({
+    where: {
+      email
+    }
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      message: 'A user with this email address does not exist.',
+      field: 'email'
+    })
+  }
+
+  // User exists, generate a random token
+  const resetPasswordToken = User.generateRandomResetPasswordToken();
+
+  await userRepository.update(user.id, {
+    resetPasswordToken,
+    requestResetPasswordAt: new Date()
+  })
+
+  const htmlBody = `
+    <h1>Forgot your password?</h1>
+    <p>We got a request to change the password for your Playpost account.</p>
+    <p>If you don't want to reset your password, you can ignore this email.</p>
+    <a href="${process.env.DASHBOARD_BASE_URL}/auth/forgot/${resetPasswordToken}">Reset your password</a>
+    <p>If you didn't request this change, you may want to review your account security.</p>
+    <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
+  `;
+
+  // Send e-mail using AWS SES
+  await AWSSes.sendTransactionalEmail(user.email, 'Forgot your password? Let\s get you a new one.', htmlBody);
+
+  return res.json({ message: 'An e-mail is send to .' });
 }

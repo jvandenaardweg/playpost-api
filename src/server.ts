@@ -255,11 +255,13 @@ export const setupServer = async () => {
   app.get('/v1/in-app-subscriptions/active', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
-  // Use expressBrute to increase the delay between each requests
+  // TODO: Use expressBrute to increase the delay between each requests
   app.post('/v1/auth', authController.getAuthenticationToken);
-  app.post('/v1/auth/reset-password', authController.getResetPasswordToken);
-  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken);
+  app.post('/v1/auth/reset-password', authController.getResetPasswordToken); // Used only for the mobile app
+  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
+
   app.patch('/v1/auth/activate', authController.patchUserActivate);
+  app.post('/v1/auth/reset/password', authController.postUserResetPassword);
 
   app.post('/v1/users', usersController.createUser);
 

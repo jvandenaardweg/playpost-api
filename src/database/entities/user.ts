@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import { IsDate, IsEmail, IsUUID } from 'class-validator';
+import { IsDate, IsEmail, IsUUID, Length } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
 import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
@@ -47,6 +47,11 @@ export class User {
   }
 
   static generateRandomResetPasswordToken = (): string => {
+    const length = 32;
+    return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+  }
+
+  static generateRandomResetPasswordTokenMobileApp = (): string => {
     const length = 6;
     return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length).toLocaleUpperCase();
   }
@@ -92,9 +97,11 @@ export class User {
   password: string;
 
   @Column('varchar', { length: 6, nullable: true, select: false })
+  @Length(6, 32)
   resetPasswordToken: string;
 
   @Column('varchar', { length: 32, nullable: true, select: false })
+  @Length(6, 32)
   activationToken: string;
 
   @Column({ nullable: true })

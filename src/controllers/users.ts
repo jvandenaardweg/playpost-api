@@ -8,14 +8,14 @@ import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
 import { routeIsProtected } from './auth';
 
-const MESSAGE_USER_EMAIL_EXISTS = 'There is already an account with this e-mail address. You can login using this e-mail address.';
+const MESSAGE_USER_EMAIL_EXISTS = 'Another user with this email address already exists. If it\'s yours, you can try to login.'
 const MESSAGE_USER_NOT_FOUND = 'No user found';
 const MESSAGE_USER_DELETED = 'User is deleted! This cannot be undone.';
 const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
 export const createUser = [
   async (req: Request, res: Response) => {
-    const { email, password, publisher } = req.body;
+    const { email, password, publisherName } = req.body;
     const userRepository = getRepository(User);
 
     const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
@@ -28,7 +28,7 @@ export const createUser = [
     const emailAddressNormalized = User.normalizeEmail(email);
     const existingUser = await userRepository.findOne({ email: emailAddressNormalized });
 
-    if (existingUser) { return res.status(400).json({ message: MESSAGE_USER_EMAIL_EXISTS }); }
+    if (existingUser) { return res.status(409).json({ message: MESSAGE_USER_EMAIL_EXISTS, field: 'email' }); }
 
     const hashedPassword = await User.hashPassword(password);
 
@@ -39,14 +39,20 @@ export const createUser = [
     if (validationResult.errors.length) { return res.status(400).json(validationResult); }
 
     // If a publisher name is giving during signup, create the publisher and attach it to the user
-    if (publisher && publisher.name) {
+    if (publisherName) {
       const publisherToCreate = new Publisher();
 
-      publisherToCreate.name = publisher.name;
+      publisherToCreate.name = publisherName;
 
       // Validate the input with our entity
       const validationResultPublisher = await validateInput(Publisher, publisherToCreate);
-      if (validationResult.errors.length) { return res.status(400).json(validationResultPublisher); }
+
+      if (validationResult.errors.length) {
+        return res.status(400).json({
+          message: validationResultPublisher,
+          field: 'publisherName'
+        });
+    }
 
       // All good, create the publisher
       // const createdPublisher = await publisherRepository.save({
