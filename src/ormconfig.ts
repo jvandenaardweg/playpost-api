@@ -39,6 +39,7 @@ import { Publisher1575731651969 } from './database/migrations/1575731651969-Publ
 import { PublisherArticles1575734771138 } from './database/migrations/1575734771138-PublisherArticles';
 import { PublisherChanges1576010672013 } from './database/migrations/1576010672013-PublisherChanges';
 import { UserActivationToken1576045108205 } from './database/migrations/1576045108205-UserActivationToken';
+import { UserResetPasswordToken1576133792281 } from './database/migrations/1576133792281-UserResetPasswordToken';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -93,7 +94,8 @@ const config: ConnectionOptions = {
     Publisher1575731651969,
     PublisherArticles1575734771138,
     PublisherChanges1576010672013,
-    UserActivationToken1576045108205
+    UserActivationToken1576045108205,
+    UserResetPasswordToken1576133792281
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

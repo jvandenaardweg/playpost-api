@@ -304,5 +304,37 @@ export const postUserResetPassword = async (req: Request, res: Response) => {
   // Send e-mail using AWS SES
   await AWSSes.sendTransactionalEmail(user.email, 'Forgot your password? Let\s get you a new one.', htmlBody);
 
-  return res.json({ message: 'An e-mail is send to .' });
+  return res.json({ message: `An e-mail is send to ${user.email} on how to reset your password.` });
+}
+
+/**
+ * Public route to allow password reset using an email address.
+ */
+export const patchUserResetPassword = async (req: Request, res: Response) => {
+  const { password, resetPasswordToken } = req.body;
+  const userRepository = getRepository(User);
+
+  const user = await userRepository.findOne({
+    where: {
+      resetPasswordToken
+    }
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      message: 'The user to reset the password for could not be found.'
+    })
+  }
+
+  // User exists
+  const newPassword = await User.hashPassword(password);
+
+  // Set the new password and remove the reset password token
+  await userRepository.update(user.id, {
+    resetPasswordToken: undefined,
+    password: newPassword,
+    resetPasswordAt: new Date()
+  })
+
+  return res.json({ message: `Great succes! You have changed your password.` });
 }

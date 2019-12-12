@@ -1,4 +1,4 @@
-import { IsDate, IsUUID } from 'class-validator';
+import { IsDate, IsUUID, Length } from 'class-validator';
 import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
 import { User } from './user';
@@ -10,7 +10,8 @@ export class Publisher {
   @IsUUID()
   id: string;
 
-  @Column({ length: 50 })
+  @Column('varchar', { length: 50 })
+  @Length(1, 50)
   name: string; // Playpost
 
   // A Publisher is owner of multiple Article's

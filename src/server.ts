@@ -262,6 +262,7 @@ export const setupServer = async () => {
 
   app.patch('/v1/auth/activate', authController.patchUserActivate);
   app.post('/v1/auth/reset/password', authController.postUserResetPassword);
+  app.patch('/v1/auth/reset/password', authController.patchUserResetPassword);
 
   app.post('/v1/users', usersController.createUser);
 

@@ -96,12 +96,12 @@ export class User {
   @Column({ nullable: false, select: false })
   password: string;
 
-  @Column('varchar', { length: 6, nullable: true, select: false })
-  @Length(6, 32)
+  @Column('varchar', { length: 32, nullable: true, select: false })
+  @Length(6, 32) // To have resetPasswordToken backwards compatible, make sure we also allow 6 characters for in our mobile app
   resetPasswordToken: string;
 
   @Column('varchar', { length: 32, nullable: true, select: false })
-  @Length(6, 32)
+  @Length(32)
   activationToken: string;
 
   @Column({ nullable: true })
