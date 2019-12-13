@@ -43,11 +43,9 @@ import { OrganizationCustomerAndPublication1576246848674 } from './database/migr
 import { PublicationUsers1576251871318 } from './database/migrations/1576251871318-PublicationUsers';
 import { CorrectOnDeleteConstraintsPublicationUsers1576257797533 } from './database/migrations/1576257797533-CorrectOnDeleteConstraintsPublicationUsers';
 import { OrganizationMultipleUsers1576261806133 } from './database/migrations/1576261806133-OrganizationMultipleUsers';
-import { UserOwnsOrganizationJoinTable1576263052774 } from './database/migrations/1576263052774-UserOwnsOrganizationJoinTable';
 import { CustomerOptionalStripeId1576263503710 } from './database/migrations/1576263503710-CustomerOptionalStripeId';
 import { CustomerOrganizationSetNull1576263832495 } from './database/migrations/1576263832495-CustomerOrganizationSetNull';
 import { CustomerOrganizationAllowNull1576264002710 } from './database/migrations/1576264002710-CustomerOrganizationAllowNull';
-import { UserPublicationsJoinTable1576266705075 } from './database/migrations/1576266705075-UserPublicationsJoinTable';
 import { OrganizationsPublicationsOwnerJoinTable1576270744686 } from './database/migrations/1576270744686-OrganizationsPublicationsOwnerJoinTable';
 
 const config: ConnectionOptions = {
@@ -108,11 +106,9 @@ const config: ConnectionOptions = {
     PublicationUsers1576251871318,
     CorrectOnDeleteConstraintsPublicationUsers1576257797533,
     OrganizationMultipleUsers1576261806133,
-    UserOwnsOrganizationJoinTable1576263052774,
     CustomerOptionalStripeId1576263503710,
     CustomerOrganizationSetNull1576263832495,
     CustomerOrganizationAllowNull1576264002710,
-    UserPublicationsJoinTable1576266705075,
     OrganizationsPublicationsOwnerJoinTable1576270744686
   ],
   migrationsRun: true, // Run migrations on start.
