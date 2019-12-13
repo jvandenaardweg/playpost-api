@@ -330,16 +330,25 @@ export const setupServer = async () => {
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
+  // Available for all users to see their publications
   app.get('/v1/publications', IS_PROTECTED_JWT, publicationsController.getPublications);
-  app.post('/v1/publications', IS_PROTECTED_JWT, publicationsController.createPublication);
+
+  // Restricted to users who are in a publication
   app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublication);
   app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticles);
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createPublicationArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticle);
+  app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 
+  // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.getOrganizations);
+
+  // Restricted to users who are in the organization
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOrganization);
-  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createPublication);
+  app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createUser);
+  app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deleteUser);
+  app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createPublication);
+  app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deletePublication);
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 
@@ -379,7 +388,7 @@ export const setupServer = async () => {
       }
 
       if (err.message === 'Unauthorized') {
-        return res.status(401).json({
+        return res.status(403).json({
           message: 'You are not logged or your access is expired. Please log in to the app and try again.'
         });
       }

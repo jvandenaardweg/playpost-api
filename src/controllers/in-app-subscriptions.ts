@@ -88,7 +88,7 @@ export const syncAllExpiredUserSubscriptions = async (req: Request, res: Respons
   const loggerPrefix = 'Sync All Expired User Subscriptions:';
 
   if (password !== 'thisappisawesome') {
-    return res.status(401).json({ message: 'You have no access. Use our magic password.' });
+    return res.status(403).json({ message: 'You have no access. Use our magic password.' });
   }
 
   try {

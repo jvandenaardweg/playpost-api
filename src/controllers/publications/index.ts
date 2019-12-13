@@ -44,45 +44,12 @@ export class PublicationsController {
       .getOne()
 
     if (!publicationOfUser) {
-      return res.status(401).json({
+      return res.status(403).json({
         message: 'You have no access to this publication.'
       })
     }
 
     return next()
-  }
-
-  createPublication = async (req: Request, res: Response) => {
-    const { name } = req.body;
-    const userId = req.user.id;
-
-    // Find if the user is an admin of an organization
-    // Only admins of an organization can create new publications
-    const organization = await this.organizationRepository.findOne({
-      where: {
-        admin: {
-          id: userId
-        }
-      },
-      relations: ['admin'] // Select the admin relation, so we can connect the user to the new publication
-    })
-
-    if (!organization) {
-      return res.status(401).json({
-        message: `You cannot create a new publication because you are not an admin of organization: ${organization}`
-      })
-    }
-
-    const newPublication = new Publication();
-
-    newPublication.name = name;
-    newPublication.users = [organization.admin]; // Connect the admin to this publication so he has access to it
-    newPublication.organization = organization; // Connect the organization of the user to the publication
-
-    // Create the publication and attach it to the organization and user (admin)
-    const createdPublication = await this.publicationsRepository.save(newPublication)
-
-    return res.json(createdPublication)
   }
 
   /**
@@ -159,5 +126,29 @@ export class PublicationsController {
     // TODO: create an article with the publication as an owner of that article
 
     return res.json({ message: 'ok', url, publicationId });
+  }
+
+  deleteArticle = async (req: Request, res: Response) => {
+    const { publicationId, articleId } = req.params;
+
+    const article = await this.articleRepository.findOne(articleId, {
+      where: {
+        publication: {
+          id: publicationId
+        }
+      }
+    })
+
+    if (!article) {
+      return res.status(404).json({
+        message: 'Article does not exist.'
+      })
+    }
+
+    await this.articleRepository.remove(article);
+
+    // TODO: delete audiofiles
+
+    return res.status(200).send();
   }
 }
