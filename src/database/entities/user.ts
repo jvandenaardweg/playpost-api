@@ -2,7 +2,7 @@ import bcryptjs from 'bcryptjs';
 import { IsDate, IsEmail, IsUUID, Length } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
-import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
@@ -12,7 +12,7 @@ import * as AWSSes from '../../mailers/aws-ses';
 import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
 import { ApiKey } from './api-key';
-import { Publisher } from './publisher';
+import { Organization } from './organization';
 import { UserInAppSubscriptionApple } from './user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from './user-in-app-subscriptions-google';
 import { UserVoiceSetting } from './user-voice-setting';
@@ -137,14 +137,12 @@ export class User {
   @OneToMany(type => UserInAppSubscriptionGoogle, inAppSubscriptionsGoogle => inAppSubscriptionsGoogle.user)
   inAppSubscriptionsGoogle: UserInAppSubscriptionGoogle[];
 
-  // A Publisher is optional for a User
-  // A User owns a Publisher
-  // A User can only have one Publisher
-  // On delete of a Publisher, do not delete the User. Because the user his account is also tied to our mobile app, which is for non-publishers
-  // Use cascade: ['insert'] to automatically insert and attach a new publisher to a user
-  @OneToOne(type => Publisher, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
-  @JoinColumn()
-  publisher: Publisher;
+  // A User can be part of one Organization
+  // A User can exist without an Organization (nullable: true)
+  // On delete of an Organization, do not delete the User, but set it to SET NULL
+  // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
+  @OneToOne(type => Organization, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
+  organization: Organization;
 
   @CreateDateColumn()
   @IsDate()

@@ -1,8 +1,6 @@
 
 import { NextFunction, Request, Response } from 'express';
 import { getRepository, Repository } from 'typeorm';
-// import { Article } from '../../database/entities/article';
-// import { Publisher } from '../../database/entities/publisher';
 import { User } from '../../database/entities/user';
 
 export class UserController {
@@ -31,9 +29,7 @@ export class UserController {
   getUser = async (req: Request, res: Response) => {
     const userId = req.user.id;
 
-    const user = await this.userRepository.findOne(userId, {
-      relations: ['publisher']
-    })
+    const user = await this.userRepository.findOne(userId)
 
     return res.json(user)
   }

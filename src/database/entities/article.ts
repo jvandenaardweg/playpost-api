@@ -10,7 +10,7 @@ import * as ArticlesPubSub from '../../pubsub/articles';
 import { logger } from '../../utils';
 import { ColumnNumericTransformer } from '../utils';
 import { Language } from './language';
-import { Publisher } from './publisher';
+import { Publication } from './publication';
 
 export enum ArticleStatus {
   CRAWLING = 'crawling',
@@ -87,12 +87,12 @@ export class Article extends BaseEntity {
   @ManyToOne(() => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' })
   user: User;
 
-  // An Article is owned by a Publisher
-  // On delete of a Publisher, also delete it's articles
-  // TODO: also remove the audiofiles
-  // A publisher can be an owner of an article, as user cannot be an owner
-  @ManyToOne(() => Publisher, publisher => publisher.articles, { nullable: true, onDelete: 'CASCADE' })
-  publisher: Publisher;
+  // An Article is owned by a Publication
+  // On delete of a Publication, also delete it's articles
+  // A Publication can be an owner of an article, as user cannot be an owner
+  // A User can add articles on his own to his playlist without a Publication to be an owner of that
+  @ManyToOne(() => Publication, publication => publication.articles, { nullable: true, onDelete: 'CASCADE' })
+  publication: Publication;
 
   @ManyToOne(() => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
   language: Language;

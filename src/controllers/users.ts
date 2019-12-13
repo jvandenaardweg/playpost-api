@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import joi from 'joi';
 import { getConnection, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
-import { Publisher } from '../database/entities/publisher';
+import { Organization } from '../database/entities/organization';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
 import { validateInput } from '../validators/entity';
@@ -15,7 +15,7 @@ const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
 export const createUser = [
   async (req: Request, res: Response) => {
-    const { email, password, publisherName } = req.body;
+    const { email, password, organizationName } = req.body;
     const userRepository = getRepository(User);
 
     const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
@@ -38,29 +38,26 @@ export const createUser = [
     const validationResult = await validateInput(User, userToCreate);
     if (validationResult.errors.length) { return res.status(400).json(validationResult); }
 
-    // If a publisher name is giving during signup, create the publisher and attach it to the user
-    if (publisherName) {
-      const publisherToCreate = new Publisher();
+    // If a organization name is giving during signup, create the organization and attach it to the user
+    if (organizationName) {
+      const organizationToCreate = new Organization();
 
-      publisherToCreate.name = publisherName;
+      organizationToCreate.name = organizationName;
 
       // Validate the input with our entity
-      const validationResultPublisher = await validateInput(Publisher, publisherToCreate);
+      const validationResultOrganization = await validateInput(Organization, organizationToCreate);
 
       if (validationResult.errors.length) {
         return res.status(400).json({
-          message: validationResultPublisher,
-          field: 'publisherName'
+          message: validationResultOrganization,
+          field: 'organizationName'
         });
+      }
+
+      userToCreate.organization = organizationToCreate;
     }
 
-      // All good, create the publisher
-      // const createdPublisher = await publisherRepository.save({
-      //   name: publisher.name
-      // })
-
-      userToCreate.publisher = publisherToCreate;
-    }
+    // TODO: create with a transaction
 
     // Create the user
     // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
@@ -71,7 +68,7 @@ export const createUser = [
     // Important: don't return the createdUser, as this contains the hashed password
     // Our findOne method exclude sensitive fields, like the password
     const user = await userRepository.findOne(createdUser.id, {
-      relations: ['publisher']
+      relations: ['organization']
     });
 
     return res.json(user);

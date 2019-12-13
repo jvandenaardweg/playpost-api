@@ -30,12 +30,13 @@ import * as voicesController from './controllers/voices';
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
 import { AnalyticsController } from './controllers/analytics';
-import { PublishersController } from './controllers/publishers';
+import { PublicationsController } from './controllers/publications';
 import { UserController } from './controllers/user';
 import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { OrganizationsController } from './controllers/organizations';
 
 const PORT = process.env.PORT || 3000;
 
@@ -243,8 +244,9 @@ export const setupServer = async () => {
   const meController = new MeController();
   const oembedController = new OembedController();
   const analyticsController = new AnalyticsController();
-  const publishersController = new PublishersController();
+  const publicationsController = new PublicationsController();
   const userController = new UserController();
+  const organizationsController = new OrganizationsController();
 
   // API Endpoints
 
@@ -328,12 +330,15 @@ export const setupServer = async () => {
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
-  app.get('/v1/publishers', IS_PROTECTED_JWT, publishersController.getPublishers);
-  app.post('/v1/publishers', IS_PROTECTED_JWT, publishersController.createPublisher);
-  app.get('/v1/publishers/:publisherId', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisher);
-  app.get('/v1/publishers/:publisherId/articles', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisherArticles);
-  app.post('/v1/publishers/:publisherId/articles', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.createPublisherArticle);
-  app.get('/v1/publishers/:publisherId/articles/:articleId', [IS_PROTECTED_JWT, publishersController.restrictResourceToOwner], publishersController.getPublisherArticle);
+  app.get('/v1/publications', IS_PROTECTED_JWT, publicationsController.getPublications);
+  app.post('/v1/publications', IS_PROTECTED_JWT, publicationsController.createPublication);
+  app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublication);
+  app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticles);
+  app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createPublicationArticle);
+  app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticle);
+
+  app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.getOrganizations);
+  app.get('/v1/organizations/:organizationId', IS_PROTECTED_JWT, organizationsController.getOrganization);
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 
