@@ -1,6 +1,6 @@
 
 import { NextFunction, Request, Response } from 'express';
-import { getConnection, getRepository, Repository, DeepPartial } from 'typeorm';
+import { getConnection, getRepository, Repository } from 'typeorm';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
