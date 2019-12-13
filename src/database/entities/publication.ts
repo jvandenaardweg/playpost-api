@@ -1,5 +1,5 @@
 import { IsDate, IsUrl, IsUUID, Length } from 'class-validator';
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Article } from './article';
 import { Organization } from './organization';
 import { User } from './user';
