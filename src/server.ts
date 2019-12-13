@@ -261,8 +261,8 @@ export const setupServer = async () => {
   app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
 
   app.patch('/v1/auth/activate', authController.patchUserActivate);
-  app.post('/v1/auth/reset/password', authController.postUserResetPassword);
-  app.patch('/v1/auth/reset/password', authController.patchUserResetPassword);
+  app.post('/v1/auth/reset/password', authController.postUserResetPassword); // Send a reset password token to the given email address
+  app.patch('/v1/auth/reset/password', authController.patchUserResetPassword); // Change the password of the user using a password reset token
 
   app.post('/v1/users', usersController.createUser);
 

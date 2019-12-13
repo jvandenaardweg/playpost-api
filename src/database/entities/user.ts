@@ -64,7 +64,7 @@ export class User {
   static sendActivationEmail = (activationToken: string, email: string) => {
     const htmlBody = `
       <h1>Activate your account</h1>
-      <p>You are one step away from an activated Playpost account.</p>
+      <p>You are one step away from an activated Playpost account. Just follow the link below to activate your account.</p>
       <a href="${process.env.PUBLISHERS_BASE_URL}/auth/activate/${activationToken}">Activate account</a>
       <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
     `;
@@ -176,7 +176,7 @@ export class User {
       logger.info(loggerPrefix, `Sending activation email to: ${this.email} using token: ${this.activationToken}`);
       await User.sendActivationEmail(this.activationToken, this.email);
     } catch (err) {
-      logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
+      logger.error(loggerPrefix, `Failed to send activation mail to: ${this.email}`, err);
       throw err;
     }
   }
