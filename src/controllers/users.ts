@@ -123,8 +123,7 @@ export const createUser = [
       return res.status(200).send();
 
     } catch (err) {
-      logger.error(loggerPrefix, 'Error while creating user:', err);
-      console.log(err)
+      logger.error(loggerPrefix, 'Error while creating user:', JSON.stringify(err));
 
       // since we have errors lets rollback changes we made
       await queryRunner.rollbackTransaction();
