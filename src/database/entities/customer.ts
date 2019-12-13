@@ -9,7 +9,7 @@ export class Customer {
   @IsUUID()
   id: string;
 
-  @Column('varchar', { length: 255 })
+  @Column('varchar', { length: 255, nullable: false })
   @Length(1, 255)
   stripeCustomerId: string; // cus_GLBNvU7Y4CEL02
 

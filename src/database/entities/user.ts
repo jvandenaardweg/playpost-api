@@ -2,17 +2,18 @@ import bcryptjs from 'bcryptjs';
 import { IsDate, IsEmail, IsUUID, Length } from 'class-validator';
 import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
-import { AfterInsert, AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { AfterRemove, BeforeInsert, Column, CreateDateColumn, Entity, Index, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { Article } from './article';
 import { Audiofile } from './audiofile';
 import { PlaylistItem } from './playlist-item';
 
 import * as AWSSes from '../../mailers/aws-ses';
-import { addEmailToMailchimpList, removeEmailToMailchimpList } from '../../mailers/mailchimp';
+import { removeEmailToMailchimpList } from '../../mailers/mailchimp';
 import { logger } from '../../utils';
 import { ApiKey } from './api-key';
 import { Organization } from './organization';
+import { Publication } from './publication';
 import { UserInAppSubscriptionApple } from './user-in-app-subscription-apple';
 import { UserInAppSubscriptionGoogle } from './user-in-app-subscriptions-google';
 import { UserVoiceSetting } from './user-voice-setting';
@@ -140,9 +141,14 @@ export class User {
   // A User can be part of one Organization
   // A User can exist without an Organization (nullable: true)
   // On delete of an Organization, do not delete the User, but set it to SET NULL
-  // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
-  @OneToOne(type => Organization, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
-  organization: Organization;
+  // Use cascade: ['insert'] to automatically insert and attach a new Organization to a new User
+  @ManyToMany(type => Organization, { onDelete: 'CASCADE', cascade: ['insert'] })
+  organizations: Organization[];
+
+  // A User can have access to multiple Publications
+  // When a Publication is deleted, also Delete it's User in the join table (CASCADE)
+  @ManyToMany(type => Publication, { onDelete: 'CASCADE' })
+  publications: Publication[];
 
   @CreateDateColumn()
   @IsDate()
@@ -156,27 +162,6 @@ export class User {
   beforeInsert() {
     this.email = User.normalizeEmail(this.email);
     this.activationToken = User.generateRandomActivationToken();
-  }
-
-  @AfterInsert()
-  async afterInsert() {
-    const loggerPrefix = 'Database Entity (User): @afterInsert():';
-
-    try {
-      logger.info(loggerPrefix, `Adding "${this.email}" to Mailchimp list.`);
-      await addEmailToMailchimpList(this.email);
-    } catch (err) {
-      logger.error(loggerPrefix, `Failed to add ${this.email} to Mailchimp list.`, err);
-      throw err;
-    }
-
-    try {
-      logger.info(loggerPrefix, `Sending activation email to: ${this.email} using token: ${this.activationToken}`);
-      await User.sendActivationEmail(this.activationToken, this.email);
-    } catch (err) {
-      logger.error(loggerPrefix, `Failed to send activation mail to: ${this.email}`, err);
-      throw err;
-    }
   }
 
   @AfterRemove()

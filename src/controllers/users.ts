@@ -5,6 +5,8 @@ import * as cacheKeys from '../cache/keys';
 import { Organization } from '../database/entities/organization';
 import { User } from '../database/entities/user';
 import { userInputValidationSchema } from '../database/validators';
+import { addEmailToMailchimpList } from '../mailers/mailchimp';
+import { logger } from '../utils';
 import { validateInput } from '../validators/entity';
 import { routeIsProtected } from './auth';
 
@@ -15,6 +17,8 @@ const MESSAGE_USER_NOT_ALLOWED = 'You are not allowed to do this.';
 
 export const createUser = [
   async (req: Request, res: Response) => {
+    const loggerPrefix = 'Create new user:';
+
     const { email, password, organizationName } = req.body;
     const userRepository = getRepository(User);
 
@@ -32,46 +36,105 @@ export const createUser = [
 
     const hashedPassword = await User.hashPassword(password);
 
-    const userToCreate: Partial<User> = { email: emailAddressNormalized, password: hashedPassword };
+    const newUser = new User();
+
+    newUser.email = emailAddressNormalized;
+    newUser.password = hashedPassword;
 
     // Validate the input
-    const validationResult = await validateInput(User, userToCreate);
+    const validationResult = await validateInput(User, newUser);
     if (validationResult.errors.length) { return res.status(400).json(validationResult); }
 
-    // If a organization name is giving during signup, create the organization and attach it to the user
-    if (organizationName) {
-      const organizationToCreate = new Organization();
+    // Create the user
 
-      organizationToCreate.name = organizationName;
+    // get a connection and create a new query runner
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
 
-      // Validate the input with our entity
-      const validationResultOrganization = await validateInput(Organization, organizationToCreate);
+    // establish real database connection using our new query runner
+    await queryRunner.connect();
 
-      if (validationResult.errors.length) {
-        return res.status(400).json({
-          message: validationResultOrganization,
-          field: 'organizationName'
-        });
+    // lets now open a new transaction:
+    await queryRunner.startTransaction();
+
+    try {
+      // First, create a user
+      logger.info(loggerPrefix, `Create user:`, newUser);
+      const savedUser = await queryRunner.manager.save(newUser);
+
+      // If a organization name is giving during signup, create the organization and attach it to the user
+      if (organizationName) {
+        const newOrganization = new Organization();
+
+        newOrganization.name = organizationName;
+
+        // Add the current user as an admin
+        newOrganization.admin = savedUser;
+
+        // Validate the input with our entity
+        const validationResultOrganization = await validateInput(Organization, newOrganization);
+
+        if (validationResult.errors.length) {
+          return res.status(400).json({
+            message: validationResultOrganization,
+            field: 'organizationName'
+          });
+        }
+
+        newOrganization.users = [savedUser];
+
+        logger.info(loggerPrefix, `Create organization:`, newOrganization);
+
+        await queryRunner.manager.save(Organization, newOrganization);
       }
 
-      userToCreate.organization = organizationToCreate;
+      const user = await queryRunner.manager.findOne(User, savedUser.id, {
+        select: ['id', 'email', 'activationToken']
+      });
+
+      if (!user) {
+        logger.info(loggerPrefix, `Could not find the user after creating it.`);
+        throw new Error('Oops! Could not find the new user after creating it.');
+      }
+
+      try {
+        logger.info(loggerPrefix, `Adding "${user.email}" to Mailchimp list.`);
+        await addEmailToMailchimpList(user.email);
+      } catch (err) {
+        logger.error(loggerPrefix, `Failed to add ${user.email} to Mailchimp list.`, err);
+        throw err;
+      }
+
+      try {
+        logger.info(loggerPrefix, `Sending activation email to: ${user.email} using token: ${user.activationToken}`);
+        await User.sendActivationEmail(user.activationToken, user.email);
+      } catch (err) {
+        logger.error(loggerPrefix, `Failed to send activation mail to: ${user.email}`, err);
+        throw err;
+      }
+
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+
+      await queryRunner.release();
+
+      // Transaction successfull!
+
+      return res.status(200).send();
+
+    } catch (err) {
+      logger.error(loggerPrefix, 'Error while creating user:', err);
+      console.log(err)
+
+      // since we have errors lets rollback changes we made
+      await queryRunner.rollbackTransaction();
+
+      await queryRunner.release();
+
+      return res.status(500).json({
+        message: 'Oops! An error happened while creating your account. Please try again.'
+      });
     }
-
-    // TODO: create with a transaction
-
-    // Create the user
-    // We have to use .create followed by .save, so we can use the afterInsert methods on the entity
-    const newUserToSave = userRepository.create(userToCreate);
-    const createdUser = await userRepository.save(newUserToSave);
-
-    // Get the created user and return it
-    // Important: don't return the createdUser, as this contains the hashed password
-    // Our findOne method exclude sensitive fields, like the password
-    const user = await userRepository.findOne(createdUser.id, {
-      relations: ['organization']
-    });
-
-    return res.json(user);
   }
 ];
 

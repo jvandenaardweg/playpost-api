@@ -1,5 +1,5 @@
 import { IsDate, IsUUID, Length } from 'class-validator';
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Customer } from './customer';
 import { Publication } from './publication';
 import { User } from './user';
@@ -20,14 +20,18 @@ export class Organization {
   @JoinColumn()
   admin: User;
 
-  // Restrict deletion of an Organization when a Customer is deleted
   // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
-  @OneToOne(type => Customer, { nullable: false, onDelete: 'RESTRICT', cascade: ['insert'] })
+  @OneToOne(type => Customer, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
   @JoinColumn()
   customer: Customer;
 
   @OneToMany(type => Publication, publication => publication.organization)
   publications: Publication[];
+
+  // An Organization can contain multiple Users
+  @ManyToMany(type => User, { onDelete: 'CASCADE', cascade: ['insert'] })
+  @JoinTable()
+  users: User[];
 
   @CreateDateColumn({ select: false })
   @IsDate()

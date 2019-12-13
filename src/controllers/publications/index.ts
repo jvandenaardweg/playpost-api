@@ -26,22 +26,27 @@ export class PublicationsController {
     const { publicationId } = req.params;
     const userId = req.user.id;
 
-    const publication = await this.publicationsRepository.findOne(publicationId);
+    const publicationExists = await this.publicationsRepository.findOne(publicationId, {
+      select: ['id']
+    });
 
-    if (!publication) {
-      return res.status(404).json({ message: 'The publication could not be found.' });
+    if (!publicationExists) {
+      return res.status(404).json({
+        message: 'The publication could not be found.'
+      });
     }
 
-    // Find the publication the user has access to
-    const userPublication = await getConnection()
+    const publicationOfUser = await getConnection()
       .getRepository(Publication)
       .createQueryBuilder('publication')
-      .leftJoinAndSelect('publication.organization', 'organization', 'organization.admin = :userId', { userId })
+      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
       .where('publication.id = :publicationId', { publicationId })
       .getOne()
 
-    if (!userPublication) {
-      return res.status(403).json({ message: 'You have no access to this publication.' });
+    if (!publicationOfUser) {
+      return res.status(401).json({
+        message: 'You have no access to this publication.'
+      })
     }
 
     return next()
@@ -52,27 +57,30 @@ export class PublicationsController {
     const userId = req.user.id;
 
     // Find if the user is an admin of an organization
+    // Only admins of an organization can create new publications
     const organization = await this.organizationRepository.findOne({
       where: {
         admin: {
           id: userId
         }
-      }
+      },
+      relations: ['admin'] // Select the admin relation, so we can connect the user to the new publication
     })
 
     if (!organization) {
       return res.status(401).json({
-        message: 'You cannot create a new publication because you are not an admin an organization.'
+        message: `You cannot create a new publication because you are not an admin of organization: ${organization}`
       })
     }
 
-    // Create the publication and attach it to the organization
-    const createdPublication = await this.publicationsRepository.save({
-      name,
-      organization: {
-        id: organization.id
-      }
-    })
+    const newPublication = new Publication();
+
+    newPublication.name = name;
+    newPublication.users = [organization.admin]; // Connect the admin to this publication so he has access to it
+    newPublication.organization = organization; // Connect the organization of the user to the publication
+
+    // Create the publication and attach it to the organization and user (admin)
+    const createdPublication = await this.publicationsRepository.save(newPublication)
 
     return res.json(createdPublication)
   }
@@ -83,22 +91,32 @@ export class PublicationsController {
   getPublications = async (req: Request, res: Response) => {
     const userId = req.user.id;
 
-    const publications = await getConnection()
+    // Get all the publications the user has access to
+    const [publications, total] = await getConnection()
       .getRepository(Publication)
       .createQueryBuilder('publication')
-      .leftJoinAndSelect('publication.organization', 'organization', 'organization.admin = :userId', { userId })
-      .getMany()
+      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
+      .getManyAndCount()
 
-    return res.json(publications)
+    return res.json({
+      total,
+      data: publications
+    })
   }
 
   getPublication = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
+    const userId = req.user.id;
 
-    // Get the publication info of the logged in user
-    const publication = await this.publicationsRepository.findOne(publicationId);
+    // Get the specific publication of the user
+    const publicationOfUser = await getConnection()
+      .getRepository(Publication)
+      .createQueryBuilder('publication')
+      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
+      .where('publication.id = :publicationId', { publicationId })
+      .getOne()
 
-    return res.json(publication)
+    return res.json(publicationOfUser)
   }
 
   getPublicationArticles = async (req: Request, res: Response): Promise<Response> => {

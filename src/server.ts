@@ -338,7 +338,8 @@ export const setupServer = async () => {
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticle);
 
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.getOrganizations);
-  app.get('/v1/organizations/:organizationId', IS_PROTECTED_JWT, organizationsController.getOrganization);
+  app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOrganization);
+  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createPublication);
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 

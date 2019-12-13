@@ -29,7 +29,7 @@ export class UserController {
   getUser = async (req: Request, res: Response) => {
     const userId = req.user.id;
 
-    const user = await this.userRepository.findOne(userId)
+    const user = await this.userRepository.findOne(userId);
 
     return res.json(user)
   }

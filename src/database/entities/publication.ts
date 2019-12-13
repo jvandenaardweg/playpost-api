@@ -32,8 +32,8 @@ export class Publication {
   @OneToMany(type => Article, article => article.publication, { onDelete: 'NO ACTION' })
   articles: Article[];
 
-  // A publication can be managed by multiple users
-  @ManyToMany(type => User, { onDelete: 'RESTRICT' })
+  // On delete of a User, remove his right to view this Publication (CASCADE)
+  @ManyToMany(type => User, { onDelete: 'CASCADE', cascade: ['insert'] })
   @JoinTable()
   users: User[];
 
