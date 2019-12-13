@@ -147,6 +147,8 @@ Updating the database is strictly done using migrations.
 6. Restart the service
 7. When starting the service migrations are run automatically
 
+Note: If there are old (not run) migrations in `npm run typeorm migration:show`, make sure you delete the `./dist` folder first, then run `npm run build` and then run `npm run typeorm migration:show` again. It should be deleted then. If not, the migration is still present in the code.
+
 ## When updating the environment with new data
 
 1. Make sure the migrations were run. We enabled logging for this.
