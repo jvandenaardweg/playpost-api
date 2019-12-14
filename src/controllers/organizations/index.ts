@@ -1,19 +1,23 @@
 
 import { NextFunction, Request, Response } from 'express';
 import { getConnection, getRepository, Repository } from 'typeorm';
+import { Customer } from '../../database/entities/customer';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
+import { stripe } from '../../billing';
 
 export class OrganizationsController {
   organizationRepository: Repository<Organization>;
   publicationRepository: Repository<Publication>;
   userRepository: Repository<User>;
+  customerRepository: Repository<Customer>;
 
   constructor() {
     this.organizationRepository = getRepository(Organization);
     this.publicationRepository = getRepository(Publication);
     this.userRepository = getRepository(User);
+    this.customerRepository = getRepository(Customer);
   }
 
   restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
@@ -226,5 +230,32 @@ export class OrganizationsController {
     await this.publicationRepository.remove(publication);
 
     return res.status(200).send();
+  }
+
+  getCustomer = async (req: Request, res: Response) => {
+    const { organizationId } = req.params;
+
+    const organization = await this.organizationRepository.findOne(organizationId, {
+      relations: ['customer']
+    });
+
+    if (!organization) {
+      return res.status(404).json({
+        message: 'The organization does not exist.'
+      })
+    }
+
+    const { stripeCustomerId } = organization.customer;
+
+    if (!stripeCustomerId) {
+      return res.status(204).send()
+    }
+
+    const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
+
+    return res.json({
+      ...organization.customer,
+      stripeCustomer
+    });
   }
 }

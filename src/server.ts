@@ -109,6 +109,12 @@ export const setupServer = async () => {
   if (!process.env.PUBLISHERS_BASE_URL) {
     throw new Error('Required environment variable "PUBLISHERS_BASE_URL" not set.');
   }
+  if (!process.env.STRIPE_PUBLISHABLE_KEY) {
+    throw new Error('Required environment variable "STRIPE_PUBLISHABLE_KEY" not set.');
+  }
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('Required environment variable "STRIPE_SECRET_KEY" not set.');
+  }
 
   const rateLimited = new ExpressRateLimit({
     // We'll use the in-memory cache, not Redis
@@ -346,6 +352,7 @@ export const setupServer = async () => {
   // Restricted to users who are in the organization
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOrganization);
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createUser);
+  app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getCustomer);
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deleteUser);
   app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createPublication);
   app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deletePublication);
