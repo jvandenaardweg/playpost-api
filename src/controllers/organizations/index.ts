@@ -1,11 +1,13 @@
 
 import { NextFunction, Request, Response } from 'express';
 import { getConnection, getRepository, Repository } from 'typeorm';
+import { stripe } from '../../billing';
 import { Customer } from '../../database/entities/customer';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
-import { stripe } from '../../billing';
+import { CollectionRequestQuery, CollectionResponse } from '../../typings';
+import joi from 'joi';
 
 export class OrganizationsController {
   organizationRepository: Repository<Organization>;
@@ -20,7 +22,7 @@ export class OrganizationsController {
     this.customerRepository = getRepository(Customer);
   }
 
-  restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
+  restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     const { organizationId } = req.params;
     const userId = req.user.id;
 
@@ -46,23 +48,59 @@ export class OrganizationsController {
     return next()
   }
 
-  getOrganizations = async (req: Request, res: Response) => {
+  /**
+   * Finds all organizations belonging to the authenticated user.
+   *
+   * @returns Promise<Response>
+   */
+  getAll = async (req: Request, res: Response): Promise<Response> => {
     const userId = req.user.id;
+    const { page, perPage } = req.query as CollectionRequestQuery;
+
+    const validationSchemaRequestQuery = joi.object().keys({
+      page: joi.number().integer(),
+      perPage: joi.number().integer()
+    })
+
+    const { error } = joi.validate(req.query, validationSchemaRequestQuery);
+
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+        details: error.details[0]
+      })
+    }
+
+    const pageParam = parseInt(page, 10) || 1;
+    const perPageParam = parseInt(perPage, 10) || 10;
+    const skip = (pageParam * perPageParam) - perPageParam;
+    const take = perPageParam;
 
     const [organizations, total] = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
       .innerJoin('organization.users', 'user', 'user.id = :userId', { userId })
       .select()
+      .skip(skip)
+      .take(take)
       .getManyAndCount()
 
-    return res.json({
+    const response: CollectionResponse<Organization[]> = {
       total,
+      page: pageParam,
+      perPage: perPageParam,
       data: organizations
-    })
+    }
+
+    return res.json(response)
   }
 
-  getOrganization = async (req: Request, res: Response) => {
+  /**
+   * Get one organization belonging to the authenticated user.
+   *
+   * @returns Promise<Response>
+   */
+  getOne = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const organization = await this.organizationRepository.findOne(organizationId, {

@@ -119,7 +119,7 @@ export const setupServer = async () => {
   const rateLimited = new ExpressRateLimit({
     // We'll use the in-memory cache, not Redis
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: process.env.NODE_ENV === 'production' ? 30 : 999999, // 30 requests allowed per minute, so at most: 1 per every 2 seconds
+    max: process.env.NODE_ENV === 'production' ? 60 : 999999, // 60 requests allowed per minute, so at most: 1 per second
     keyGenerator: req => {
       const authorizationHeaders = req.headers.authorization as string;
       const ipAddressOfUser = getRealUserIpAddress(req);
@@ -257,20 +257,21 @@ export const setupServer = async () => {
   // API Endpoints
 
   // TODO: Deprecated endpoints, remove later
-  app.patch('/v1/me/email', [rateLimited, IS_PROTECTED_JWT], meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.patch('/v1/me/password', [rateLimited, IS_PROTECTED_JWT], meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
-  app.get('/v1/languages/active', [rateLimited, IS_PROTECTED_JWT], languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
-  app.get('/v1/in-app-subscriptions/active', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  // app.patch('/v1/me/email', [rateLimited, IS_PROTECTED_JWT], meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
+  // app.patch('/v1/me/password', [rateLimited, IS_PROTECTED_JWT], meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
+  // app.get('/v1/languages/active', [rateLimited, IS_PROTECTED_JWT], languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
+  // app.get('/v1/in-app-subscriptions/active', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
   // TODO: Use expressBrute to increase the delay between each requests
   app.post('/v1/auth', authController.getAuthenticationToken);
-  app.post('/v1/auth/reset-password', authController.getResetPasswordToken); // Used only for the mobile app
-  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
-
   app.patch('/v1/auth/activate', authController.patchUserActivate);
   app.post('/v1/auth/reset/password', authController.postUserResetPassword); // Send a reset password token to the given email address
   app.patch('/v1/auth/reset/password', authController.patchUserResetPassword); // Change the password of the user using a password reset token
+
+  // Only used in our mobile app:
+  app.post('/v1/auth/reset-password', authController.getResetPasswordToken); // Used only for the mobile app
+  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
 
   app.post('/v1/users', usersController.createUser);
 
@@ -281,6 +282,7 @@ export const setupServer = async () => {
   app.delete('/v1/users/:userId', [rateLimited, IS_PROTECTED_JWT], usersController.deleteUser); // Admin only
 
   // /v1/me
+  // Used only in our mobile app
   app.get('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.findCurrentUser);
   app.patch('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.patchMe);
   app.post('/v1/me/voices', [rateLimited, IS_PROTECTED_JWT], meController.createSelectedVoice); // Setting the default voice per language for the user
@@ -322,7 +324,6 @@ export const setupServer = async () => {
   app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.findAll);
 
   // v1/subscriptions
-  // app.get('/v1/subscriptions', [rateLimited, IS_PROTECTED_JWT], subscriptionsController.findAll);
   app.get('/v1/in-app-subscriptions', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
   app.post('/v1/in-app-subscriptions/validate', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
@@ -332,25 +333,26 @@ export const setupServer = async () => {
 
   app.get('/health', rateLimited, healthController.getHealthStatus);
 
+  // Used by embedly
   app.get('/v1/oembed', oembedController.getOembedCode);
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
   // Available for all users to see their publications
-  app.get('/v1/publications', IS_PROTECTED_JWT, publicationsController.getPublications);
+  app.get('/v1/publications', IS_PROTECTED_JWT, publicationsController.getAll);
 
   // Restricted to users who are in a publication
-  app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublication);
-  app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticles);
-  app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createPublicationArticle);
-  app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getPublicationArticle);
+  app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOne);
+  app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getAllArticles);
+  app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createArticle);
+  app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 
   // Available for all users to see their organizations
-  app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.getOrganizations);
+  app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.getAll);
 
   // Restricted to users who are in the organization
-  app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOrganization);
+  app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOne);
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createUser);
   app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getCustomer);
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deleteUser);

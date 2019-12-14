@@ -82,3 +82,15 @@ export interface IAppleSubscriptionNotificationReceiptDetails {
   original_purchase_date_ms: string;
   version_external_identifier: string;
 }
+
+export interface CollectionResponse<T> {
+  total: number;
+  page: number;
+  perPage: number;
+  data: T;
+}
+
+export interface CollectionRequestQuery {
+  page: string;
+  perPage: string;
+}

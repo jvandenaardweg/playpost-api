@@ -9,6 +9,9 @@ import { addEmailToMailchimpList } from '../mailers/mailchimp';
 import { logger } from '../utils';
 import { validateInput } from '../validators/entity';
 import { routeIsProtected } from './auth';
+// import { stripe } from '../billing';
+// import { Customer } from '../database/entities/customer';
+// import uuid from 'uuid';
 
 const MESSAGE_USER_EMAIL_EXISTS = 'Another user with this email address already exists. If it\'s yours, you can try to login.'
 const MESSAGE_USER_NOT_FOUND = 'No user found';
@@ -65,6 +68,9 @@ export const createUser = [
       // If a organization name is giving during signup, create the organization and attach it to the user
       if (organizationName) {
         const newOrganization = new Organization();
+        // const newCustomer = new Customer();
+
+        // newCustomer.id = uuid.v4();
 
         newOrganization.name = organizationName;
 
@@ -80,6 +86,29 @@ export const createUser = [
             field: 'organizationName'
           });
         }
+
+        // Use the organization name to add it to stripe
+        // try {
+        //   logger.info(loggerPrefix, `Adding organization to Stripe...`);
+        //   const stripeCustomer = await stripe.customers.create({
+        //     name: newOrganization.name,
+        //     email: savedUser.email,
+        //     preferred_locales: ['en-US'], // https://support.stripe.com/questions/language-options-for-customer-emails
+        //     metadata: {
+        //       customerId: newCustomer.id,
+        //       userId: savedUser.id
+        //     }
+        //   })
+
+        //   newCustomer.stripeCustomerId = stripeCustomer.id;
+        // } catch (err) {
+        //   logger.error(loggerPrefix, `Failed to add organization to Stripe:`, JSON.stringify(err));
+        //   throw err;
+        // }
+
+        // const savedCustomer = await queryRunner.manager.save(Customer, newCustomer);
+
+        // newOrganization.customer = savedCustomer;
 
         newOrganization.users = [savedUser];
 
@@ -98,18 +127,18 @@ export const createUser = [
       }
 
       try {
-        logger.info(loggerPrefix, `Adding "${user.email}" to Mailchimp list.`);
-        await addEmailToMailchimpList(user.email);
-      } catch (err) {
-        logger.error(loggerPrefix, `Failed to add ${user.email} to Mailchimp list.`, err);
-        throw err;
-      }
-
-      try {
         logger.info(loggerPrefix, `Sending activation email to: ${user.email} using token: ${user.activationToken}`);
         await User.sendActivationEmail(user.activationToken, user.email);
       } catch (err) {
         logger.error(loggerPrefix, `Failed to send activation mail to: ${user.email}`, err);
+        throw err;
+      }
+
+      try {
+        logger.info(loggerPrefix, `Adding "${user.email}" to Mailchimp list.`);
+        await addEmailToMailchimpList(user.email);
+      } catch (err) {
+        logger.error(loggerPrefix, `Failed to add ${user.email} to Mailchimp list.`, err);
         throw err;
       }
 

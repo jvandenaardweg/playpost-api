@@ -55,7 +55,7 @@ export class PublicationsController {
   /**
    * Get the publications the user has access to.
    */
-  getPublications = async (req: Request, res: Response) => {
+  getAll = async (req: Request, res: Response) => {
     const userId = req.user.id;
 
     // Get all the publications the user has access to
@@ -71,7 +71,7 @@ export class PublicationsController {
     })
   }
 
-  getPublication = async (req: Request, res: Response) => {
+  getOne = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const userId = req.user.id;
 
@@ -86,7 +86,7 @@ export class PublicationsController {
     return res.json(publicationOfUser)
   }
 
-  getPublicationArticles = async (req: Request, res: Response): Promise<Response> => {
+  getAllArticles = async (req: Request, res: Response): Promise<Response> => {
     const { page, perPage } = req.query;
     const { publicationId } = req.params;
 
@@ -101,7 +101,7 @@ export class PublicationsController {
     return res.json(articleSummariesResponse)
   }
 
-  getPublicationArticle = async (req: Request, res: Response) => {
+  getArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
     const article = await this.articleRepository.findOneOrFail(articleId, {
@@ -115,7 +115,7 @@ export class PublicationsController {
     return res.json(article)
   }
 
-  createPublicationArticle = async (req: Request, res: Response) => {
+  createArticle = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
