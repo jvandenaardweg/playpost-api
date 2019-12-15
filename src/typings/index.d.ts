@@ -95,3 +95,6 @@ export interface CollectionRequestQuery {
   page: string;
   perPage: string;
 }
+
+export type PermissionRole = 'user' | 'organization-user' | 'organization-admin';
+export type PermissionRoles = PermissionRole[];

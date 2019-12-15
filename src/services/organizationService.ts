@@ -59,7 +59,7 @@ export class OrganizationService extends BaseService {
     return organization;
   }
 
-  async findPublications(organizationId: string): Promise<Publication[]> {
+  async findAllPublications(organizationId: string): Promise<Publication[]> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -84,7 +84,7 @@ export class OrganizationService extends BaseService {
     return organization.publications;
   }
 
-  async findUsers(organizationId: string): Promise<User[]> {
+  async findAllUsers(organizationId: string): Promise<User[]> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -109,7 +109,7 @@ export class OrganizationService extends BaseService {
     return organization.users;
   }
 
-  async findCustomer(organizationId: string): Promise<Customer> {
+  async findOneCustomer(organizationId: string): Promise<Customer> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -134,7 +134,7 @@ export class OrganizationService extends BaseService {
     return organization.customer;
   }
 
-  async findAdmin(organizationId: string): Promise<User> {
+  async findOneAdmin(organizationId: string): Promise<User> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -159,7 +159,7 @@ export class OrganizationService extends BaseService {
     return organization.admin;
   }
 
-  async changeAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
+  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
     if (authenticatedUserId === newAdminUserId) {
       throw {
         status: 403,
