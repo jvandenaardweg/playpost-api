@@ -2,7 +2,7 @@ import joi from 'joi';
 import { CollectionRequestQuery } from '../typings';
 
 export class BaseService {
-  constructor () { }
+  // constructor () { }
 
   validateGetOneParam(requestParams: any): { organizationId: string } {
     const validationSchema = joi.object().keys({
