@@ -3609,20 +3609,104 @@
 					]
 				},
 				{
-					"name": "Get customer",
+					"name": "Get customer of organization",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/v1/organizations/97629636-b7ff-4766-8f9f-0742465682ba/customer",
+							"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"v1",
 								"organizations",
-								"97629636-b7ff-4766-8f9f-0742465682ba",
+								":organizationId",
 								"customer"
+							],
+							"variable": [
+								{
+									"key": "organizationId",
+									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get publications of organization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/organizations/:organizationId/publications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"organizations",
+								":organizationId",
+								"publications"
+							],
+							"variable": [
+								{
+									"key": "organizationId",
+									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users of organization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/organizations/:organizationId/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"organizations",
+								":organizationId",
+								"users"
+							],
+							"variable": [
+								{
+									"key": "organizationId",
+									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get admin of organization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/organizations/:organizationId/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"organizations",
+								":organizationId",
+								"admin"
+							],
+							"variable": [
+								{
+									"key": "organizationId",
+									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+								}
 							]
 						}
 					},
@@ -3801,6 +3885,48 @@
 								{
 									"key": "publicationId",
 									"value": "90f1d7f0-75a9-408a-9a71-47e033e19bbe"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change admin of organization",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"adminId\": \"e7e4c3f7-d681-4bb9-957a-a1cbe046cab0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/organizations/:organizationId/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"organizations",
+								":organizationId",
+								"admin"
+							],
+							"variable": [
+								{
+									"key": "organizationId",
+									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
 								}
 							]
 						}

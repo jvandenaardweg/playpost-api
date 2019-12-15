@@ -354,7 +354,11 @@ export const setupServer = async () => {
   // Restricted to users who are in the organization
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getOne);
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createUser);
+  app.get('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getUsers);
+  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getPublications);
   app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getCustomer);
+  app.get('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.getAdmin);
+  app.put('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.putAdmin);
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deleteUser);
   app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.createPublication);
   app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.restrictResourceToOwner], organizationsController.deletePublication);

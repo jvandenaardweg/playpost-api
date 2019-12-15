@@ -1,51 +1,54 @@
 
 import { NextFunction, Request, Response } from 'express';
-import { getConnection, getRepository, Repository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 import { stripe } from '../../billing';
 import { Customer } from '../../database/entities/customer';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
-import { CollectionRequestQuery, CollectionResponse } from '../../typings';
-import joi from 'joi';
+import { OrganizationService } from '../../services/organizationService';
 
 export class OrganizationsController {
   organizationRepository: Repository<Organization>;
   publicationRepository: Repository<Publication>;
   userRepository: Repository<User>;
   customerRepository: Repository<Customer>;
+  organizationService: OrganizationService;
 
   constructor() {
     this.organizationRepository = getRepository(Organization);
     this.publicationRepository = getRepository(Publication);
     this.userRepository = getRepository(User);
     this.customerRepository = getRepository(Customer);
+    this.organizationService = new OrganizationService();
   }
 
   restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     const { organizationId } = req.params;
     const userId = req.user.id;
 
-    const organization = await this.organizationRepository.findOne(organizationId, {
-      select: ['id', 'admin'],
-      relations: ['users', 'admin']
-    });
+    try {
+      const organization = await this.organizationService.findOne(organizationId);
 
-    if (!organization) {
-      return res.status(404).json({
-        message: 'The organization could not be found.'
-      });
-    }
+      // Only allow access to this resource if it's a user or admin
+      const isUser = organization.users.some(user => user.id === userId);
+      const isAdmin = organization.admin.id === userId;
 
-    const isAllowed = organization.users.some(user => user.id === userId);
+      if (!isUser && !isAdmin) {
+        return res.status(403).json({
+          message: 'You have no access to this organization.'
+        })
+      }
 
-    if (!isAllowed) {
-      return res.status(403).json({
-        message: 'You have no access to this organization.'
+      return next()
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
       })
     }
-
-    return next()
   }
 
   /**
@@ -55,44 +58,20 @@ export class OrganizationsController {
    */
   getAll = async (req: Request, res: Response): Promise<Response> => {
     const userId = req.user.id;
-    const { page, perPage } = req.query as CollectionRequestQuery;
 
-    const validationSchemaRequestQuery = joi.object().keys({
-      page: joi.number().integer(),
-      perPage: joi.number().integer()
-    })
+    try {
+      const { page, perPage } = this.organizationService.validateGetAllParams(req.query);
+      const response = await this.organizationService.findAll(userId, page, perPage)
 
-    const { error } = joi.validate(req.query, validationSchemaRequestQuery);
+      return res.json(response)
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
 
-    if (error) {
-      return res.status(400).json({
-        message: error.details[0].message,
-        details: error.details[0]
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
       })
     }
-
-    const pageParam = parseInt(page, 10) || 1;
-    const perPageParam = parseInt(perPage, 10) || 10;
-    const skip = (pageParam * perPageParam) - perPageParam;
-    const take = perPageParam;
-
-    const [organizations, total] = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .innerJoin('organization.users', 'user', 'user.id = :userId', { userId })
-      .select()
-      .skip(skip)
-      .take(take)
-      .getManyAndCount()
-
-    const response: CollectionResponse<Organization[]> = {
-      total,
-      page: pageParam,
-      perPage: perPageParam,
-      data: organizations
-    }
-
-    return res.json(response)
   }
 
   /**
@@ -101,13 +80,123 @@ export class OrganizationsController {
    * @returns Promise<Response>
    */
   getOne = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
 
-    const organization = await this.organizationRepository.findOne(organizationId, {
-      relations: ['customer', 'publications', 'users']
-    });
+      const organization = await this.organizationService.findOne(organizationId);
 
-    return res.json(organization)
+      return res.json(organization)
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
+  }
+
+  getPublications = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
+
+      const publications = await this.organizationService.findPublications(organizationId);
+
+      return res.json(publications)
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
+  }
+
+  getUsers = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
+
+      const users = await this.organizationService.findUsers(organizationId);
+
+      return res.json(users)
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
+  }
+
+  getCustomer = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
+
+      const customer = await this.organizationService.findCustomer(organizationId);
+
+      const { stripeCustomerId } = customer;
+
+      if (!stripeCustomerId) {
+        return res.status(204).send()
+      }
+
+      const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
+
+      return res.json({
+        ...customer,
+        stripeCustomer
+      });
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
+  }
+
+  getAdmin = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
+
+      const admin = await this.organizationService.findAdmin(organizationId);
+
+      return res.json(admin);
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
+  }
+
+  /**
+   * Changes the admin of this organization. The user must already exist.
+   * Only admins of an organization can do this.
+   */
+  putAdmin = async (req: Request, res: Response): Promise<Response> => {
+    const { adminId } = req.body;
+    const userId = req.user.id;
+
+    try {
+      const { organizationId } = this.organizationService.validateGetOneParam(req.params);
+
+      const organization = await this.organizationService.changeAdmin(organizationId, userId, adminId);
+
+      return res.json(organization);
+    } catch (err) {
+      const errStatus = err.status ? err.status : 400;
+
+      return res.status(errStatus).json({
+        message: err.message,
+        details: (err.details) ? err.details : undefined
+      })
+    }
   }
 
   /**
@@ -268,32 +357,5 @@ export class OrganizationsController {
     await this.publicationRepository.remove(publication);
 
     return res.status(200).send();
-  }
-
-  getCustomer = async (req: Request, res: Response) => {
-    const { organizationId } = req.params;
-
-    const organization = await this.organizationRepository.findOne(organizationId, {
-      relations: ['customer']
-    });
-
-    if (!organization) {
-      return res.status(404).json({
-        message: 'The organization does not exist.'
-      })
-    }
-
-    const { stripeCustomerId } = organization.customer;
-
-    if (!stripeCustomerId) {
-      return res.status(204).send()
-    }
-
-    const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
-
-    return res.json({
-      ...organization.customer,
-      stripeCustomer
-    });
   }
 }
