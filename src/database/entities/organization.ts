@@ -29,7 +29,7 @@ export class Organization {
   publications: Publication[];
 
   // An Organization can contain multiple Users
-  @ManyToMany(type => User, { onDelete: 'CASCADE', cascade: ['insert'] })
+  @ManyToMany(type => User, user => user.organizations, { onDelete: 'CASCADE', cascade: ['insert'] })
   @JoinTable()
   users: User[];
 

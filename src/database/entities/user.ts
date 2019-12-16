@@ -142,12 +142,12 @@ export class User {
   // A User can exist without an Organization (nullable: true)
   // On delete of an Organization, do not delete the User, but set it to SET NULL
   // Use cascade: ['insert'] to automatically insert and attach a new Organization to a new User
-  @ManyToMany(type => Organization, { onDelete: 'CASCADE', cascade: ['insert'] })
+  @ManyToMany(type => Organization, organization => organization.users, { onDelete: 'CASCADE', cascade: ['insert'] })
   organizations: Organization[];
 
   // A User can have access to multiple Publications
   // When a Publication is deleted, also Delete it's User in the join table (CASCADE)
-  @ManyToMany(type => Publication, { onDelete: 'CASCADE' })
+  @ManyToMany(type => Publication, publication => publication.users, { onDelete: 'CASCADE' })
   publications: Publication[];
 
   @CreateDateColumn()

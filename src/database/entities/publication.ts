@@ -18,7 +18,7 @@ export class Publication {
   @Column('varchar', { length: 100, nullable: true })
   @Length(1, 100)
   @IsUrl()
-  url: string; // https://blog.playpost.app
+  url?: string; // https://blog.playpost.app
 
   // A Publication belongs to an Organization
   // Multiple Publications can belong to an Organization
@@ -30,18 +30,18 @@ export class Publication {
   // A Publication is owner of multiple Article's
   // On delete of an Article, do nothing
   @OneToMany(type => Article, article => article.publication, { onDelete: 'NO ACTION' })
-  articles: Article[];
+  articles?: Article[];
 
   // On delete of a User, remove his right to view this Publication (CASCADE)
-  @ManyToMany(type => User, { onDelete: 'CASCADE', cascade: ['insert'] })
+  @ManyToMany(type => User, user => user.publications, { onDelete: 'CASCADE', cascade: ['insert'] })
   @JoinTable()
   users: User[];
 
   @CreateDateColumn({ select: false })
   @IsDate()
-  createdAt: Date;
+  createdAt?: Date;
 
   @UpdateDateColumn({ select: false })
   @IsDate()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

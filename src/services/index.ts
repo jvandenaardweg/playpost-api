@@ -24,7 +24,7 @@ export class BaseService {
     }
   }
 
-  validateGetAllParams(requestQuery: CollectionRequestQuery) {
+  validatePagingParams(requestQuery: CollectionRequestQuery) {
     const validationSchemaRequestQuery = joi.object().keys({
       page: joi.number().integer(),
       perPage: joi.number().integer()
@@ -40,6 +40,20 @@ export class BaseService {
       }
     }
 
+    return requestQuery
+  }
+
+  // getSkipAndTake() {
+  //   const skip = (page * perPage) - perPage;
+  //   const take = perPage;
+
+  //   return {
+  //     skip,
+  //     take
+  //   }
+  // }
+
+  getPagingParams(requestQuery: CollectionRequestQuery) {
     const defaultPage = 1;
     const defaultPerPage = 10;
 

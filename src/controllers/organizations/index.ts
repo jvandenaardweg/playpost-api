@@ -6,29 +6,25 @@ import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
+import { BaseController } from '../index';
 
-export class OrganizationsController {
+export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
   publicationRepository: Repository<Publication>;
   userRepository: Repository<User>;
   organizationService: OrganizationService;
 
   constructor() {
+    super()
     this.organizationRepository = getRepository(Organization);
     this.publicationRepository = getRepository(Publication);
     this.userRepository = getRepository(User);
     this.organizationService = new OrganizationService();
   }
 
-  handleError(err: any, res: Response) {
-    const errStatus = err.status ? err.status : 400;
-
-    return res.status(errStatus).json({
-      message: err.message,
-      details: err.details ? err.details : undefined
-    });
-  }
-
+  /**
+   * Handles access permissions.
+   */
   permissions = (roles: PermissionRoles) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
       const userId = req.user.id;
@@ -82,8 +78,9 @@ export class OrganizationsController {
     const userId = req.user.id;
 
     try {
-      const { page, perPage } = this.organizationService.validateGetAllParams(req.query);
-      const response = await this.organizationService.findAll(userId, page, perPage);
+      const requestQuery = this.organizationService.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const response = await this.organizationService.findAll(userId, page, perPage, skip, take);
 
       return res.json(response);
     } catch (err) {
@@ -110,8 +107,11 @@ export class OrganizationsController {
 
   getPublications = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
+
     try {
-      const publications = await this.organizationService.findAllPublications(organizationId);
+      const requestQuery = this.organizationService.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const publications = await this.organizationService.findAllPublications(organizationId, page, perPage, skip, take);
 
       return res.json(publications);
     } catch (err) {
@@ -119,11 +119,16 @@ export class OrganizationsController {
     }
   };
 
+  /**
+   * Get all users within the organization.
+   */
   getUsers = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
-      const users = await this.organizationService.findAllUsers(organizationId);
+      const requestQuery = this.organizationService.validatePagingParams(req.query);
+      const { page, perPage } = this.organizationService.getPagingParams(requestQuery);
+      const users = await this.organizationService.findAllUsers(organizationId, page, perPage);
 
       return res.json(users);
     } catch (err) {
@@ -131,6 +136,9 @@ export class OrganizationsController {
     }
   };
 
+  /**
+   * Get the customer information of the organization. This includes data from Stripe.
+   */
   getCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
@@ -154,6 +162,9 @@ export class OrganizationsController {
     }
   };
 
+  /**
+   * Get the admin user of the organization.
+   */
   getAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 

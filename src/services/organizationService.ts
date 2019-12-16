@@ -12,10 +12,7 @@ export class OrganizationService extends BaseService {
     super()
   }
 
-  async findAll(userId: string, page: number, perPage: number): Promise<CollectionResponse<Organization[]>> {
-    const skip = (page * perPage) - perPage;
-    const take = perPage;
-
+  async findAll(userId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Organization[]>> {
     const [organizations, total] = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -59,54 +56,53 @@ export class OrganizationService extends BaseService {
     return organization;
   }
 
-  async findAllPublications(organizationId: string): Promise<Publication[]> {
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.publications", "publication")
+  async findAllPublications(organizationId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Publication[]>> {
+    const [publications, total] = await getConnection()
+      .getRepository(Publication)
+      .createQueryBuilder('publication')
+      .leftJoin("publication.organization", "organization")
       .where('organization.id = :organizationId', { organizationId })
-      .getOne()
+      .skip(skip)
+      .take(take)
+      .getManyAndCount()
 
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
+    const totalPages = Math.ceil(total / perPage);
+
+    const response: CollectionResponse<Publication[]> = {
+      total,
+      page,
+      perPage,
+      totalPages,
+      data: publications
     }
 
-    if (!organization.publications || !organization.publications.length) {
-      throw {
-        status: 404,
-        message: 'Organization does not have any publications yet.'
-      }
-    }
-
-    return organization.publications;
+    return response
   }
 
-  async findAllUsers(organizationId: string): Promise<User[]> {
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.users", "user")
+  async findAllUsers(organizationId: string, page: number, perPage: number): Promise<CollectionResponse<User[]>> {
+    const skip = (page * perPage) - perPage;
+    const take = perPage;
+
+    const [users, total] = await getConnection()
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoin("user.organizations", "organization")
       .where('organization.id = :organizationId', { organizationId })
-      .getOne()
+      .skip(skip)
+      .take(take)
+      .getManyAndCount()
 
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
+    const totalPages = Math.ceil(total / perPage);
+
+    const response: CollectionResponse<User[]> = {
+      total,
+      page,
+      perPage,
+      totalPages,
+      data: users
     }
 
-    if (!organization.users || !organization.users.length) {
-      throw {
-        status: 404,
-        message: 'Organization does not have any users yet.'
-      }
-    }
-
-    return organization.users;
+    return response
   }
 
   async findOneCustomer(organizationId: string): Promise<Customer> {
