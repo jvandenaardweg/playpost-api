@@ -7,6 +7,8 @@ import { User } from '../database/entities/user';
 import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
+import { stripe } from '../billing';
+import Stripe = require('stripe');
 
 export class OrganizationService extends BaseService {
   constructor () {
@@ -229,5 +231,40 @@ export class OrganizationService extends BaseService {
     ]);
 
     return updatedOrganization
+  }
+
+  /**
+   * Updates the customer in Stripe.
+   *
+   * @param organizationId
+   * @param authenticatedUserId 
+   * @param customerUpdateFields 
+   */
+  async updateCustomer(organizationId: string, authenticatedUserId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
+    const organization = await getConnection()
+      .getRepository(Organization)
+      .createQueryBuilder('organization')
+      .leftJoinAndSelect("organization.admin", "admin")
+      .leftJoinAndSelect("organization.customer", "customer")
+      .where('organization.id = :organizationId', { organizationId })
+      .getOne()
+
+    if (!organization) {
+      throw {
+        status: 404,
+        message: 'Organization does not exist.'
+      }
+    }
+
+    if (organization.admin.id !== authenticatedUserId) {
+      throw {
+        status: 403,
+        message: 'You are not allowed to do this because you are not an admin of this organization.'
+      }
+    }
+
+    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, customerUpdateFields);
+
+    return updatedStripeCustomer;
   }
 }

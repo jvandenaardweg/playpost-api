@@ -8,6 +8,7 @@ import * as AWSSes from '../../mailers/aws-ses';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
+import Stripe = require('stripe');
 
 export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
@@ -391,6 +392,20 @@ export class OrganizationsController extends BaseController {
       await this.publicationRepository.remove(publication);
 
       return res.status(200).send();
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  patchCustomer = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+    const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
+    const userId = req.user.id;
+
+    try {
+      const updatedCustomer = await this.organizationService.updateCustomer(organizationId, userId, requestBody);
+
+      return res.json(updatedCustomer);
     } catch (err) {
       return this.handleError(err, res);
     }
