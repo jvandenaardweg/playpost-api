@@ -67,7 +67,6 @@ export class User {
       <h1>Activate your account</h1>
       <p>You are one step away from an activated Playpost account. Just follow the link below to activate your account.</p>
       <a href="${process.env.PUBLISHERS_BASE_URL}/auth/activate/${activationToken}">Activate account</a>
-      <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
     `;
 
     // Send e-mail using AWS SES

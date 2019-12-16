@@ -152,7 +152,7 @@ export class OrganizationService extends BaseService {
     return organization.admin;
   }
 
-  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
+  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<{updatedOrganization: Organization, newAdmin: User, oldAdmin: User}> {
     if (authenticatedUserId === newAdminUserId) {
       throw {
         status: 403,
@@ -195,8 +195,17 @@ export class OrganizationService extends BaseService {
     }
 
     // Change the admin to the new admin
+    // tslint:disable-next-line: no-object-literal-type-assertion
+    const oldAdmin = { ...organization.admin } as User; // Make a copy of the old admin object, so we can use that
+
     organization.admin = newAdmin
 
-    return getConnection().manager.save(organization)
+    const updatedOrganization = await getConnection().manager.save(organization);
+
+    return {
+      updatedOrganization,
+      newAdmin,
+      oldAdmin
+    }
   }
 }

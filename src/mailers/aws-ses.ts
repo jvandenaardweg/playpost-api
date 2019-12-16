@@ -19,7 +19,10 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: htmlBody
+          Data: `
+            ${htmlBody}
+            ${transactionEmailFooter()}
+          `
         },
         Text: {
           Charset: 'UTF-8',
@@ -32,7 +35,7 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
       }
     },
     Source: 'noreply@playpost.app',
-    ReplyToAddresses: ['info@playpost.app']
+    ReplyToAddresses: ['support@playpost.app']
   };
 
   try {
@@ -57,3 +60,15 @@ export const sendTransactionalEmail = async (toEmail: string, title: string, htm
     throw err; // pass it up
   }
 };
+
+export const transactionEmailFooter = () => {
+  return `
+    <p>If you have a question, feedback or need any help, just reply to this email and we'll help you out.</p>
+    <p>
+      Thanks,<br />
+      Jordy van den Aardweg<br />
+      Founder Playpost<br />
+      support@playpost.app
+    </p>
+  `
+}

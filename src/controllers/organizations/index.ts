@@ -7,6 +7,7 @@ import { User } from '../../database/entities/user';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
+import * as AWSSes from '../../mailers/aws-ses';
 
 export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
@@ -183,13 +184,39 @@ export class OrganizationsController extends BaseController {
    */
   putAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
-    const { adminId } = req.body;
+    const { newAdminUserId } = req.body;
     const userId = req.user.id;
 
     try {
-      const organization = await this.organizationService.saveAdmin(organizationId, userId, adminId);
+      const { updatedOrganization, newAdmin, oldAdmin } = await this.organizationService.saveAdmin(organizationId, userId, newAdminUserId);
 
-      return res.json(organization);
+      // Send an e-mail to the new admin and old admin
+      await Promise.all([
+        // Admin rights added
+        AWSSes.sendTransactionalEmail(
+          newAdmin.email,
+          `You are now an admin of: ${updatedOrganization.name}`,
+          `
+            <p>Hi,</p>
+            <p>This is an e-mail to confirm you now have admin rights on organization <strong>${updatedOrganization.name}</strong>.</p>
+            <p>Use these superpowers wisely :-)</p>
+            <p><a href="${process.env.PUBLISHERS_BASE_URL}">View organization</a></p>
+          `
+        ),
+
+        // Admin rights removed
+        AWSSes.sendTransactionalEmail(
+          oldAdmin.email,
+          `Removed your admin rights on: ${updatedOrganization.name}`,
+          `
+            <p>Hi,</p>
+            <p>This is an e-mail to confirm your admin rights on organization <strong>${updatedOrganization.name}</strong> have been removed and replaced to user: ${newAdmin.email}.</p>
+            <p><a href="${process.env.PUBLISHERS_BASE_URL}">Login</a></p>
+          `
+        )
+      ]);
+
+      return res.json(updatedOrganization);
     } catch (err) {
       return this.handleError(err, res);
     }
@@ -292,6 +319,16 @@ export class OrganizationsController extends BaseController {
 
       const updatedOrganization = await this.organizationRepository.save(organization);
 
+      await AWSSes.sendTransactionalEmail(
+        newUser.email,
+        `You have been added to organization: ${updatedOrganization.name}`,
+        `
+          <p>Hi,</p>
+          <p>This is an e-mail to confirm you have been added to organization <strong>${updatedOrganization.name}</strong>.</p>
+          <p><a href="${process.env.PUBLISHERS_BASE_URL}">Login</a></p>
+        `
+      )
+
       return res.json(updatedOrganization);
     } catch (err) {
       return this.handleError(err, res);
@@ -322,11 +359,25 @@ export class OrganizationsController extends BaseController {
 
       // Filter out the user we want to delete
       const usersWithoutUserToDelete = organization.users.filter(organizationUser => organizationUser.id !== userId);
+      const userToDelete = organization.users.find(organizationUser => organizationUser.id === userId);
 
       // Set the new users, without the deleted user
       organization.users = usersWithoutUserToDelete;
 
       const updatedOrganization = await this.organizationRepository.save(organization);
+
+      if (userToDelete) {
+        await AWSSes.sendTransactionalEmail(
+          userToDelete.email,
+          `You have been removed from organization: ${updatedOrganization.name}`,
+          `
+            <p>Hi,</p>
+            <p>This is an e-mail to confirm you have been removed from organization <strong>${updatedOrganization.name}</strong>.</p>
+            <p>If this is correct, you can safely ignore and remove this email.</p.
+            <p>If you think this is incorrect, please reach out to us.</p>
+          `
+        )
+      }
 
       return res.json(updatedOrganization);
     } catch (err) {

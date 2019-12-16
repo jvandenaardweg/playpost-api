@@ -174,7 +174,6 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
       <li>Fill in your new password</li>
       <li>Save your new password and you're done!</li>
     </ol>
-    <p>Need more help? E-mail us at info@playpost.app. We are happy to help you!</p>
   `;
 
 
