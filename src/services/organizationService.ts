@@ -1,5 +1,7 @@
 import { getConnection } from 'typeorm';
 
+import Stripe from 'stripe';
+import { stripe } from '../billing';
 import { Customer } from '../database/entities/customer';
 import { Organization } from '../database/entities/organization';
 import { Publication } from '../database/entities/publication';
@@ -7,8 +9,6 @@ import { User } from '../database/entities/user';
 import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
-import { stripe } from '../billing';
-import Stripe = require('stripe');
 
 export class OrganizationService extends BaseService {
   constructor () {

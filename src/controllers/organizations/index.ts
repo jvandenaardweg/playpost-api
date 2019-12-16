@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
+import joi from 'joi';
+import Stripe from 'stripe';
 import { getRepository, Repository } from 'typeorm';
 import { stripe } from '../../billing';
 import { Organization } from '../../database/entities/organization';
@@ -8,8 +10,6 @@ import * as AWSSes from '../../mailers/aws-ses';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import Stripe from 'stripe';
-import joi from 'joi';
 
 export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
