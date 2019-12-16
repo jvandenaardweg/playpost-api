@@ -33,7 +33,7 @@ export class OrganizationsController extends BaseController {
       try {
         if (Object.keys(req.params).length) {
           // Validate
-          this.organizationService.validateGetOneParam(req.params);
+          this.validateGetOneParam(req.params);
         }
 
         // If the role is a user (so every authenticated user), skip the resource permission check
@@ -78,8 +78,8 @@ export class OrganizationsController extends BaseController {
     const userId = req.user.id;
 
     try {
-      const requestQuery = this.organizationService.validatePagingParams(req.query);
-      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const requestQuery = this.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
       const response = await this.organizationService.findAll(userId, page, perPage, skip, take);
 
       return res.json(response);
@@ -109,8 +109,8 @@ export class OrganizationsController extends BaseController {
     const { organizationId } = req.params;
 
     try {
-      const requestQuery = this.organizationService.validatePagingParams(req.query);
-      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const requestQuery = this.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
       const publications = await this.organizationService.findAllPublications(organizationId, page, perPage, skip, take);
 
       return res.json(publications);
@@ -126,8 +126,8 @@ export class OrganizationsController extends BaseController {
     const { organizationId } = req.params;
 
     try {
-      const requestQuery = this.organizationService.validatePagingParams(req.query);
-      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const requestQuery = this.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
       const users = await this.organizationService.findAllUsers(organizationId, page, perPage, skip, take);
 
       return res.json(users);
