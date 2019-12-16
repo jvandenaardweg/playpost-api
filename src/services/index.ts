@@ -2,7 +2,13 @@ import joi from 'joi';
 import { CollectionRequestQuery } from '../typings';
 
 export class BaseService {
-  // constructor () { }
+  defaultPage: number;
+  defaultPerPage: number;
+
+  constructor () {
+    this.defaultPage = 1;
+    this.defaultPerPage = 20;
+   }
 
   validateGetOneParam(requestParams: any): { organizationId: string } {
     const validationSchema = joi.object().keys({
@@ -43,22 +49,9 @@ export class BaseService {
     return requestQuery
   }
 
-  // getSkipAndTake() {
-  //   const skip = (page * perPage) - perPage;
-  //   const take = perPage;
-
-  //   return {
-  //     skip,
-  //     take
-  //   }
-  // }
-
   getPagingParams(requestQuery: CollectionRequestQuery) {
-    const defaultPage = 1;
-    const defaultPerPage = 10;
-
-    const pageParam = parseInt(requestQuery.page, 10) || defaultPage;
-    const perPageParam = parseInt(requestQuery.perPage, 10) || defaultPerPage;
+    const pageParam = parseInt(requestQuery.page, 10) || this.defaultPage;
+    const perPageParam = parseInt(requestQuery.perPage, 10) || this.defaultPerPage;
     const skip = (pageParam * perPageParam) - perPageParam;
     const take = perPageParam;
 

@@ -127,8 +127,8 @@ export class OrganizationsController extends BaseController {
 
     try {
       const requestQuery = this.organizationService.validatePagingParams(req.query);
-      const { page, perPage } = this.organizationService.getPagingParams(requestQuery);
-      const users = await this.organizationService.findAllUsers(organizationId, page, perPage);
+      const { page, perPage, skip, take } = this.organizationService.getPagingParams(requestQuery);
+      const users = await this.organizationService.findAllUsers(organizationId, page, perPage, skip, take);
 
       return res.json(users);
     } catch (err) {

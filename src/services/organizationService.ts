@@ -79,10 +79,7 @@ export class OrganizationService extends BaseService {
     return response
   }
 
-  async findAllUsers(organizationId: string, page: number, perPage: number): Promise<CollectionResponse<User[]>> {
-    const skip = (page * perPage) - perPage;
-    const take = perPage;
-
+  async findAllUsers(organizationId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<User[]>> {
     const [users, total] = await getConnection()
       .getRepository(User)
       .createQueryBuilder('user')

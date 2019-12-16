@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Response } from 'express';
 
 export class BaseController {
   handleError(err: any, res: Response) {
