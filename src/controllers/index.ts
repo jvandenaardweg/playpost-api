@@ -34,28 +34,6 @@ export class BaseController {
     }
   }
 
-
-
-  validateGetOneParam(requestParams: any): { organizationId: string } {
-    const validationSchema = joi.object().keys({
-      organizationId: joi.string().uuid().required()
-    })
-
-    const { error } = joi.validate(requestParams, validationSchema);
-
-    if (error) {
-      throw {
-        status: 400,
-        message: error.details[0].message,
-        details: error.details[0]
-      }
-    }
-
-    return {
-      organizationId: requestParams.organizationId
-    }
-  }
-
   validatePagingParams(requestQuery: CollectionRequestQuery) {
     const validationSchemaRequestQuery = joi.object().keys({
       page: joi.number().integer(),

@@ -33,10 +33,19 @@ export class OrganizationsController extends BaseController {
       const userId = req.user.id;
       const { organizationId } = req.params;
 
+      const reqParamsValidationSchema = joi.object().keys({
+        organizationId: joi.string().uuid().required()
+      })
+
       try {
-        if (Object.keys(req.params).length) {
-          // Validate
-          this.validateGetOneParam(req.params);
+        const { error } = joi.validate(req.params, reqParamsValidationSchema);
+
+        if (error) {
+          throw {
+            status: 400,
+            message: error.details[0].message,
+            details: error.details[0]
+          }
         }
 
         // If the role is a user (so every authenticated user), skip the resource permission check
