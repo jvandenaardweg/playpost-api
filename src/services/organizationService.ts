@@ -22,7 +22,7 @@ export class OrganizationService extends BaseService {
       .take(take)
       .getManyAndCount()
 
-    const totalPages = Math.ceil(total / perPage);
+    const totalPages = this.getTotalPages(total, perPage);
 
     const response: CollectionResponse<Organization[]> = {
       total,
@@ -66,7 +66,7 @@ export class OrganizationService extends BaseService {
       .take(take)
       .getManyAndCount()
 
-    const totalPages = Math.ceil(total / perPage);
+    const totalPages = this.getTotalPages(total, perPage);
 
     const response: CollectionResponse<Publication[]> = {
       total,
@@ -89,7 +89,7 @@ export class OrganizationService extends BaseService {
       .take(take)
       .getManyAndCount()
 
-    const totalPages = Math.ceil(total / perPage);
+    const totalPages = this.getTotalPages(total, perPage);
 
     const response: CollectionResponse<User[]> = {
       total,

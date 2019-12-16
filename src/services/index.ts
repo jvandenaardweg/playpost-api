@@ -8,7 +8,7 @@ export class BaseService {
   constructor () {
     this.defaultPage = 1;
     this.defaultPerPage = 20;
-   }
+  }
 
   validateGetOneParam(requestParams: any): { organizationId: string } {
     const validationSchema = joi.object().keys({
@@ -61,5 +61,9 @@ export class BaseService {
       skip,
       take
     }
+  }
+
+  getTotalPages(total: number, perPage: number): number {
+    return Math.ceil(total / perPage);
   }
 }
