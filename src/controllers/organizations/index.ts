@@ -4,10 +4,10 @@ import { stripe } from '../../billing';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
+import * as AWSSes from '../../mailers/aws-ses';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import * as AWSSes from '../../mailers/aws-ses';
 
 export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
@@ -188,33 +188,7 @@ export class OrganizationsController extends BaseController {
     const userId = req.user.id;
 
     try {
-      const { updatedOrganization, newAdmin, oldAdmin } = await this.organizationService.saveAdmin(organizationId, userId, newAdminUserId);
-
-      // Send an e-mail to the new admin and old admin
-      await Promise.all([
-        // Admin rights added
-        AWSSes.sendTransactionalEmail(
-          newAdmin.email,
-          `You are now an admin of: ${updatedOrganization.name}`,
-          `
-            <p>Hi,</p>
-            <p>This is an e-mail to confirm you now have admin rights on organization <strong>${updatedOrganization.name}</strong>.</p>
-            <p>Use these superpowers wisely :-)</p>
-            <p><a href="${process.env.PUBLISHERS_BASE_URL}">View organization</a></p>
-          `
-        ),
-
-        // Admin rights removed
-        AWSSes.sendTransactionalEmail(
-          oldAdmin.email,
-          `Removed your admin rights on: ${updatedOrganization.name}`,
-          `
-            <p>Hi,</p>
-            <p>This is an e-mail to confirm your admin rights on organization <strong>${updatedOrganization.name}</strong> have been removed and replaced to user: ${newAdmin.email}.</p>
-            <p><a href="${process.env.PUBLISHERS_BASE_URL}">Login</a></p>
-          `
-        )
-      ]);
+      const updatedOrganization = await this.organizationService.saveAdmin(organizationId, userId, newAdminUserId);
 
       return res.json(updatedOrganization);
     } catch (err) {

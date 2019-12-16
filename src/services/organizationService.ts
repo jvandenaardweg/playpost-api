@@ -4,6 +4,7 @@ import { Customer } from '../database/entities/customer';
 import { Organization } from '../database/entities/organization';
 import { Publication } from '../database/entities/publication';
 import { User } from '../database/entities/user';
+import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
 
@@ -152,7 +153,7 @@ export class OrganizationService extends BaseService {
     return organization.admin;
   }
 
-  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<{updatedOrganization: Organization, newAdmin: User, oldAdmin: User}> {
+  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
     if (authenticatedUserId === newAdminUserId) {
       throw {
         status: 403,
@@ -202,10 +203,31 @@ export class OrganizationService extends BaseService {
 
     const updatedOrganization = await getConnection().manager.save(organization);
 
-    return {
-      updatedOrganization,
-      newAdmin,
-      oldAdmin
-    }
+    // Send confirmation emails
+    await Promise.all([
+      // Admin rights added
+      AWSSes.sendTransactionalEmail(
+        newAdmin.email,
+        `You are now an admin of: ${updatedOrganization.name}`,
+        `
+          <p>Hi,</p>
+          <p>This is an e-mail to confirm you now have admin rights on organization <strong>${updatedOrganization.name}</strong>.</p>
+          <p>Use these superpowers wisely :-)</p>
+          <p><a href="${process.env.PUBLISHERS_BASE_URL}">View organization</a></p>
+        `
+      ),
+      // Admin rights removed
+      AWSSes.sendTransactionalEmail(
+        oldAdmin.email,
+        `Removed your admin rights on: ${updatedOrganization.name}`,
+        `
+          <p>Hi,</p>
+          <p>This is an e-mail to confirm your admin rights on organization <strong>${updatedOrganization.name}</strong> have been removed and replaced to user: ${newAdmin.email}.</p>
+          <p><a href="${process.env.PUBLISHERS_BASE_URL}">Login</a></p>
+        `
+      )
+    ]);
+
+    return updatedOrganization
   }
 }
