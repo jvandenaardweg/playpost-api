@@ -237,7 +237,7 @@ export class OrganizationService extends BaseService {
    * Updates the customer in Stripe.
    *
    * @param organizationId
-   * @param authenticatedUserId 
+   * @param authenticatedUserId
    * @param customerUpdateFields 
    */
   async updateCustomer(organizationId: string, authenticatedUserId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
@@ -263,7 +263,19 @@ export class OrganizationService extends BaseService {
       }
     }
 
-    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, customerUpdateFields);
+    const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
+      email: customerUpdateFields.email,
+      name: customerUpdateFields.name,
+      address: customerUpdateFields.address,
+      phone: customerUpdateFields.phone,
+      metadata: {
+        customerId: organization.customer.id,
+        organizationId: organization.id,
+        adminEmail: organization.admin.email
+      }
+    }
+
+    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateCustomerFields);
 
     return updatedStripeCustomer;
   }

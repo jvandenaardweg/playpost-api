@@ -357,6 +357,7 @@ export const setupServer = async () => {
   app.get('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getUsers);
   app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getPublications);
   app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomer);
+  app.patch('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchCustomer);
   app.get('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAdmin);
   app.put('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.putAdmin);
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteUser);

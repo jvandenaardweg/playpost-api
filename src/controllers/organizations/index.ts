@@ -8,7 +8,8 @@ import * as AWSSes from '../../mailers/aws-ses';
 import { OrganizationService } from '../../services/organizationService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import Stripe = require('stripe');
+import Stripe from 'stripe';
+import joi from 'joi';
 
 export class OrganizationsController extends BaseController {
   organizationRepository: Repository<Organization>;
@@ -402,7 +403,31 @@ export class OrganizationsController extends BaseController {
     const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
     const userId = req.user.id;
 
+    const customerValidationSchema = joi.object().keys({
+      email: joi.string().email().required(),
+      name: joi.string().max(50).required(),
+      address: joi.object().keys({
+        line1: joi.string().max(50).required(),
+        line2: joi.string().allow(null).max(50).optional(),
+        city: joi.string().required().max(50),
+        postal_code: joi.string().max(10).required(),
+        state: joi.string().allow(null).max(50).optional(),
+        country: joi.string().max(50).required()
+      }).required(),
+      phone: joi.string().allow(null).max(100).optional()
+    });
+
     try {
+      const { error } = joi.validate(req.body, customerValidationSchema);
+
+      if (error) {
+        throw {
+          status: 400,
+          message: error.details[0].message,
+          details: error.details[0]
+        }
+      }
+
       const updatedCustomer = await this.organizationService.updateCustomer(organizationId, userId, requestBody);
 
       return res.json(updatedCustomer);
