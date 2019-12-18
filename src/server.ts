@@ -37,6 +37,7 @@ import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { BillingController } from './controllers/billing';
 
 const PORT = process.env.PORT || 3000;
 
@@ -253,6 +254,7 @@ export const setupServer = async () => {
   const publicationsController = new PublicationsController();
   const userController = new UserController();
   const organizationsController = new OrganizationsController();
+  const billingController = new BillingController();
 
   // API Endpoints
 
@@ -347,6 +349,13 @@ export const setupServer = async () => {
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
+
+  app.get('/v1/billing/plans', IS_PROTECTED_JWT, billingController.getAllPlans);
+  app.get('/v1/billing/plans/:stripePlanId', IS_PROTECTED_JWT, billingController.getOnePlan);
+  app.get('/v1/billing/products', IS_PROTECTED_JWT, billingController.getAllProducts);
+  app.get('/v1/billing/products/:stripeProductId', IS_PROTECTED_JWT, billingController.getOneProduct);
+  app.get('/v1/billing/tax-rates', IS_PROTECTED_JWT, billingController.getAllTaxRates);
+  app.get('/v1/billing/tax-rates/:stripeTaxRateId', IS_PROTECTED_JWT, billingController.getOneTaxRate);
 
   // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);

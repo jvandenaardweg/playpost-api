@@ -2,11 +2,11 @@ import joi from '@hapi/joi';
 import { NextFunction, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { getRepository, Repository } from 'typeorm';
-import { stripe } from '../../billing';
 import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
 import * as AWSSes from '../../mailers/aws-ses';
+import { BillingService } from '../../services/billingService';
 import { OrganizationService } from '../../services/organizationService';
 import { UsageRecordService } from '../../services/usageRecordService';
 import { PermissionRoles } from '../../typings';
@@ -18,6 +18,7 @@ export class OrganizationsController extends BaseController {
   userRepository: Repository<User>;
   organizationService: OrganizationService;
   usageRecordService: UsageRecordService;
+  billingService: BillingService;
 
   constructor() {
     super()
@@ -26,6 +27,7 @@ export class OrganizationsController extends BaseController {
     this.userRepository = getRepository(User);
     this.organizationService = new OrganizationService();
     this.usageRecordService = new UsageRecordService();
+    this.billingService = new BillingService();
   }
 
   /**
@@ -171,10 +173,14 @@ export class OrganizationsController extends BaseController {
         return res.status(204).send();
       }
 
-      const stripeCustomer = await stripe.customers.retrieve(stripeCustomerId);
+      const stripeCustomer = await this.billingService.findOneCustomer(stripeCustomerId);
+      const isSubscribed = stripeCustomer.subscriptions.data[0].current_period_end * 1000 > new Date().getTime();
+      const lastSubscriptionStatus = (isSubscribed) ? stripeCustomer.subscriptions.data[0].status : null;
 
       return res.json({
         ...customer,
+        isSubscribed,
+        lastSubscriptionStatus,
         stripeCustomer
       });
     } catch (err) {
