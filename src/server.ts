@@ -30,6 +30,7 @@ import * as voicesController from './controllers/voices';
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
 import { AnalyticsController } from './controllers/analytics';
+import { BillingController } from './controllers/billing';
 import { OrganizationsController } from './controllers/organizations';
 import { PublicationsController } from './controllers/publications';
 import { UserController } from './controllers/user';
@@ -37,7 +38,6 @@ import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
-import { BillingController } from './controllers/billing';
 
 const PORT = process.env.PORT || 3000;
 
