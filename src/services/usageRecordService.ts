@@ -71,19 +71,21 @@ export class UsageRecordService extends BaseService {
    * @param stripeSubscriptionItemId 
    */
   async createUsageRecord(
-    articleId: string,
-    audiofileId: string,
-    organizationId: string,
-    publicationId: string,
-    userId: string,
-    quantity: number,
-    isMetered: boolean,
-    stripeSubscriptionItemId: string
+    stripeSubscriptionItemId: string,
+    options: {
+      articleId: string,
+      audiofileId: string,
+      organizationId: string,
+      publicationId: string,
+      userId: string,
+      quantity: number,
+      isMetered: boolean,
+    }
   ): Promise<InsertResult> {
     const timestamp = new Date().getTime();
 
     const stripePayload: Stripe.usageRecords.IUsageRecordCreationOptions = {
-      quantity,
+      quantity: options.quantity,
       timestamp,
       action: 'increment'
     }
@@ -91,7 +93,7 @@ export class UsageRecordService extends BaseService {
     let stripeUsageRecordId: string | undefined;
 
     // We track all usage, but allow to be "unmetered"
-    if (isMetered) {
+    if (options.isMetered) {
       // TODO: retry on fail
       const createdStripeUsageRecord = await stripe.usageRecords.create(stripeSubscriptionItemId, stripePayload);
       stripeUsageRecordId = createdStripeUsageRecord.id;
@@ -99,22 +101,22 @@ export class UsageRecordService extends BaseService {
 
     const newUsageRecord = this.usageRecordRepository.create({
       article: {
-        id: articleId
+        id: options.articleId
       },
       audiofile: {
-        id: audiofileId
+        id: options.audiofileId
       },
       organization: {
-        id: organizationId
+        id: options.organizationId
       },
       publication: {
-        id: publicationId
+        id: options.publicationId
       },
       user: {
-        id: userId
+        id: options.userId
       },
-      quantity,
-      isMetered,
+      quantity: options.quantity,
+      isMetered: options.isMetered,
       stripeSubscriptionItemId,
       stripeUsageRecordId,
       timestamp
