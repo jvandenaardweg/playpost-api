@@ -1,5 +1,5 @@
+import joi from '@hapi/joi';
 import { NextFunction, Request, Response } from 'express';
-import joi from 'joi';
 import Stripe from 'stripe';
 import { getRepository, Repository } from 'typeorm';
 import { stripe } from '../../billing';
@@ -39,13 +39,13 @@ export class OrganizationsController extends BaseController {
       try {
         // Only check for params when on routes that have params
         if (Object.keys(req.params).length) {
-          const reqParamsValidationSchema = joi.object().keys({
+          const validationSchema = joi.object().keys({
             organizationId: joi.string().uuid().required(),
             stripeSubscriptionId: joi.string().optional(),
             stripeSubscriptionItemId: joi.string().optional()
           })
 
-          const { error } = joi.validate(req.params, reqParamsValidationSchema);
+          const { error } = validationSchema.validate(req.params);
 
           if (error) {
             throw {
@@ -419,8 +419,8 @@ export class OrganizationsController extends BaseController {
     const { organizationId } = req.params;
     const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
 
-    const customerValidationSchema = joi.object().keys({
-      email: joi.string().email({ minDomainAtoms: 2 }).required(),
+    const validationSchema = joi.object().keys({
+      email: joi.string().email({ minDomainSegments: 2 }).required(),
       name: joi.string().max(50).required(),
       address: joi.object().keys({
         line1: joi.string().max(50).required(),
@@ -434,7 +434,7 @@ export class OrganizationsController extends BaseController {
     });
 
     try {
-      const { error } = joi.validate(req.body, customerValidationSchema);
+      const { error } = validationSchema.validate(req.body);
 
       if (error) {
         throw {

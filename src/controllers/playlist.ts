@@ -1,8 +1,7 @@
+import joi from '@hapi/joi';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import { DeepPartial, getManager, getRepository, Not } from 'typeorm';
-import { playlistInputValidationSchema } from '../database/validators';
 
 import { Article, ArticleStatus } from '../database/entities/article';
 import { PlaylistItem } from '../database/entities/playlist-item';
@@ -36,7 +35,12 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'favoritedAt'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required(),
+    favoritedAt: joi.alternatives().try(joi.string().allow(null)).required()
+  });
+
+  const { error } = validationSchema.validate({ ...req.params, ...req.body });
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -101,7 +105,12 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
 
-  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'archivedAt'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required(),
+    archivedAt: joi.alternatives().try(joi.string().allow(null)).required()
+  });
+
+  const { error } = validationSchema.validate({ ...req.params, ...req.body });
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -174,7 +183,11 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.params, playlistInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -245,7 +258,12 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.body, playlistInputValidationSchema.requiredKeys('articleUrl'));
+  const validationSchema = joi.object().keys({
+    articleUrl: joi.string().uri().required(),
+    documentHtml: joi.string().allow(undefined).optional()
+  });
+
+  const { error } = validationSchema.validate(req.body);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -342,7 +360,16 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const { order } = req.body;
 
-  const { error } = joi.validate({ ...req.params, ...req.body }, playlistInputValidationSchema.requiredKeys('articleId', 'order'));
+  const patchValidationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required(),
+    order: joi
+      .number()
+      .integer()
+      .min(0)
+      .required()
+  });
+
+  const { error } = patchValidationSchema.validate({ ...req.params, ...req.body })
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -454,7 +481,11 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.params, playlistInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');

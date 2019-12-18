@@ -1,5 +1,5 @@
+import joi from '@hapi/joi';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import { FindConditions, getCustomRepository, getRepository } from 'typeorm';
 
 import { Voice } from '../database/entities/voice';
@@ -8,7 +8,6 @@ import * as storage from '../storage/google-cloud';
 
 import { CACHE_ONE_DAY } from '../constants/cache';
 import { VoiceRepository } from '../database/repositories/voice';
-import { voiceInputValidationSchema } from '../database/validators';
 
 export const findAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
@@ -51,7 +50,12 @@ export const deleteVoicePreview = async (req: Request, res: Response) => {
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
 
-  const { error } = joi.validate(req.params, voiceInputValidationSchema.requiredKeys('voiceId'));
+  const validationSchema = joi.object().keys({
+    id: joi.string().uuid().required(),
+    voiceId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

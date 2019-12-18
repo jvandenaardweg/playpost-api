@@ -1,9 +1,8 @@
+import joi from '@hapi/joi';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import inAppPurchase, { Receipt } from 'in-app-purchase';
-import joi from 'joi';
 import { FindConditions, FindManyOptions, getRepository, LessThan } from 'typeorm';
-import { subscriptionPurchaseValidationSchema } from '../database/validators';
 
 import { APP_BUNDLE_ID } from '../constants/bundle-id';
 import { CACHE_ONE_DAY } from '../constants/cache';
@@ -123,7 +122,14 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
   const { id: userId } = req.user;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
-  const { error } = joi.validate({ ...req.body, ...req.params }, subscriptionPurchaseValidationSchema.requiredKeys('receipt', 'productId', 'platform'));
+  const validationSchema = joi.object().keys({
+    receipt: joi.string().required(),
+    productId: joi.string().required(),
+    inAppSubscriptionId: joi.string().uuid().optional(),
+    platform: joi.string().required()
+  });
+
+  const { error } = validationSchema.validate({ ...req.body, ...req.params });
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');

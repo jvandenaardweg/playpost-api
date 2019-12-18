@@ -1,8 +1,7 @@
+import joi from '@hapi/joi';
 import { Request, Response } from 'express'
-import joi from 'joi'
 import { getRepository, Repository } from 'typeorm'
 import { Article } from '../database/entities/article'
-import { oembedInputValidationSchema } from '../database/validators'
 
 export class OembedController {
   articleRepository: Repository<Article>
@@ -26,9 +25,13 @@ export class OembedController {
 
     // Make sure we pass through the extra query parameters
     const fullQueryUrl = Object.keys(req.query).map(key => key + '=' + req.query[key]).join('&').replace('url=', '');
-    const urlWithoutQueryParams = url.split('?')[0]
+    const urlWithoutQueryParams = url.split('?')[0];
 
-    const { error } = joi.validate({ url }, oembedInputValidationSchema.requiredKeys('url'));
+    const validationSchema = joi.object().keys({
+      url: joi.string().uri().required()
+    });
+
+    const { error } = validationSchema.validate({ url });
 
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -48,11 +51,13 @@ export class OembedController {
       const articleId = articleAndAudiofileIds[0];
       const audiofileId = articleAndAudiofileIds[1];
 
+      const otherValidationSchema = joi.object().keys({
+        articleId: joi.string().uuid().required(),
+        audiofileId: joi.string().uuid().required()
+      });
+
       // tslint:disable-next-line: no-shadowed-variable
-      const { error } = joi.validate({
-        articleId,
-        audiofileId
-      }, oembedInputValidationSchema.requiredKeys('articleId', 'audiofileId'));
+      const { error } = otherValidationSchema.validate({ articleId, audiofileId });
 
       if (error) {
         const messageDetails = error.details.map(detail => detail.message).join(' and ');

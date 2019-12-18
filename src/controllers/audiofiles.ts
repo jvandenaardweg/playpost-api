@@ -1,6 +1,6 @@
+import joi from '@hapi/joi';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import { getCustomRepository, getRepository } from 'typeorm';
 import uuid from 'uuid';
 
@@ -13,14 +13,18 @@ import { Voice } from '../database/entities/voice';
 import { AudiofileRepository } from '../database/repositories/audiofile';
 import { UserRepository } from '../database/repositories/user';
 
-import { audiofileInputValidationSchema } from '../database/validators';
 import { synthesizeArticleToAudiofile } from '../synthesizers';
 import { logger } from '../utils';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
-  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('audiofileId'));
+
+  const validationSchema = joi.object().keys({
+    audiofileId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -58,7 +62,12 @@ export const createAudiofile = async (req: Request, res: Response) => {
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
   const userRepository = getCustomRepository(UserRepository);
 
-  const { error } = joi.validate({ ...req.params, ...req.body }, audiofileInputValidationSchema.requiredKeys('articleId', 'mimeType'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required(),
+    mimeType: joi.string().required()
+  });
+
+  const { error } = validationSchema.validate({ ...req.params, ...req.body });
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -599,7 +608,11 @@ export const findAudiofileById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 
-  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('audiofileId'));
+  const validationSchema = joi.object().keys({
+    audiofileId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

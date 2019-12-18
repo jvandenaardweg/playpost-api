@@ -1,5 +1,5 @@
+import joi from '@hapi/joi';
 import { Response } from 'express';
-import joi from 'joi';
 import { CollectionRequestQuery } from '../typings';
 
 export class BaseController {
@@ -35,12 +35,12 @@ export class BaseController {
   }
 
   validatePagingParams(requestQuery: CollectionRequestQuery) {
-    const validationSchemaRequestQuery = joi.object().keys({
-      page: joi.number().integer(),
-      perPage: joi.number().integer()
+    const validationSchema = joi.object().keys({
+      page: joi.number().integer().optional(),
+      perPage: joi.number().integer().optional()
     })
 
-    const { error } = joi.validate(requestQuery, validationSchemaRequestQuery);
+    const { error } = validationSchema.validate(requestQuery);
 
     if (error) {
       throw {

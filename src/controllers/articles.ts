@@ -1,5 +1,5 @@
+import joi from '@hapi/joi';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import nodeFetch from 'node-fetch';
 import { getRepository } from 'typeorm';
 import urlParse from 'url-parse';
@@ -9,7 +9,6 @@ import { CACHE_FOREVER } from '../constants/cache';
 import { Article, ArticleStatus } from '../database/entities/article';
 import { Language } from '../database/entities/language';
 import { PlaylistItem } from '../database/entities/playlist-item';
-import { articleInputValidationSchema, audiofileInputValidationSchema } from '../database/validators';
 import * as storage from '../storage/google-cloud';
 import { logger } from '../utils';
 
@@ -17,7 +16,11 @@ export const findArticleById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -45,7 +48,11 @@ export const findAllArticles = async (req: Request, res: Response) => {
   const { url } = req.query;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.query, audiofileInputValidationSchema.requiredKeys('url'));
+  const validationSchema = joi.object().keys({
+    url: joi.string().uri().required()
+  });
+
+  const { error } = validationSchema.validate(req.query);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -74,7 +81,11 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -99,7 +110,11 @@ export const deleteById = async (req: Request, res: Response) => {
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
-  const { error } = joi.validate(req.params, audiofileInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -252,7 +267,11 @@ export const syncArticleWithSource = async (req: Request, res: Response) => {
   const playlistItemRepository = getRepository(PlaylistItem);
   const { articleId } = req.params;
 
-  const { error } = joi.validate(req.params, articleInputValidationSchema.requiredKeys('articleId'));
+  const validationSchema = joi.object().keys({
+    articleId: joi.string().uuid().required()
+  });
+
+  const { error } = validationSchema.validate(req.params);
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');

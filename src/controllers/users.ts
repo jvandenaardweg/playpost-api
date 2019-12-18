@@ -1,9 +1,9 @@
+import joi from '@hapi/joi';
 import { Request, Response } from 'express';
 import { getConnection, getRepository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
 import { Organization } from '../database/entities/organization';
 import { User } from '../database/entities/user';
-import { organizationValidationSchema, userCreationValidationSchema } from '../database/validators';
 import { addEmailToMailchimpList } from '../mailers/mailchimp';
 import { logger } from '../utils';
 import { validateInput } from '../validators/entity';
@@ -32,7 +32,13 @@ export const createUser = [
     const { email, password, organization } = req.body as CreateUserRequestBody;
     const userRepository = getRepository(User);
 
-    const userValidationResult = userCreationValidationSchema.validate(req.body);
+    const validationSchema = joi.object().keys({
+      email: joi.string().email({ minDomainSegments: 2 }),
+      password: joi.string().min(6),
+      organization: joi.object().optional()
+    });
+
+    const userValidationResult = validationSchema.validate(req.body);
 
     if (userValidationResult.error) {
       const firstError = userValidationResult.error.details[0];
@@ -79,6 +85,16 @@ export const createUser = [
 
       // If a organization name is giving during signup, create the organization and attach it to the user
       if (organization) {
+        const organizationValidationSchema = joi.object().keys({
+          organization: joi.object().keys({
+            name: joi.string().max(50).required().messages({
+              'string.base': 'Organization name must be a string.',
+              'string.empty': 'Organization name cannot be empty.',
+              'string.max': 'Organization name should have a maximum length of {#limit}.',
+              'any.required': 'An organization name is required.'
+            })
+          })
+        });
         // Only validate the organization object, remove email and password
         const organizationBody = { organization: req.body.organization }
         const organizationValidation = organizationValidationSchema.validate(organizationBody);

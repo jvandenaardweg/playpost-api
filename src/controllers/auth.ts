@@ -1,9 +1,8 @@
+import joi from '@hapi/joi';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import passport from 'passport';
 import { getCustomRepository, getRepository } from 'typeorm';
 import { User } from '../database/entities/user';
-import { userInputValidationSchema } from '../database/validators';
 
 import { UserRepository } from '../database/repositories/user';
 import * as AWSSes from '../mailers/aws-ses';
@@ -28,7 +27,13 @@ export const routeIsProtected = passport.authenticate('jwt', { session: false, f
 export const getAuthenticationToken = async (req: Request, res: Response) => {
   const loggerPrefix = 'Get Authentication Token: ';
   const { email, password } = req.body;
-  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email', 'password'));
+
+  const validationSchema = joi.object().keys({
+    email: joi.string().email({ minDomainSegments: 2 }).required(),
+    password: joi.string().min(6).required()
+  });
+
+  const { error } = validationSchema.validate(req.body);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -108,7 +113,11 @@ export const getResetPasswordToken = async (req: Request, res: Response) => {
 
   const { email } = req.body as IRequestBody;
 
-  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('email'));
+  const validationSchema = joi.object().keys({
+    email: joi.string().email({ minDomainSegments: 2 }).required()
+  });
+
+  const { error } = validationSchema.validate(req.body);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');
@@ -205,7 +214,12 @@ export const updatePasswordUsingToken = async (req: Request, res: Response) => {
 
   const { resetPasswordToken, password } = req.body as IRequestBody;
 
-  const { error } = joi.validate(req.body, userInputValidationSchema.requiredKeys('resetPasswordToken', 'password'));
+  const validationSchema = joi.object().keys({
+    password: joi.string().min(6).required(),
+    resetPasswordToken: joi.string().length(6).required()
+  });
+
+  const { error } = validationSchema.validate(req.body);
 
   if (error) {
     const message = error.details.map(detail => detail.message).join(' and ');

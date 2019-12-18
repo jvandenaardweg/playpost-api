@@ -1,6 +1,6 @@
+import joi from '@hapi/joi';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
-import joi from 'joi';
 import { getConnection, getCustomRepository, getRepository, Repository } from 'typeorm';
 
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
@@ -10,7 +10,6 @@ import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
 
 import { UserRepository } from '../database/repositories/user';
-import { apiKeyInputValidationSchema, userInputValidationSchema, userVoiceSettingValidationSchema } from '../database/validators';
 
 import * as cacheKeys from '../cache/keys';
 import { logger } from '../utils';
@@ -75,7 +74,12 @@ export class MeController {
     const userId = req.user.id;
     const loggerPrefix = 'Patch User: ';
 
-    const { error } = joi.validate(req.body, userInputValidationSchema.optionalKeys('email', 'password'));
+    const validationSchema = joi.object().keys({
+      email: joi.string().email({ minDomainSegments: 2 }).optional(),
+      password: joi.string().min(6).optional()
+    });
+
+    const { error } = validationSchema.validate(req.body);
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -138,6 +142,8 @@ export class MeController {
 
     await this.customUserRepository.removeById(userId);
 
+    // TODO: prevent deletion if user is admin of organization
+
     return res.json({ message: MESSAGE_ME_DELETED });
   };
 
@@ -151,7 +157,11 @@ export class MeController {
     const userId: string = req.user.id;
     const { voiceId }: { voiceId: string } = req.body;
 
-    const { error } = joi.validate(req.body, userVoiceSettingValidationSchema.requiredKeys('voiceId'));
+    const validationSchema = joi.object().keys({
+      voiceId: joi.string().uuid().required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -268,7 +278,11 @@ export class MeController {
     const userId = req.user.id;
     const { apiKeyId } = req.params;
 
-    const { error } = joi.validate(req.params, apiKeyInputValidationSchema);
+    const validationSchema = joi.object().keys({
+      apiKeyId: joi.string().uuid().required()
+    });
+
+    const { error } = validationSchema.validate(req.params);
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
@@ -304,9 +318,12 @@ export class MeController {
     const userId = req.user.id;
     const { label, allowedDomain } = req.body;
 
-    // TODO: validate "allowedDomain" with class validator
+    const validationSchema = joi.object().keys({
+      label: joi.string().required(),
+      allowedDomain: joi.string().optional()
+    });
 
-    const { error } = joi.validate(req.body, apiKeyInputValidationSchema);
+    const { error } = validationSchema.validate(req.body);
 
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
