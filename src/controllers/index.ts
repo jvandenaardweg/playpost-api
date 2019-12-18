@@ -12,7 +12,7 @@ export class BaseController {
   }
 
   handleError(err: any, res: Response) {
-    const errStatus = err.status ? err.status : 400;
+    const errStatus = err.status ? err.status : err.statusCode ? err.statusCode : 400;
 
     return res.status(errStatus).json({
       message: err.message,

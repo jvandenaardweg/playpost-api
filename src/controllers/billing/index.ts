@@ -10,6 +10,10 @@ export class BillingController extends BaseController {
     this.billingService = new BillingService();
   }
 
+  getIndex = async (req: Request, res: Response): Promise<Response> => {
+    return res.status(200).send('OK');
+  };
+
   getAllPlans = async (req: Request, res: Response): Promise<Response> => {
     // const userId = req.user.id;
 

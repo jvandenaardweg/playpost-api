@@ -350,6 +350,7 @@ export const setupServer = async () => {
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 
+  app.get('/v1/billing', IS_PROTECTED_JWT, billingController.getIndex);
   app.get('/v1/billing/plans', IS_PROTECTED_JWT, billingController.getAllPlans);
   app.get('/v1/billing/plans/:stripePlanId', IS_PROTECTED_JWT, billingController.getOnePlan);
   app.get('/v1/billing/products', IS_PROTECTED_JWT, billingController.getAllProducts);

@@ -165,9 +165,11 @@
   "devDependencies": {
     "@types/hapi__joi": "^16.0.4",
     "@types/stripe": "^7.12.0",
+    "@types/supertest": "^2.0.8",
     "husky": "^3.0.9",
     "loadtest": "^3.0.8",
     "npm-check": "^5.9.0",
+    "supertest": "^4.0.2",
     "tslint-config-prettier": "^1.18.0"
   }
 }
