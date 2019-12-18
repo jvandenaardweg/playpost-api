@@ -1,4 +1,4 @@
-import joi from 'joi';
+import joi from '@hapi/joi';
 
 export const articleInputValidationSchema = joi.object().keys({
   articleUrl: joi.string().uri(),
@@ -49,11 +49,28 @@ export const playlistInputValidationSchema = joi.object().keys({
 export const userInputValidationSchema = joi.object().keys({
   id: joi.string().uuid(),
   userId: joi.string().uuid(),
-  email: joi.string().email({ minDomainAtoms: 2 }),
+  email: joi.string().email({ minDomainSegments: 2 }),
   password: joi.string().min(6),
   resetPasswordToken: joi.string().length(6),
   activationToken: joi.string().length(32),
-  organizationName: joi.string().max(50)
+  organization: joi.object().optional()
+});
+
+export const userCreationValidationSchema = joi.object().keys({
+  email: joi.string().email({ minDomainSegments: 2 }),
+  password: joi.string().min(6),
+  organization: joi.object().optional()
+});
+
+export const organizationValidationSchema = joi.object().keys({
+  organization: joi.object().keys({
+    name: joi.string().max(50).required().messages({
+      'string.base': 'Organization name must be a string.',
+      'string.empty': 'Organization name cannot be empty.',
+      'string.max': 'Organization name should have a maximum length of {#limit}.',
+      'any.required': 'An organization name is required.'
+    })
+  })
 });
 
 export const voiceInputValidationSchema = joi.object().keys({

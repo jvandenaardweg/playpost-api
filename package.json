@@ -73,6 +73,7 @@
     "@google-cloud/pubsub": "^1.0.0",
     "@google-cloud/storage": "^4.0.1",
     "@google-cloud/text-to-speech": "^1.4.1",
+    "@hapi/joi": "^16.1.8",
     "@sentry/cli": "^1.48.0",
     "@sentry/integrations": "^5.7.1",
     "@sentry/node": "^5.7.1",
@@ -164,6 +165,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "@types/hapi__joi": "^16.0.4",
     "@types/stripe": "^7.12.0",
     "husky": "^3.0.9",
     "loadtest": "^3.0.8",
