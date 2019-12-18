@@ -1,9 +1,11 @@
-import { getConnection, getRepository, DeepPartial, Repository, InsertResult } from 'typeorm';
 import Stripe from 'stripe';
+import { getConnection, getRepository, InsertResult, Repository } from 'typeorm';
+
+import { stripe } from '../billing';
 import { UsageRecord } from '../database/entities/usage-record';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
-import { stripe } from '../billing';
+
 export class UsageRecordService extends BaseService {
   usageRecordRepository: Repository<UsageRecord>;
 
