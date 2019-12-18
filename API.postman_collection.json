@@ -3449,6 +3449,45 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Get all customer usage records",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"subscriptions",
+										":stripeSubscriptionId",
+										"subscription-items",
+										":stripeSubscriptionItemId",
+										"usage-records"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										},
+										{
+											"key": "stripeSubscriptionId",
+											"value": "sub_GNKb05bvWL9vsy"
+										},
+										{
+											"key": "stripeSubscriptionItemId",
+											"value": "si_GNKbK8bT1KAa6A"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -4162,6 +4201,192 @@
 								{
 									"key": "organizationId",
 									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Billing",
+			"item": [
+				{
+					"name": "Get all plans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/plans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"plans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all subscriptions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/subscriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all tax rates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a tax rate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/tax-rates/:stripeTaxRateId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"tax-rates",
+								":stripeTaxRateId"
+							],
+							"variable": [
+								{
+									"key": "stripeTaxRateId",
+									"value": "txr_1Fqzv1LbygOvfi9oYJqZckKS"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a plan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/plans/:stripePlanId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"plans",
+								":stripePlanId"
+							],
+							"variable": [
+								{
+									"key": "stripePlanId",
+									"value": "plan_GLVHSLbMkT1UX8"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/subscriptions/:stripeSubscriptionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"subscriptions",
+								":stripeSubscriptionId"
+							],
+							"variable": [
+								{
+									"key": "stripeSubscriptionId",
+									"value": "sub_GNKb05bvWL9vsy"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/billing/products/:stripeProductId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"billing",
+								"products",
+								":stripeProductId"
+							],
+							"variable": [
+								{
+									"key": "stripeProductId",
+									"value": "prod_GNoXV2xtX4zdOI"
 								}
 							]
 						}
