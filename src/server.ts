@@ -351,18 +351,31 @@ export const setupServer = async () => {
   // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);
 
-  // Restricted to users who are in the organization
+  // Organization: Info
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOne);
+
+  // Organization: Publications
+  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getPublications);
+  app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.createPublication);
+  app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deletePublication);
+
+  // Organization: Customer and Stripe subscriptions
+  app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomer);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerSubscriptions);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerSubscription);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerSubscriptionItems);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records-summaries', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerUsageRecordsSummaries);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerUsageRecords);
+  app.get('/v1/organizations/:organizationId/customer/invoices', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerInvoices);
+  app.get('/v1/organizations/:organizationId/customer/invoices/upcoming', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerInvoices);
+  app.patch('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchCustomer);
+
+  // Organization: manage Admins and Users
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user', 'organization-admin'])], organizationsController.createUser);
   app.get('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getUsers);
-  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getPublications);
-  app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomer);
-  app.patch('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchCustomer);
   app.get('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAdmin);
   app.put('/v1/organizations/:organizationId/admin', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.putAdmin);
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteUser);
-  app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.createPublication);
-  app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deletePublication);
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 

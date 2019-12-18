@@ -1,6 +1,6 @@
+import Stripe from 'stripe';
 import { getConnection } from 'typeorm';
 
-import Stripe from 'stripe';
 import { stripe } from '../billing';
 import { Customer } from '../database/entities/customer';
 import { Organization } from '../database/entities/organization';
@@ -36,6 +36,17 @@ export class OrganizationService extends BaseService {
     }
 
     return response
+  }
+
+  async findOneExists(organizationId: string): Promise<boolean> {
+    const organization = await getConnection()
+      .getRepository(Organization)
+      .createQueryBuilder('organization')
+      .where('organization.id = :organizationId', { organizationId })
+      .select('id')
+      .getOne()
+
+    return !!organization;
   }
 
   async findOne(organizationId: string): Promise<Organization> {
@@ -106,19 +117,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findOneCustomer(organizationId: string): Promise<Customer> {
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.customer", "customer")
-      .where('organization.id = :organizationId', { organizationId })
-      .getOne()
-
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
-    }
+    const organization = await this.findOne(organizationId);
 
     if (!organization.customer) {
       throw {
@@ -131,19 +130,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findOneAdmin(organizationId: string): Promise<User> {
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.admin", "admin")
-      .where('organization.id = :organizationId', { organizationId })
-      .getOne()
-
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
-    }
+    const organization = await this.findOne(organizationId);
 
     if (!organization.admin) {
       throw {
@@ -163,26 +150,7 @@ export class OrganizationService extends BaseService {
       }
     }
 
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.admin", "admin")
-      .where('organization.id = :organizationId', { organizationId })
-      .getOne()
-
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
-    }
-
-    if (organization.admin.id !== authenticatedUserId) {
-      throw {
-        status: 403,
-        message: 'You are not allowed to do this because you are not an admin of this organization.'
-      }
-    }
+    const organization = await this.findOne(organizationId);
 
     const newAdmin = await getConnection()
       .getRepository(User)
@@ -240,28 +208,8 @@ export class OrganizationService extends BaseService {
    * @param authenticatedUserId
    * @param customerUpdateFields 
    */
-  async updateCustomer(organizationId: string, authenticatedUserId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
-    const organization = await getConnection()
-      .getRepository(Organization)
-      .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.admin", "admin")
-      .leftJoinAndSelect("organization.customer", "customer")
-      .where('organization.id = :organizationId', { organizationId })
-      .getOne()
-
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
-    }
-
-    if (organization.admin.id !== authenticatedUserId) {
-      throw {
-        status: 403,
-        message: 'You are not allowed to do this because you are not an admin of this organization.'
-      }
-    }
+  async updateCustomer(organizationId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
+    const organization = await this.findOne(organizationId);
 
     const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
       email: customerUpdateFields.email,
@@ -272,11 +220,75 @@ export class OrganizationService extends BaseService {
         customerId: organization.customer.id,
         organizationId: organization.id,
         adminEmail: organization.admin.email
-      }
+      },
     }
+
+    // const taxIds = await stripe.customers.listTaxIds(organization.customer.stripeCustomerId);
+
+    // // User has no tax ID, add it.
+    // if (customerUpdateFields && !taxIds.data.length) {
+    //   await stripe.customers.createTaxId(organization.customer.stripeCustomerId, {
+    //     type: 'eu_vat', // TODO: fill in
+    //     value: 'VATNUMBER0123' // TODO: fill in
+    //   })
+    // } else {
+    //   // A user can only have one tax ID
+    //   // const currentTaxId = taxIds;
+
+    //   // Update tax ID
+    //   // await stripe.customers.deleteTaxId(, taxIds.data[0].v)
+    // }
 
     const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateCustomerFields);
 
     return updatedStripeCustomer;
+  }
+
+  async findCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
+    const organization = await this.findOne(organizationId);
+
+    const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
+
+    return subscriptions;
+  }
+
+  async findCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
+    const subscriptions = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+    return subscriptions;
+  }
+
+  async findCustomerSubscriptionItems(stripeSubscriptionId: string): Promise<Stripe.subscriptionItems.ISubscriptionItem[]> {
+    const subscriptionItems = await stripe.subscriptionItems.list({
+      subscription: stripeSubscriptionId
+    })
+
+    return subscriptionItems.data;
+  }
+
+  async findCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId: string): Promise<Stripe.usageRecordSummaries.IUsageRecordSummariesItem[]> {
+    const usageRecordSummaries = await stripe.usageRecordSummaries.list(stripeSubscriptionItemId)
+
+    return usageRecordSummaries.data;
+  }
+
+  async findCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
+    const organization = await this.findOne(organizationId);
+
+    const invoices = await stripe.invoices.list({
+      customer: organization.customer.stripeCustomerId
+    })
+
+    return invoices;
+  }
+
+  async findCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
+    const organization = await this.findOne(organizationId);
+
+    const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
+      customer: organization.customer.stripeCustomerId
+    })
+
+    return invoicesUpcoming;
   }
 }

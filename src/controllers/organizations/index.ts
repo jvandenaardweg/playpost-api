@@ -8,6 +8,7 @@ import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
 import * as AWSSes from '../../mailers/aws-ses';
 import { OrganizationService } from '../../services/organizationService';
+import { UsageRecordService } from '../../services/usageRecordService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 
@@ -16,6 +17,7 @@ export class OrganizationsController extends BaseController {
   publicationRepository: Repository<Publication>;
   userRepository: Repository<User>;
   organizationService: OrganizationService;
+  usageRecordService: UsageRecordService;
 
   constructor() {
     super()
@@ -23,6 +25,7 @@ export class OrganizationsController extends BaseController {
     this.publicationRepository = getRepository(Publication);
     this.userRepository = getRepository(User);
     this.organizationService = new OrganizationService();
+    this.usageRecordService = new UsageRecordService();
   }
 
   /**
@@ -33,18 +36,23 @@ export class OrganizationsController extends BaseController {
       const userId = req.user.id;
       const { organizationId } = req.params;
 
-      const reqParamsValidationSchema = joi.object().keys({
-        organizationId: joi.string().uuid().required()
-      })
-
       try {
-        const { error } = joi.validate(req.params, reqParamsValidationSchema);
+        // Only check for params when on routes that have params
+        if (Object.keys(req.params).length) {
+          const reqParamsValidationSchema = joi.object().keys({
+            organizationId: joi.string().uuid().required(),
+            stripeSubscriptionId: joi.string().optional(),
+            stripeSubscriptionItemId: joi.string().optional()
+          })
 
-        if (error) {
-          throw {
-            status: 400,
-            message: error.details[0].message,
-            details: error.details[0]
+          const { error } = joi.validate(req.params, reqParamsValidationSchema);
+
+          if (error) {
+            throw {
+              status: 400,
+              message: error.details[0].message,
+              details: error.details[0]
+            }
           }
         }
 
@@ -410,10 +418,9 @@ export class OrganizationsController extends BaseController {
   patchCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
-    const userId = req.user.id;
 
     const customerValidationSchema = joi.object().keys({
-      email: joi.string().email().required(),
+      email: joi.string().email({ minDomainAtoms: 2 }).required(),
       name: joi.string().max(50).required(),
       address: joi.object().keys({
         line1: joi.string().max(50).required(),
@@ -437,9 +444,93 @@ export class OrganizationsController extends BaseController {
         }
       }
 
-      const updatedCustomer = await this.organizationService.updateCustomer(organizationId, userId, requestBody);
+      const updatedCustomer = await this.organizationService.updateCustomer(organizationId, requestBody);
 
       return res.json(updatedCustomer);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    try {
+      const customerSubscriptions = await this.organizationService.findCustomerSubscriptions(organizationId);
+
+      return res.json(customerSubscriptions.data);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    try {
+      const customerInvoices = await this.organizationService.findCustomerInvoices(organizationId);
+
+      return res.json(customerInvoices.data);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    try {
+      const customerInvoicesUpcoming = await this.organizationService.findCustomerInvoicesUpcoming(organizationId);
+
+      return res.json(customerInvoicesUpcoming);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeSubscriptionId } = req.params;
+
+    try {
+      const customerSubscription = await this.organizationService.findCustomerSubscription(stripeSubscriptionId);
+
+      return res.json(customerSubscription);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeSubscriptionId } = req.params;
+
+    try {
+      const customerSubscriptionItems = await this.organizationService.findCustomerSubscriptionItems(stripeSubscriptionId);
+
+      return res.json(customerSubscriptionItems);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeSubscriptionItemId } = req.params;
+
+    try {
+      const customerUsageRecordsSummaries = await this.organizationService.findCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
+
+      return res.json(customerUsageRecordsSummaries);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
+  };
+
+  getCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeSubscriptionItemId } = req.params;
+
+    try {
+      const customerUsageRecords = await this.usageRecordService.findAllForSubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
+
+      return res.json(customerUsageRecords);
     } catch (err) {
       return this.handleError(err, res);
     }

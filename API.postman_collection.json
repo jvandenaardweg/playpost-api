@@ -1261,7 +1261,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"email\": \"test2@playpost.app\",\n\t\"password\": \"demodemo\",\n\t\"publisherName\": \"Test\"\n}"
+							"raw": "{\n\t\"email\": \"test2@playpost.app\",\n\t\"password\": \"demodemo\",\n\t\"organization\": {\n\t\t\"name\": \"Test\"\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/users",
@@ -3194,6 +3194,267 @@
 			"name": "Organizations",
 			"item": [
 				{
+					"name": "Customer",
+					"item": [
+						{
+							"name": "Get a customer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update customer details",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Playpost Demo\",\n\t\"email\": \"info@playpost.app\",\n\t\"phone\": \"+31612706744\",\n\t\"address\": {\n\t\t\"line1\": \"Orteliusstraat 217-2\",\n\t\t\"line2\": null,\n\t\t\"postal_code\": \"1056NR\",\n\t\t\"city\": \"Amsterdam\",\n\t\t\"country\": \"Netherlands\",\n\t\t\"state\": \"Noord-Holland\"\n\t}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all customer subscriptions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/subscriptions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"subscriptions"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a customer subscription",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"subscriptions",
+										":stripeSubscriptionId"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										},
+										{
+											"key": "stripeSubscriptionId",
+											"value": "sub_GNKb05bvWL9vsy"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all customer invoices",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/invoices",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"invoices"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all customer invoices upcoming",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/invoices/upcoming",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"invoices",
+										"upcoming"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all customer subscription items",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"subscriptions",
+										":stripeSubscriptionId",
+										"subscription-items"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										},
+										{
+											"key": "stripeSubscriptionId",
+											"value": "sub_GNKb05bvWL9vsy"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all customer usage records summaries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records-summaries",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"organizations",
+										":organizationId",
+										"customer",
+										"subscriptions",
+										":stripeSubscriptionId",
+										"subscription-items",
+										":stripeSubscriptionItemId",
+										"usage-records-summaries"
+									],
+									"variable": [
+										{
+											"key": "organizationId",
+											"value": "97629636-b7ff-4766-8f9f-0742465682ba"
+										},
+										{
+											"key": "stripeSubscriptionId",
+											"value": "sub_GNKb05bvWL9vsy"
+										},
+										{
+											"key": "stripeSubscriptionItemId",
+											"value": "si_GNKbK8bT1KAa6A"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "Get all organizations for user",
 					"request": {
 						"method": "GET",
@@ -3609,32 +3870,6 @@
 					]
 				},
 				{
-					"name": "Get customer of organization",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/v1/organizations/:organizationId/customer",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"v1",
-								"organizations",
-								":organizationId",
-								"customer"
-							],
-							"variable": [
-								{
-									"key": "organizationId",
-									"value": "97629636-b7ff-4766-8f9f-0742465682ba"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Get publications of organization",
 					"request": {
 						"method": "GET",
@@ -3905,7 +4140,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"adminId\": \"e7e4c3f7-d681-4bb9-957a-a1cbe046cab0\"\n}",
+							"raw": "{\n\t\"newAdminUserId\": \"0a1b27c0-44c7-4164-a2e5-96855e006e45\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

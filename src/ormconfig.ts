@@ -16,6 +16,7 @@ import { Voice } from './database/entities/voice';
 import { Customer } from './database/entities/customer';
 import { Organization } from './database/entities/organization';
 import { Publication } from './database/entities/publication';
+import { UsageRecord } from './database/entities/usage-record';
 import { UserInAppSubscriptionGoogle } from './database/entities/user-in-app-subscriptions-google';
 import { ArticleCompatible1564467937421 } from './database/migrations/1564467937421-ArticleCompatible';
 import { VoiceQuality1564674653133 } from './database/migrations/1564674653133-VoiceQuality';
@@ -47,6 +48,7 @@ import { CustomerOptionalStripeId1576263503710 } from './database/migrations/157
 import { CustomerOrganizationSetNull1576263832495 } from './database/migrations/1576263832495-CustomerOrganizationSetNull';
 import { CustomerOrganizationAllowNull1576264002710 } from './database/migrations/1576264002710-CustomerOrganizationAllowNull';
 import { OrganizationsPublicationsOwnerJoinTable1576270744686 } from './database/migrations/1576270744686-OrganizationsPublicationsOwnerJoinTable';
+import { UsageRecordTable1576585231400 } from './database/migrations/1576585231400-UsageRecordTable';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -76,7 +78,8 @@ const config: ConnectionOptions = {
     UserInAppSubscriptionGoogle,
     Customer,
     Organization,
-    Publication
+    Publication,
+    UsageRecord
   ],
   migrations: [
     // In order of execution is important, oldest first
@@ -109,7 +112,8 @@ const config: ConnectionOptions = {
     CustomerOptionalStripeId1576263503710,
     CustomerOrganizationSetNull1576263832495,
     CustomerOrganizationAllowNull1576264002710,
-    OrganizationsPublicationsOwnerJoinTable1576270744686
+    OrganizationsPublicationsOwnerJoinTable1576270744686,
+    UsageRecordTable1576585231400
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
