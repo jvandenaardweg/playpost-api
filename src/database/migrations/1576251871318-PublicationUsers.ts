@@ -4,7 +4,6 @@ export class PublicationUsers1576251871318 implements MigrationInterface {
     name = 'PublicationUsers1576251871318'
 
     public async up(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.query(`ALTER TABLE "user" DROP CONSTRAINT "FK_7f01b2d6c8a7ff856455eaf16f9"`, undefined);
         await queryRunner.query(`CREATE TABLE "publication_users_user" ("publicationId" uuid NOT NULL, "userId" uuid NOT NULL, CONSTRAINT "PK_ca2169e7723d4d81bb1a51cd656" PRIMARY KEY ("publicationId", "userId"))`, undefined);
         await queryRunner.query(`CREATE INDEX "IDX_cde89c7c247524697d52aa546b" ON "publication_users_user" ("publicationId") `, undefined);
         await queryRunner.query(`CREATE INDEX "IDX_2fb335a82a7e31e6ad2ea25e84" ON "publication_users_user" ("userId") `, undefined);
