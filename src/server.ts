@@ -148,9 +148,19 @@ export const setupServer = async () => {
   // include before other routes
   // This allows pre-flight OPTIONS requests
   const corsWhitelist = [
+    // production services
     'https://playpost.app',
     'https://publisher.playpost.app',
     'https://player.playpost.app',
+
+    // test/staging services
+    'https://playpost-website-test.herokuapp.com',
+    'https://playpost-publisher-test.herokuapp.com',
+    'https://playpost-publisher.herokuapp.com',
+    'https://playpost-player.herokuapp.com',
+    'https://playpost-player-test.herokuapp.com',
+
+    // development services
     'http://localhost:8080'
   ];
 
