@@ -110,9 +110,6 @@ export const setupServer = async () => {
   if (!process.env.PUBLISHERS_BASE_URL) {
     throw new Error('Required environment variable "PUBLISHERS_BASE_URL" not set.');
   }
-  if (!process.env.STRIPE_PUBLISHABLE_KEY) {
-    throw new Error('Required environment variable "STRIPE_PUBLISHABLE_KEY" not set.');
-  }
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('Required environment variable "STRIPE_SECRET_KEY" not set.');
   }
