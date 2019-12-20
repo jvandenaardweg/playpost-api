@@ -1,49 +1,57 @@
 import joi from '@hapi/joi';
-import { Request, Response } from 'express'
-import { getRepository, Repository } from 'typeorm'
-import { Article } from '../database/entities/article'
+import { Request, Response } from 'express';
 
-export class OembedController {
-  articleRepository: Repository<Article>
+import { ArticleService } from '../../services/articleService';
+import { BaseController } from '../index';
+
+export class OembedController extends BaseController {
+  articleService: ArticleService;
 
   constructor() {
-    this.articleRepository = getRepository(Article)
+    super()
+
+    this.articleService = new ArticleService()
   }
 
-  getOembedCode = async (req: Request, res: Response) => {
+  getAll = async (req: Request, res: Response) => {
     const playerBaseUrl = 'https://player.playpost.app';
     const oembedThumbnailUrl = playerBaseUrl + '/oembed.png';
 
     // Example url: https://player.playpost.app/articles/c3baaf54-28a5-47d1-b752-07f21bd8a7bc/audiofiles/72dc6da2-798a-4b14-a5e2-c0fbf4039788
     const { url, format } = req.query;
 
-    if (format && format !== 'json') {
-      return res.status(400).json({
-        message: 'We currently only support the json format. Please only use ?format=json'
-      })
-    }
-
-    // Make sure we pass through the extra query parameters
-    const fullQueryUrl = Object.keys(req.query).map(key => key + '=' + req.query[key]).join('&').replace('url=', '');
-    const urlWithoutQueryParams = url.split('?')[0];
-
-    const validationSchema = joi.object().keys({
-      url: joi.string().uri().required()
-    });
-
-    const { error } = validationSchema.validate({ url });
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    if (!url.startsWith(playerBaseUrl)) {
-      return res.status(400).json({
-        message: `We only allow urls from ${playerBaseUrl}`
-      })
-    }
-
     try {
+      if (format && format !== 'json') {
+        throw {
+          status: 400,
+          message: 'We currently only support the json format. Please only use ?format=json'
+        }
+      }
+
+      // Make sure we pass through the extra query parameters
+      const fullQueryUrl = Object.keys(req.query).map(key => key + '=' + req.query[key]).join('&').replace('url=', '');
+      const urlWithoutQueryParams = url.split('?')[0];
+
+      const validationSchema = joi.object().keys({
+        url: joi.string().uri().required()
+      });
+
+      const validateUrl = validationSchema.validate({ url });
+
+      if (validateUrl.error) {
+        throw {
+          status: 400,
+          message: validateUrl.error.details[0].message
+        }
+      }
+
+      if (!url.startsWith(playerBaseUrl)) {
+        throw {
+          status: 400,
+          message: `We only allow urls from ${playerBaseUrl}`
+        }
+      }
+
       const articleAndAudiofileIds: string[] = urlWithoutQueryParams.split('/').filter((urlPart: string) => {
         return !['https:', 'http:', '', 'player.playpost.app', 'localhost', 'localhost:8080', 'v1', 'articles', 'audiofiles'].includes(urlPart)
       })
@@ -57,28 +65,34 @@ export class OembedController {
       });
 
       // tslint:disable-next-line: no-shadowed-variable
-      const { error } = otherValidationSchema.validate({ articleId, audiofileId });
+      const validateIds = otherValidationSchema.validate({ articleId, audiofileId });
 
-      if (error) {
-        const messageDetails = error.details.map(detail => detail.message).join(' and ');
-        return res.status(400).json({ message: messageDetails });
+      if (validateIds.error) {
+        const messageDetails = validateIds.error.details.map(detail => detail.message).join(' and ');
+
+        throw {
+          status: 400,
+          message: messageDetails
+        }
       }
 
       // TODO: add caching
-      const foundArticle = await this.articleRepository.findOne(articleId, { relations: ['audiofiles'] });
+      const foundArticle = await this.articleService.findOne(articleId);
 
       if (!foundArticle) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: `Could not find article with ID: ${articleId}`
-        })
+        }
       }
 
       const foundAudiofile = foundArticle.audiofiles.find(audiofile => audiofile.id === audiofileId);
 
       if (!foundAudiofile) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: `Could not find audiofile with ID: ${audiofileId}`
-        })
+        }
       }
 
       const responseToSend = {
@@ -97,11 +111,9 @@ export class OembedController {
       }
 
       return res.json(responseToSend);
+
     } catch (err) {
-      return res.status(500).json({
-        message: err && err.message
-      })
+      return this.handleError(err, res);
     }
   }
-
 }

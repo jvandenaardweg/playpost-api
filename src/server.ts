@@ -16,7 +16,6 @@ import { createConnection } from 'typeorm';
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
 import * as authController from './controllers/auth';
-import * as catchAllController from './controllers/catch-all';
 import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
@@ -24,34 +23,30 @@ import { MeController } from './controllers/me';
 import { OembedController } from './controllers/oembed';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
-import * as usersController from './controllers/users';
+import { UsersController } from './controllers/users';
 import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
 import { AnalyticsController } from './controllers/analytics';
 import { BillingController } from './controllers/billing';
+import { NotFoundController } from './controllers/not-found';
 import { OrganizationsController } from './controllers/organizations';
 import { PublicationsController } from './controllers/publications';
+import { StatusController } from './controllers/status';
 import { UserController } from './controllers/user';
+
 import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+;
 
-const PORT = process.env.PORT || 3000;
-
-const IS_PROTECTED_APIKEY = passport.authenticate(['jwt', 'x-api-key-secret'], {
-  session: false,
-  failWithError: true
-});
-
-const IS_PROTECTED_JWT = passport.authenticate(['jwt'], {
-  session: false,
-  failWithError: true
-});
+logger.info('App init:', 'Starting...');
 
 export const setupServer = async () => {
+  logger.info('App init:', 'Server setup...');
+
   // Check required env vars
   if (!process.env.NODE_ENV) {
     throw new Error('Required environment variable "NODE_ENV" not set.');
@@ -113,6 +108,18 @@ export const setupServer = async () => {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('Required environment variable "STRIPE_SECRET_KEY" not set.');
   }
+
+  const PORT = process.env.PORT || 3000;
+
+  const IS_PROTECTED_APIKEY = passport.authenticate(['jwt', 'x-api-key-secret'], {
+    session: false,
+    failWithError: true
+  });
+
+  const IS_PROTECTED_JWT = passport.authenticate(['jwt'], {
+    session: false,
+    failWithError: true
+  });
 
   const rateLimited = new ExpressRateLimit({
     // We'll use the in-memory cache, not Redis
@@ -262,14 +269,12 @@ export const setupServer = async () => {
   const userController = new UserController();
   const organizationsController = new OrganizationsController();
   const billingController = new BillingController();
+  const usersController = new UsersController();
+  const statusController = new StatusController();
+  const notFoundController = new NotFoundController();
+
 
   // API Endpoints
-
-  // TODO: Deprecated endpoints, remove later
-  // app.patch('/v1/me/email', [rateLimited, IS_PROTECTED_JWT], meController.updateEmail); // TODO: remove later, available in iOS app 1.1.3 and below
-  // app.patch('/v1/me/password', [rateLimited, IS_PROTECTED_JWT], meController.updatePassword); // TODO: remove later, available in iOS app 1.1.3 and below
-  // app.get('/v1/languages/active', [rateLimited, IS_PROTECTED_JWT], languagesController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
-  // app.get('/v1/in-app-subscriptions/active', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAllActive); // TODO: remove later, available iOS app 1.2.x and below
 
   // Public
   // TODO: Use expressBrute to increase the delay between each requests
@@ -282,13 +287,14 @@ export const setupServer = async () => {
   app.post('/v1/auth/reset-password', authController.getResetPasswordToken); // Used only for the mobile app
   app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
 
-  app.post('/v1/users', usersController.createUser);
+  app.post('/v1/users', usersController.create); // To create user accounts
 
-  // Protected by login
+  app.get('/v1/oembed', oembedController.getAll); // Used by embedly
+  app.get('/v1/status', statusController.getAll);
+  app.get('/health', rateLimited, healthController.getHealthStatus);
 
-  // v1/users
-  app.get('/v1/users', [rateLimited, IS_PROTECTED_JWT], usersController.findAllUsers); // Admin only
-  app.delete('/v1/users/:userId', [rateLimited, IS_PROTECTED_JWT], usersController.deleteUser); // Admin only
+
+  // Private routes
 
   // /v1/me
   // Used only in our mobile app
@@ -339,11 +345,6 @@ export const setupServer = async () => {
   app.get('/v1/in-app-subscriptions/sync', rateLimited, inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
   app.get('/v1/synthesizers/:synthesizerName/voices', rateLimited, synthesizersController.findAllVoices);
-
-  app.get('/health', rateLimited, healthController.getHealthStatus);
-
-  // Used by embedly
-  app.get('/v1/oembed', oembedController.getOembedCode);
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
@@ -396,13 +397,9 @@ export const setupServer = async () => {
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
 
-  // Endpoint for uptime monitoring
-  app.get('/v1/status', rateLimited, (req, res) => {
-    return res.status(200).json({ message: 'OK' });
-  });
-
   // Catch all
-  app.all('*', catchAllController.catchAll);
+  // Should be the last route
+  app.all('*', notFoundController.getAll);
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
