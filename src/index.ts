@@ -14,7 +14,7 @@ import { Sentry } from './sentry';
 import { setupServer } from './server';
 import { logger } from './utils';
 
-const WORKER_COUNT = process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
+const WORKER_COUNT = !!process.env.HEROKU_APP_NAME ? 1 : process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
 
 logger.info('App init: Setting up...');
 
