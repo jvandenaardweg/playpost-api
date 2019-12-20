@@ -1,6 +1,12 @@
 // tslint:disable-next-line
 const { version } = require('../package.json');
 
+if (process.env.NODE_ENV === 'production') {
+  // tslint:disable-next-line
+  require('newrelic');
+}
+
+
 import expressCluster from 'express-cluster';
 import os from 'os';
 import { Sentry } from './sentry';
