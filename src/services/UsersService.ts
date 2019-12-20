@@ -1,4 +1,4 @@
-import { getConnection, getRepository, Repository, FindOneOptions } from 'typeorm';
+import { getConnection, getRepository, Repository } from 'typeorm';
 
 import * as cacheKeys from '../cache/keys';
 import { Organization } from '../database/entities/organization';
