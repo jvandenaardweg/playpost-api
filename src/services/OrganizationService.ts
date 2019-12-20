@@ -49,7 +49,7 @@ export class OrganizationService extends BaseService {
     return !!organization;
   }
 
-  async findOne(organizationId: string): Promise<Organization> {
+  async findOneById(organizationId: string): Promise<Organization> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -117,7 +117,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findOneCustomer(organizationId: string): Promise<Customer> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     if (!organization.customer) {
       throw {
@@ -130,7 +130,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findOneAdmin(organizationId: string): Promise<User> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     if (!organization.admin) {
       throw {
@@ -142,6 +142,10 @@ export class OrganizationService extends BaseService {
     return organization.admin;
   }
 
+  async save(organization: Organization) {
+    return getConnection().manager.save(organization);
+  }
+
   async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
     if (authenticatedUserId === newAdminUserId) {
       throw {
@@ -150,7 +154,7 @@ export class OrganizationService extends BaseService {
       }
     }
 
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     const newAdmin = await getConnection()
       .getRepository(User)
@@ -209,7 +213,7 @@ export class OrganizationService extends BaseService {
    * @param customerUpdateFields 
    */
   async updateCustomer(organizationId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
       email: customerUpdateFields.email,
@@ -245,7 +249,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
 
@@ -273,7 +277,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     const invoices = await stripe.invoices.list({
       customer: organization.customer.stripeCustomerId
@@ -283,7 +287,7 @@ export class OrganizationService extends BaseService {
   }
 
   async findCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
-    const organization = await this.findOne(organizationId);
+    const organization = await this.findOneById(organizationId);
 
     const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
       customer: organization.customer.stripeCustomerId

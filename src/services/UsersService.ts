@@ -1,4 +1,4 @@
-import { getConnection, getRepository, Repository } from 'typeorm';
+import { getConnection, getRepository, Repository, FindOneOptions } from 'typeorm';
 
 import * as cacheKeys from '../cache/keys';
 import { Organization } from '../database/entities/organization';
@@ -15,7 +15,21 @@ export class UsersService extends BaseService {
     this.userRepository = getRepository(User);
   }
 
-  async create(email: string, password: string, organization?: { name: string }): Promise<void> {
+  findOne = async (userId: string) => {
+    return this.userRepository.findOne(userId);
+  }
+
+  findOneByEmail = async (email: string) => {
+    const normalizedEmail = User.normalizeEmail(email)
+
+    return this.userRepository.findOne({
+      where: {
+        email: normalizedEmail
+      }
+    });
+  }
+
+  create = async (email: string, password: string, organization?: { name: string }): Promise<void> => {
     const loggerPrefix = 'Create new user:';
     const emailAddressNormalized = User.normalizeEmail(email);
     const existingUser = await this.userRepository.findOne({ email: emailAddressNormalized });
@@ -149,7 +163,7 @@ export class UsersService extends BaseService {
     }
   }
 
-  async delete(userId: string): Promise<void> {
+  delete = async (userId: string): Promise<void> => {
     const userToDelete = await this.userRepository.findOne(userId);
 
     if (!userToDelete) {
