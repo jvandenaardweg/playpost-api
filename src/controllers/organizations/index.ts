@@ -35,7 +35,7 @@ export class OrganizationsController extends BaseController {
    */
   permissions = (roles: PermissionRoles) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { organizationId } = req.params;
 
       try {
@@ -97,7 +97,7 @@ export class OrganizationsController extends BaseController {
    * @returns Promise<Response>
    */
   getAll = async (req: Request, res: Response): Promise<Response> => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     try {
       const requestQuery = this.validatePagingParams(req.query);
@@ -210,7 +210,7 @@ export class OrganizationsController extends BaseController {
   putAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const { newAdminUserId } = req.body;
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     try {
       const updatedOrganization = await this.organizationService.saveAdmin(organizationId, userId, newAdminUserId);
@@ -227,7 +227,7 @@ export class OrganizationsController extends BaseController {
   createPublication = async (req: Request, res: Response) => {
     const { organizationId } = req.params;
     const { name, url } = req.body;
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     try {
       // When we end up here, the user is allowed to create a publiction for this organization

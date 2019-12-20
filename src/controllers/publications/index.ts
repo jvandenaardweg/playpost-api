@@ -24,7 +24,7 @@ export class PublicationsController {
    */
   restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
     const { publicationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     const publicationExists = await this.publicationsRepository.findOne(publicationId, {
       select: ['id']
@@ -56,7 +56,7 @@ export class PublicationsController {
    * Get the publications the user has access to.
    */
   getAll = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     // Get all the publications the user has access to
     const [publications, total] = await getConnection()
@@ -73,7 +73,7 @@ export class PublicationsController {
 
   getOne = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     // Get the specific publication of the user
     const publicationOfUser = await getConnection()

@@ -11,7 +11,7 @@ export class UserController {
   }
 
   restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     const user = await this.userRepository.findOne(userId);
 
@@ -27,7 +27,7 @@ export class UserController {
   }
 
   getUser = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     const user = await this.userRepository.findOne(userId);
 

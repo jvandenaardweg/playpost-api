@@ -52,7 +52,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const loggerPrefix = 'Create Audiofile:';
 
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
   const { mimeType } = req.body as IRequestBody;
 
@@ -76,7 +76,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       Sentry.captureMessage(message);
     });
 
@@ -126,7 +126,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
       Sentry.captureMessage(message);
@@ -148,7 +148,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -170,7 +170,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -210,7 +210,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       scope.setExtra('subscriptionUpgradeOption', subscriptionUpgradeOption);
@@ -234,7 +234,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       scope.setExtra('userSubscriptionLimits', userSubscriptionLimits);
@@ -260,7 +260,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -278,7 +278,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -296,7 +296,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -314,7 +314,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -333,7 +333,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       Sentry.captureMessage(message);
@@ -367,7 +367,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
         scope.setLevel(Sentry.Severity.Error);
         scope.setExtra('body', req.body);
         scope.setExtra('params', req.params);
-        scope.setUser(req.user);
+        scope.setUser(req.user!);
         scope.setExtra('article', article);
         scope.setExtra('userIsSubscribed', userIsSubscribed);
         scope.setExtra('userVoiceSetting', userVoiceSetting);
@@ -388,7 +388,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
       scope.setExtra('userVoiceSetting', userVoiceSetting);
@@ -429,7 +429,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
           scope.setLevel(Sentry.Severity.Error);
           scope.setExtra('body', req.body);
           scope.setExtra('params', req.params);
-          scope.setUser(req.user);
+          scope.setUser(req.user!);
           scope.setExtra('article', article);
           scope.setExtra('voice', voice);
           scope.setExtra('userIsSubscribed', userIsSubscribed);
@@ -461,7 +461,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
           scope.setLevel(Sentry.Severity.Error);
           scope.setExtra('body', req.body);
           scope.setExtra('params', req.params);
-          scope.setUser(req.user);
+          scope.setUser(req.user!);
           scope.setExtra('article', article);
           scope.setExtra('voice', voice);
           scope.setExtra('userIsSubscribed', userIsSubscribed);
@@ -483,7 +483,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('voice', voice);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
@@ -508,7 +508,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
         scope.setLevel(Sentry.Severity.Error);
         scope.setExtra('body', req.body);
         scope.setExtra('params', req.params);
-        scope.setUser(req.user);
+        scope.setUser(req.user!);
         scope.setExtra('article', article);
         scope.setExtra('voice', voice);
         scope.setExtra('userIsSubscribed', userIsSubscribed);
@@ -574,7 +574,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     Sentry.withScope(scope => {
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('article', article);
       scope.setExtra('voice', voice);
       scope.setExtra('userIsSubscribed', userIsSubscribed);
@@ -591,7 +591,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
  * This endpoint is not visible for other users.
  */
 export const findAllAudiofiles = async (req: Request, res: Response) => {
-  const userEmail = req.user.email;
+  const userEmail = req.user!.email;
   const audiofileRepository = getRepository(Audiofile);
 
   if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
@@ -631,7 +631,7 @@ export const findAudiofileById = async (req: Request, res: Response) => {
  * Also deletes the audiofile from our cloud storage using AfterRemove on the Audiofile entity.
  */
 export const deleteById = async (req: Request, res: Response) => {
-  const userEmail = req.user.email;
+  const userEmail = req.user!.email;
   const { audiofileId } = req.params;
   const audiofileRepository = getRepository(Audiofile);
 

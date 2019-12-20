@@ -35,7 +35,7 @@ export class MeController {
   }
 
   findCurrentUser = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     // On each request of the user's own details, make sure all his subscriptions are correctly synced
     // So we can always provide the user with an up-to-date status of his subscriptions
@@ -71,7 +71,7 @@ export class MeController {
    */
   patchMe = async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const loggerPrefix = 'Patch User: ';
 
     const validationSchema = joi.object().keys({
@@ -138,7 +138,7 @@ export class MeController {
    * The only thing we do not delete, is the purchase history.
    */
   deleteCurrentUser = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     await this.customUserRepository.removeById(userId);
 
@@ -154,7 +154,7 @@ export class MeController {
    */
   createSelectedVoice = async (req: Request, res: Response) => {
     const loggerPrefix = 'User Create Selected Voice Setting:';
-    const userId: string = req.user.id;
+    const userId: string = req.user!.id;
     const { voiceId }: { voiceId: string } = req.body;
 
     const validationSchema = joi.object().keys({
@@ -256,7 +256,7 @@ export class MeController {
    *
    */
   findAllApiKeys = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
 
     const userKeys = await this.apiKeyRepository.find({
       user: {
@@ -275,7 +275,7 @@ export class MeController {
    * @param res
    */
   deleteApiKey = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const { apiKeyId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -315,7 +315,7 @@ export class MeController {
    * @param res
    */
   createApiKey = async (req: Request, res: Response) => {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const { label, allowedDomain } = req.body;
 
     const validationSchema = joi.object().keys({

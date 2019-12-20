@@ -15,7 +15,7 @@ const MESSAGE_PLAYLISTS_UPDATE_ORDER_EQUAL = 'The given order is the same. We do
 const MESSAGE_PLAYLISTS_UPDATE_ORDER_SUCCESS = 'Successfully updated the order of your playlist!';
 
 export const findAllPlaylistItems = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const playlistItemRepository = getRepository(PlaylistItem);
 
   const playlistItems = await playlistItemRepository.find({
@@ -30,7 +30,7 @@ export const findAllPlaylistItems = async (req: Request, res: Response) => {
 };
 
 export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
   const { favoritedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
@@ -100,7 +100,7 @@ export const patchPlaylistItemFavoritedAt = async (req: Request, res: Response) 
 };
 
 export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
   const { archivedAt } = req.body;
   const playlistItemRepository = getRepository(PlaylistItem);
@@ -177,7 +177,7 @@ export const patchPlaylistItemArchivedAt = async (req: Request, res: Response) =
  */
 export const createPlaylistItemByArticleId = async (req: Request, res: Response) => {
   const loggerPrefix = 'Create Playlist Item By Article ID:';
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
 
   const playlistItemRepository = getRepository(PlaylistItem);
@@ -196,7 +196,7 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       Sentry.captureMessage(message);
     });
 
@@ -250,7 +250,7 @@ export const createPlaylistItemByArticleId = async (req: Request, res: Response)
 
 export const createPlaylistItemByArticleUrl = async (req: Request, res: Response) => {
   const loggerPrefix = 'Create Playlist Item By Article URL:';
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleUrl, documentHtml }: { articleUrl: string, documentHtml?: string } = req.body; // articleUrl is required, documentHtml is optional
 
   let articleId = '';
@@ -272,7 +272,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
       scope.setLevel(Sentry.Severity.Error);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       Sentry.captureMessage(message);
     });
 
@@ -356,7 +356,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
  *
  */
 export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
   const { order } = req.body;
 
@@ -376,7 +376,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       Sentry.captureMessage(message);
@@ -405,7 +405,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   if (!playlistItem) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setExtra('playlistItem', playlistItem);
@@ -419,7 +419,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
   if (playlistItem.user.id !== userId) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setExtra('playlistItem', playlistItem);
@@ -458,7 +458,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setExtra('playlistItem', playlistItem);
@@ -476,7 +476,7 @@ export const patchPlaylistItemOrder = async (req: Request, res: Response) => {
 };
 
 export const deletePlaylistItem = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user!.id;
   const { articleId } = req.params;
   const playlistItemRepository = getRepository(PlaylistItem);
   const articleRepository = getRepository(Article);
@@ -492,7 +492,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       Sentry.captureMessage(message);
@@ -517,7 +517,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
   if (!playlistItem) {
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       Sentry.captureMessage(MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND);
@@ -536,7 +536,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
 
     Sentry.withScope(scope => {
       scope.setLevel(Sentry.Severity.Error);
-      scope.setUser(req.user);
+      scope.setUser(req.user!);
       scope.setExtra('body', req.body);
       scope.setExtra('params', req.params);
       scope.setExtra('playlistItem', playlistItem);
@@ -566,7 +566,7 @@ export const deletePlaylistItem = async (req: Request, res: Response) => {
 
       Sentry.withScope(scope => {
         scope.setLevel(Sentry.Severity.Error);
-        scope.setUser(req.user);
+        scope.setUser(req.user!);
         scope.setExtra('body', req.body);
         scope.setExtra('params', req.params);
         scope.setExtra('failedArticle', failedArticle);

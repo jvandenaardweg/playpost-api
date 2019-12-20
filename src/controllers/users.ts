@@ -214,7 +214,7 @@ export const createUser = [
 export const deleteUser = [
   routeIsProtected,
   async (req: Request, res: Response) => {
-    const userEmail = req.user.email;
+    const userEmail = req.user!.email;
     const { userId } = req.params;
     const userRepository = getRepository(User);
 
@@ -240,7 +240,7 @@ export const deleteUser = [
 export const findAllUsers = [
   routeIsProtected,
   async (req: Request, res: Response) => {
-    const userEmail = req.user.email;
+    const userEmail = req.user!.email;
     const userRepository = getRepository(User);
 
     if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }

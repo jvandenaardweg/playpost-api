@@ -119,7 +119,7 @@ export const validateInAppSubscriptionReceipt = async (req: Request, res: Respon
 
   const loggerPrefix = 'Create And Validate In App Subscription: ';
   const { receipt, productId, platform } = req.body as IRequestBody;
-  const { id: userId } = req.user;
+  const userId = req.user!.id;
   const inAppSubscriptionRepository = getRepository(InAppSubscription);
 
   const validationSchema = joi.object().keys({

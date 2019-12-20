@@ -15,7 +15,7 @@ export class BillingController extends BaseController {
   };
 
   getAllPlans = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user.id;
+    // const userId = req.user!.id;
 
     try {
       // const requestQuery = this.validatePagingParams(req.query);
@@ -41,7 +41,7 @@ export class BillingController extends BaseController {
   };
 
   getAllProducts = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user.id;
+    // const userId = req.user!.id;
 
     try {
       // const requestQuery = this.validatePagingParams(req.query);
@@ -67,7 +67,7 @@ export class BillingController extends BaseController {
   };
 
   getAllTaxRates = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user.id;
+    // const userId = req.user!.id;
 
     try {
       // const requestQuery = this.validatePagingParams(req.query);

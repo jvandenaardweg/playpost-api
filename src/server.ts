@@ -409,8 +409,8 @@ export const setupServer = async () => {
     if (err) {
       if (process.env.NODE_ENV === 'production') {
         // Grab the user so we can give some context to our errors
-        if (req.user) {
-          const { id, email } = req.user;
+        if (req.user!) {
+          const { id, email } = req.user!;
 
           Sentry.configureScope(scope => {
             scope.setUser({ id, email });

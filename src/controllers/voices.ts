@@ -44,7 +44,7 @@ export const createVoicePreview = async (req: Request, res: Response) => {
 };
 
 export const deleteVoicePreview = async (req: Request, res: Response) => {
-  const userEmail = req.user.email;
+  const userEmail = req.user!.email;
   const { voiceId } = req.params;
   const voiceRepository = getRepository(Voice);
 

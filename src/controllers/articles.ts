@@ -106,7 +106,7 @@ export const findAudiofileByArticleId = async (req: Request, res: Response) => {
 };
 
 export const deleteById = async (req: Request, res: Response) => {
-  const userEmail = req.user.email;
+  const userEmail = req.user!.email;
   const { articleId } = req.params;
   const articleRepository = getRepository(Article);
 
