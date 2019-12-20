@@ -1,39 +1,37 @@
 import joi from '@hapi/joi';
 import { NextFunction, Request, Response } from 'express';
 import Stripe from 'stripe';
-import { getRepository, Repository } from 'typeorm';
-import { Organization } from '../../database/entities/organization';
+
 import { Publication } from '../../database/entities/publication';
-import { User } from '../../database/entities/user';
 import * as AWSSes from '../../mailers/aws-ses';
 import { BillingService } from '../../services/BillingService';
 import { OrganizationService } from '../../services/OrganizationService';
+import { PublicationService } from '../../services/PublicationService';
 import { UsageRecordService } from '../../services/UsageRecordService';
+import { UsersService } from '../../services/UsersService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 
 export class OrganizationsController extends BaseController {
-  organizationRepository: Repository<Organization>;
-  publicationRepository: Repository<Publication>;
-  userRepository: Repository<User>;
-  organizationService: OrganizationService;
-  usageRecordService: UsageRecordService;
-  billingService: BillingService;
+  private organizationService: OrganizationService;
+  private usageRecordService: UsageRecordService;
+  private billingService: BillingService;
+  private usersService: UsersService;
+  private publicationService: PublicationService;
 
   constructor() {
     super()
-    this.organizationRepository = getRepository(Organization);
-    this.publicationRepository = getRepository(Publication);
-    this.userRepository = getRepository(User);
     this.organizationService = new OrganizationService();
     this.usageRecordService = new UsageRecordService();
     this.billingService = new BillingService();
+    this.usersService = new UsersService()
+    this.publicationService = new PublicationService()
   }
 
   /**
    * Handles access permissions.
    */
-  permissions = (roles: PermissionRoles) => {
+  public permissions = (roles: PermissionRoles) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
       const userId = req.user!.id;
       const { organizationId } = req.params;
@@ -66,7 +64,7 @@ export class OrganizationsController extends BaseController {
         // If we end up here, we want to check if the authenticated user has permission to view this organization
 
         // Get the organization so we can determine if the user is an admin or normal user of this resource
-        const organization = await this.organizationService.findOne(organizationId);
+        const organization = await this.organizationService.findOneById(organizationId);
 
         // Only allow access to this resource if it's a user or admin
         const isAdminInOrganization = organization.admin.id === userId;
@@ -96,7 +94,7 @@ export class OrganizationsController extends BaseController {
    *
    * @returns Promise<Response>
    */
-  getAll = async (req: Request, res: Response): Promise<Response> => {
+  public getAll = async (req: Request, res: Response): Promise<Response> => {
     const userId = req.user!.id;
 
     try {
@@ -115,11 +113,11 @@ export class OrganizationsController extends BaseController {
    *
    * @returns Promise<Response>
    */
-  getOne = async (req: Request, res: Response): Promise<Response> => {
+  public getOne = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
-      const organization = await this.organizationService.findOne(organizationId);
+      const organization = await this.organizationService.findOneById(organizationId);
 
       return res.json(organization);
     } catch (err) {
@@ -127,7 +125,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getPublications = async (req: Request, res: Response): Promise<Response> => {
+  public getPublications = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -144,7 +142,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get all users within the organization.
    */
-  getUsers = async (req: Request, res: Response): Promise<Response> => {
+  public getUsers = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -161,7 +159,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get the customer information of the organization. This includes data from Stripe.
    */
-  getCustomer = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -191,7 +189,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get the admin user of the organization.
    */
-  getAdmin = async (req: Request, res: Response): Promise<Response> => {
+  public getAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -207,7 +205,7 @@ export class OrganizationsController extends BaseController {
    * Changes the admin of this organization. The user must already exist.
    * Only admins of an organization can do this.
    */
-  putAdmin = async (req: Request, res: Response): Promise<Response> => {
+  public putAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const { newAdminUserId } = req.body;
     const userId = req.user!.id;
@@ -224,7 +222,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Creates a publication for the selected organization.
    */
-  createPublication = async (req: Request, res: Response) => {
+  public createPublication = async (req: Request, res: Response) => {
     const { organizationId } = req.params;
     const { name, url } = req.body;
     const userId = req.user!.id;
@@ -232,28 +230,22 @@ export class OrganizationsController extends BaseController {
     try {
       // When we end up here, the user is allowed to create a publiction for this organization
 
-      const organization = await this.organizationRepository.findOne(organizationId, {
-        select: ['id', 'name', 'admin']
-      });
+      const organization = await this.organizationService.findOneById(organizationId);
 
       if (!organization) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: 'Organization could not be found.'
-        });
+        }
       }
 
-      // if (!organization || (organization.admin && organization.admin.id !== userId)) {
-      //   return res.status(403).json({
-      //     message: `You cannot create a new publication because you are not an admin of this organization.`
-      //   })
-      // }
-
-      const user = await this.userRepository.findOne(userId);
+      const user = await this.usersService.findOne(userId);
 
       if (!user) {
-        return res.status(400).json({
+        throw {
+          status: 400,
           message: `We could not find your account.`
-        });
+        }
       }
 
       const newPublication = new Publication();
@@ -264,7 +256,7 @@ export class OrganizationsController extends BaseController {
       newPublication.organization = organization; // Connect the organization of the user to the publication
 
       // Create the publication and attach it to the organization and user (admin)
-      const createdPublication = await this.publicationRepository.save(newPublication);
+      const createdPublication = await this.publicationService.save(newPublication);
 
       return res.json(createdPublication);
     } catch (err) {
@@ -275,48 +267,42 @@ export class OrganizationsController extends BaseController {
   /**
    * Associates a existing user to an organization
    */
-  createUser = async (req: Request, res: Response) => {
+  public createUser = async (req: Request, res: Response) => {
     const { organizationId } = req.params;
     const { email } = req.body;
 
     try {
-      const normalizedEmail = User.normalizeEmail(email);
-
-      const newUser = await this.userRepository.findOne({
-        where: {
-          email: normalizedEmail
-        }
-      });
+      const newUser = await this.usersService.findOneByEmail(email);
 
       if (!newUser) {
-        // TODO: invite user
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: 'A user with that email address does not exist.'
-        });
+        }
       }
 
-      const organization = await this.organizationRepository.findOne(organizationId, {
-        relations: ['users'] // Important: we need the current users to push the new user into that array
-      });
+      const organization = await this.organizationService.findOneById(organizationId);
 
       if (!organization) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: 'The organization does not exist.'
-        });
+        }
       }
 
       const userExistsInOrganization = organization.users.some(organizationUser => organizationUser.id === newUser.id);
 
       if (userExistsInOrganization) {
-        return res.status(409).json({
+        throw {
+          status: 409,
           message: 'The user already exists in this organization.'
-        });
+        }
       }
 
       // Attach existing users and new user to the organization
       organization.users.push(newUser);
 
-      const updatedOrganization = await this.organizationRepository.save(organization);
+      const updatedOrganization = await this.organizationService.save(organization);
 
       await AWSSes.sendTransactionalEmail(
         newUser.email,
@@ -334,13 +320,11 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  deleteUser = async (req: Request, res: Response) => {
+  public deleteUser = async (req: Request, res: Response) => {
     const { organizationId, userId } = req.params;
 
     try {
-      const organization = await this.organizationRepository.findOne(organizationId, {
-        relations: ['users'] // Important: we need the current users to update the array
-      });
+      const organization = await this.organizationService.findOneById(organizationId);
 
       if (!organization) {
         return res.status(404).json({
@@ -363,7 +347,7 @@ export class OrganizationsController extends BaseController {
       // Set the new users, without the deleted user
       organization.users = usersWithoutUserToDelete;
 
-      const updatedOrganization = await this.organizationRepository.save(organization);
+      const updatedOrganization = await this.organizationService.save(organization);
 
       if (userToDelete) {
         await AWSSes.sendTransactionalEmail(
@@ -388,32 +372,32 @@ export class OrganizationsController extends BaseController {
    * Deletes a publication from the database.
    * IMPORTANT: Very destructive operation.
    */
-  deletePublication = async (req: Request, res: Response) => {
+  public deletePublication = async (req: Request, res: Response) => {
     const { organizationId, publicationId } = req.params;
 
     try {
-      const organization = await this.organizationRepository.findOne(organizationId, {
-        relations: ['publications']
-      });
+      const organization = await this.organizationService.findOneById(organizationId);
 
       if (!organization) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: 'The organization does not exist.'
-        });
+        }
       }
 
-      const publication = await this.publicationRepository.findOne(publicationId);
+      const publication = await this.publicationService.findOneById(publicationId);
 
       if (!publication) {
-        return res.status(404).json({
+        throw {
+          status: 404,
           message: 'Publication does not exist.'
-        });
+        }
       }
 
       // TODO: delete publication articles
       // TODO: delete publication audiofiles
 
-      await this.publicationRepository.remove(publication);
+      await this.publicationService.remove(publication);
 
       return res.status(200).send();
     } catch (err) {
@@ -421,7 +405,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  patchCustomer = async (req: Request, res: Response): Promise<Response> => {
+  public patchCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
 
@@ -458,7 +442,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -470,7 +454,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -482,7 +466,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     try {
@@ -494,7 +478,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
     try {
@@ -506,7 +490,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
     try {
@@ -518,7 +502,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
     try {
@@ -530,7 +514,7 @@ export class OrganizationsController extends BaseController {
     }
   };
 
-  getCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
+  public getCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
     try {

@@ -1,110 +1,103 @@
 
 import { NextFunction, Request, Response } from 'express';
-import { getConnection, getCustomRepository, getRepository, Repository } from 'typeorm';
-import { Organization } from '../../database/entities/organization';
-import { Publication } from '../../database/entities/publication';
-import { ArticleRepository } from '../../database/repositories/article';
-import { UserRepository } from '../../database/repositories/user';
 
-export class PublicationsController {
-  publicationsRepository: Repository<Publication>;
-  organizationRepository: Repository<Organization>;
-  articleRepository: ArticleRepository;
-  userRepository: UserRepository;
+import { ArticleService } from '../../services/ArticleService';
+import { PublicationService } from '../../services/PublicationService';
+import { BaseController } from '../index';
+
+export class PublicationsController extends BaseController {
+  private publicationService: PublicationService;
+  private articleService: ArticleService;
 
   constructor() {
-    this.publicationsRepository = getRepository(Publication);
-    this.articleRepository = getCustomRepository(ArticleRepository);
-    this.userRepository = getCustomRepository(UserRepository);
-    this.organizationRepository = getRepository(Organization);
+    super();
+
+    this.articleService = new ArticleService()
+    this.publicationService = new PublicationService();
   }
 
   /**
    * Method to make sure the logged-in user is the owner of the Publication.
    */
-  restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
+  public restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
     const { publicationId } = req.params;
     const userId = req.user!.id;
 
-    const publicationExists = await this.publicationsRepository.findOne(publicationId, {
-      select: ['id']
-    });
+    try {
+      const publication = await this.publicationService.findOneById(publicationId);
 
-    if (!publicationExists) {
-      return res.status(404).json({
-        message: 'The publication could not be found.'
-      });
+      if (!publication) {
+        throw {
+          status: 404,
+          message: 'The publication could not be found.'
+        }
+      }
+  
+      const isPublicationOfUser = !!publication.users.find(user => user.id === userId);
+  
+      if (!isPublicationOfUser) {
+        throw {
+          status: 403,
+          message: 'You have no access to this publication.'
+        }
+      }
+
+      return next()
+    } catch (err) {
+      return this.handleError(err, res);
     }
-
-    const publicationOfUser = await getConnection()
-      .getRepository(Publication)
-      .createQueryBuilder('publication')
-      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
-      .where('publication.id = :publicationId', { publicationId })
-      .getOne()
-
-    if (!publicationOfUser) {
-      return res.status(403).json({
-        message: 'You have no access to this publication.'
-      })
-    }
-
-    return next()
   }
 
   /**
    * Get the publications the user has access to.
    */
-  getAll = async (req: Request, res: Response) => {
+  public getAll = async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
-    // Get all the publications the user has access to
-    const [publications, total] = await getConnection()
-      .getRepository(Publication)
-      .createQueryBuilder('publication')
-      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
-      .getManyAndCount()
+    try {
+      const requestQuery = this.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+      const response = await this.publicationService.findAll(userId, page, perPage, skip, take);
 
-    return res.json({
-      total,
-      data: publications
-    })
+      return res.json(response);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
   }
 
-  getOne = async (req: Request, res: Response) => {
+  public getOne = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const userId = req.user!.id;
 
-    // Get the specific publication of the user
-    const publicationOfUser = await getConnection()
-      .getRepository(Publication)
-      .createQueryBuilder('publication')
-      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
-      .where('publication.id = :publicationId', { publicationId })
-      .getOne()
+    try {
+      const publicationOfUser = await this.publicationService.findOneByIdOfUser(publicationId, userId);
 
-    return res.json(publicationOfUser)
+      return res.json(publicationOfUser);
+    } catch (err) {
+      return this.handleError(err, res);
+    }
   }
 
-  getAllArticles = async (req: Request, res: Response): Promise<Response> => {
-    const { page, perPage } = req.query;
+  public getAllArticles = async (req: Request, res: Response): Promise<Response> => {
     const { publicationId } = req.params;
 
-    const articleSummariesResponse = await this.articleRepository.findSummaryOrFail({
-      where: {
-        publication: {
-          id: publicationId
-        }
-      }
-    }, page, perPage);
+    try {
+      const requestQuery = this.validatePagingParams(req.query);
+      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+      const where = 'publication.id = :publicationId';
+      const parameters = { publicationId };
+      const articleSummariesResponse = await this.articleService.findAllSummaries(where, parameters, page, perPage, skip, take);
 
-    return res.json(articleSummariesResponse)
+      return res.json(articleSummariesResponse)
+    } catch (err) {
+      return this.handleError(err, res);
+    }
   }
 
-  getArticle = async (req: Request, res: Response) => {
+  public getArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
-    const article = await this.articleRepository.findOneOrFail(articleId, {
+    const article = await this.articleService.findOneById(articleId, {
       where: {
         publication: {
           id: publicationId
@@ -131,7 +124,7 @@ export class PublicationsController {
   deleteArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
-    const article = await this.articleRepository.findOne(articleId, {
+    const article = await this.articleService.findOneById(articleId, {
       where: {
         publication: {
           id: publicationId
@@ -145,7 +138,7 @@ export class PublicationsController {
       })
     }
 
-    await this.articleRepository.remove(article);
+    await this.articleService.remove(article);
 
     // TODO: delete audiofiles
 

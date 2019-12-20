@@ -1,9 +1,15 @@
 
 import { Request, Response } from 'express';
+
 import { logger } from '../../utils';
+import { BaseController } from '../index';
 import { AnalyticsEventRequestBody } from './types';
 
-export class AnalyticsController {
+export class AnalyticsController extends BaseController {
+  constructor() {
+    super()
+  }
+
   createEvent = async (req: Request, res: Response) => {
     const eventData = req.body as AnalyticsEventRequestBody
 
