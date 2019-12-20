@@ -6,9 +6,9 @@ import { Organization } from '../../database/entities/organization';
 import { Publication } from '../../database/entities/publication';
 import { User } from '../../database/entities/user';
 import * as AWSSes from '../../mailers/aws-ses';
-import { BillingService } from '../../services/billingService';
-import { OrganizationService } from '../../services/organizationService';
-import { UsageRecordService } from '../../services/usageRecordService';
+import { BillingService } from '../../services/BillingService';
+import { OrganizationService } from '../../services/OrganizationService';
+import { UsageRecordService } from '../../services/UsageRecordService';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 

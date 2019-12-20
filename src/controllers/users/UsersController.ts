@@ -1,7 +1,7 @@
 import joi from '@hapi/joi';
 import { Request, Response } from 'express';
 
-import { UsersService } from '../../services/usersService';
+import { UsersService } from '../../services/UsersService';
 import { BaseController } from '../index';
 import { CreateUserRequestBody } from './types';
 

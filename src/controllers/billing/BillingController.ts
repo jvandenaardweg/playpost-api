@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { BillingService } from '../../services/billingService';
+import { BillingService } from '../../services/BillingService';
 import { BaseController } from '../index';
 
 export class BillingController extends BaseController {

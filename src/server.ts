@@ -20,21 +20,21 @@ import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
 import { MeController } from './controllers/me';
-import { OembedController } from './controllers/oembed';
+import { OembedController } from './controllers/oembed/OembedController';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
-import { UsersController } from './controllers/users';
+import { UsersController } from './controllers/users/UsersController';
 import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
-import { AnalyticsController } from './controllers/analytics';
-import { BillingController } from './controllers/billing';
-import { NotFoundController } from './controllers/not-found';
-import { OrganizationsController } from './controllers/organizations';
-import { PublicationsController } from './controllers/publications';
-import { StatusController } from './controllers/status';
-import { UserController } from './controllers/user';
+import { AnalyticsController } from './controllers/analytics/AnalyticsController';
+import { BillingController } from './controllers/billing/BillingController';
+import { NotFoundController } from './controllers/not-found/NotFoundController';
+import { OrganizationsController } from './controllers/organizations/OrganizationsController';
+import { PublicationsController } from './controllers/publications/PublicationsController';
+import { StatusController } from './controllers/status/StatusController';
+import { UserController } from './controllers/user/UserController';
 
 import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
