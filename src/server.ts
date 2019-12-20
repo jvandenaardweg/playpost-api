@@ -424,10 +424,6 @@ export const setupServer = async () => {
         }
       }
 
-      if (process.env.NODE_ENV !== 'test') {
-        logger.error(`Error on route: ${req.method} ${req.url} "${err.message}"`);
-      }
-
       if (err.message === 'Unauthorized') {
         return res.status(403).json({
           message: 'You are not logged or your access is expired. Please log in to the app and try again.'
