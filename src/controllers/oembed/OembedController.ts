@@ -77,7 +77,7 @@ export class OembedController extends BaseController {
       }
 
       // TODO: add caching
-      const foundArticle = await this.articleService.findOne(articleId);
+      const foundArticle = await this.articleService.findOneById(articleId);
 
       if (!foundArticle) {
         throw {
