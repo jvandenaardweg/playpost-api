@@ -9,6 +9,7 @@ import { User } from '../database/entities/user';
 import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
+import { HttpError, HttpStatus } from '../http-error';
 
 export class OrganizationService extends BaseService {
   constructor () {
@@ -198,6 +199,10 @@ export class OrganizationService extends BaseService {
   async updateCustomer(organizationId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
     const organization = await this.findOneById(organizationId);
 
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+    
     const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
@@ -234,6 +239,10 @@ export class OrganizationService extends BaseService {
   async findCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
     const organization = await this.findOneById(organizationId);
 
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
     const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
 
     return subscriptions;
@@ -262,6 +271,10 @@ export class OrganizationService extends BaseService {
   async findCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
     const organization = await this.findOneById(organizationId);
 
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
     const invoices = await stripe.invoices.list({
       customer: organization.customer.stripeCustomerId
     })
@@ -271,6 +284,10 @@ export class OrganizationService extends BaseService {
 
   async findCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
     const organization = await this.findOneById(organizationId);
+
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
 
     const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
       customer: organization.customer.stripeCustomerId
