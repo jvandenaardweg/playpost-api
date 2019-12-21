@@ -49,7 +49,7 @@ export class OrganizationService extends BaseService {
     return !!organization;
   }
 
-  async findOneById(organizationId: string): Promise<Organization> {
+  async findOneById(organizationId: string): Promise<Organization | undefined> {
     const organization = await getConnection()
       .getRepository(Organization)
       .createQueryBuilder('organization')
@@ -59,13 +59,6 @@ export class OrganizationService extends BaseService {
       .leftJoinAndSelect("organization.admin", "admin")
       .where('organization.id = :organizationId', { organizationId })
       .getOne()
-
-    if (!organization) {
-      throw {
-        status: 404,
-        message: 'Organization does not exist.'
-      }
-    }
 
     return organization;
   }
@@ -116,27 +109,29 @@ export class OrganizationService extends BaseService {
     return response
   }
 
-  async findOneCustomer(organizationId: string): Promise<Customer> {
+  async findOneCustomer(organizationId: string): Promise<Customer | undefined> {
     const organization = await this.findOneById(organizationId);
 
+    if (!organization) {
+      return undefined;
+    }
+
     if (!organization.customer) {
-      throw {
-        status: 404,
-        message: 'Organization is not a customer yet.'
-      }
+      return undefined;
     }
 
     return organization.customer;
   }
 
-  async findOneAdmin(organizationId: string): Promise<User> {
+  async findOneAdmin(organizationId: string): Promise<User | undefined> {
     const organization = await this.findOneById(organizationId);
 
+    if (!organization) {
+      return undefined;
+    }
+
     if (!organization.admin) {
-      throw {
-        status: 404,
-        message: 'Organization does not have an admin.'
-      }
+      return undefined;
     }
 
     return organization.admin;
@@ -146,16 +141,7 @@ export class OrganizationService extends BaseService {
     return getConnection().manager.save(organization);
   }
 
-  async saveAdmin(organizationId: string, authenticatedUserId: string, newAdminUserId: string): Promise<Organization> {
-    if (authenticatedUserId === newAdminUserId) {
-      throw {
-        status: 403,
-        message: 'This user is already an admin of this organization.'
-      }
-    }
-
-    const organization = await this.findOneById(organizationId);
-
+  async saveAdmin(organization: Organization, newAdminUserId: string): Promise<Organization | undefined> {
     const newAdmin = await getConnection()
       .getRepository(User)
       .createQueryBuilder('user')
@@ -163,10 +149,7 @@ export class OrganizationService extends BaseService {
       .getOne();
 
     if (!newAdmin) {
-      throw {
-        status: 404,
-        message: 'User to be added as a new admin does not exist.'
-      }
+      return undefined;
     }
 
     // Change the admin to the new admin

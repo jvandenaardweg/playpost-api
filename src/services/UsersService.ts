@@ -6,6 +6,7 @@ import { User } from '../database/entities/user';
 import { addEmailToMailchimpList } from '../mailers/mailchimp';
 import { logger } from '../utils';
 import { BaseService } from './index';
+import { HttpError, HttpStatus } from '../http-error';
 
 export class UsersService extends BaseService {
   userRepository: Repository<User>;
@@ -35,11 +36,7 @@ export class UsersService extends BaseService {
     const existingUser = await this.userRepository.findOne({ email: emailAddressNormalized });
 
     if (existingUser) {
-      throw {
-        status: 409,
-        message: "Another user with this email address already exists. If it's yours, you can try to login.",
-        field: 'email'
-      }
+      throw new HttpError(HttpStatus.Conflict, "Another user with this email address already exists. If it's yours, you can try to login.", { field: 'email' })
     }
 
     const hashedPassword = await User.hashPassword(password);
@@ -156,10 +153,7 @@ export class UsersService extends BaseService {
 
       await queryRunner.release();
 
-      throw {
-        status: 500,
-        message: 'Oops! An error happened while creating your account. Please try again.'
-      }
+      throw new HttpError(HttpStatus.InternalServerError, 'Oops! An error happened while creating your account. Please try again.');
     }
   }
 
@@ -167,10 +161,7 @@ export class UsersService extends BaseService {
     const userToDelete = await this.userRepository.findOne(userId);
 
     if (!userToDelete) {
-      throw {
-        status: 400,
-        message: 'Could not find the user to delete.'
-      }
+      throw new HttpError(HttpStatus.NotFound, 'User to delete could not be found.');
     }
 
     await this.userRepository.remove(userToDelete);

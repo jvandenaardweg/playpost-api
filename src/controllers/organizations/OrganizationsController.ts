@@ -62,6 +62,10 @@ export class OrganizationsController extends BaseController {
       // Get the organization so we can determine if the user is an admin or normal user of this resource
       const organization = await this.organizationService.findOneById(organizationId);
 
+      if (!organization) {
+        throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+      }
+
       // Only allow access to this resource if it's a user or admin
       const isAdminInOrganization = organization.admin.id === userId;
       const isUserInOrganization = organization.users.some(user => user.id === userId);
@@ -103,6 +107,10 @@ export class OrganizationsController extends BaseController {
 
     const organization = await this.organizationService.findOneById(organizationId);
 
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
     return res.json(organization);
   };
 
@@ -137,6 +145,10 @@ export class OrganizationsController extends BaseController {
 
     const customer = await this.organizationService.findOneCustomer(organizationId);
 
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization does not exist.');
+    }
+
     const { stripeCustomerId } = customer;
 
     if (!stripeCustomerId) {
@@ -163,6 +175,10 @@ export class OrganizationsController extends BaseController {
 
     const admin = await this.organizationService.findOneAdmin(organizationId);
 
+    if (!admin) {
+      throw new HttpError(HttpStatus.NotFound, 'Admin for this organization does not exist.');
+    }
+
     return res.json(admin);
   };
 
@@ -175,7 +191,17 @@ export class OrganizationsController extends BaseController {
     const { newAdminUserId } = req.body;
     const userId = req.user!.id;
 
-    const updatedOrganization = await this.organizationService.saveAdmin(organizationId, userId, newAdminUserId);
+    if (userId === newAdminUserId) {
+      throw new HttpError(HttpStatus.BadRequest, 'This user is already an admin of this organization.');
+    }
+
+    const organization = await this.organizationService.findOneById(organizationId);
+
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
+    const updatedOrganization = await this.organizationService.saveAdmin(organization, newAdminUserId);
 
     return res.json(updatedOrganization);
   };
@@ -193,7 +219,7 @@ export class OrganizationsController extends BaseController {
     const organization = await this.organizationService.findOneById(organizationId);
 
     if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization could not be found.');
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
     const user = await this.usersService.findOne(userId);
@@ -231,7 +257,7 @@ export class OrganizationsController extends BaseController {
     const organization = await this.organizationService.findOneById(organizationId);
 
     if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'The organization does not exist.');
+      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
     const userExistsInOrganization = organization.users.some(organizationUser => organizationUser.id === newUser.id);

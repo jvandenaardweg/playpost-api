@@ -1,5 +1,6 @@
 import joi from '@hapi/joi';
 import { CollectionRequestQuery } from '../typings';
+import { HttpError, HttpStatus } from '../http-error';
 
 export class BaseController {
   defaultPage: number;
@@ -33,11 +34,7 @@ export class BaseController {
     const { error } = validationSchema.validate(requestQuery);
 
     if (error) {
-      throw {
-        status: 400,
-        message: error.details[0].message,
-        details: error.details[0]
-      }
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0]);
     }
 
     return requestQuery
