@@ -246,4 +246,12 @@ export class PublicationsController extends BaseController {
 
     return res.status(200).send();
   }
+
+  createAudiofile = async (req: Request, res: Response) => {
+    // const { publicationId, articleId } = req.params;
+
+    return res.json({
+      message: 'Should create audiofile'
+    })
+  }
 }

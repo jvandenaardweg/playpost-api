@@ -34,6 +34,17 @@ export class PublicationService extends BaseService {
     return response
   }
 
+  public findOneByIdOfUser = async (publicationId: string, userId: string) => {
+    return getConnection()
+      .getRepository(Publication)
+      .createQueryBuilder('publication')
+      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
+      .leftJoinAndSelect("publication.users", "users")
+      .leftJoinAndSelect("publication.organization", "organization")
+      .where('publication.id = :publicationId', { publicationId })
+      .getOne()
+  }
+
   /**
    * Find a publication by ID with and include all it's relations.
    *
@@ -51,14 +62,5 @@ export class PublicationService extends BaseService {
 
   public remove = async (publication: Publication) => {
     return this.publicationRepository.remove(publication);
-  }
-
-  public findOneByIdOfUser = async (publicationId: string, userId: string) => {
-    return getConnection()
-      .getRepository(Publication)
-      .createQueryBuilder('publication')
-      .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
-      .where('publication.id = :publicationId', { publicationId })
-      .getOne()
   }
 }

@@ -44,17 +44,18 @@ export class ArticleService extends BaseService {
       'compatibilityMessage',
       'status',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
     ];
 
     const [articles, total] = await getConnection()
       .getRepository(Article)
       .createQueryBuilder('article')
+      .leftJoinAndSelect("article.publication", "publication")
       .select(select.map(item => `article.${item}`))
       .where(where, parameters)
       .skip(skip)
       .take(take)
-      .orderBy('createdAt', 'DESC')
+      .orderBy('article.createdAt', 'DESC')
       .getManyAndCount()
 
     const totalPages = this.getTotalPages(total, perPage);

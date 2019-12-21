@@ -355,8 +355,9 @@ export const setupServer = async () => {
   app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOne);
   app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getAllArticles);
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createArticle);
-  app.post('/v1/publications/:publicationId/articles/import', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createImportArticle);
+  app.post('/v1/publications/:publicationId/import/article', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createImportArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
+  app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 
   app.get('/v1/billing', IS_PROTECTED_JWT, billingController.getIndex);
