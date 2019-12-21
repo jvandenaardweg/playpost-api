@@ -202,7 +202,7 @@ export class OrganizationService extends BaseService {
     if (!organization) {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
-    
+
     const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
