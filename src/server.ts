@@ -40,6 +40,7 @@ import { connectionOptions } from './database/connection-options';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { HttpStatus } from './http-error';
 ;
 
 logger.info('App init:', 'Starting...');
@@ -404,33 +405,27 @@ export const setupServer = async () => {
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     if (err) {
-      if (process.env.NODE_ENV === 'production') {
-        // Grab the user so we can give some context to our errors
-        if (req.user!) {
-          const { id, email } = req.user!;
+      const statusCode = err.status ? err.status : err.statusCode ? err.statusCode : HttpStatus.InternalServerError;
 
-          Sentry.configureScope(scope => {
-            scope.setUser({ id, email });
-          });
+      // We do not want to track al error types
+      // General Bad Request status codes is not something we want to see
+      if ([HttpStatus.BadRequest, HttpStatus.NotFound].includes(statusCode)) {
+        // Sentry error tracking is only enabled in NODE_ENV production
+        Sentry.configureScope(scope => {
+          if (req.user!) {
+            scope.setUser({
+              id: req.user!.id,
+              email: req.user!.email
+            });
+          }
 
-          logger.error(`Error for user ID "${id}", email: "${email}"`, err);
-        }
+          if (statusCode === HttpStatus.InternalServerError) {
+            scope.setLevel(Sentry.Severity.Critical);
+          }
 
-        // Capture the error for us to see in Sentry
-        // Do not capture Unauthorized errors
-        if (err.message !== 'Unauthorized') {
-          logger.error('Uncaught error', err);
           Sentry.captureException(err);
-        }
-      }
-
-      if (err.message === 'Unauthorized') {
-        return res.status(403).json({
-          message: 'You are not logged or your access is expired. Please log in to the app and try again.'
         });
       }
-
-      const statusCode = err.status ? err.status : err.statusCode ? err.statusCode : 500;
 
       // If we have a status code, use our custom error response
       if (statusCode) {
@@ -440,22 +435,6 @@ export const setupServer = async () => {
           details: err.details ? err.details : undefined
         });
       }
-
-      // // Return a specific error message when on dev mode
-      if (process.env.NODE_ENV !== 'production') {
-        return res.status(500).json({
-          status: 500,
-          message: err && err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
-        });
-      }
-
-      // Show a general error message to our users on Production
-      // Our users do not need to know what goes wrong in the error message
-      return res.status(500).json({
-        status: 500,
-        message: 'An unexpected error occurred. Please try again or contact us when this happens again.'
-      });
-
     }
 
     return next(err);

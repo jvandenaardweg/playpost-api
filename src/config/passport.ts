@@ -7,6 +7,7 @@ import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { UserRepository } from '../database/repositories/user';
 import { getRealUserIpAddress } from '../utils/ip-address';
+import { HttpError, HttpStatus } from '../http-error';
 
 const { JWT_SECRET } = process.env;
 
@@ -62,7 +63,7 @@ export const apiKeySecretPassportStrategy = new passportCustom.Strategy(async (r
   // If we find the auth headers if we end up in this strategy, just return unauthorized
   // User must return ONLY "x-api-key" and "x-api-secret"
   if (authHeader) {
-    return done(new Error('Unauthorized'))
+    return done(new HttpError(HttpStatus.Unauthorized, 'You are not logged in or your access is expired. Please login and try again.'))
   }
 
   const apiKey  = req.headers['x-api-key'] as string | undefined;
