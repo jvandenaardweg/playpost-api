@@ -52,6 +52,9 @@ export class PublicationsController extends BaseController {
     return res.json(response);
   }
 
+  /**
+   * Get one publication the user has access to.
+   */
   public getOne = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const userId = req.user!.id;
@@ -61,6 +64,10 @@ export class PublicationsController extends BaseController {
     return res.json(publicationOfUser);
   }
 
+  /**
+   * Get all article summaries from a publication.
+   * This list includes draft articles, which are not available outside the organization.
+   */
   public getAllArticles = async (req: Request, res: Response): Promise<Response> => {
     const { publicationId } = req.params;
 
@@ -73,6 +80,9 @@ export class PublicationsController extends BaseController {
     return res.json(articleSummariesResponse)
   }
 
+  /**
+   * Get a single article of a publication.
+   */
   public getArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
@@ -100,6 +110,9 @@ export class PublicationsController extends BaseController {
     return res.json({ message: 'ok', url, publicationId });
   }
 
+  /**
+   * Deletes a single article from a publication.
+   */
   deleteArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
@@ -112,10 +125,11 @@ export class PublicationsController extends BaseController {
     })
 
     if (!article) {
-      return res.status(404).json({
-        message: 'Article does not exist.'
-      })
+      throw new HttpError(HttpStatus.NotFound, 'Article does not exist.');
     }
+
+    // TODO: find out if article already exists in playlists
+    // TODO: find out if article already has audiofiles
 
     await this.articleService.remove(article);
 

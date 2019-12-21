@@ -15,27 +15,6 @@ export class UsageRecordService extends BaseService {
     this.usageRecordRepository = getRepository(UsageRecord);
   }
 
-  async findAll(page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
-    const [usageRecords, total] = await getConnection()
-      .getRepository(UsageRecord)
-      .createQueryBuilder('usage_record')
-      .skip(skip)
-      .take(take)
-      .getManyAndCount()
-
-    const totalPages = this.getTotalPages(total, perPage);
-
-    const response: CollectionResponse<UsageRecord[]> = {
-      total,
-      page,
-      perPage,
-      totalPages,
-      data: usageRecords
-    }
-
-    return response
-  }
-
   async findAllForSubscriptionItemId(stripeSubscriptionItemId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
     const [usageRecords, total] = await getConnection()
       .getRepository(UsageRecord)
@@ -79,7 +58,7 @@ export class UsageRecordService extends BaseService {
       publicationId: string,
       userId: string,
       quantity: number,
-      isMetered: boolean,
+      isMetered: boolean
     }
   ): Promise<InsertResult> {
     const timestamp = new Date().getTime();
@@ -93,7 +72,8 @@ export class UsageRecordService extends BaseService {
     let stripeUsageRecordId: string | undefined;
 
     // We track all usage, but allow to be "unmetered"
-    if (options.isMetered) {
+    // If no isMetered option is given, fallback to metered
+    if (options.isMetered || options.isMetered === undefined) {
       // TODO: retry on fail
       const createdStripeUsageRecord = await stripe.usageRecords.create(stripeSubscriptionItemId, stripePayload);
       stripeUsageRecordId = createdStripeUsageRecord.id;

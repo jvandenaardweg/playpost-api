@@ -222,7 +222,7 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    const user = await this.usersService.findOne(userId);
+    const user = await this.usersService.findOneById(userId);
 
     if (!user) {
       throw new HttpError(HttpStatus.NotFound, 'We could not find your account.');

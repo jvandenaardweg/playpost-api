@@ -16,7 +16,7 @@ export class UsersService extends BaseService {
     this.userRepository = getRepository(User);
   }
 
-  findOne = async (userId: string) => {
+  findOneById = async (userId: string) => {
     return this.userRepository.findOne(userId);
   }
 
