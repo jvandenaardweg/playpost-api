@@ -6,10 +6,10 @@ import { Customer } from '../database/entities/customer';
 import { Organization } from '../database/entities/organization';
 import { Publication } from '../database/entities/publication';
 import { User } from '../database/entities/user';
+import { HttpError, HttpStatus } from '../http-error';
 import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
-import { HttpError, HttpStatus } from '../http-error';
 
 export class OrganizationService extends BaseService {
   constructor () {
