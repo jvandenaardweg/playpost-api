@@ -2,7 +2,7 @@ import joi from '@hapi/joi';
 import { Request, Response } from 'express';
 
 import { HttpError, HttpStatus } from '../../http-error';
-import { ArticleService } from '../../services/ArticleService';
+import { ArticleService } from '../../services/article-service';
 import { BaseController } from '../index';
 
 export class OembedController extends BaseController {

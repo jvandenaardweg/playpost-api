@@ -2,7 +2,7 @@ import joi from '@hapi/joi';
 import { Request, Response } from 'express';
 
 import { HttpError, HttpStatus } from '../../http-error';
-import { UsersService } from '../../services/UsersService';
+import { UsersService } from '../../services/users-service';
 import { BaseController } from '../index';
 import { CreateUserRequestBody } from './types';
 

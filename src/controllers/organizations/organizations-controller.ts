@@ -5,11 +5,11 @@ import Stripe from 'stripe';
 import { Publication } from '../../database/entities/publication';
 import { HttpError, HttpStatus } from '../../http-error';
 import * as AWSSes from '../../mailers/aws-ses';
-import { BillingService } from '../../services/BillingService';
-import { OrganizationService } from '../../services/OrganizationService';
-import { PublicationService } from '../../services/PublicationService';
-import { UsageRecordService } from '../../services/UsageRecordService';
-import { UsersService } from '../../services/UsersService';
+import { BillingService } from '../../services/billing-service';
+import { OrganizationService } from '../../services/organization-service';
+import { PublicationService } from '../../services/publication-service';
+import { UsageRecordService } from '../../services/usage-record-service';
+import { UsersService } from '../../services/users-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 

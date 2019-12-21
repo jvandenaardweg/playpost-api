@@ -2,8 +2,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpError, HttpStatus } from '../../http-error';
-import { ArticleService } from '../../services/ArticleService';
-import { PublicationService } from '../../services/PublicationService';
+import { ArticleService } from '../../services/article-service';
+import { PublicationService } from '../../services/publication-service';
 import { BaseController } from '../index';
 
 export class PublicationsController extends BaseController {

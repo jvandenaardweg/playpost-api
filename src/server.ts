@@ -20,21 +20,21 @@ import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages';
 import { MeController } from './controllers/me';
-import { OembedController } from './controllers/oembed/OembedController';
+import { OembedController } from './controllers/oembed/oembed-controller';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
-import { UsersController } from './controllers/users/UsersController';
+import { UsersController } from './controllers/users/users-controller';
 import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
-import { AnalyticsController } from './controllers/analytics/AnalyticsController';
-import { BillingController } from './controllers/billing/BillingController';
-import { NotFoundController } from './controllers/not-found/NotFoundController';
-import { OrganizationsController } from './controllers/organizations/OrganizationsController';
-import { PublicationsController } from './controllers/publications/PublicationsController';
-import { StatusController } from './controllers/status/StatusController';
-import { UserController } from './controllers/user/UserController';
+import { AnalyticsController } from './controllers/analytics/analytics-controller';
+import { BillingController } from './controllers/billing/billing-controller';
+import { NotFoundController } from './controllers/not-found/not-found-controller';
+import { OrganizationsController } from './controllers/organizations/organizations-controller';
+import { PublicationsController } from './controllers/publications/publications-controller';
+import { StatusController } from './controllers/status/status-controller';
+import { UserController } from './controllers/user/user-controller';
 
 import { connectionOptions } from './database/connection-options';
 import { HttpStatus } from './http-error';
