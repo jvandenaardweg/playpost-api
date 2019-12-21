@@ -1,14 +1,14 @@
 
-import { NextFunction, Request, Response } from 'express';
 import joi from '@hapi/joi';
+import { NextFunction, Request, Response } from 'express';
 
+import { Article, ArticleStatus } from '../../database/entities/article';
 import { HttpError, HttpStatus } from '../../http-error';
 import { ArticleService } from '../../services/article-service';
-import { PublicationService } from '../../services/publication-service';
-import { BaseController } from '../index';
-import { fetchFullArticleContents } from '../articles';
-import { Article, ArticleStatus } from '../../database/entities/article';
 import { LanguageService } from '../../services/language-service';
+import { PublicationService } from '../../services/publication-service';
+import { fetchFullArticleContents } from '../articles';
+import { BaseController } from '../index';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
