@@ -1,6 +1,6 @@
 import joi from '@hapi/joi';
-import { CollectionRequestQuery } from '../typings';
 import { HttpError, HttpStatus } from '../http-error';
+import { CollectionRequestQuery } from '../typings';
 
 export class BaseController {
   defaultPage: number;

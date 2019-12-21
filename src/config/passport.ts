@@ -6,8 +6,8 @@ import { CACHE_ONE_DAY } from '../constants/cache';
 import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { UserRepository } from '../database/repositories/user';
-import { getRealUserIpAddress } from '../utils/ip-address';
 import { HttpError, HttpStatus } from '../http-error';
+import { getRealUserIpAddress } from '../utils/ip-address';
 
 const { JWT_SECRET } = process.env;
 

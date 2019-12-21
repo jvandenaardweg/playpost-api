@@ -37,11 +37,10 @@ import { StatusController } from './controllers/status/StatusController';
 import { UserController } from './controllers/user/UserController';
 
 import { connectionOptions } from './database/connection-options';
+import { HttpStatus } from './http-error';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
-import { HttpStatus } from './http-error';
-;
 
 logger.info('App init:', 'Starting...');
 

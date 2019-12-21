@@ -3,10 +3,10 @@ import { getConnection, getRepository, Repository } from 'typeorm';
 import * as cacheKeys from '../cache/keys';
 import { Organization } from '../database/entities/organization';
 import { User } from '../database/entities/user';
+import { HttpError, HttpStatus } from '../http-error';
 import { addEmailToMailchimpList } from '../mailers/mailchimp';
 import { logger } from '../utils';
 import { BaseService } from './index';
-import { HttpError, HttpStatus } from '../http-error';
 
 export class UsersService extends BaseService {
   userRepository: Repository<User>;
