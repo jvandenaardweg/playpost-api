@@ -71,7 +71,7 @@ export class OembedController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, `Could not find article with ID: ${articleId}`);
     }
 
-    const foundAudiofile = foundArticle.audiofiles.find(audiofile => audiofile.id === audiofileId);
+    const foundAudiofile = foundArticle.audiofiles && foundArticle.audiofiles.find(audiofile => audiofile.id === audiofileId);
 
     if (!foundAudiofile) {
       throw new HttpError(HttpStatus.NotFound, `Could not find audiofile with ID: ${audiofileId}`);

@@ -5,20 +5,20 @@ import { Language } from '../entities/language';
 
 export interface ArticleSummary {
   id: Article['id'];
-  title: Article['title'];
+  title?: Article['title'];
   url: Article['url'];
-  canonicalUrl: Article['canonicalUrl'];
-  readingTime: Article['readingTime'];
-  sourceName: Article['sourceName'];
-  imageUrl: Article['imageUrl'];
-  authorName: Article['authorName'];
-  isCompatible: Article['isCompatible'];
-  compatibilityMessage: Article['compatibilityMessage'];
-  status: Article['status'];
+  canonicalUrl?: Article['canonicalUrl'];
+  readingTime?: Article['readingTime'];
+  sourceName?: Article['sourceName'];
+  imageUrl?: Article['imageUrl'];
+  authorName?: Article['authorName'];
+  isCompatible?: Article['isCompatible'];
+  compatibilityMessage?: Article['compatibilityMessage'];
+  status?: Article['status'];
   createdAt: Article['createdAt'];
   updatedAt: Article['updatedAt'];
-  audiofiles: Audiofile[];
-  language: Language;
+  audiofiles?: Audiofile[];
+  language?: Language;
 }
 
 export interface ArticleSummariesResponse {

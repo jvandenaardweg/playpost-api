@@ -48,6 +48,7 @@ import { CustomerOrganizationSetNull1576263832495 } from './database/migrations/
 import { CustomerOrganizationAllowNull1576264002710 } from './database/migrations/1576264002710-CustomerOrganizationAllowNull';
 import { OrganizationsPublicationsOwnerJoinTable1576270744686 } from './database/migrations/1576270744686-OrganizationsPublicationsOwnerJoinTable';
 import { UsageRecordTable1576585231400 } from './database/migrations/1576585231400-UsageRecordTable';
+import { ArticleDraftStatus1576943426233 } from './database/migrations/1576943426233-ArticleDraftStatus';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -111,7 +112,8 @@ const config: ConnectionOptions = {
     CustomerOrganizationSetNull1576263832495,
     CustomerOrganizationAllowNull1576264002710,
     OrganizationsPublicationsOwnerJoinTable1576270744686,
-    UsageRecordTable1576585231400
+    UsageRecordTable1576585231400,
+    ArticleDraftStatus1576943426233
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

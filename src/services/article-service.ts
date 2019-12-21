@@ -6,18 +6,27 @@ import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
 
 export class ArticleService extends BaseService {
-  articleRepository: Repository<Article>;
+  private readonly articleRepository: Repository<Article>;
+  private readonly defaultRelations: string[];
 
   constructor() {
     super()
 
+    this.defaultRelations = ['audiofiles', 'publication'];
     this.articleRepository = getRepository(Article);
   }
 
   public findOneById = (articleId: string, options?: FindOneOptions<Article> | undefined) => {
     return this.articleRepository.findOne(articleId, {
       ...options,
-      relations: ['audiofiles']
+      relations: this.defaultRelations
+    });
+  }
+
+  public findOne = (options: FindOneOptions<Article> | undefined) => {
+    return this.articleRepository.findOne({
+      ...options,
+      relations: this.defaultRelations
     });
   }
 
@@ -63,5 +72,13 @@ export class ArticleService extends BaseService {
 
   public remove = async (article: Article): Promise<Article> => {
     return this.articleRepository.remove(article);
+  }
+
+  public save = async (article: Article): Promise<{ id: string }> => {
+    const savedArticle = await this.articleRepository.save(article);
+
+    return {
+      id: savedArticle.id
+    };
   }
 }

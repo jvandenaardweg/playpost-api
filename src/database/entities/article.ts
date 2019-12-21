@@ -16,7 +16,8 @@ export enum ArticleStatus {
   CRAWLING = 'crawling',
   NEW = 'new',
   FINISHED = 'finished',
-  FAILED = 'failed'
+  FAILED = 'failed',
+  DRAFT = 'draft'
 }
 
 @Entity()
@@ -26,38 +27,37 @@ export class Article extends BaseEntity {
   id: string;
 
   @Column({ nullable: true })
-  title: string;
+  title?: string;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
 
   @Index()
-  @Column({ unique: true })
+  @Column({ nullable: false })
   @IsUrl()
   url: string;
 
   @Index()
-  @Column({ unique: true, nullable: true })
+  @Column({ nullable: true })
   @IsUrl()
-  // The "canonicalUrl" is filled in after we crawl the page. We could get redirects. The URL we end up is the "canonicalUrl", which could be different then "url".
-  canonicalUrl: string;
+  canonicalUrl?: string;
 
   @Column({ type: 'enum', enum: ArticleStatus, default: ArticleStatus.NEW })
   status: ArticleStatus;
 
   @Column({ nullable: true })
-  sourceName: string;
+  sourceName?: string;
 
   @Column({ nullable: true })
   @IsUrl()
-  imageUrl: string;
+  imageUrl?: string;
 
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
   // Time in seconds
-  readingTime: number;
+  readingTime?: number;
 
   @Column({ nullable: true })
-  authorName: string;
+  authorName?: string;
 
   @Column({ nullable: false, default: true })
   // A property to determine if the article at the url is really an article by our definition
@@ -68,40 +68,40 @@ export class Article extends BaseEntity {
   @Column({ nullable: true })
   // A message from our article crawler on why it is not compatible
   // Can be used for debugging or for giving the user more information on what he needs to do to make the article compatible
-  compatibilityMessage: string;
+  compatibilityMessage?: string;
 
   @Column('text', { nullable: true })
   // The article's HTML we can display to the user
-  html: string;
+  html?: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the ssml to the user. If you need it, use in your find query { select: ['ssml'] }
   // The SSML needed for Text-to-Speech services
-  ssml: string;
+  ssml?: string;
 
   @Column('text', { nullable: true, select: false }) // Be aware: we don't send the text to the user. If you need it, use in your find query { select: ['documentHtml'] }
   // The complete documentHtml we get from the user (by using our share extensions). We remove the documentHtml if we have crawled the article.
-  documentHtml: string;
+  documentHtml?: string;
 
   // A User can add an article, but is not the owner. A Publisher is the owner of an Article
   // On delete of a User, keep the Article in the database, but set its userId to NULL
   @ManyToOne(() => User, user => user.articles, { nullable: true, onDelete: 'SET NULL' })
-  user: User;
+  user?: User;
 
   // An Article is owned by a Publication
   // On delete of a Publication, also delete it's articles
   // A Publication can be an owner of an article, as user cannot be an owner
   // A User can add articles on his own to his playlist without a Publication to be an owner of that
   @ManyToOne(() => Publication, publication => publication.articles, { nullable: true, onDelete: 'CASCADE' })
-  publication: Publication;
+  publication?: Publication;
 
   @ManyToOne(() => Language, language => language.articles, { nullable: true, onDelete: 'RESTRICT', eager: true }) // On delete of a Language, restrict the deletion when there are articles with the same language
-  language: Language;
+  language?: Language;
 
   @OneToMany(() => Audiofile, audiofile => audiofile.article, { onDelete: 'NO ACTION', eager: true }) // On delete of a Audiofile, don't remove the Article
-  audiofiles: Audiofile[];
+  audiofiles?: Audiofile[];
 
   @OneToMany(() => PlaylistItem, playlistItem => playlistItem.article, { onDelete: 'NO ACTION' }) // On delete of a PlaylistItem, don't remove the Article
-  playlistItems: PlaylistItem[];
+  playlistItems?: PlaylistItem[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -113,16 +113,20 @@ export class Article extends BaseEntity {
   async afterInsert() {
     const loggerPrefix = 'Database Entity (Article):';
 
-    try {
-      // Should get the full article details, like ssml, text and html
-      logger.info(loggerPrefix, '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
-
-      // Important: do not await this, we do not want the user to wait for this publish to happen, as that delays it with 1 second
-      ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
-    } catch (err) {
-      const errorMessage = err && err.message ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
-      logger.error(loggerPrefix, errorMessage);
-      throw err;
+    // Only automatically fetch the article when the status on insert is not DRAFT
+    // Publishers insert Draft articles.
+    if (this.status !== ArticleStatus.DRAFT) {
+      try {
+        // Should get the full article details, like ssml, text and html
+        logger.info(loggerPrefix, '@AfterInsert():', 'Should get the full article details, like ssml, text and html...');
+  
+        // Important: do not await this, we do not want the user to wait for this publish to happen, as that delays it with 1 second
+        ArticlesPubSub.publishCrawlFullArticle(this.id, this.url);
+      } catch (err) {
+        const errorMessage = err && err.message ? err.message : 'Unknown error happened while publishing message to start crawler for the full article.';
+        logger.error(loggerPrefix, errorMessage);
+        throw err;
+      }
     }
   }
 
@@ -142,7 +146,7 @@ export class Article extends BaseEntity {
       ...audiofileCacheKeys,
       cache.getCacheKey('Article', articleId),
       cache.getCacheKey('Article', this.url),
-      cache.getCacheKey('Article', this.canonicalUrl)
+      cache.getCacheKey('Article', this.canonicalUrl!)
     ]
 
     logger.info(loggerPrefix, 'Should delete caches:', cacheKeys.join(', '))

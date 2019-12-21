@@ -180,7 +180,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     return res.status(400).json({ message });
   }
 
-  const articleReadingTimeInSeconds = article.readingTime && article.readingTime;
+  const articleReadingTimeInSeconds = article.readingTime!;
 
   // Check to see of the current article readingtime length will go above the user's monthly limit
   // Note: unlimited users do not have this limitation
@@ -497,7 +497,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   // Check if audiofile for same voice already exists on this article
   // This generally should not happen, we should prevent this from within the app
-  if (voice && article.audiofiles.length) {
+  if (voice && article.audiofiles && article.audiofiles.length) {
     const voiceId = voice && voice.id;
     const existingAudiofileForVoice = article.audiofiles.find(audiofile => audiofile.voice.id === voiceId);
 
