@@ -430,9 +430,21 @@ export const setupServer = async () => {
         });
       }
 
-      // Return a specific error message when on dev mode
+      const statusCode = err.status ? err.status : err.statusCode ? err.statusCode : 500;
+
+      // If we have a status code, use our custom error response
+      if (statusCode) {
+        return res.status(statusCode).json({
+          status: statusCode ? statusCode : undefined,
+          message: err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.',
+          details: err.details ? err.details : undefined
+        });
+      }
+
+      // // Return a specific error message when on dev mode
       if (process.env.NODE_ENV !== 'production') {
         return res.status(500).json({
+          status: 500,
           message: err && err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.'
         });
       }
@@ -440,6 +452,7 @@ export const setupServer = async () => {
       // Show a general error message to our users on Production
       // Our users do not need to know what goes wrong in the error message
       return res.status(500).json({
+        status: 500,
         message: 'An unexpected error occurred. Please try again or contact us when this happens again.'
       });
 

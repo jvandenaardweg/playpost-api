@@ -1,6 +1,7 @@
 
 import { NextFunction, Request, Response } from 'express';
 
+import { HttpError, HttpStatus } from '../../http-error';
 import { ArticleService } from '../../services/ArticleService';
 import { PublicationService } from '../../services/PublicationService';
 import { BaseController } from '../index';
@@ -23,29 +24,19 @@ export class PublicationsController extends BaseController {
     const { publicationId } = req.params;
     const userId = req.user!.id;
 
-    try {
-      const publication = await this.publicationService.findOneById(publicationId);
+    const publication = await this.publicationService.findOneById(publicationId);
 
-      if (!publication) {
-        throw {
-          status: 404,
-          message: 'The publication could not be found.'
-        }
-      }
-  
-      const isPublicationOfUser = !!publication.users.find(user => user.id === userId);
-  
-      if (!isPublicationOfUser) {
-        throw {
-          status: 403,
-          message: 'You have no access to this publication.'
-        }
-      }
-
-      return next()
-    } catch (err) {
-      return this.handleError(err, res);
+    if (!publication) {
+      throw new HttpError(HttpStatus.NotFound, 'The publication could not be found.');
     }
+
+    const isPublicationOfUser = !!publication.users.find(user => user.id === userId);
+
+    if (!isPublicationOfUser) {
+      throw new HttpError(HttpStatus.Forbidden, 'You have no access to this publication.');
+    }
+
+    return next()
   }
 
   /**
@@ -54,44 +45,32 @@ export class PublicationsController extends BaseController {
   public getAll = async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
-    try {
-      const requestQuery = this.validatePagingParams(req.query);
-      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-      const response = await this.publicationService.findAll(userId, page, perPage, skip, take);
+    const requestQuery = this.validatePagingParams(req.query);
+    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const response = await this.publicationService.findAll(userId, page, perPage, skip, take);
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   }
 
   public getOne = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const userId = req.user!.id;
 
-    try {
-      const publicationOfUser = await this.publicationService.findOneByIdOfUser(publicationId, userId);
+    const publicationOfUser = await this.publicationService.findOneByIdOfUser(publicationId, userId);
 
-      return res.json(publicationOfUser);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(publicationOfUser);
   }
 
   public getAllArticles = async (req: Request, res: Response): Promise<Response> => {
     const { publicationId } = req.params;
 
-    try {
-      const requestQuery = this.validatePagingParams(req.query);
-      const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-      const where = 'publication.id = :publicationId';
-      const parameters = { publicationId };
-      const articleSummariesResponse = await this.articleService.findAllSummaries(where, parameters, page, perPage, skip, take);
+    const requestQuery = this.validatePagingParams(req.query);
+    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const where = 'publication.id = :publicationId';
+    const parameters = { publicationId };
+    const articleSummariesResponse = await this.articleService.findAllSummaries(where, parameters, page, perPage, skip, take);
 
-      return res.json(articleSummariesResponse)
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(articleSummariesResponse)
   }
 
   public getArticle = async (req: Request, res: Response) => {

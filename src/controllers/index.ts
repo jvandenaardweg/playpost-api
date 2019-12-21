@@ -1,5 +1,4 @@
 import joi from '@hapi/joi';
-import { Response } from 'express';
 import { CollectionRequestQuery } from '../typings';
 
 export class BaseController {
@@ -9,15 +8,6 @@ export class BaseController {
   constructor () {
     this.defaultPage = 1;
     this.defaultPerPage = 20;
-  }
-
-  handleError(err: any, res: Response) {
-    const errStatus = err.status ? err.status : err.statusCode ? err.statusCode : 400;
-
-    return res.status(errStatus).json({
-      message: err.message,
-      details: err.details ? err.details : undefined
-    });
   }
 
   getPagingParams(requestQuery: CollectionRequestQuery) {

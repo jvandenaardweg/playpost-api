@@ -8,7 +8,7 @@ stripe.setMaxNetworkRetries(3);
 stripe.setAppInfo({
   name: 'Playpost API',
   version,
-  url: process.env.PRODUCTION ? 'https://api.playpost.app' : 'https://localhost:3000'
+  url: process.env.PRODUCTION ? 'https://api.playpost.app' : !!process.env.HEROKU_APP_NAME ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` : 'https://localhost:3000'
 });
 
 export { stripe }

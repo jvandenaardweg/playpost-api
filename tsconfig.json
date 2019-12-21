@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": "/",
     "importHelpers": true,
     "emitDecoratorMetadata": true, // typeOrm requirement
     "experimentalDecorators": true, // typeOrm requirement
@@ -34,8 +34,5 @@
       "*": ["src/typings/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
   "exclude": ["node_modules", "babel.config.js", "src/**/*.test.ts"]
 }

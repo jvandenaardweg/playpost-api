@@ -17,78 +17,54 @@ export class BillingController extends BaseController {
   getAllPlans = async (req: Request, res: Response): Promise<Response> => {
     // const userId = req.user!.id;
 
-    try {
-      // const requestQuery = this.validatePagingParams(req.query);
-      // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-      const response = await this.billingService.findAllPlans();
+    // const requestQuery = this.validatePagingParams(req.query);
+    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const response = await this.billingService.findAllPlans();
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 
   getOnePlan = async (req: Request, res: Response): Promise<Response> => {
     const { stripePlanId } = req.params;
 
-    try {
-      const response = await this.billingService.findOnePlan(stripePlanId);
+    const response = await this.billingService.findOnePlan(stripePlanId);
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 
   getAllProducts = async (req: Request, res: Response): Promise<Response> => {
     // const userId = req.user!.id;
 
-    try {
-      // const requestQuery = this.validatePagingParams(req.query);
-      // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-      const response = await this.billingService.findAllProductsWithPlans();
+    // const requestQuery = this.validatePagingParams(req.query);
+    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const response = await this.billingService.findAllProductsWithPlans();
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 
   getOneProduct = async (req: Request, res: Response): Promise<Response> => {
     const { stripeProductId } = req.params;
 
-    try {
-      const response = await this.billingService.findOneProduct(stripeProductId);
+    const response = await this.billingService.findOneProduct(stripeProductId);
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 
   getAllTaxRates = async (req: Request, res: Response): Promise<Response> => {
     // const userId = req.user!.id;
 
-    try {
-      // const requestQuery = this.validatePagingParams(req.query);
-      // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-      const response = await this.billingService.findAllTaxRates();
+    // const requestQuery = this.validatePagingParams(req.query);
+    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const response = await this.billingService.findAllTaxRates();
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 
   getOneTaxRate = async (req: Request, res: Response): Promise<Response> => {
     const { stripeTaxRateId } = req.params;
 
-    try {
-      const response = await this.billingService.findOneTaxRate(stripeTaxRateId);
+    const response = await this.billingService.findOneTaxRate(stripeTaxRateId);
 
-      return res.json(response);
-    } catch (err) {
-      return this.handleError(err, res);
-    }
+    return res.json(response);
   };
 }
