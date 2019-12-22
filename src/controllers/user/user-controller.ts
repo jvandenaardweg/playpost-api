@@ -2,16 +2,16 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpError, HttpStatus } from '../../http-error';
-import { UsersService } from '../../services/users-service';
+import { UserService } from '../../services/user-service';
 import { BaseController } from '../index';
 
 export class UserController extends BaseController {
-  private readonly usersService: UsersService;
+  private readonly usersService: UserService;
 
   constructor() {
     super();
 
-    this.usersService = new UsersService()
+    this.usersService = new UserService()
   }
 
   restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {

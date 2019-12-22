@@ -9,7 +9,7 @@ import { BillingService } from '../../services/billing-service';
 import { OrganizationService } from '../../services/organization-service';
 import { PublicationService } from '../../services/publication-service';
 import { UsageRecordService } from '../../services/usage-record-service';
-import { UsersService } from '../../services/users-service';
+import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 
@@ -17,7 +17,7 @@ export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
   private usageRecordService: UsageRecordService;
   private billingService: BillingService;
-  private usersService: UsersService;
+  private usersService: UserService;
   private publicationService: PublicationService;
 
   constructor() {
@@ -25,7 +25,7 @@ export class OrganizationsController extends BaseController {
     this.organizationService = new OrganizationService();
     this.usageRecordService = new UsageRecordService();
     this.billingService = new BillingService();
-    this.usersService = new UsersService()
+    this.usersService = new UserService()
     this.publicationService = new PublicationService()
   }
 

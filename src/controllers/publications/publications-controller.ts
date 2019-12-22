@@ -2,25 +2,21 @@
 import joi from '@hapi/joi';
 import { NextFunction, Request, Response } from 'express';
 
-import { Article, ArticleStatus } from '../../database/entities/article';
+import { ArticleStatus } from '../../database/entities/article';
 import { HttpError, HttpStatus } from '../../http-error';
 import { ArticleService } from '../../services/article-service';
-import { LanguageService } from '../../services/language-service';
 import { PublicationService } from '../../services/publication-service';
-import { fetchFullArticleContents } from '../articles';
 import { BaseController } from '../index';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
   private readonly articleService: ArticleService;
-  private readonly languageService: LanguageService;
 
   constructor() {
     super();
 
     this.articleService = new ArticleService()
     this.publicationService = new PublicationService();
-    this.languageService = new LanguageService();
   }
 
   /**
@@ -113,14 +109,14 @@ export class PublicationsController extends BaseController {
     const { url } = req.body;
 
     const validationSchema = joi.object().keys({
+      publicationId: joi.string().uuid().required(),
       url: joi.string().uri().required()
     });
 
-    const userValidationResult = validationSchema.validate(req.body);
+    const userValidationResult = validationSchema.validate({ ...req.body, ...req.params });
 
     if (userValidationResult.error) {
       const firstError = userValidationResult.error.details[0];
-
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
@@ -139,41 +135,35 @@ export class PublicationsController extends BaseController {
     })
 
     if (existingArticle && existingArticle.publication && existingArticle.publication.id === publicationId) {
-      throw new HttpError(HttpStatus.Conflict, `This publication already has this article: ${existingArticle.title}`, {
-        article: existingArticle
-      })
+      throw new HttpError(
+        HttpStatus.Conflict,
+        `This publication already has this article: ${existingArticle.title}`,
+        {
+          article: existingArticle
+        }
+      );
     }
 
     // Publication does not already have this article, crawl it...
-
-    const crawledArticle = await fetchFullArticleContents(url);
+    const crawledArticle = await this.articleService.fetchArticleByUrl(url);
 
     if (!crawledArticle.language) {
       throw new HttpError(HttpStatus.BadRequest, 'We cannot automatically import this article because the language of this article could not be detected.');
     }
 
-    const language = await this.languageService.findOneByCode(crawledArticle.language);
+    // Insert the crawled article as a draft
+    crawledArticle.status = ArticleStatus.DRAFT;
 
-    if (!language) {
-      throw new HttpError(HttpStatus.BadRequest, 'The language of this article seems to be unknown.');
-    }
+    // Attach the article to this publication
+    crawledArticle.publication = publication;
 
-    const newArticle = new Article();
+    // Mark this article always as compatible
+    // This compatibility message is only used in our App to automatically determine if the article is compatible
+    // We do not need that kind of information when the user manually imports an article and edits it
+    crawledArticle.isCompatible = true;
+    crawledArticle.compatibilityMessage = undefined;
 
-    newArticle.status = ArticleStatus.DRAFT;
-    newArticle.title = crawledArticle.title || '';
-    newArticle.description = crawledArticle.description || '';
-    newArticle.canonicalUrl = crawledArticle.canonicalUrl || '';
-    newArticle.url = crawledArticle.url || '';
-    newArticle.html = crawledArticle.html || '';
-    newArticle.ssml = crawledArticle.ssml || '';
-    newArticle.imageUrl = crawledArticle.imageUrl || '';
-    newArticle.publication = publication;
-    newArticle.language = language;
-    newArticle.sourceName = crawledArticle.siteName || '';
-    newArticle.readingTime = crawledArticle.readingTime || 0;
-
-    const savedArticle = await this.articleService.save(newArticle);
+    const savedArticle = await this.articleService.save(crawledArticle);
 
     return res.json(savedArticle);
   };
@@ -224,6 +214,18 @@ export class PublicationsController extends BaseController {
    */
   deleteArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
+
+    const validationSchema = joi.object().keys({
+      publicationId: joi.string().uuid().required(),
+      articleId: joi.string().uuid().required()
+    });
+
+    const userValidationResult = validationSchema.validate(req.params);
+
+    if (userValidationResult.error) {
+      const firstError = userValidationResult.error.details[0];
+      throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
+    }
 
     const article = await this.articleService.findOneById(articleId, {
       where: {

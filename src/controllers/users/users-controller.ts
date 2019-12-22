@@ -2,16 +2,16 @@ import joi from '@hapi/joi';
 import { Request, Response } from 'express';
 
 import { HttpError, HttpStatus } from '../../http-error';
-import { UsersService } from '../../services/users-service';
+import { UserService } from '../../services/user-service';
 import { BaseController } from '../index';
 import { CreateUserRequestBody } from './types';
 
 export class UsersController extends BaseController {
-  usersService: UsersService;
+  usersService: UserService;
 
   constructor() {
     super();
-    this.usersService = new UsersService();
+    this.usersService = new UserService();
   }
 
   create = async (req: Request, res: Response) => {

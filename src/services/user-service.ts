@@ -8,7 +8,7 @@ import { addEmailToMailchimpList } from '../mailers/mailchimp';
 import { logger } from '../utils';
 import { BaseService } from './index';
 
-export class UsersService extends BaseService {
+export class UserService extends BaseService {
   userRepository: Repository<User>;
 
   constructor() {
