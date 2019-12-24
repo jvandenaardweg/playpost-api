@@ -2,7 +2,7 @@
 import joi from '@hapi/joi';
 import { NextFunction, Request, Response } from 'express';
 
-import { ArticleStatus } from '../../database/entities/article';
+import { Article, ArticleStatus } from '../../database/entities/article';
 import { HttpError, HttpStatus } from '../../http-error';
 import { ArticleService } from '../../services/article-service';
 import { PublicationService } from '../../services/publication-service';
@@ -104,7 +104,7 @@ export class PublicationsController extends BaseController {
    * Article is stored as a "draft", so it's not publicaly available (yet).
    *
    */
-  createImportArticle = async (req: Request, res: Response) => {
+  public createImportArticle = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -168,7 +168,7 @@ export class PublicationsController extends BaseController {
     return res.json(savedArticle);
   };
 
-  createArticle = async (req: Request, res: Response) => {
+  public createArticle = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -212,7 +212,7 @@ export class PublicationsController extends BaseController {
   /**
    * Deletes a single article from a publication.
    */
-  deleteArticle = async (req: Request, res: Response) => {
+  public deleteArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -246,14 +246,75 @@ export class PublicationsController extends BaseController {
 
     // TODO: delete audiofiles
 
-    return res.status(200).send();
+    return res.status(HttpStatus.NoContent).send();
   }
 
-  createAudiofile = async (req: Request, res: Response) => {
+  public createAudiofile = async (req: Request, res: Response) => {
     // const { publicationId, articleId } = req.params;
 
     return res.json({
       message: 'Should create audiofile'
     })
+  }
+
+  public patchArticle = async (req: Request, res: Response) => {
+    const { articleId, publicationId } = req.params;
+
+    const validationSchema = joi.object().keys({
+      publicationId: joi.string().uuid().required(),
+      articleId: joi.string().uuid().required(),
+
+      // All properties are optional so we can just update a single property
+      url: joi.string().uri().optional(),
+      title: joi.string().optional(),
+      canonicalUrl: joi.string().optional(),
+      status: joi.string().valid('draft', 'finished').lowercase().optional(),
+      readingTime: joi.number().optional(),
+      html: joi.string().optional(),
+      ssml: joi.string().optional(),
+      sourceName: joi.string().optional(),
+      imageUrl: joi.string().uri().optional(),
+      description: joi.string().optional(),
+      authorName: joi.string().optional(),
+    });
+
+    const userValidationResult = validationSchema.validate({ ...req.body, ...req.params }, {
+      allowUnknown: false // Do not allow other properties to be updated
+    });
+
+    if (userValidationResult.error) {
+      const firstError = userValidationResult.error.details[0];
+      throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
+    }
+
+    if (!Object.keys(req.body).length) {
+      throw new HttpError(HttpStatus.BadRequest, 'Nothing to update.');
+    }
+
+    const currentArticle = await this.articleService.findOneById(articleId, {
+      where: {
+        publication: {
+          id: publicationId
+        }
+      }
+    });
+
+    if (!currentArticle) {
+      throw new HttpError(HttpStatus.NotFound, 'The article does not exist.');
+    }
+
+    const updatedArticleProperties = new Article();
+
+    // Only add the updated properties
+    Object.keys(req.body).map(property => {
+      updatedArticleProperties[property] = req.body[property];
+    });
+
+    // TODO: if html/ssml changes, also create a new audiofile?
+
+    await this.articleService.update(articleId, updatedArticleProperties);
+
+    return res.status(HttpStatus.NoContent).send()
+
   }
 }

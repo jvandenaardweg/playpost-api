@@ -1,5 +1,5 @@
 import nodeFetch from 'node-fetch';
-import { FindOneOptions, getConnection, getRepository, Repository } from 'typeorm';
+import { FindOneOptions, getConnection, getRepository, Repository, UpdateResult } from 'typeorm';
 import urlParse from 'url-parse';
 
 import { Article } from '../database/entities/article';
@@ -87,6 +87,10 @@ export class ArticleService extends BaseService {
     };
   }
 
+  public update = async (articleId: string, article: Article): Promise<UpdateResult> => {
+    const savedArticle = await this.articleRepository.update(articleId, article);
+    return savedArticle;
+  }
   /**
    * Get's the article from a URL and returns an Article entity which we can use to insert in the database.
    */

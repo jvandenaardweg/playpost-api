@@ -108,6 +108,9 @@ export const setupServer = async () => {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('Required environment variable "STRIPE_SECRET_KEY" not set.');
   }
+  if (!process.env.SYNTHESIZER_ACCESS_TOKEN) {
+    throw new Error('Required environment variable "SYNTHESIZER_ACCESS_TOKEN" not set.');
+  }
 
   const PORT = process.env.PORT || 3000;
 
@@ -357,6 +360,7 @@ export const setupServer = async () => {
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createArticle);
   app.post('/v1/publications/:publicationId/import/article', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createImportArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
+  app.patch('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.patchArticle);
   app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 

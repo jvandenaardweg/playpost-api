@@ -60,6 +60,6 @@ export class UsersController extends BaseController {
 
     await this.usersService.create(email, password, organization);
 
-    return res.status(204).send();
+    return res.status(HttpStatus.NoContent).send();
   }
 }
