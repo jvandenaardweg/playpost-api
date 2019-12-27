@@ -7,17 +7,14 @@ import { getRepository } from 'typeorm';
 import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
 import { SynthesizerType } from './index';
-import { Synthesizers } from './synthesizers';
 
 export type AWSVoice = Polly.Voice
 
-export class AwsSynthesizer extends Synthesizers {
+export class AwsSynthesizer {
   voices: AWSVoice[];
   client: AWS.Polly;
 
   constructor() {
-    super([]);
-
     AWS.config.update({ region: process.env.AWS_REGION });
 
     this.client = new Polly({
@@ -153,40 +150,6 @@ export class AwsSynthesizer extends Synthesizers {
         }
       });
     });
-  };
-
-  /**
-   * Synthesizes the SSML parts into seperate audiofiles
-   */
-  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string[]> => {
-    const promises: Array<Promise<string>> = [];
-    const loggerPrefix = 'AWS SSML Parts To Speech:';
-
-    logger.info(loggerPrefix, 'Starting...');
-
-    ssmlParts.forEach((ssmlPart: string, index: number) => {
-      // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
-      // Note: this seem to fix the problem we had with concurrent requests
-      const synthesizerOptionsCopy = {...synthesizerOptions};
-      promises.push(this.SSMLToSpeech(index, ssmlPart, type, identifier, synthesizerOptionsCopy, storageUploadPath));
-    });
-
-    logger.info(loggerPrefix, 'Waiting for all SSML part promises to resolve...');
-
-    try {
-      const tempLocalAudiofilePaths = await Promise.all(promises);
-
-      tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
-
-      logger.info(loggerPrefix, 'All SSML part promises resolved. Returning temporary local audiofile paths:', tempLocalAudiofilePaths);
-
-      return tempLocalAudiofilePaths;
-    } catch (err) {
-      // Cleanup temp files when there's an error
-      await this.removeAllTempFiles();
-
-      throw err;
-    }
   };
 
 }

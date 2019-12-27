@@ -37,7 +37,7 @@ Example voice response:
 },
 */
 
-export class MicrosoftSynthesizer extends Synthesizers {
+export class MicrosoftSynthesizer {
   voices: MicrosoftVoice[] = [];
   subscriptionKey = process.env.MICROSOFT_TTS_SUBSCRIPTION_KEY;
   region = 'westeurope';
@@ -46,10 +46,6 @@ export class MicrosoftSynthesizer extends Synthesizers {
   // Microsoft Text to Speech REST API docs:
   // 1. Go to: https://editor.swagger.io/
   // 2. Import URL: https://westeurope.cris.ai/docs/v2.0/swagge
-
-  constructor() {
-    super([]);
-  }
 
   authorize = async () => {
     logger.info('Microsoft: Authorizing...');
@@ -255,42 +251,6 @@ export class MicrosoftSynthesizer extends Synthesizers {
     } catch (err) {
       logger.error(loggerPrefix, 'Synthesizing failed for:', type, index, type, index, voice.languageCode, voice.name, tempLocalAudiofilePath);
       logger.error(err);
-      throw err;
-    }
-  };
-
-  // /**
-  //  * Synthesizes the SSML parts into seperate audiofiles
-  //  */
-  SSMLPartsToSpeech = async (ssmlParts: string[], type: SynthesizerType, voice: Voice, storageUploadPath: string): Promise<string[]> => {
-    const promises: Array<Promise<string>> = [];
-    const loggerPrefix = 'Microsoft SSML Parts To Speech:';
-
-    logger.info(loggerPrefix, 'Starting...');
-
-    try {
-
-      await this.authorize();
-
-      ssmlParts.forEach((ssmlPart: string, index: number) => {
-        // Create a copy of the synthesizerOptions before giving it to the ssmlToSpeech method
-        // Note: this seem to fix the problem we had with concurrent requests
-        promises.push(this.SSMLToSpeech(index, ssmlPart, type, voice, storageUploadPath));
-      });
-  
-      logger.info(loggerPrefix, 'Waiting for all SSML part promises to resolve...');
-
-      const tempLocalAudiofilePaths = await Promise.all(promises);
-
-      tempLocalAudiofilePaths.sort((a: any, b: any) => b - a); // Sort: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 etc...
-
-      logger.info(loggerPrefix, 'All SSML part promises resolved. Returning temporary local audiofile paths:', tempLocalAudiofilePaths);
-
-      return tempLocalAudiofilePaths;
-    } catch (err) {
-      // Cleanup temp files when there's an error
-      await this.removeAllTempFiles();
-
       throw err;
     }
   };

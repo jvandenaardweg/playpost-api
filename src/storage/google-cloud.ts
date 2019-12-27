@@ -108,7 +108,7 @@ export const uploadArticleAudioFile = async (voice: Voice, concatinatedLocalAudi
 /**
  * Uploads a file to our Google Cloud Storage bucket. Returns the publicFileUrl
  */
-export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: string, mimeType: AudiofileMimeType, audiofileLength: number) => {
+export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: string, mimeType: AudiofileMimeType) => {
   const hrstart = process.hrtime();
   const uploadPath = `${voice.id}`;
 
@@ -134,7 +134,6 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
       gzip: false, // Important: We need to keep gzip false, so our audio works streaming on Safari browsers using "byte range" requests. More on that here: https://cloud.google.com/cdn/docs/caching
       metadata: {
         metadata: {
-          audiofileLength: audiofileLength.toString(), // Google Cloud requires numbers to be string in metadata
           voiceId: voice.id,
           voiceSynthesizer: voice.synthesizer,
           voiceLanguageCode: voice.languageCode,
@@ -160,7 +159,6 @@ export const uploadVoicePreviewAudiofile = async (voice: Voice, audiofilePath: s
       scope.setExtra('voice', voice);
       scope.setExtra('audiofilePath', audiofilePath);
       scope.setExtra('mimeType', mimeType);
-      scope.setExtra('audiofileLength', audiofileLength);
       Sentry.captureException(err);
     });
 

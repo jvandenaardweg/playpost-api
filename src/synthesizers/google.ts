@@ -8,7 +8,6 @@ import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voi
 import { getGoogleCloudCredentials } from '../utils/credentials';
 import { logger } from '../utils/logger';
 import { SynthesizerType } from './index';
-import { Synthesizers } from './synthesizers';
 
 export type GoogleAudioEncoding = IGoogleAudioEncoding;
 
@@ -23,11 +22,10 @@ export interface ITextToSpeechVoice {
   naturalSampleRateHertz: number;
 }
 
-export class GoogleSynthesizer extends Synthesizers {
+export class GoogleSynthesizer {
   client: typeof GoogleTextToSpeech.TextToSpeechClient.prototype;
 
   constructor() {
-    super([]);
     this.client = new GoogleTextToSpeech.TextToSpeechClient(getGoogleCloudCredentials());
   }
 

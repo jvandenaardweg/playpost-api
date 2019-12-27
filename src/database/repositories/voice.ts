@@ -4,7 +4,6 @@ import * as storage from '../../storage/google-cloud';
 import { SynthesizerEncoding } from '../../synthesizers';
 import { AwsSynthesizer } from '../../synthesizers/aws';
 import { GoogleSynthesizer } from '../../synthesizers/google';
-import { getAudioFileDurationInSeconds } from '../../utils/audio';
 import { AudiofileMimeType } from '../entities/audiofile';
 import { Language } from '../entities/language';
 import { Voice } from '../entities/voice';
@@ -621,15 +620,11 @@ export class VoiceRepository extends Repository<Voice> {
       throw new Error('Synthesizer could not be found.');
     }
 
-    // Step 3: Get the length of the audiofile
-    const audiofileLength = await getAudioFileDurationInSeconds(localAudiofilePath);
-
     // Step 4: Upload the file to Google Cloud Storage
     const uploadResponse = await storage.uploadVoicePreviewAudiofile(
       voice,
       localAudiofilePath,
-      mimeType,
-      audiofileLength
+      mimeType
     );
 
     // Step 6: Delete the local file, we don't need it anymore

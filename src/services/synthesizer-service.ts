@@ -1,15 +1,37 @@
 import nodeFetch from 'node-fetch';
+import { EVoiceGender } from '../database/entities/voice';
 import { BaseService } from './index';
 
+export type SynthesizerName = 'google' | 'aws';
+export type SynthesizeAction = 'upload' | 'preview';
+
 interface RequestBody {
-  action: 'upload' | 'preview',
-  synthesizerName: 'google' | 'aws',
-  voiceSsmlGender: 'FEMALE' | 'MALE',
+  action: SynthesizeAction,
+  synthesizerName: SynthesizerName,
+  voiceSsmlGender: EVoiceGender,
   voiceName: string;
   voiceLanguageCode: string;
   ssml: string;
-  bucketName?: 'storage.playpost.app' | 'storage-development.playpost.app' | 'storage-staging.playpost.app'; // only with action: upload
+  bucketName?: string; // only with action: upload
   bucketUploadDestination?: string; // only with action: upload
+}
+
+interface UploadOptions {
+  synthesizerName: SynthesizerName,
+  voiceSsmlGender: EVoiceGender,
+  voiceName: string;
+  voiceLanguageCode: string;
+  ssml: string;
+  bucketName: string; // only with action: upload
+  bucketUploadDestination: string; // only with action: upload
+}
+
+interface PreviewOptions {
+  synthesizerName: SynthesizerName,
+  voiceSsmlGender: EVoiceGender,
+  voiceName: string;
+  voiceLanguageCode: string;
+  ssml: string;
 }
 
 interface SynthesizeUploadResponse {
@@ -34,11 +56,13 @@ export class SynthesizerService extends BaseService {
    *
    * Returns: base64 encoded audio string
    */
-  public preview = async (payload: RequestBody): Promise<string> => {
-    const response: SynthesizePreviewResponse = await this.synthesize({
-      ...payload,
-      action: 'preview'
-    });
+  public preview = async (options: PreviewOptions): Promise<string> => {
+    const response: SynthesizePreviewResponse = await this.synthesize(
+      {
+        ...options,
+        action: 'preview'
+      }
+    );
 
     return response.audio;
   }
@@ -49,11 +73,14 @@ export class SynthesizerService extends BaseService {
    * Synthesizer will synthesize the given `ssml` with the given voice, and will store the output in the
    * given `bucketName` and `bucketUploadDestination`.
    */
-  public upload = async (payload: RequestBody): Promise<SynthesizeUploadResponse> => {
-    const response: SynthesizeUploadResponse = await this.synthesize({
-      ...payload,
-      action: 'upload'
-    });
+  public upload = async (options: UploadOptions): Promise<SynthesizeUploadResponse> => {
+    const response: SynthesizeUploadResponse = await this.synthesize(
+      {
+        ...options,
+        action: 'upload',
+        bucketName: `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`
+      }
+    );
 
     return response;
   }
@@ -68,9 +95,11 @@ export class SynthesizerService extends BaseService {
    * Function will return a audio base64 string
    */
   private synthesize = async (payload: RequestBody) => {
-    const payloadStringified = JSON.stringify(payload);
+    const payloadStringified = JSON.stringify({
+      ...payload
+    });
 
-    const response = await nodeFetch('https://europe-west1-playpost.cloudfunctions.net/synthesize', {
+    const response = await nodeFetch('https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app', {
       method: 'POST',
       body: payloadStringified,
       headers: {
