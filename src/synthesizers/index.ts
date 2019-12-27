@@ -1,4 +1,3 @@
-// import appRootPath from 'app-root-path';
 import { Polly } from 'aws-sdk';
 
 import { Article } from '../database/entities/article';
@@ -19,8 +18,6 @@ export enum SynthesizerEncoding {
   AWS_PCM = 'pcm',
   AWS_OGG_VORBIS = 'ogg_vorbis'
 }
-
-export * from './synthesizers';
 
 /**
  * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
@@ -89,14 +86,16 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
     throw new Error(errorMessage);
   }
 
-  const synthesizerService = new SynthesizerService();
+  const synthesizerName = voice.synthesizer === 'Google' ? 'google' : 'aws';
+  const synthesizerService = new SynthesizerService(synthesizerName);
+
   const bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
 
   const synthesizeUploadResult = await synthesizerService.upload({
+    outputFormat: 'mp3',
     bucketName,
     bucketUploadDestination: storageUploadPath,
     ssml,
-    synthesizerName: voice.synthesizer === 'Google' ? 'google' : 'aws',
     voiceLanguageCode: voice.languageCode,
     voiceName: voice.name,
     voiceSsmlGender: voice.gender

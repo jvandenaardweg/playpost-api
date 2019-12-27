@@ -4,32 +4,32 @@ import { BaseService } from './index';
 
 export type SynthesizerName = 'google' | 'aws';
 export type SynthesizeAction = 'upload' | 'preview';
+export type SynthesizeOutputFormat = 'mp3' | 'wav';
 
 interface RequestBody {
-  action: SynthesizeAction,
-  synthesizerName: SynthesizerName,
-  voiceSsmlGender: EVoiceGender,
   voiceName: string;
+  outputFormat: SynthesizeOutputFormat;
   voiceLanguageCode: string;
+  voiceSsmlGender: EVoiceGender;
   ssml: string;
   bucketName?: string; // only with action: upload
   bucketUploadDestination?: string; // only with action: upload
 }
 
 interface UploadOptions {
-  synthesizerName: SynthesizerName,
-  voiceSsmlGender: EVoiceGender,
   voiceName: string;
+  outputFormat: SynthesizeOutputFormat;
   voiceLanguageCode: string;
+  voiceSsmlGender: EVoiceGender;
   ssml: string;
   bucketName: string; // only with action: upload
   bucketUploadDestination: string; // only with action: upload
 }
 
 interface PreviewOptions {
-  synthesizerName: SynthesizerName,
-  voiceSsmlGender: EVoiceGender,
   voiceName: string;
+  outputFormat: SynthesizeOutputFormat;
+  voiceSsmlGender: EVoiceGender;
   voiceLanguageCode: string;
   ssml: string;
 }
@@ -38,7 +38,6 @@ interface SynthesizeUploadResponse {
   fileMetaData: any;
   publicFileUrl: string;
   durationInSeconds: number;
-  audiofileMetadata: any;
 }
 
 interface SynthesizePreviewResponse {
@@ -46,8 +45,12 @@ interface SynthesizePreviewResponse {
 }
 
 export class SynthesizerService extends BaseService {
-  constructor() {
+  private readonly synthesizerName: SynthesizerName;
+
+  constructor(synthesizerName: SynthesizerName) {
     super()
+
+    this.synthesizerName = synthesizerName;
   }
 
   /**
@@ -58,10 +61,8 @@ export class SynthesizerService extends BaseService {
    */
   public preview = async (options: PreviewOptions): Promise<string> => {
     const response: SynthesizePreviewResponse = await this.synthesize(
-      {
-        ...options,
-        action: 'preview'
-      }
+      'preview',
+      options
     );
 
     return response.audio;
@@ -75,9 +76,9 @@ export class SynthesizerService extends BaseService {
    */
   public upload = async (options: UploadOptions): Promise<SynthesizeUploadResponse> => {
     const response: SynthesizeUploadResponse = await this.synthesize(
+      'upload',
       {
         ...options,
-        action: 'upload',
         bucketName: `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`
       }
     );
@@ -94,12 +95,10 @@ export class SynthesizerService extends BaseService {
    *
    * Function will return a audio base64 string
    */
-  private synthesize = async (payload: RequestBody) => {
-    const payloadStringified = JSON.stringify({
-      ...payload
-    });
+  private synthesize = async (action: SynthesizeAction, payload: RequestBody) => {
+    const payloadStringified = JSON.stringify(payload);
 
-    const response = await nodeFetch('https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app', {
+    const response = await nodeFetch(`https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app/v1/${this.synthesizerName}/${action}`, {
       method: 'POST',
       body: payloadStringified,
       headers: {

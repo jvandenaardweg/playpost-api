@@ -1,10 +1,5 @@
-import fsExtra from 'fs-extra';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
-import * as storage from '../../storage/google-cloud';
-import { SynthesizerEncoding } from '../../synthesizers';
-import { AwsSynthesizer } from '../../synthesizers/aws';
-import { GoogleSynthesizer } from '../../synthesizers/google';
-import { AudiofileMimeType } from '../entities/audiofile';
+import { SynthesizerService } from '../../services/synthesizer-service';
 import { Language } from '../entities/language';
 import { Voice } from '../entities/voice';
 
@@ -12,10 +7,6 @@ import { Voice } from '../entities/voice';
 export class VoiceRepository extends Repository<Voice> {
 
   async createVoicePreview(voiceId: string): Promise<Voice> {
-    let localAudiofilePath: string = '';
-    let audioEncoding: SynthesizerEncoding;
-    let mimeType: AudiofileMimeType;
-
     const voice = await this.findOne(voiceId);
 
     if (!voice) { throw new Error('Voice not found, cannot create preview.'); }
@@ -562,79 +553,25 @@ export class VoiceRepository extends Repository<Voice> {
 
     if (!['Google', 'AWS'].includes(voice.synthesizer)) { throw new Error('Voice synthesizer not supported.'); }
 
-    if (voice.synthesizer === 'Google') {
-      const googleSynthesizer = new GoogleSynthesizer();
-      audioEncoding = SynthesizerEncoding.GOOGLE_LINEAR16;
-      mimeType = AudiofileMimeType.WAV;
+    const synthesizerName = voice.synthesizer === 'Google' ? 'google' : 'aws';
+    const synthesizerService = new SynthesizerService(synthesizerName);
 
-      // Step 1: Prepare the config
-      const synthesizerOptions = {
-        audioConfig: {
-          audioEncoding
-        },
-        voice: {
-          languageCode: voice.languageCode,
-          name: voice.name,
-          ssmlGender: voice.gender
-        },
-        input: {
-          ssml: previewSsml
-        }
-      };
+    const bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
+    const outputFormat = 'wav';
+    const bucketUploadDestination = `voices/${voice.id}.${outputFormat}`;
 
-      // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-      localAudiofilePath = await googleSynthesizer.SSMLToSpeech(
-        0,
-        synthesizerOptions.input.ssml,
-        'preview',
-        voice.id,
-        synthesizerOptions,
-        voice.id
-      );
-
-    } else if (voice.synthesizer === 'AWS') {
-      const awsSynthesizer = new AwsSynthesizer();
-      audioEncoding = SynthesizerEncoding.AWS_MP3;
-      mimeType = AudiofileMimeType.MP3;
-
-      // Step 1: Prepare the config
-      const synthesizerOptions = {
-        VoiceId: voice.name,
-        LanguageCode: voice.languageCode,
-        OutputFormat: audioEncoding,
-        TextType: 'ssml',
-        Text: previewSsml
-      };
-
-      // Step 2: Send the SSML parts to Google's Text to Speech API and download the audio files
-      localAudiofilePath = await awsSynthesizer.SSMLToSpeech(
-        0,
-        synthesizerOptions.Text,
-        'preview',
-        voice.id,
-        synthesizerOptions,
-        voice.id
-      );
-
-    } else {
-      throw new Error('Synthesizer could not be found.');
-    }
-
-    // Step 4: Upload the file to Google Cloud Storage
-    const uploadResponse = await storage.uploadVoicePreviewAudiofile(
-      voice,
-      localAudiofilePath,
-      mimeType
-    );
-
-    // Step 6: Delete the local file, we don't need it anymore
-    await fsExtra.remove(localAudiofilePath);
-
-    // Step 7: Create a publicfile URL our users can use
-    const publicFileUrl = storage.getPublicFileUrl(uploadResponse);
+    const synthesizeUploadResult = await synthesizerService.upload({
+      outputFormat: 'wav',
+      bucketName,
+      bucketUploadDestination,
+      ssml: previewSsml,
+      voiceLanguageCode: voice.languageCode,
+      voiceName: voice.name,
+      voiceSsmlGender: voice.gender
+    });
 
     await this.update(voice.id, {
-      exampleAudioUrl: publicFileUrl
+      exampleAudioUrl: synthesizeUploadResult.publicFileUrl
     });
 
     // When we have updated a voice, remove all related caches

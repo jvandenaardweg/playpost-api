@@ -1,12 +1,10 @@
 import * as Sentry from '@sentry/node';
-import appRootPath from 'app-root-path';
 import LocaleCode from 'locale-code';
 import nodeFetch, { RequestInit } from 'node-fetch';
 import { getRepository } from 'typeorm';
 
 import { EVoiceGender, EVoiceQuality, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
-import { Synthesizers, SynthesizerType } from './index';
 
 export interface MicrosoftVoice {
   Name: string;
@@ -198,61 +196,6 @@ export class MicrosoftSynthesizer {
     }
 
     return voices;
-  };
-
-  SSMLToSpeech = async (index: number, ssmlPart: string, type: SynthesizerType, voice: Voice, storageUploadPath: string): Promise<string> => {
-    const loggerPrefix = 'Microsoft SSML Part To Speech:';
-
-    const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.mp3`;
-
-    // tslint:disable max-line-length
-    logger.info(loggerPrefix, 'Synthesizing:', type, index, voice.languageCode, voice.name, tempLocalAudiofilePath);
-
-    // Performs the Text-to-Speech request
-    const url = `https://${this.region}.tts.speech.microsoft.com/cognitiveservices/v1`;
-
-    const voiceGender = (voice.gender === 'MALE') ? 'Male' : 'Female';
-
-    // Make the SSML compatible with how Microsoft wants it
-    // Add attributes to <speak> and wrap everything inside <speak> within a <voice> tag
-    // Then, properly close it off
-    let ssmlPartMS = ssmlPart;
-    ssmlPartMS = ssmlPartMS.replace('<speak>', `<speak version='1.0' xml:lang='${voice.languageCode}'><voice xml:lang='${voice.languageCode}' xml:gender='${voiceGender}' name='${voice.name}'>`);
-    ssmlPartMS = ssmlPartMS.replace('</speak>', `</voice></speak>`);
-
-    const request: MicrosoftSpeechRequestHeaders = {
-      method: 'post',
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'X-Microsoft-OutputFormat': 'audio-24khz-160kbitrate-mono-mp3',
-        'Content-Type': 'application/ssml+xml',
-        'User-Agent': 'Playpost-API'
-      },
-      body: ssmlPartMS
-    }
-
-    try {
-      const response = await nodeFetch(url, request);
-
-      if (!response.ok) {
-        const error = await response.json();
-        logger.error(loggerPrefix, error)
-        throw new Error('Did not receive a OK response.');
-      }
-
-      const audioBuffer = await response.buffer();
-
-      logger.info(loggerPrefix, 'Received synthesized audio for:', type, index, type, index, voice.languageCode, voice.name, tempLocalAudiofilePath);
-
-      const savedTempLocalAudiofilePath = await this.saveTempFile(tempLocalAudiofilePath, audioBuffer);
-      logger.info(loggerPrefix, `Finished part ${index}. Wrote file to: `, tempLocalAudiofilePath);
-
-      return savedTempLocalAudiofilePath;
-    } catch (err) {
-      logger.error(loggerPrefix, 'Synthesizing failed for:', type, index, type, index, voice.languageCode, voice.name, tempLocalAudiofilePath);
-      logger.error(err);
-      throw err;
-    }
   };
 
 }

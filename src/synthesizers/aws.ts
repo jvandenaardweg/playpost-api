@@ -1,12 +1,10 @@
 import * as Sentry from '@sentry/node';
-import appRootPath from 'app-root-path';
 import AWS, { Polly } from 'aws-sdk';
 import LocaleCode from 'locale-code';
 import { getRepository } from 'typeorm';
 
 import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { logger } from '../utils/logger';
-import { SynthesizerType } from './index';
 
 export type AWSVoice = Polly.Voice
 
@@ -103,53 +101,6 @@ export class AwsSynthesizer {
     }
 
     return voices;
-  };
-
-  SSMLToSpeech = (index: number, ssmlPart: string, type: SynthesizerType, identifier: string, synthesizerOptions: Polly.Types.SynthesizeSpeechInput, storageUploadPath: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const loggerPrefix = 'AWS SSML Part To Speech:';
-
-      // Create a copy of the synthesizerOptions before giving it to the synthesizeSpeech method
-      // Note: this seem to fix the problem we had with concurrent requests
-      const ssmlPartSynthesizerOptions = {...synthesizerOptions, 
-        Text: ssmlPart};
-
-      let extension = 'mp3';
-
-      if (ssmlPartSynthesizerOptions.OutputFormat === 'ogg_vorbis') {
-        extension = 'ogg';
-      }
-
-      if (ssmlPartSynthesizerOptions.OutputFormat === 'pcm') {
-        extension = 'wav';
-      }
-
-      const tempLocalAudiofilePath = `${appRootPath}/temp/${storageUploadPath}-${index}.${extension}`;
-
-      // tslint:disable max-line-length
-      logger.info(loggerPrefix, 'Synthesizing:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
-
-      // Performs the Text-to-Speech request
-      return this.client.synthesizeSpeech(ssmlPartSynthesizerOptions, async (err, response) => {
-        if (err) {
-          logger.error(loggerPrefix, 'Synthesizing failed for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
-          logger.error(err);
-          return reject(err);
-        }
-
-        logger.info(loggerPrefix, 'Received synthesized audio for:', type, index, ssmlPartSynthesizerOptions.LanguageCode, ssmlPartSynthesizerOptions.VoiceId, tempLocalAudiofilePath);
-
-        // Write the binary audio content to a local file
-        try {
-          const savedTempLocalAudiofilePath = await this.saveTempFile(tempLocalAudiofilePath, response.AudioStream);
-          logger.info(loggerPrefix, `Finished part ${index}. Wrote file to: `, tempLocalAudiofilePath);
-          resolve(savedTempLocalAudiofilePath);
-        } catch (err) {
-          logger.error(loggerPrefix, `Writing temporary file for synthesized SSML part ${index} failed.`, err);
-          reject(err);
-        }
-      });
-    });
   };
 
 }
