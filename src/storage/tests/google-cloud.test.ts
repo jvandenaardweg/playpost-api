@@ -222,8 +222,7 @@ describe('Storage: Google Cloud', () => {
       await GoogleCloudStorage.uploadVoicePreviewAudiofile(
         voiceMock as any,
         'test/path.mp3',
-        AudiofileMimeType.MP3,
-        100
+        AudiofileMimeType.MP3
       );
 
       expect(spyUpload).toBeCalledTimes(1);
@@ -237,8 +236,7 @@ describe('Storage: Google Cloud', () => {
         await GoogleCloudStorage.uploadVoicePreviewAudiofile(
           voiceMock as any,
           'test/path.mp3',
-          AudiofileMimeType.MP3,
-          100
+          AudiofileMimeType.MP3
         );
       } catch (err) {
         expect(spyUpload).toBeCalledTimes(1);

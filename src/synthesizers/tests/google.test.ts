@@ -1,4 +1,4 @@
-import { GoogleAudioEncoding, GoogleSynthesizer } from '../google';
+import { GoogleSynthesizer } from '../google';
 
 import mockedGoogleVoices from '../../../tests/__mocks/googleVoices';
 
