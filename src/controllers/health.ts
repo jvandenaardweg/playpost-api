@@ -7,6 +7,7 @@ import { getRepository } from 'typeorm';
 
 import { redisClient } from '../cache';
 import { Language } from '../database/entities/language';
+import { EVoiceSynthesizer } from '../database/entities/voice';
 import { SynthesizerService } from '../services/synthesizer-service';
 
 export const getHealthStatus = async (req: Request, res: Response) => {
@@ -24,7 +25,7 @@ export const getHealthStatus = async (req: Request, res: Response) => {
   // TODO: check pubsub status
 
   try {
-    const googleSynthesizerService = new SynthesizerService('google');
+    const googleSynthesizerService = new SynthesizerService(EVoiceSynthesizer.GOOGLE);
     const voices = await googleSynthesizerService.getAllVoices();
 
     if (voices.length) {
@@ -38,7 +39,7 @@ export const getHealthStatus = async (req: Request, res: Response) => {
   }
 
   try {
-    const awsSynthesizerService = new SynthesizerService('aws');
+    const awsSynthesizerService = new SynthesizerService(EVoiceSynthesizer.AWS);
     const voices = await awsSynthesizerService.getAllVoices();
 
     if (voices.length) {

@@ -2,18 +2,16 @@ import joi from '@hapi/joi';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import { getCustomRepository, getRepository } from 'typeorm';
-import uuid from 'uuid';
 
 import * as storage from '../storage/google-cloud';
 
 import { Article, ArticleStatus } from '../database/entities/article';
-import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
+import { Audiofile } from '../database/entities/audiofile';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
 import { AudiofileRepository } from '../database/repositories/audiofile';
 import { UserRepository } from '../database/repositories/user';
-
-import { synthesizeArticleToAudiofile } from '../synthesizers';
+import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils';
 
 export const findById = async (req: Request, res: Response) => {
@@ -43,18 +41,12 @@ export const findById = async (req: Request, res: Response) => {
  *
  */
 export const createAudiofile = async (req: Request, res: Response) => {
-  interface IRequestBody {
-    mimeType: AudiofileMimeType;
-    voiceId: string;
-  }
-
   const hrstart = process.hrtime();
 
   const loggerPrefix = 'Create Audiofile:';
 
   const userId = req.user!.id;
   const { articleId } = req.params;
-  const { mimeType } = req.body as IRequestBody;
 
   const articleRepository = getRepository(Article);
   const voiceRepository = getRepository(Voice);
@@ -526,39 +518,34 @@ export const createAudiofile = async (req: Request, res: Response) => {
   logger.info(loggerPrefix, 'Start generating audio using voice:', voice.id);
 
   try {
-    // Manually generate a UUID.
-    // So we can use this ID to upload a file to storage, before we insert it into the database.
-    const audiofileId = uuid.v4();
+    // Start synthesizing...
 
-    logger.info(loggerPrefix, 'Creating audiofile placeholder...');
+    logger.info(loggerPrefix, 'Starting synthesizer...');
 
-    // Prepare the audiofile
-    const audiofile = audiofileRepository.create({
-      id: audiofileId,
-      article: {
-        id: articleId
-      },
-      user: {
-        id: userId
-      },
-      voice: {
-        id: voice.id
+    // Create a synthesizer service based on the voice synthesizer (Google or AWS)
+    const synthesizerService = new SynthesizerService(voice.synthesizer);
+
+    const newAudiofile = await synthesizerService.uploadArticleAudio(
+      articleId,
+      userId,
+      voice.id,
+      {
+        outputFormat: 'mp3', // Only allow mp3 synthesizing for our mobile app users
+        ssml: article.ssml,
+        voiceLanguageCode: voice.languageCode,
+        voiceName: voice.name,
+        voiceSsmlGender: voice.gender
       }
-    });
+    );
 
-    logger.info(loggerPrefix, `Created audiofile placeholder using ID: ${audiofile.id}`);
+     // End synthesizing.
 
-    logger.info(loggerPrefix, "Now synthesizing the article's SSML...");
-
-    // // Synthesize and return an uploaded audiofile for use to use in the database
-    const audiofileToCreate = await synthesizeArticleToAudiofile(voice, article, audiofile, mimeType);
-
-    logger.info(loggerPrefix, "Successfully synthesized the article's SSML!");
+    logger.info(loggerPrefix, "Successfully synthesized the article's SSML! Got audiofile data: ", newAudiofile);
 
     logger.info(loggerPrefix, 'Saving the audiofile in the database...');
 
     // Then save it in the database
-    const createdAudiofile = await audiofileRepository.save(audiofileToCreate);
+    const createdAudiofile = await audiofileRepository.save(newAudiofile);
 
     logger.info(loggerPrefix, 'Saved the audiofile in the database! Audiofile ID:', createdAudiofile.id);
 

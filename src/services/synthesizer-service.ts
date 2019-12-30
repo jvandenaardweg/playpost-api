@@ -1,10 +1,12 @@
 import { AudioEncoding as IGoogleAudioEncoding, SynthesizeSpeechRequest, Voice as IGoogleVoice } from '@google-cloud/text-to-speech';
 import { Polly } from 'aws-sdk';
 import nodeFetch from 'node-fetch';
+import { getRepository, Repository } from 'typeorm';
+import uuid from 'uuid';
 
-import { EVoiceGender } from '../database/entities/voice';
+import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
+import { EVoiceGender, EVoiceSynthesizer } from '../database/entities/voice';
 import { BaseService } from './index';
-import { AudiofileMimeType } from '../database/entities/audiofile';
 
 export type GoogleAudioEncoding = IGoogleAudioEncoding;
 
@@ -51,8 +53,6 @@ interface UploadOptions {
   voiceLanguageCode: string;
   voiceSsmlGender: EVoiceGender;
   ssml: string;
-  bucketName: string; // only with action: upload
-  bucketUploadDestination: string; // only with action: upload
 }
 
 interface PreviewOptions {
@@ -74,14 +74,18 @@ interface SynthesizePreviewResponse {
 }
 
 export class SynthesizerService extends BaseService {
-  private readonly synthesizerName: SynthesizerName;
+  private readonly synthesizerName: string;
   private readonly baseUrl: string;
+  private readonly audiofileRepository: Repository<Audiofile>;
+  private readonly bucketName: string;
 
-  constructor(synthesizerName: SynthesizerName) {
+  constructor(synthesizerName: EVoiceSynthesizer) {
     super()
 
-    this.synthesizerName = synthesizerName;
+    this.synthesizerName = synthesizerName.toLowerCase(); // Google -> google, AWS -> aws
     this.baseUrl = 'https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app';
+    this.audiofileRepository = getRepository(Audiofile);
+    this.bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
   }
 
   /**
@@ -122,16 +126,57 @@ export class SynthesizerService extends BaseService {
    * Synthesizer will synthesize the given `ssml` with the given voice, and will store the output in the
    * given `bucketName` and `bucketUploadDestination`.
    */
-  public upload = async (options: UploadOptions): Promise<SynthesizeUploadResponse> => {
+  public uploadArticleAudio = async (articleId: string, userId: string, voiceId: string, options: UploadOptions): Promise<Audiofile> => {
+    // Manually generate a UUID.
+    // So we can use this ID to upload a file to storage, before we insert it into the database.
+    const audiofileId = uuid.v4();
+
+    const bucketUploadDestination = `${articleId}/audiofiles/${audiofileId}`;
+
     const response: SynthesizeUploadResponse = await this.synthesize(
       'upload',
       {
         ...options,
-        bucketName: `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`
+        bucketName: this.bucketName,
+        bucketUploadDestination
       }
     );
 
-    return response;
+    // Return an audiofile object we can store in the database
+    const newAudiofile = this.audiofileRepository.create({
+      id: audiofileId,
+      article: {
+        id: articleId
+      },
+      user: {
+        id: userId
+      },
+      voice: {
+        id: voiceId
+      }
+    });
+
+    newAudiofile.url = response.publicFileUrl;
+    newAudiofile.bucket = this.bucketName;
+    newAudiofile.filename = bucketUploadDestination;
+    newAudiofile.length = response.durationInSeconds;
+
+    return newAudiofile;
+  }
+
+  public uploadVoicePreview = async (voiceId: string, options: UploadOptions): Promise<SynthesizeUploadResponse> => {
+    const bucketUploadDestination = `voices/${voiceId}.${options.outputFormat}`;
+
+    const response: SynthesizeUploadResponse = await this.synthesize(
+      'upload',
+      {
+        ...options,
+        bucketName: this.bucketName,
+        bucketUploadDestination
+      }
+    );
+
+    return response
   }
 
   /**

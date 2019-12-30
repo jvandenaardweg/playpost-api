@@ -553,17 +553,10 @@ export class VoiceRepository extends Repository<Voice> {
 
     if (!['Google', 'AWS'].includes(voice.synthesizer)) { throw new Error('Voice synthesizer not supported.'); }
 
-    const synthesizerName = voice.synthesizer === 'Google' ? 'google' : 'aws';
-    const synthesizerService = new SynthesizerService(synthesizerName);
+    const synthesizerService = new SynthesizerService(voice.synthesizer);
 
-    const bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
-    const outputFormat = 'wav';
-    const bucketUploadDestination = `voices/${voice.id}.${outputFormat}`;
-
-    const synthesizeUploadResult = await synthesizerService.upload({
+    const synthesizeUploadResult = await synthesizerService.uploadVoicePreview(voice.id, {
       outputFormat: 'wav',
-      bucketName,
-      bucketUploadDestination,
       ssml: previewSsml,
       voiceLanguageCode: voice.languageCode,
       voiceName: voice.name,

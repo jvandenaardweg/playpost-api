@@ -5,7 +5,7 @@ import { BaseService } from '.';
 import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { Sentry } from '../sentry';
 import { logger } from '../utils';
-import { SynthesizerName, SynthesizerService } from './synthesizer-service';
+import { SynthesizerService } from './synthesizer-service';
 
 export class VoiceService extends BaseService {
   private readonly voiceRepository: Repository<Voice>;
@@ -19,17 +19,17 @@ export class VoiceService extends BaseService {
     return this.voiceRepository.find();
   }
 
-  public addAllSynthesizerVoices = async (synthesizerName: SynthesizerName): Promise<void> => {
+  public addAllSynthesizerVoices = async (synthesizerName: EVoiceSynthesizer): Promise<void> => {
     logger.info('Checking if we need to add new voices to the database...');
 
     const synthesizerService = new SynthesizerService(synthesizerName);
     const voices = await synthesizerService.getAllVoices();
 
-    if (synthesizerName === 'aws') {
+    if (synthesizerName === EVoiceSynthesizer.AWS) {
       await this.addAllAWSVoices(voices);
     }
 
-    if (synthesizerName === 'google') {
+    if (synthesizerName === EVoiceSynthesizer.GOOGLE) {
       await this.addAllGoogleVoices(voices);
     }
   };

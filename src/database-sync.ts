@@ -131,8 +131,8 @@ const syncVoices = async () => {
   try {
     logger.info(loggerPrefix, 'Checking for new voices at Google, AWS and Microsoft...');
 
-    await voiceService.addAllSynthesizerVoices('google');
-    await voiceService.addAllSynthesizerVoices('aws');
+    await voiceService.addAllSynthesizerVoices(EVoiceSynthesizer.GOOGLE);
+    await voiceService.addAllSynthesizerVoices(EVoiceSynthesizer.AWS);
 
     const foundCountries = await countryRepository.find();
     logger.info(loggerPrefix, `Got ${foundCountries.length} countries from database.`);
