@@ -1,56 +1,8 @@
-import { Polly } from 'aws-sdk';
-
 import { Article } from '../database/entities/article';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
-import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
+import { Voice } from '../database/entities/voice';
 import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils';
-import { GoogleAudioEncoding } from './google';
-
-export type SynthesizerType = 'article' | 'preview';
-export type SynthesizerAudioEncodingTypes = GoogleAudioEncoding & Polly.OutputFormat;
-
-export enum SynthesizerEncoding {
-  GOOGLE_MP3 = 'MP3',
-  GOOGLE_OGG_OPUS = 'OGG_OPUS',
-  GOOGLE_LINEAR16 = 'LINEAR16',
-  AWS_MP3 = 'mp3',
-  AWS_PCM = 'pcm',
-  AWS_OGG_VORBIS = 'ogg_vorbis'
-}
-
-/**
- * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
- *
- * For example: when someone requests an article text to be synthesized into a "audio/mpeg" file, the synthesizer will use the parameter:
- * { "audioConfig": { "audioEncoding": "MP3" } } (Google)
- * or
- * { "OutputFormat": "mp3" } (AWS)
- *
- */
-export const mimeTypeToEncoderParameter = (mimeType: AudiofileMimeType, synthesizer: EVoiceSynthesizer) => {
-  if (mimeType === 'audio/mpeg') {
-    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : SynthesizerEncoding.AWS_MP3;
-  }
-
-  if (mimeType === 'audio/wav') {
-    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_MP3 : null;
-  }
-
-  if (mimeType === 'audio/pcm') {
-    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_PCM;
-  }
-
-  if (mimeType === 'audio/ogg') {
-    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? null : SynthesizerEncoding.AWS_OGG_VORBIS;
-  }
-
-  if (mimeType === 'audio/opus') {
-    return (synthesizer === EVoiceSynthesizer.GOOGLE) ? SynthesizerEncoding.GOOGLE_OGG_OPUS : null;
-  }
-
-  return null;
-};
 
 /**
  * Takes the article and prepared audiofile object to synthesize the SSML to Speech.
@@ -66,13 +18,6 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   const ssml = article.ssml;
   const audiofileId = audiofile.id;
   const storageUploadPath = `${articleId}/audiofiles/${audiofileId}`;
-  const encodingParameter = mimeTypeToEncoderParameter(mimeType, voice.synthesizer);
-
-  if (!encodingParameter) {
-    const errorMessage = `Synthesizer "${voice.synthesizer}" does not support mimeType: ${mimeType}`;
-    logger.error(loggerPrefix, errorMessage);
-    throw new Error(errorMessage);
-  }
 
   if (!ssml) {
     const errorMessage = 'Synthesizer dit not get any SSML to synthesize.';
@@ -92,7 +37,7 @@ export const synthesizeArticleToAudiofile = async (voice: Voice, article: Articl
   const bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
 
   const synthesizeUploadResult = await synthesizerService.upload({
-    outputFormat: 'mp3',
+    outputFormat: synthesizerService.mimeTypeToFormat(mimeType),
     bucketName,
     bucketUploadDestination: storageUploadPath,
     ssml,

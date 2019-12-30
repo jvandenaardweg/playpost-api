@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import { AwsSynthesizer } from '../synthesizers/aws';
-import { GoogleSynthesizer } from '../synthesizers/google';
 import { MicrosoftSynthesizer } from '../synthesizers/microsoft';
 
 import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
+import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils/logger';
 
 export const findAllVoices = async (req: Request, res: Response) => {
@@ -19,8 +18,8 @@ export const findAllVoices = async (req: Request, res: Response) => {
   try {
 
     if (synthesizerName === 'google') {
-      const googleSynthesizer = new GoogleSynthesizer();
-      const voices = await googleSynthesizer.getAllVoices();
+      const googleSynthesizerService = new SynthesizerService('google');
+      const voices = await googleSynthesizerService.getAllVoices();
 
       if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({
@@ -53,8 +52,8 @@ export const findAllVoices = async (req: Request, res: Response) => {
     }
 
     if (synthesizerName === 'aws') {
-      const awsSynthesizer = new AwsSynthesizer();
-      const voices = await awsSynthesizer.getAllVoices();
+      const awsSynthesizerService = new SynthesizerService('aws');
+      const voices = await awsSynthesizerService.getAllVoices();
 
       if (status === 'new' || status === 'inactive') {
         const savedVoices = await getRepository(Voice).find({

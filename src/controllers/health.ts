@@ -7,8 +7,7 @@ import { getRepository } from 'typeorm';
 
 import { redisClient } from '../cache';
 import { Language } from '../database/entities/language';
-import { AwsSynthesizer } from '../synthesizers/aws';
-import { GoogleSynthesizer } from '../synthesizers/google';
+import { SynthesizerService } from '../services/synthesizer-service';
 
 export const getHealthStatus = async (req: Request, res: Response) => {
   let crawlerStatus = 'fail';
@@ -25,8 +24,8 @@ export const getHealthStatus = async (req: Request, res: Response) => {
   // TODO: check pubsub status
 
   try {
-    const googleSynthesizer = new GoogleSynthesizer();
-    const voices = await googleSynthesizer.getAllVoices();
+    const googleSynthesizerService = new SynthesizerService('google');
+    const voices = await googleSynthesizerService.getAllVoices();
 
     if (voices.length) {
       googleTTSStatus = 'ok'
@@ -39,8 +38,8 @@ export const getHealthStatus = async (req: Request, res: Response) => {
   }
 
   try {
-    const awsSynthesizer = new AwsSynthesizer();
-    const voices = await awsSynthesizer.getAllVoices();
+    const awsSynthesizerService = new SynthesizerService('aws');
+    const voices = await awsSynthesizerService.getAllVoices();
 
     if (voices.length) {
       awsPollyStatus = 'ok'

@@ -1,6 +1,35 @@
+import { AudioEncoding as IGoogleAudioEncoding, SynthesizeSpeechRequest, Voice as IGoogleVoice } from '@google-cloud/text-to-speech';
+import { Polly } from 'aws-sdk';
 import nodeFetch from 'node-fetch';
+
 import { EVoiceGender } from '../database/entities/voice';
 import { BaseService } from './index';
+import { AudiofileMimeType } from '../database/entities/audiofile';
+
+export type GoogleAudioEncoding = IGoogleAudioEncoding;
+
+export type GoogleVoice = IGoogleVoice;
+
+export type GoogleSynthesizerOptions = SynthesizeSpeechRequest;
+
+export interface ITextToSpeechVoice {
+  languageCodes: string[];
+  name: string;
+  ssmlGender: EVoiceGender;
+  naturalSampleRateHertz: number;
+}
+
+export type SynthesizerType = 'article' | 'preview';
+export type SynthesizerAudioEncodingTypes = GoogleAudioEncoding & Polly.OutputFormat;
+
+export enum SynthesizerEncoding {
+  GOOGLE_MP3 = 'MP3',
+  GOOGLE_OGG_OPUS = 'OGG_OPUS',
+  GOOGLE_LINEAR16 = 'LINEAR16',
+  AWS_MP3 = 'mp3',
+  AWS_PCM = 'pcm',
+  AWS_OGG_VORBIS = 'ogg_vorbis'
+}
 
 export type SynthesizerName = 'google' | 'aws';
 export type SynthesizeAction = 'upload' | 'preview';
@@ -46,12 +75,31 @@ interface SynthesizePreviewResponse {
 
 export class SynthesizerService extends BaseService {
   private readonly synthesizerName: SynthesizerName;
+  private readonly baseUrl: string;
 
   constructor(synthesizerName: SynthesizerName) {
     super()
 
     this.synthesizerName = synthesizerName;
+    this.baseUrl = 'https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app';
   }
+
+  /**
+   * Converts the given mimeType to the correct encoding parameter for the synthesizer service to use.
+   *
+   * For example: when someone requests an article text to be synthesized into a "audio/mpeg" file, the synthesizer will use the parameter:
+   * { "audioConfig": { "audioEncoding": "MP3" } } (Google)
+   * or
+   * { "OutputFormat": "mp3" } (AWS)
+   *
+   */
+  public mimeTypeToFormat = (mimeType: AudiofileMimeType): SynthesizeOutputFormat => {
+    if (mimeType === 'audio/mpeg') {
+      return 'mp3'
+    }
+  
+    return 'wav';
+  };
 
   /**
    * Sends a preview request to the synthesizer.
@@ -87,6 +135,40 @@ export class SynthesizerService extends BaseService {
   }
 
   /**
+   * Does a request to get the status of the synthesizer.
+   */
+  public getStatus = async () => {
+    const response = await nodeFetch(`${this.baseUrl}/status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${process.env.SYNTHESIZER_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const json = await response.json();
+
+    return json;
+  }
+
+  /**
+   * Get's all the voices from the chosen synthesizer.
+   */
+  public getAllVoices = async () => {
+    const response = await nodeFetch(`${this.baseUrl}/v1/${this.synthesizerName}/voices`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${process.env.SYNTHESIZER_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const json = await response.json();
+
+    return json;
+  }
+
+  /**
    * Does a request to our Google Cloud Function.
    *
    * Function will return an uploaded audiofile URL
@@ -98,7 +180,7 @@ export class SynthesizerService extends BaseService {
   private synthesize = async (action: SynthesizeAction, payload: RequestBody) => {
     const payloadStringified = JSON.stringify(payload);
 
-    const response = await nodeFetch(`https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app/v1/${this.synthesizerName}/${action}`, {
+    const response = await nodeFetch(`${this.baseUrl}/v1/${this.synthesizerName}/${action}`, {
       method: 'POST',
       body: payloadStringified,
       headers: {

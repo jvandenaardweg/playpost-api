@@ -11,11 +11,8 @@ import { VoiceRepository } from './database/repositories/voice';
 import countries from './database/seeds/countries';
 import inAppSubscriptions from './database/seeds/in-app-subscriptions';
 import languages from './database/seeds/languages';
-// import voicesData from './database/seeds/voices';
-import { AwsSynthesizer } from './synthesizers/aws';
-import { GoogleSynthesizer } from './synthesizers/google';
+import { VoiceService } from './services/voice-service';
 import { logger } from './utils/logger';
-// import { MicrosoftSynthesizer } from './synthesizers/microsoft';
 
 const syncCountries = async () => {
   const loggerPrefix = 'Sync Countries:';
@@ -129,15 +126,13 @@ const syncVoices = async () => {
   const languageRepository = getRepository(Language);
   const countryRepository = getRepository(Country);
 
-  const awsSynthesizer = new AwsSynthesizer();
-  const googleSynthesizer = new GoogleSynthesizer();
-  // const microsoftSynthesizer = new MicrosoftSynthesizer();
+  const voiceService = new VoiceService();
 
   try {
     logger.info(loggerPrefix, 'Checking for new voices at Google, AWS and Microsoft...');
-    await googleSynthesizer.addAllVoices();
-    await awsSynthesizer.addAllVoices();
-    // await microsoftSynthesizer.addAllVoices(loggerPrefix);
+
+    await voiceService.addAllSynthesizerVoices('google');
+    await voiceService.addAllSynthesizerVoices('aws');
 
     const foundCountries = await countryRepository.find();
     logger.info(loggerPrefix, `Got ${foundCountries.length} countries from database.`);
