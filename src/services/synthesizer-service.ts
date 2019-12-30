@@ -131,7 +131,7 @@ export class SynthesizerService extends BaseService {
     // So we can use this ID to upload a file to storage, before we insert it into the database.
     const audiofileId = uuid.v4();
 
-    const bucketUploadDestination = `${articleId}/audiofiles/${audiofileId}`;
+    const bucketUploadDestination = `articles/${articleId}/audiofiles/${audiofileId}.${options.outputFormat}`;
 
     const response: SynthesizeUploadResponse = await this.synthesize(
       'upload',
@@ -200,7 +200,7 @@ export class SynthesizerService extends BaseService {
    * Get's all the voices from the chosen synthesizer.
    */
   public getAllVoices = async () => {
-    const response = await nodeFetch(`${this.baseUrl}/v1/${this.synthesizerName}/voices`, {
+    const response = await nodeFetch(`${this.baseUrl}/v1/synthesize/${this.synthesizerName}/voices`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${process.env.SYNTHESIZER_ACCESS_TOKEN}`,
@@ -225,7 +225,7 @@ export class SynthesizerService extends BaseService {
   private synthesize = async (action: SynthesizeAction, payload: RequestBody) => {
     const payloadStringified = JSON.stringify(payload);
 
-    const response = await nodeFetch(`${this.baseUrl}/v1/${this.synthesizerName}/${action}`, {
+    const response = await nodeFetch(`${this.baseUrl}/v1/synthesize/${this.synthesizerName}/${action}`, {
       method: 'POST',
       body: payloadStringified,
       headers: {
