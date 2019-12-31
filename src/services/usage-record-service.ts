@@ -50,15 +50,15 @@ export class UsageRecordService extends BaseService {
    * @param stripeSubscriptionItemId 
    */
   async createUsageRecord(
-    stripeSubscriptionItemId: string,
     options: {
       articleId: string,
       audiofileId: string,
-      organizationId: string,
-      publicationId: string,
       userId: string,
       quantity: number,
-      isMetered: boolean
+      isMetered: boolean,
+      stripeSubscriptionItemId: string,
+      organizationId?: string,
+      publicationId?: string,
     }
   ): Promise<InsertResult> {
     const timestamp = new Date().getTime();
@@ -75,7 +75,7 @@ export class UsageRecordService extends BaseService {
     // If no isMetered option is given, fallback to metered
     if (options.isMetered || options.isMetered === undefined) {
       // TODO: retry on fail
-      const createdStripeUsageRecord = await stripe.usageRecords.create(stripeSubscriptionItemId, stripePayload);
+      const createdStripeUsageRecord = await stripe.usageRecords.create(options.stripeSubscriptionItemId, stripePayload);
       stripeUsageRecordId = createdStripeUsageRecord.id;
     }
 
@@ -97,7 +97,7 @@ export class UsageRecordService extends BaseService {
       },
       quantity: options.quantity,
       isMetered: options.isMetered,
-      stripeSubscriptionItemId,
+      stripeSubscriptionItemId: options.stripeSubscriptionItemId,
       stripeUsageRecordId,
       timestamp
     });
