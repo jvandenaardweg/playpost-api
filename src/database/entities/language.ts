@@ -16,7 +16,7 @@ export class Language {
   name: string; // French
 
   @Column({ nullable: true })
-  nativeName: string; // French => Français
+  nativeName?: string; // French => Français
 
   @Index()
   @Column()

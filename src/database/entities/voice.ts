@@ -79,20 +79,20 @@ export class Voice {
   isPremium: boolean;
 
   @Column({ nullable: true }) // Determine if this voice is the default for the language
-  isLanguageDefault: boolean;
+  isLanguageDefault?: boolean;
 
   // For now, the same as isLanguageDefault
   // We should phase out isLanguageDefault and use this one
   @Column({ nullable: true })
-  isUnsubscribedLanguageDefault: boolean;
+  isUnsubscribedLanguageDefault?: boolean;
 
   // When a user is on a "free" subscription, he is allowed a certain amount of articles using a high quality voice. To give the user a better introduction.
   // isForPreview is true for "Very High" quality voices that allow a certain amount of previews, when not subscribed
   @Column({ nullable: true })
-  isSubscribedLanguageDefault: boolean;
+  isSubscribedLanguageDefault?: boolean;
 
   @Column({ nullable: true }) // A URL to an audiofile with an example
-  exampleAudioUrl: string;
+  exampleAudioUrl?: string;
 
   @CreateDateColumn({ select: false })
   @IsDate()

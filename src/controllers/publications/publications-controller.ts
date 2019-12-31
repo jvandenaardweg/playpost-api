@@ -39,7 +39,7 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'The publication could not be found.');
     }
 
-    const isPublicationOfUser = !!publication.users.find(user => user.id === userId);
+    const isPublicationOfUser = !!publication.users && publication.users.find(user => user.id === userId);
 
     if (!isPublicationOfUser) {
       throw new HttpError(HttpStatus.Forbidden, 'You have no access to this publication.');

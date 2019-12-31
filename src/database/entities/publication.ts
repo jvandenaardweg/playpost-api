@@ -25,7 +25,7 @@ export class Publication {
   // On delete of an Organization, delete it's Publication's (CASCADE)
   // A Publication MUST be part of an Organization (nullable: false)
   @ManyToOne(() => Organization, { nullable: false, onDelete: 'CASCADE' })
-  organization: Organization;
+  organization?: Organization;
 
   // A Publication is owner of multiple Article's
   // On delete of an Article, do nothing
@@ -35,7 +35,7 @@ export class Publication {
   // On delete of a User, remove his right to view this Publication (CASCADE)
   @ManyToMany(type => User, user => user.publications, { onDelete: 'CASCADE', cascade: ['insert'] })
   @JoinTable()
-  users: User[];
+  users?: User[];
 
   @CreateDateColumn({ select: false })
   @IsDate()

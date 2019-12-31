@@ -42,7 +42,7 @@ export class UserInAppSubscriptionGoogle {
   // To indicate if the user already used a trial
   // Since Apple does not provide this information for us, we need to track it ourselfs
   @Column({ nullable: true, default: false })
-  hadTrial: boolean;
+  hadTrial?: boolean;
 
   @Column({ nullable: false, default: false })
   isTrial: boolean;
@@ -64,7 +64,7 @@ export class UserInAppSubscriptionGoogle {
   // User could also be null if we receive purchase events from Apple, but we didnt register a purchase in our database
   @Index()
   @ManyToOne(type => User, { nullable: true, onDelete: 'SET NULL' })
-  user: User;
+  user?: User;
 
   // When we try to delete a Subscription, prevent that from happening
   @Index()
@@ -73,11 +73,11 @@ export class UserInAppSubscriptionGoogle {
 
   @Column({ nullable: true })
   @IsDate()
-  renewedAt: Date;
+  renewedAt?: Date;
 
   @Column({ nullable: true })
   @IsDate()
-  canceledAt: Date;
+  canceledAt?: Date;
 
   @CreateDateColumn()
   @IsDate()
@@ -99,13 +99,15 @@ export class UserInAppSubscriptionGoogle {
     if (userId && ![InAppSubscriptionStatus.ACTIVE, InAppSubscriptionStatus.LAPSED].includes(this.status)) {
       logger.info(loggerPrefix, `Removing voice settings for user ID "${userId}"...`);
 
-      const deleteResult = await getRepository(UserVoiceSetting).delete({
-        user: {
-          id: this.user.id
-        }
-      })
+      if (this.user) {
+        const deleteResult = await getRepository(UserVoiceSetting).delete({
+          user: {
+            id: this.user.id
+          }
+        })
 
-      logger.info(loggerPrefix, `Removed ${deleteResult.affected} voice settings for user ID "${userId}"!`);
+        logger.info(loggerPrefix, `Removed ${deleteResult.affected} voice settings for user ID "${userId}"!`);
+      }
     } else {
       logger.info(loggerPrefix, `No voice settings to delete for user ID "${userId}"...`);
     }

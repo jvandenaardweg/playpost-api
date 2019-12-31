@@ -67,8 +67,8 @@ export class OrganizationsController extends BaseController {
       }
 
       // Only allow access to this resource if it's a user or admin
-      const isAdminInOrganization = organization.admin.id === userId;
-      const isUserInOrganization = organization.users.some(user => user.id === userId);
+      const isAdminInOrganization = organization.admin && organization.admin.id === userId;
+      const isUserInOrganization = organization.users && organization.users.some(user => user.id === userId);
 
       if (roles.includes('organization-user') && !isUserInOrganization && !isAdminInOrganization) {
         throw new HttpError(HttpStatus.Forbidden, 'You have no access to this organization.');
@@ -260,6 +260,10 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
+    if (!organization.users) {
+      throw new HttpError(HttpStatus.NotFound, 'Users does not exist on organization.');
+    }
+
     const userExistsInOrganization = organization.users.some(organizationUser => organizationUser.id === newUser.id);
 
     if (userExistsInOrganization) {
@@ -291,6 +295,10 @@ export class OrganizationsController extends BaseController {
 
     if (!organization) {
       throw new HttpError(HttpStatus.NotFound, 'The organization does not exist.');
+    }
+
+    if (!organization.users) {
+      throw new HttpError(HttpStatus.NotFound, 'Users does not exist on organization.');
     }
 
     const userExistsInOrganization = organization.users.some(organizationUser => organizationUser.id === userId);

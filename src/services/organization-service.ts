@@ -203,6 +203,10 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
+    if (!organization.customer) {
+      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
+    }
+
     const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
@@ -211,7 +215,7 @@ export class OrganizationService extends BaseService {
       metadata: {
         customerId: organization.customer.id,
         organizationId: organization.id,
-        adminEmail: organization.admin.email
+        adminEmail: organization.admin ? organization.admin.email : ''
       },
     }
 
@@ -241,6 +245,10 @@ export class OrganizationService extends BaseService {
 
     if (!organization) {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
+    if (!organization.customer) {
+      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
     }
 
     const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
@@ -275,6 +283,10 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
+    if (!organization.customer) {
+      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
+    }
+
     const invoices = await stripe.invoices.list({
       customer: organization.customer.stripeCustomerId
     })
@@ -287,6 +299,10 @@ export class OrganizationService extends BaseService {
 
     if (!organization) {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
+    }
+
+    if (!organization.customer) {
+      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
     }
 
     const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({

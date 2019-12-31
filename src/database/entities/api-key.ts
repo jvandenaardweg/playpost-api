@@ -39,7 +39,7 @@ export class ApiKey {
 
   // Optional label the user can choose to keep his keys organized
   @Column({ nullable: true })
-  label: string;
+  label?: string;
 
   @Index()
   @Column({ nullable: false, unique: true })
@@ -54,27 +54,27 @@ export class ApiKey {
   // A key belongs to a user
   // A user can have multiple keys
   // When a user is deleted, delete his keys
-  @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   user: User;
 
   // The last date the key was used
   // For security purposes
   @Column({ nullable: true })
   @IsDate()
-  lastUsedAt: Date;
+  lastUsedAt?: Date;
 
   // The IP address where the usage from the API key originates from
   // For security purposes
   @Column({ nullable: true })
   @IsIP()
-  lastUsedIpAddress: string;
+  lastUsedIpAddress?: string;
 
   // If a user fills this in, it can restrict access from only the domain given
   // For example: if the user fills in google.com, then the api/embed/application must be embedded into that domain
   // Possible values: "localhost", "nos.nl", "cnn.com" etc...
   @Column({ nullable: true })
   @IsFQDN()
-  allowedDomain: string;
+  allowedDomain?: string;
 
   @CreateDateColumn()
   @IsDate()

@@ -28,17 +28,17 @@ export class PlaylistItem {
 
   @Column({ nullable: true })
   @IsDate()
-  lastPlayedAt: Date;
+  lastPlayedAt?: Date;
 
   @Index()
   @Column({ nullable: true })
   @IsDate()
-  archivedAt: Date;
+  archivedAt?: Date;
 
   @Index()
   @Column({ nullable: true })
   @IsDate()
-  favoritedAt: Date;
+  favoritedAt?: Date;
 
   @CreateDateColumn()
   @IsDate()

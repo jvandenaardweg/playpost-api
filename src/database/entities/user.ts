@@ -98,23 +98,23 @@ export class User {
 
   @Column('varchar', { length: 32, nullable: true, select: false })
   @Length(6, 32) // To have resetPasswordToken backwards compatible, make sure we also allow 6 characters for in our mobile app
-  resetPasswordToken: string;
+  resetPasswordToken?: string;
 
   @Column('varchar', { length: 32, nullable: true, select: false })
   @Length(32)
-  activationToken: string;
+  activationToken?: string;
 
   @Column({ nullable: true })
-  authenticatedAt: Date;
+  authenticatedAt?: Date;
 
   @Column({ nullable: true, select: false })
-  requestResetPasswordAt: Date;
+  requestResetPasswordAt?: Date;
 
   @Column({ nullable: true, select: false })
-  resetPasswordAt: Date;
+  resetPasswordAt?: Date;
 
   @Column({ nullable: true })
-  activatedAt: Date;
+  activatedAt?: Date;
 
   @OneToMany(type => Article, article => article.user)
   articles: Article[];

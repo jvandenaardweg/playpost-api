@@ -120,6 +120,10 @@ export class UserService extends BaseService {
       // Our mobile app users also use this endpoint, without the organization
       if (organization) {
         try {
+          if (!user.activationToken) {
+            throw new HttpError(HttpStatus.BadRequest, 'No activation token found.');
+          }
+
           logger.info(loggerPrefix, `Sending activation email to: ${user.email} using token: ${user.activationToken}`);
           await User.sendActivationEmail(user.activationToken, user.email);
         } catch (err) {

@@ -64,7 +64,7 @@ export class InAppSubscription {
   isActive: boolean;
 
   @Column({ nullable: true })
-  upgradeFromId: string;
+  upgradeFromId?: string;
 
   @ManyToOne(type => InAppSubscription, { onDelete: 'RESTRICT' })
   upgradeFrom: InAppSubscription;

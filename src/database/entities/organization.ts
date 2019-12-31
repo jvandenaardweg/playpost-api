@@ -18,20 +18,20 @@ export class Organization {
   // Restrict deletion of an Organization when a User is deleted
   @OneToOne(type => User, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn()
-  admin: User;
+  admin?: User;
 
   // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
   @OneToOne(type => Customer, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
   @JoinColumn()
-  customer: Customer;
+  customer?: Customer;
 
   @OneToMany(type => Publication, publication => publication.organization)
-  publications: Publication[];
+  publications?: Publication[];
 
   // An Organization can contain multiple Users
   @ManyToMany(type => User, user => user.organizations, { onDelete: 'CASCADE', cascade: ['insert'] })
   @JoinTable()
-  users: User[];
+  users?: User[];
 
   @CreateDateColumn({ select: false })
   @IsDate()
