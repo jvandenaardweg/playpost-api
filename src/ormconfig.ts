@@ -51,6 +51,8 @@ import { UsageRecordTable1576585231400 } from './database/migrations/15765852314
 import { ArticleDraftStatus1576943426233 } from './database/migrations/1576943426233-ArticleDraftStatus';
 import { RemoveArticleUrlUniques1577017748366 } from './database/migrations/1577017748366-RemoveArticleUrlUniques';
 import { UsageRecordSetDefault1577017826554 } from './database/migrations/1577017826554-UsageRecordSetDefault';
+import { ApiKeyNulls1577775219312 } from './database/migrations/1577775219312-ApiKeyNulls';
+import { UsageRecordNulls1577775219313 } from './database/migrations/1577775219313-UsageRecordNulls';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -117,7 +119,9 @@ const config: ConnectionOptions = {
     UsageRecordTable1576585231400,
     ArticleDraftStatus1576943426233,
     RemoveArticleUrlUniques1577017748366,
-    UsageRecordSetDefault1577017826554
+    UsageRecordSetDefault1577017826554,
+    ApiKeyNulls1577775219312,
+    UsageRecordNulls1577775219313
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
