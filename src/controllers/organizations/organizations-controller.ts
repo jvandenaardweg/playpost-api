@@ -393,7 +393,11 @@ export class OrganizationsController extends BaseController {
 
     const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
 
-    return res.json(customerSubscriptions.data);
+    if (!customerSubscriptions) {
+      return res.status(HttpStatus.NoContent).json(customerSubscriptions);
+    }
+
+    return res.json(customerSubscriptions);
   };
 
   public getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {

@@ -307,7 +307,7 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findAllCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
+  async findAllCustomerSubscriptions(organizationId: string): Promise<Stripe.subscriptions.ISubscription[]> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -320,7 +320,7 @@ export class OrganizationService extends BaseService {
 
     const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
 
-    return subscriptions;
+    return subscriptions.data;
   }
 
   /**

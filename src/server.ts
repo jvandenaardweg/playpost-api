@@ -361,6 +361,7 @@ export const setupServer = async () => {
   app.post('/v1/publications/:publicationId/import/article', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createImportArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getArticle);
   app.patch('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.patchArticle);
+  app.post('/v1/publications/:publicationId/articles/:articleId/preview-paragraph', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.previewArticleParagraph);
   app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.createAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteArticle);
 
@@ -424,7 +425,7 @@ export const setupServer = async () => {
             });
           }
 
-          if (statusCode === HttpStatus.InternalServerError) {
+          if (statusCode === HttpStatus.InternalServerError || statusCode === HttpStatus.PaymentRequired) {
             scope.setLevel(Sentry.Severity.Critical);
           }
 

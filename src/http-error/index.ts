@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 // From https://github.com/goldbergyoni/nodebestpractices/blob/master/sections/errorhandling/useonlythebuiltinerror.md
 export class HttpError extends Error {
   public readonly statusCode: HttpStatus;
@@ -11,6 +13,8 @@ export class HttpError extends Error {
     this.details = details;
 
     Object.setPrototypeOf(this, new.target.prototype);
+
+    logger.error(this.statusCode.toString(), this.message, JSON.stringify(this.details));
 
     Error.captureStackTrace(this);
   }

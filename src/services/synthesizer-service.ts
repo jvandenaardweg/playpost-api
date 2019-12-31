@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { EVoiceGender, EVoiceSynthesizer } from '../database/entities/voice';
 import { BaseService } from './index';
-import { UsageRecordService } from './usage-record-service';
 
 export type GoogleAudioEncoding = IGoogleAudioEncoding;
 
@@ -74,18 +73,11 @@ interface SynthesizePreviewResponse {
   audio: string; // base64 string, which can be used in web players
 }
 
-interface MeteredOptions {
-  stripeSubscriptionItemId: string;
-  publicationId: string;
-  organizationId: string;
-}
-
 export class SynthesizerService extends BaseService {
   private readonly synthesizerName: string;
   private readonly baseUrl: string;
   private readonly audiofileRepository: Repository<Audiofile>;
   private readonly bucketName: string;
-  private readonly usageRecordService: UsageRecordService
 
   constructor(synthesizerName: EVoiceSynthesizer) {
     super()
@@ -94,7 +86,6 @@ export class SynthesizerService extends BaseService {
     this.baseUrl = 'https://playpost-synthesizer-ue5zwn5yja-ew.a.run.app';
     this.audiofileRepository = getRepository(Audiofile);
     this.bucketName = `${process.env.GOOGLE_CLOUD_STORAGE_BUCKET_NAME}`;
-    this.usageRecordService = new UsageRecordService();
   }
 
   /**
@@ -135,7 +126,7 @@ export class SynthesizerService extends BaseService {
    * Synthesizer will synthesize the given `ssml` with the given voice, and will store the output in the
    * given `bucketName` and `bucketUploadDestination`.
    */
-  public uploadArticleAudio = async (articleId: string, userId: string, voiceId: string, options: UploadOptions, meteredOptions?: MeteredOptions): Promise<Audiofile> => {
+  public uploadArticleAudio = async (articleId: string, userId: string, voiceId: string, options: UploadOptions): Promise<Audiofile> => {
     // Manually generate a UUID.
     // So we can use this ID to upload a file to storage, before we insert it into the database.
     const audiofileId = uuid.v4();
@@ -169,20 +160,6 @@ export class SynthesizerService extends BaseService {
     newAudiofile.bucket = this.bucketName;
     newAudiofile.filename = bucketUploadDestination;
     newAudiofile.length = response.durationInSeconds;
-
-    // Create a usage record in Stripe and in our database
-    if (meteredOptions) {
-      await this.usageRecordService.createUsageRecord({
-        articleId,
-        audiofileId,
-        stripeSubscriptionItemId: meteredOptions.stripeSubscriptionItemId,
-        organizationId: meteredOptions.organizationId,
-        publicationId: meteredOptions.publicationId,
-        userId,
-        quantity: options.ssml.length,
-        isMetered: true // Sends metered usage to Stripe
-      })
-    }
 
     return newAudiofile;
   }

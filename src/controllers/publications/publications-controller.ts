@@ -10,12 +10,17 @@ import { PublicationService } from '../../services/publication-service';
 import { SynthesizerService } from '../../services/synthesizer-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
+import { Sentry } from '../../sentry';
+import { UsageRecordService } from '../../services/usage-record-service';
+import { OrganizationService } from '../../services/organization-service';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
   private readonly articleService: ArticleService;
   private readonly voiceService: VoiceService;
   private readonly audiofileService: AudiofileService;
+  private readonly usageRecordService: UsageRecordService;
+  private readonly organizationService: OrganizationService;
 
   constructor() {
     super();
@@ -24,6 +29,8 @@ export class PublicationsController extends BaseController {
     this.publicationService = new PublicationService();
     this.voiceService = new VoiceService();
     this.audiofileService = new AudiofileService();
+    this.usageRecordService = new UsageRecordService();
+    this.organizationService = new OrganizationService();
   }
 
   /**
@@ -258,8 +265,55 @@ export class PublicationsController extends BaseController {
 
   public createAudiofile = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
-    const { voiceId } = req.body;
+    const { voiceId, organizationId } = req.body;
     const userId = req.user!.id;
+
+    const validationSchema = joi.object().keys({
+      publicationId: joi.string().uuid().required(),
+      articleId: joi.string().uuid().required(),
+      voiceId: joi.string().uuid().required(),
+      organizationId: joi.string().uuid().required()
+    });
+
+    const validationResult = validationSchema.validate({ ...req.body, ...req.params });
+
+    if (validationResult.error) {
+      const firstError = validationResult.error.details[0];
+      throw new HttpError(HttpStatus.BadRequest, firstError.message, validationResult.error.details);
+    }
+
+    // Get the organization to verify if this publication is part of that organization
+    // We need the organizationId to record usage
+    const organization = await this.organizationService.findOneById(organizationId);
+
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization not found.');
+    }
+
+    if (!organization.publications) {
+      throw new HttpError(HttpStatus.NotFound, 'Publication not found.');
+    }
+
+    // Make sure the publication is part of the organization
+    if (!organization.publications.find(publication => publication.id !== publicationId)) {
+      throw new HttpError(HttpStatus.NotFound, 'Publication is not part of the given organization.');
+    }
+
+    // When we end up here, the publication exists, and the given organizationId has access to that publication
+
+    // Get the subscriptions of the organization customer
+    const subscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
+
+    if (!subscriptions || !subscriptions.length) {
+      throw new HttpError(HttpStatus.PaymentRequired, 'You have no active subscription. This action requires an active subscription.');
+    }
+
+    // Get the first subscription item id, as an organization can only have 1 active subscription, not multiple
+    const stripeSubscriptionItemId = subscriptions[0].items.data[0].id;
+
+    if (!stripeSubscriptionItemId) {
+      throw new HttpError(HttpStatus.PaymentRequired, 'A subscription item id does not exist.');
+    }
 
     const article = await this.articleService.findOneById(articleId, {
       where: {
@@ -283,6 +337,8 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'Active voice does not exist.')
     }
 
+    // When we end up here, everything is OK, we can synthesize now.
+
     const synthesizerService = new SynthesizerService(voice.synthesizer);
 
     const newAudiofile = await synthesizerService.uploadArticleAudio(article.id, userId, voice.id, {
@@ -295,7 +351,84 @@ export class PublicationsController extends BaseController {
 
     const createdAudiofile = await this.audiofileService.save(newAudiofile);
 
+    // Track usage in our database and in Stripe
+    // The user will see the "quantity" on their invoice
+    await this.usageRecordService.createUsageRecord({
+      articleId,
+      audiofileId: createdAudiofile.id,
+      stripeSubscriptionItemId,
+      organizationId,
+      publicationId,
+      userId,
+      quantity: article.ssml.length,
+      isMetered: true // Sends metered usage to Stripe
+    })
+
     return res.json(createdAudiofile)
+  }
+
+  /**
+   * Previews a small ssml paragraph.
+   */
+  public previewArticleParagraph = async (req: Request, res: Response) => {
+    const { publicationId, articleId } = req.params;
+    const { ssml, voiceId } = req.body;
+
+    const validationSchema = joi.object().keys({
+      publicationId: joi.string().uuid().required(),
+      articleId: joi.string().uuid().required(),
+      voiceId: joi.string().uuid().required(),
+      ssml: joi.string().required()
+    });
+
+    const validationResult = validationSchema.validate({ ...req.body, ...req.params });
+
+    if (validationResult.error) {
+      const firstError = validationResult.error.details[0];
+      throw new HttpError(HttpStatus.BadRequest, firstError.message, validationResult.error.details);
+    }
+
+    // TODO: make sure to limit the usage of this endpoint to prevent abuse
+    // As previewing does not cost the user anything, but costs us money
+
+    // To prevent abuse, we set a max. We need to figure out if this max is enough.
+    if (ssml.length > 2000) {
+      const errorMessage = 'Paragraph length is too long to be previewed.';
+      Sentry.captureMessage(errorMessage, Sentry.Severity.Critical);
+      throw new HttpError(HttpStatus.BadRequest, errorMessage)
+    }
+
+    const article = await this.articleService.findOneById(articleId, {
+      where: {
+        publication: {
+          id: publicationId
+        }
+      }
+    });
+
+    if (!article) {
+      throw new HttpError(HttpStatus.NotFound, 'Article does not exist.');
+    }
+
+    const voice = await this.voiceService.findOneByIdWhereActive(voiceId);
+
+    if (!voice) {
+      throw new HttpError(HttpStatus.NotFound, 'Active voice does not exist.')
+    }
+
+    const synthesizerService = new SynthesizerService(voice.synthesizer);
+
+    const audioBase64String = await synthesizerService.preview({
+      outputFormat: 'mp3',
+      ssml,
+      voiceLanguageCode: voice.languageCode,
+      voiceName: voice.name,
+      voiceSsmlGender: voice.gender
+    });
+
+    return res.json({
+      audio: audioBase64String
+    })
   }
 
   public patchArticle = async (req: Request, res: Response) => {
