@@ -34,6 +34,11 @@ export class AudiofileRepository extends Repository<Audiofile> {
 
     const totalUsageCurrentMonthInSeconds = userAudiofilesInCurrentMonth.reduce((length, audiofile) => {
       // tslint:disable no-parameter-reassignment
+      if (!audiofile.length) {
+        length = length + 0;
+        return length;
+      }
+
       length = length + audiofile.length;
       return length;
     }, 0);
@@ -58,6 +63,11 @@ export class AudiofileRepository extends Repository<Audiofile> {
 
     const totalUsageCurrentMonthInSeconds = audiofilesVeryHighQuality.reduce((length, audiofile) => {
       // tslint:disable no-parameter-reassignment
+      if (!audiofile.length) {
+        length = length + 0;
+        return length;
+      }
+
       length = length + audiofile.length;
       return length;
     }, 0);
