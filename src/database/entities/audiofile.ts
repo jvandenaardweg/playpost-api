@@ -25,16 +25,16 @@ export class Audiofile {
 
   @Column({ nullable: true })
   @IsUrl()
-  url: string;
+  url?: string;
 
   @Column({ nullable: true })
-  bucket: string;
+  bucket?: string;
 
   @Column({ nullable: true })
-  filename: string;
+  filename?: string;
 
   @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
-  length: number; // Length in seconds
+  length?: number; // Length in seconds
 
   @Column({ nullable: false, type: 'enum', enum: AudiofileMimeType, default: AudiofileMimeType.MP3 })
   mimeType: AudiofileMimeType;
@@ -48,7 +48,7 @@ export class Audiofile {
 
   @Index()
   @ManyToOne(() => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
-  user: User;
+  user?: User;
 
   @Index()
   @CreateDateColumn()

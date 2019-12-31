@@ -19,6 +19,14 @@ export class VoiceService extends BaseService {
     return this.voiceRepository.find();
   }
 
+  public findOneByIdWhereActive = (voiceId: string): Promise<Voice | undefined> => {
+    return this.voiceRepository.findOne(voiceId, {
+      where: {
+        isActive: true
+      }
+    });
+  }
+
   public addAllSynthesizerVoices = async (synthesizerName: EVoiceSynthesizer): Promise<void> => {
     logger.info('Checking if we need to add new voices to the database...');
 

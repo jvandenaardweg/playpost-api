@@ -15,7 +15,7 @@ export class UsageRecordService extends BaseService {
     this.usageRecordRepository = getRepository(UsageRecord);
   }
 
-  async findAllForSubscriptionItemId(stripeSubscriptionItemId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
+  async findAllBySubscriptionItemId(stripeSubscriptionItemId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
     const [usageRecords, total] = await getConnection()
       .getRepository(UsageRecord)
       .createQueryBuilder('usage_record')

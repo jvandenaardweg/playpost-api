@@ -9,8 +9,8 @@ import { Article, ArticleStatus } from '../database/entities/article';
 import { Audiofile } from '../database/entities/audiofile';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
-import { AudiofileRepository } from '../database/repositories/audiofile';
 import { UserRepository } from '../database/repositories/user';
+import { AudiofileService } from '../services/audiofile-service';
 import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils';
 
@@ -50,9 +50,9 @@ export const createAudiofile = async (req: Request, res: Response) => {
 
   const articleRepository = getRepository(Article);
   const voiceRepository = getRepository(Voice);
-  const audiofileRepository = getCustomRepository(AudiofileRepository);
   const userVoiceSettingRepository = getRepository(UserVoiceSetting);
   const userRepository = getCustomRepository(UserRepository);
+  const audiofileService = new AudiofileService();
 
   const validationSchema = joi.object().keys({
     articleId: joi.string().uuid().required(),
@@ -545,7 +545,7 @@ export const createAudiofile = async (req: Request, res: Response) => {
     logger.info(loggerPrefix, 'Saving the audiofile in the database...');
 
     // Then save it in the database
-    const createdAudiofile = await audiofileRepository.save(newAudiofile);
+    const createdAudiofile = await audiofileService.save(newAudiofile);
 
     logger.info(loggerPrefix, 'Saved the audiofile in the database! Audiofile ID:', createdAudiofile.id);
 

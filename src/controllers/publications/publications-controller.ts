@@ -6,17 +6,24 @@ import { Article, ArticleStatus } from '../../database/entities/article';
 import { HttpError, HttpStatus } from '../../http-error';
 import { ArticleService } from '../../services/article-service';
 import { PublicationService } from '../../services/publication-service';
+import { SynthesizerService } from '../../services/synthesizer-service';
 import { BaseController } from '../index';
+import { VoiceService } from '../../services/voice-service';
+import { AudiofileService } from '../../services/audiofile-service';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
   private readonly articleService: ArticleService;
+  private readonly voiceService: VoiceService;
+  private readonly audiofileService: AudiofileService;
 
   constructor() {
     super();
 
     this.articleService = new ArticleService()
     this.publicationService = new PublicationService();
+    this.voiceService = new VoiceService();
+    this.audiofileService = new AudiofileService();
   }
 
   /**
@@ -250,11 +257,45 @@ export class PublicationsController extends BaseController {
   }
 
   public createAudiofile = async (req: Request, res: Response) => {
-    // const { publicationId, articleId } = req.params;
+    const { publicationId, articleId } = req.params;
+    const { voiceId } = req.body;
+    const userId = req.user!.id;
 
-    return res.json({
-      message: 'Should create audiofile'
+    const article = await this.articleService.findOneById(articleId, {
+      where: {
+        publication: {
+          id: publicationId
+        }
+      }
+    });
+
+    if (!article) {
+      throw new HttpError(HttpStatus.NotFound, 'Article does not exist.');
+    }
+
+    if (!article.ssml) {
+      throw new HttpError(HttpStatus.BadRequest, 'Article has no SSML, cannot create audio for this article.');
+    }
+
+    const voice = await this.voiceService.findOneByIdWhereActive(voiceId);
+
+    if (!voice) {
+      throw new HttpError(HttpStatus.NotFound, 'Active voice does not exist.')
+    }
+
+    const synthesizerService = new SynthesizerService(voice.synthesizer);
+
+    const newAudiofile = await synthesizerService.uploadArticleAudio(article.id, userId, voice.id, {
+      outputFormat: 'mp3',
+      ssml: article.ssml,
+      voiceLanguageCode: voice.languageCode,
+      voiceName: voice.name,
+      voiceSsmlGender: voice.gender
     })
+
+    const createdAudiofile = await this.audiofileService.save(newAudiofile);
+
+    return res.json(createdAudiofile)
   }
 
   public patchArticle = async (req: Request, res: Response) => {

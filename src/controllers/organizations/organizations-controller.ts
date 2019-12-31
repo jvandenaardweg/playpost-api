@@ -431,7 +431,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
-    const customerUsageRecords = await this.usageRecordService.findAllForSubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
+    const customerUsageRecords = await this.usageRecordService.findAllBySubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
 
     return res.json(customerUsageRecords);
   };
