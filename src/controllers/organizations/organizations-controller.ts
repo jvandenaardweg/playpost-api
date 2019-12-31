@@ -391,7 +391,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customerSubscriptions = await this.organizationService.findCustomerSubscriptions(organizationId);
+    const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
 
     return res.json(customerSubscriptions.data);
   };
@@ -399,7 +399,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customerInvoices = await this.organizationService.findCustomerInvoices(organizationId);
+    const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
 
     return res.json(customerInvoices.data);
   };
@@ -407,7 +407,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customerInvoicesUpcoming = await this.organizationService.findCustomerInvoicesUpcoming(organizationId);
+    const customerInvoicesUpcoming = await this.organizationService.findAllCustomerInvoicesUpcoming(organizationId);
 
     return res.json(customerInvoicesUpcoming);
   };
@@ -415,7 +415,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
-    const customerSubscription = await this.organizationService.findCustomerSubscription(stripeSubscriptionId);
+    const customerSubscription = await this.organizationService.findOneCustomerSubscription(stripeSubscriptionId);
 
     return res.json(customerSubscription);
   };
@@ -423,7 +423,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
-    const customerSubscriptionItems = await this.organizationService.findCustomerSubscriptionItems(stripeSubscriptionId);
+    const customerSubscriptionItems = await this.organizationService.findAllCustomerSubscriptionItems(stripeSubscriptionId);
 
     return res.json(customerSubscriptionItems);
   };
@@ -431,7 +431,7 @@ export class OrganizationsController extends BaseController {
   public getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
-    const customerUsageRecordsSummaries = await this.organizationService.findCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
+    const customerUsageRecordsSummaries = await this.organizationService.findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
 
     return res.json(customerUsageRecordsSummaries);
   };

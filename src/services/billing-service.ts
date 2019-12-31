@@ -4,12 +4,16 @@ import { stripe } from '../billing';
 import { BaseService } from './index';
 
 export class BillingService extends BaseService {
+  private readonly stripe: Stripe;
+
   constructor () {
     super()
+
+    this.stripe = stripe;
   }
 
   async findAllProducts(): Promise<Stripe.products.IProduct[]> {
-    const products = await stripe.products.list();
+    const products = await this.stripe.products.list();
 
     return products.data;
   }
@@ -17,8 +21,8 @@ export class BillingService extends BaseService {
   async findAllProductsWithPlans(): Promise<Stripe.products.IProduct[]> {
     // Get products an plans together
     const [products, plans] = await Promise.all([
-      stripe.products.list(),
-      stripe.plans.list()
+      this.stripe.products.list(),
+      this.stripe.plans.list()
     ]);
 
     const productsWithPlans = products.data.map(product => {
@@ -34,19 +38,19 @@ export class BillingService extends BaseService {
   }
 
   async findOneProduct(stripeProductId: string): Promise<Stripe.products.IProduct> {
-    const product = await stripe.products.retrieve(stripeProductId);
+    const product = await this.stripe.products.retrieve(stripeProductId);
 
     return product;
   }
 
   async findAllPlans(): Promise<Stripe.plans.IPlan[]> {
-    const plans = await stripe.plans.list()
+    const plans = await this.stripe.plans.list()
 
     return plans.data;
   }
 
   async findOnePlan(stripePlanId: string): Promise<Stripe.plans.IPlan> {
-    const plans = await stripe.plans.retrieve(stripePlanId)
+    const plans = await this.stripe.plans.retrieve(stripePlanId)
 
     return plans;
   }
@@ -56,13 +60,13 @@ export class BillingService extends BaseService {
    * This should not be public facing.
    */
   async findAllSubscriptions(): Promise<Stripe.subscriptions.ISubscription[]> {
-    const subscriptions = await stripe.subscriptions.list();
+    const subscriptions = await this.stripe.subscriptions.list();
 
     return subscriptions.data;
   }
 
   async findOneSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
-    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     return subscription;
   }
@@ -71,7 +75,7 @@ export class BillingService extends BaseService {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
     // @ts-ignore
-    const taxRates = await stripe.taxRates.list();
+    const taxRates = await this.stripe.taxRates.list();
 
     return taxRates.data;
   }
@@ -80,13 +84,13 @@ export class BillingService extends BaseService {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
     // @ts-ignore
-    const taxRate = await stripe.taxRates.retrieve(stripeTaxRateId);
+    const taxRate = await this.stripe.taxRates.retrieve(stripeTaxRateId);
 
     return taxRate;
   }
 
   async findOneCustomer(stripeCustomerId: string): Promise<Stripe.customers.ICustomer> {
-    const customer = await stripe.customers.retrieve(stripeCustomerId);
+    const customer = await this.stripe.customers.retrieve(stripeCustomerId);
 
     return customer;
   }

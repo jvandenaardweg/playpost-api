@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { getConnection } from 'typeorm';
+import { getConnection, getRepository, Repository } from 'typeorm';
 
 import { stripe } from '../billing';
 import { Customer } from '../database/entities/customer';
@@ -12,13 +12,29 @@ import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
 
 export class OrganizationService extends BaseService {
+  private readonly organizationRepository: Repository<Organization>;
+  private readonly publicationRepository: Repository<Publication>;
+  private readonly userRepository: Repository<User>;
+
   constructor () {
     super()
+
+    this.organizationRepository = getRepository(Organization);
+    this.publicationRepository = getRepository(Publication);
+    this.userRepository = getRepository(User);
   }
 
+  /**
+   * Find all organization's the user has access to.
+   *
+   * @param userId
+   * @param page 
+   * @param perPage 
+   * @param skip 
+   * @param take 
+   */
   async findAll(userId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Organization[]>> {
-    const [organizations, total] = await getConnection()
-      .getRepository(Organization)
+    const [organizations, total] = await this.organizationRepository
       .createQueryBuilder('organization')
       .innerJoin('organization.users', 'user', 'user.id = :userId', { userId })
       .select()
@@ -39,9 +55,13 @@ export class OrganizationService extends BaseService {
     return response
   }
 
+  /**
+   * Fast query to verify the existens of an organization.
+   *
+   * @param organizationId
+   */
   async findOneExists(organizationId: string): Promise<boolean> {
-    const organization = await getConnection()
-      .getRepository(Organization)
+    const organization = await this.organizationRepository
       .createQueryBuilder('organization')
       .where('organization.id = :organizationId', { organizationId })
       .select('id')
@@ -50,9 +70,13 @@ export class OrganizationService extends BaseService {
     return !!organization;
   }
 
+  /**
+   * Find on organization by organization id.
+   *
+   * @param organizationId
+   */
   async findOneById(organizationId: string): Promise<Organization | undefined> {
-    const organization = await getConnection()
-      .getRepository(Organization)
+    const organization = await this.organizationRepository
       .createQueryBuilder('organization')
       .leftJoinAndSelect("organization.customer", "customer")
       .leftJoinAndSelect("organization.publications", "publication")
@@ -64,9 +88,17 @@ export class OrganizationService extends BaseService {
     return organization;
   }
 
+  /**
+   * Find all publications of the organization.
+   *
+   * @param organizationId
+   * @param page 
+   * @param perPage 
+   * @param skip 
+   * @param take 
+   */
   async findAllPublications(organizationId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Publication[]>> {
-    const [publications, total] = await getConnection()
-      .getRepository(Publication)
+    const [publications, total] = await this.publicationRepository
       .createQueryBuilder('publication')
       .leftJoin("publication.organization", "organization")
       .where('organization.id = :organizationId', { organizationId })
@@ -87,9 +119,17 @@ export class OrganizationService extends BaseService {
     return response
   }
 
+  /**
+   * Find all users attached to this organization.
+   *
+   * @param organizationId
+   * @param page 
+   * @param perPage 
+   * @param skip 
+   * @param take 
+   */
   async findAllUsers(organizationId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<User[]>> {
-    const [users, total] = await getConnection()
-      .getRepository(User)
+    const [users, total] = await this.userRepository
       .createQueryBuilder('user')
       .leftJoin("user.organizations", "organization")
       .where('organization.id = :organizationId', { organizationId })
@@ -110,6 +150,11 @@ export class OrganizationService extends BaseService {
     return response
   }
 
+  /**
+   * Find the customer object of the organization.
+   *
+   * @param organizationId
+   */
   async findOneCustomer(organizationId: string): Promise<Customer | undefined> {
     const organization = await this.findOneById(organizationId);
 
@@ -124,6 +169,11 @@ export class OrganizationService extends BaseService {
     return organization.customer;
   }
 
+  /**
+   * Find the admin user of this organization.
+   *
+   * @param organizationId
+   */
   async findOneAdmin(organizationId: string): Promise<User | undefined> {
     const organization = await this.findOneById(organizationId);
 
@@ -138,13 +188,25 @@ export class OrganizationService extends BaseService {
     return organization.admin;
   }
 
+  /**
+   * Saves the organization in the database.
+   * Will insert a new organization if the organization does not exist.
+   * Will update the organization if it exists.
+   *
+   * @param organization
+   */
   async save(organization: Organization) {
     return getConnection().manager.save(organization);
   }
 
+  /**
+   * Save a user as the admin for the organization.
+   *
+   * @param organization
+   * @param newAdminUserId 
+   */
   async saveAdmin(organization: Organization, newAdminUserId: string): Promise<Organization | undefined> {
-    const newAdmin = await getConnection()
-      .getRepository(User)
+    const newAdmin = await this.userRepository
       .createQueryBuilder('user')
       .where('user.id = :userId', { userId: newAdminUserId })
       .getOne();
@@ -240,7 +302,12 @@ export class OrganizationService extends BaseService {
     return updatedStripeCustomer;
   }
 
-  async findCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
+  /**
+   * Find all the subscriptions of the organization customer.
+   *
+   * @param organizationId
+   */
+  async findAllCustomerSubscriptions(organizationId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -256,13 +323,23 @@ export class OrganizationService extends BaseService {
     return subscriptions;
   }
 
-  async findCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
+  /**
+   * Find one customer subscription from Stripe using the `stripeSubscriptionId`.
+   *
+   * @param stripeSubscriptionId
+   */
+  async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
     const subscriptions = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     return subscriptions;
   }
 
-  async findCustomerSubscriptionItems(stripeSubscriptionId: string): Promise<Stripe.subscriptionItems.ISubscriptionItem[]> {
+  /**
+   * Find all customer subscription items from Stripe using `stripeSubscriptionId`.
+   *
+   * @param stripeSubscriptionId
+   */
+  async findAllCustomerSubscriptionItems(stripeSubscriptionId: string): Promise<Stripe.subscriptionItems.ISubscriptionItem[]> {
     const subscriptionItems = await stripe.subscriptionItems.list({
       subscription: stripeSubscriptionId
     })
@@ -270,13 +347,23 @@ export class OrganizationService extends BaseService {
     return subscriptionItems.data;
   }
 
-  async findCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId: string): Promise<Stripe.usageRecordSummaries.IUsageRecordSummariesItem[]> {
+  /**
+   * Find all customer subscription items usage record summaries from Stripe using `stripeSubscriptionItemId`.
+   *
+   * @param stripeSubscriptionItemId
+   */
+  async findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId: string): Promise<Stripe.usageRecordSummaries.IUsageRecordSummariesItem[]> {
     const usageRecordSummaries = await stripe.usageRecordSummaries.list(stripeSubscriptionItemId)
 
     return usageRecordSummaries.data;
   }
 
-  async findCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
+  /**
+   * Find all customer invoices of the organization.
+   *
+   * @param organizationId
+   */
+  async findAllCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -294,7 +381,12 @@ export class OrganizationService extends BaseService {
     return invoices;
   }
 
-  async findCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
+  /**
+   * Find all upcoming invoices for the customer.
+   *
+   * @param organizationId
+   */
+  async findAllCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {

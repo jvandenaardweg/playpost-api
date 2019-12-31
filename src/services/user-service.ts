@@ -9,7 +9,7 @@ import { logger } from '../utils';
 import { BaseService } from './index';
 
 export class UserService extends BaseService {
-  userRepository: Repository<User>;
+  private readonly userRepository: Repository<User>;
 
   constructor() {
     super();

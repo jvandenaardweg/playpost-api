@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { getConnection, getRepository, InsertResult, Repository } from 'typeorm';
+import { getRepository, InsertResult, Repository } from 'typeorm';
 
 import { stripe } from '../billing';
 import { UsageRecord } from '../database/entities/usage-record';
@@ -16,8 +16,7 @@ export class UsageRecordService extends BaseService {
   }
 
   async findAllBySubscriptionItemId(stripeSubscriptionItemId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
-    const [usageRecords, total] = await getConnection()
-      .getRepository(UsageRecord)
+    const [usageRecords, total] = await this.usageRecordRepository
       .createQueryBuilder('usage_record')
       .where('usage_record.stripeSubscriptionItemId = :stripeSubscriptionItemId', { stripeSubscriptionItemId })
       .skip(skip)

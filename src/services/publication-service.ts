@@ -1,4 +1,4 @@
-import { getConnection, getRepository, Repository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 
 import { Publication } from '../database/entities/publication';
 import { CollectionResponse } from '../typings';
@@ -13,8 +13,7 @@ export class PublicationService extends BaseService {
   }
 
   async findAll(userId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Publication[]>> {
-    const [publications, total] = await getConnection()
-      .getRepository(Publication)
+    const [publications, total] = await this.publicationRepository
       .createQueryBuilder('publication')
       .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
       .skip(skip)
@@ -35,8 +34,7 @@ export class PublicationService extends BaseService {
   }
 
   public findOneByIdOfUser = async (publicationId: string, userId: string) => {
-    return getConnection()
-      .getRepository(Publication)
+    return this.publicationRepository
       .createQueryBuilder('publication')
       .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
       .leftJoinAndSelect("publication.users", "users")
