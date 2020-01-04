@@ -27,7 +27,6 @@ export const getSSMLParts = (ssml: string, optionsOverwrite?: ISsmlSplitOptions)
   const defaultOptions: ISsmlSplitOptions = {
     hardLimit: DEFAULT_SSML_SPLIT_HARD_LIMIT, // MAX length of a single batch of split text
     softLimit: DEFAULT_SSML_SPLIT_SOFT_LIMIT, // MIN length of a single batch of split text
-    // extraSplitChars: '.', // Set of extra split characters (Optional property)
     includeSSMLTagsInCounter: true,
     breakParagraphsAboveHardLimit: true,
   };
