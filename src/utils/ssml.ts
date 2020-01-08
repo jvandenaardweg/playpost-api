@@ -1,4 +1,4 @@
-import SSMLSplit from 'ssml-split';
+import SSMLSplit, { OptionsInput } from 'ssml-split';
 import { logger } from '../utils';
 
 export const GOOGLE_CHARACTER_HARD_LIMIT = 5000;
@@ -13,21 +13,13 @@ export const MICROSOFT_CHARACTER_SOFT_LIMIT = 500;
 export const DEFAULT_SSML_SPLIT_HARD_LIMIT = AWS_CHARACTER_HARD_LIMIT;
 export const DEFAULT_SSML_SPLIT_SOFT_LIMIT = AWS_CHARACTER_SOFT_LIMIT;
 
-interface ISsmlSplitOptions {
-  softLimit?: number;
-  hardLimit: number;
-  extraSplitChars?: string;
-  includeSSMLTagsInCounter?: boolean;
-  breakParagraphsAboveHardLimit?: boolean;
-}
-
-export const getSSMLParts = (ssml: string, optionsOverwrite?: ISsmlSplitOptions) => {
+export const getSSMLParts = (ssml: string, optionsOverwrite?: OptionsInput) => {
   const loggerPrefix = 'SSML (Util):';
 
-  const defaultOptions: ISsmlSplitOptions = {
+  const defaultOptions: OptionsInput = {
+    synthesizer: 'google',
     hardLimit: DEFAULT_SSML_SPLIT_HARD_LIMIT, // MAX length of a single batch of split text
     softLimit: DEFAULT_SSML_SPLIT_SOFT_LIMIT, // MIN length of a single batch of split text
-    includeSSMLTagsInCounter: true,
     breakParagraphsAboveHardLimit: true,
   };
 
