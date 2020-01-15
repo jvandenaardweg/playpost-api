@@ -62,7 +62,7 @@ export class UsageRecordService extends BaseService {
   ): Promise<InsertResult> {
     const timestamp = new Date().getTime();
 
-    const stripePayload: Stripe.usageRecords.IUsageRecordCreationOptions = {
+    const stripePayload: Stripe.UsageRecordCreateParams = {
       quantity: options.quantity,
       timestamp,
       action: 'increment'
@@ -74,7 +74,7 @@ export class UsageRecordService extends BaseService {
     // If no isMetered option is given, fallback to metered
     if (options.isMetered || options.isMetered === undefined) {
       // TODO: retry on fail
-      const createdStripeUsageRecord = await stripe.usageRecords.create(options.stripeSubscriptionItemId, stripePayload);
+      const createdStripeUsageRecord = await stripe.subscriptionItems.createUsageRecord(options.stripeSubscriptionItemId, stripePayload)
       stripeUsageRecordId = createdStripeUsageRecord.id;
     }
 

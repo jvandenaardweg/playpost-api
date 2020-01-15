@@ -12,13 +12,13 @@ export class BillingService extends BaseService {
     this.stripe = stripe;
   }
 
-  async findAllProducts(): Promise<Stripe.products.IProduct[]> {
+  async findAllProducts(): Promise<Stripe.Product[]> {
     const products = await this.stripe.products.list();
 
     return products.data;
   }
 
-  async findAllProductsWithPlans(): Promise<Stripe.products.IProduct[]> {
+  async findAllProductsWithPlans(): Promise<Stripe.Product[]> {
     // Get products an plans together
     const [products, plans] = await Promise.all([
       this.stripe.products.list(),
@@ -37,19 +37,19 @@ export class BillingService extends BaseService {
     return productsWithPlans;
   }
 
-  async findOneProduct(stripeProductId: string): Promise<Stripe.products.IProduct> {
+  async findOneProduct(stripeProductId: string): Promise<Stripe.Product> {
     const product = await this.stripe.products.retrieve(stripeProductId);
 
     return product;
   }
 
-  async findAllPlans(): Promise<Stripe.plans.IPlan[]> {
+  async findAllPlans(): Promise<Stripe.Plan[]> {
     const plans = await this.stripe.plans.list()
 
     return plans.data;
   }
 
-  async findOnePlan(stripePlanId: string): Promise<Stripe.plans.IPlan> {
+  async findOnePlan(stripePlanId: string): Promise<Stripe.Plan> {
     const plans = await this.stripe.plans.retrieve(stripePlanId)
 
     return plans;
@@ -59,19 +59,19 @@ export class BillingService extends BaseService {
    * Returns all active subscriptions from our customers.
    * This should not be public facing.
    */
-  async findAllSubscriptions(): Promise<Stripe.subscriptions.ISubscription[]> {
+  async findAllSubscriptions(): Promise<Stripe.Subscription[]> {
     const subscriptions = await this.stripe.subscriptions.list();
 
     return subscriptions.data;
   }
 
-  async findOneSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
+  async findOneSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     return subscription;
   }
 
-  async findAllTaxRates(): Promise<Stripe.taxRates.ITaxRate[]> {
+  async findAllTaxRates(): Promise<Stripe.TaxRate[]> {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
     // @ts-ignore
@@ -80,7 +80,7 @@ export class BillingService extends BaseService {
     return taxRates.data;
   }
 
-  async findOneTaxRate(stripeTaxRateId: string): Promise<Stripe.taxRates.ITaxRate> {
+  async findOneTaxRate(stripeTaxRateId: string): Promise<Stripe.TaxRate> {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
     // @ts-ignore
@@ -89,23 +89,27 @@ export class BillingService extends BaseService {
     return taxRate;
   }
 
-  async findOneCustomer(stripeCustomerId: string): Promise<Stripe.customers.ICustomer> {
-    const customer = await this.stripe.customers.retrieve(stripeCustomerId);
+  async findOneCustomer(stripeCustomerId: string): Promise<Stripe.Customer | Stripe.DeletedCustomer> {
+    const customer = await this.stripe.customers.retrieve(stripeCustomerId, { expand: ['subscriptions'] });
 
     return customer;
   }
 
-  async findOneCustomerSubscriptions(stripeCustomerId: string): Promise<Stripe.customers.ICustomerSubscriptions> {
-    const customer = await this.findOneCustomer(stripeCustomerId);
+  async findOneCustomerSubscriptions(stripeCustomerId: string): Promise<Stripe.Subscription[]> {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId
+    });
 
-    return customer.subscriptions;
+    return subscriptions.data;
   }
 
-  async findOneCustomerSubscriptionStatus(stripeCustomerId: string): Promise<Stripe.subscriptions.SubscriptionStatus> {
-    const customer = await this.findOneCustomer(stripeCustomerId);
+  async findOneCustomerSubscriptionStatus(stripeCustomerId: string): Promise<Stripe.Subscription.Status> {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId
+    });
 
-    if (!customer.subscriptions.data.length) {
-      return customer.subscriptions.data[0].status
+    if (!subscriptions.data.length) {
+      return subscriptions.data[0].status
     }
 
     // If there is no active subscription, it's either "canceled", or the customer was not a subscriber before

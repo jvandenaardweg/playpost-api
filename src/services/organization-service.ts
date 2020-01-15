@@ -258,7 +258,7 @@ export class OrganizationService extends BaseService {
    * @param authenticatedUserId
    * @param customerUpdateFields 
    */
-  async updateCustomer(organizationId: string, customerUpdateFields: Stripe.customers.ICustomerUpdateOptions): Promise<Stripe.customers.ICustomer> {
+  async updateCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams): Promise<Stripe.Customer> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -269,7 +269,7 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
     }
 
-    const updateCustomerFields: Stripe.customers.ICustomerUpdateOptions = {
+    const updateCustomerFields: Stripe.CustomerUpdateParams = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
       address: customerUpdateFields.address,
@@ -307,7 +307,7 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findAllCustomerSubscriptions(organizationId: string): Promise<Stripe.subscriptions.ISubscription[]> {
+  async findAllCustomerSubscriptions(organizationId: string): Promise<Stripe.Subscription[]> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -318,7 +318,9 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
     }
 
-    const subscriptions = await (await stripe.customers.retrieve(organization.customer.stripeCustomerId)).subscriptions
+    const subscriptions = await stripe.subscriptions.list({
+      customer: organization.customer.stripeCustomerId
+    });
 
     return subscriptions.data;
   }
@@ -328,7 +330,7 @@ export class OrganizationService extends BaseService {
    *
    * @param stripeSubscriptionId
    */
-  async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.subscriptions.ISubscription> {
+  async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     const subscriptions = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     return subscriptions;
@@ -339,7 +341,7 @@ export class OrganizationService extends BaseService {
    *
    * @param stripeSubscriptionId
    */
-  async findAllCustomerSubscriptionItems(stripeSubscriptionId: string): Promise<Stripe.subscriptionItems.ISubscriptionItem[]> {
+  async findAllCustomerSubscriptionItems(stripeSubscriptionId: string): Promise<Stripe.SubscriptionItem[]> {
     const subscriptionItems = await stripe.subscriptionItems.list({
       subscription: stripeSubscriptionId
     })
@@ -352,8 +354,8 @@ export class OrganizationService extends BaseService {
    *
    * @param stripeSubscriptionItemId
    */
-  async findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId: string): Promise<Stripe.usageRecordSummaries.IUsageRecordSummariesItem[]> {
-    const usageRecordSummaries = await stripe.usageRecordSummaries.list(stripeSubscriptionItemId)
+  async findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId: string): Promise<Stripe.UsageRecordSummary[]> {
+    const usageRecordSummaries = await stripe.subscriptionItems.listUsageRecordSummaries(stripeSubscriptionItemId)
 
     return usageRecordSummaries.data;
   }
@@ -363,7 +365,7 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findAllCustomerInvoices(organizationId: string): Promise<Stripe.IList<Stripe.invoices.IInvoice>> {
+  async findAllCustomerInvoices(organizationId: string): Promise<Stripe.ApiList<Stripe.Invoice>> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -386,7 +388,7 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findAllCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.invoices.IInvoice> {
+  async findAllCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.Invoice> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {

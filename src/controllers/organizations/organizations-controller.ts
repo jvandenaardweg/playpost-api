@@ -155,15 +155,15 @@ export class OrganizationsController extends BaseController {
       return res.status(204).send();
     }
 
-    const stripeCustomer = await this.billingService.findOneCustomer(stripeCustomerId);
-    const isSubscribed = stripeCustomer.subscriptions.data[0].current_period_end * 1000 > new Date().getTime();
-    const lastSubscriptionStatus = (isSubscribed) ? stripeCustomer.subscriptions.data[0].status : null;
+    const subscriptions = await this.billingService.findOneCustomerSubscriptions(stripeCustomerId)
+    const isSubscribed = subscriptions[0].current_period_end * 1000 > new Date().getTime();
+    const lastSubscriptionStatus = (isSubscribed) ? subscriptions[0].status : null;
 
     return res.json({
       ...customer,
       isSubscribed,
       lastSubscriptionStatus,
-      stripeCustomer
+      stripeCustomer: subscriptions[0].customer
     });
   };
 
@@ -361,7 +361,7 @@ export class OrganizationsController extends BaseController {
 
   public patchCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
-    const requestBody = req.body as Stripe.customers.ICustomerUpdateOptions;
+    const requestBody = req.body as Stripe.CustomerUpdateParams;
 
     const validationSchema = joi.object().keys({
       email: joi.string().email({ minDomainSegments: 2 }).required(),
