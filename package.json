@@ -118,7 +118,7 @@
     "request": "^2.88.0",
     "response-time": "^2.3.2",
     "ssml-split": "^0.5.0",
-    "stripe": "^8.1.0",
+    "stripe": "^8.7.0",
     "supertest": "^4.0.2",
     "ts-node": "^8.6.2",
     "ts-node-dev": "^1.0.0-pre.40",
