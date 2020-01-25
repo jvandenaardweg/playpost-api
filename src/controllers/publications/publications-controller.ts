@@ -370,7 +370,7 @@ export class PublicationsController extends BaseController {
   /**
    * Previews a small ssml paragraph.
    */
-  public previewArticleParagraph = async (req: Request, res: Response) => {
+  public previewArticleSSML = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
     const { ssml, voiceId } = req.body;
 
