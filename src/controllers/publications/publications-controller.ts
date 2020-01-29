@@ -107,7 +107,9 @@ export class PublicationsController extends BaseController {
         publication: {
           id: publicationId
         }
-      }
+      },
+      // TODO: make better
+      select: ['id', 'ssml', 'language', 'canonicalUrl', 'compatibilityMessage', 'createdAt', 'updatedAt', 'description', 'imageUrl', 'isCompatible', 'authorName', 'readingTime', 'sourceName', 'status', 'title']
     })
 
     return res.json(article)
