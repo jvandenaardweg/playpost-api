@@ -260,7 +260,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
 
   const validationSchema = joi.object().keys({
     articleUrl: joi.string().uri().required(),
-    documentHtml: joi.string().allow(undefined).optional()
+    documentHtml: joi.string().optional()
   });
 
   const { error } = validationSchema.validate(req.body);
