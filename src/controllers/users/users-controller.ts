@@ -62,7 +62,7 @@ export class UsersController extends BaseController {
 
     // Get the user and return it
     // Our App needs this user info
-    const user = this.usersService.findOneByEmail(email)
+    const user = await this.usersService.findOneByEmail(email)
 
     return res.json(user);
   }
