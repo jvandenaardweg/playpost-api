@@ -90,7 +90,9 @@ export class BillingService extends BaseService {
   }
 
   async findOneCustomer(stripeCustomerId: string): Promise<Stripe.Customer | Stripe.DeletedCustomer> {
-    const customer = await this.stripe.customers.retrieve(stripeCustomerId, { expand: ['subscriptions'] });
+    const customer = await this.stripe.customers.retrieve(stripeCustomerId, {
+      expand: ['subscriptions', 'subscriptions.data.plan.product', 'subscriptions.data.latest_invoice']
+    });
 
     return customer;
   }

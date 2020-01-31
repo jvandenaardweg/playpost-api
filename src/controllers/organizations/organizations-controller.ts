@@ -155,16 +155,13 @@ export class OrganizationsController extends BaseController {
       return res.status(204).send();
     }
 
-    const subscriptions = await this.billingService.findOneCustomerSubscriptions(stripeCustomerId)
-    const isSubscribed = subscriptions[0].current_period_end * 1000 > new Date().getTime();
-    const lastSubscriptionStatus = (isSubscribed) ? subscriptions[0].status : null;
+    const stripeCustomer = await this.billingService.findOneCustomer(stripeCustomerId)
 
-    return res.json({
-      ...customer,
-      isSubscribed,
-      lastSubscriptionStatus,
-      stripeCustomer: subscriptions[0].customer
-    });
+    // const subscriptions = await this.billingService.findOneCustomerSubscriptions(stripeCustomerId)
+    // const isSubscribed = subscriptions[0].current_period_end * 1000 > new Date().getTime();
+    // const lastSubscriptionStatus = (isSubscribed) ? subscriptions[0].status : null;
+
+    return res.json(stripeCustomer);
   };
 
   /**
