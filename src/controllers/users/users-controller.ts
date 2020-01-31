@@ -60,6 +60,10 @@ export class UsersController extends BaseController {
 
     await this.usersService.create(email, password, organization);
 
-    return res.status(HttpStatus.NoContent).send();
+    // Get the user and return it
+    // Our App needs this user info
+    const user = this.usersService.findOneByEmail(email)
+
+    return res.json(user);
   }
 }
