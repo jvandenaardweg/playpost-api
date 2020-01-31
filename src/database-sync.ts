@@ -1131,6 +1131,31 @@ const updateGoogleVoicesLabel = async () => {
       name: 'cmn-CN-Wavenet-D',
       label: 'Jiao',
       gender: 'FEMALE'
+    },
+    {
+      name: 'ru-RU-Standard-E',
+      label: 'Alla',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'ru-RU-Wavenet-E',
+      label: 'Christina',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'ar-XA-Standard-D',
+      label: 'Nadia',
+      gender: 'FEMALE'
+    },
+    {
+      name: 'de-DE-Wavenet-E',
+      label: 'Jonas',
+      gender: 'MALE'
+    },
+    {
+      name: 'de-DE-Standard-E',
+      label: 'Walter',
+      gender: 'MALE'
     }
   ];
 
