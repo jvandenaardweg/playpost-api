@@ -322,7 +322,8 @@ export class OrganizationService extends BaseService {
       customer: organization.customer.stripeCustomerId,
       // Also get the complete product, customer and latest invoice object's
       // So we do not need to do seperate calls to Stripe to get these required details we want to present to our users
-      expand: ['data.plan.product', 'data.customer', 'data.latest_invoice']
+      expand: ['data.plan.product', 'data.customer', 'data.latest_invoice'],
+      status: 'all'
     });
 
     return subscriptions.data;
