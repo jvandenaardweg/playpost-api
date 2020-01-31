@@ -554,6 +554,8 @@ export const createAudiofile = async (req: Request, res: Response) => {
     const dms = hrend[1] / 1000000;
     logger.info(loggerPrefix, `Execution time: ${ds} ${dms}ms`);
 
+    logger.info(loggerPrefix, 'Returning audiofile:', JSON.stringify(createdAudiofile));
+
     return res.json(createdAudiofile);
   } catch (err) {
     const errorMessage = err && err.message ? err.message : 'An unknown error happenend while generating the audio for this article.';
