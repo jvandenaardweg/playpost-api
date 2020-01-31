@@ -447,4 +447,12 @@ export class OrganizationsController extends BaseController {
 
     return res.json(customerUsageRecords);
   };
+
+  public deleteSubscription = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeSubscriptionId } = req.params;
+
+    const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
+
+    return res.json(cancelSubscriptionResult);
+  }
 }
