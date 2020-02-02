@@ -12,10 +12,20 @@ export class PublicationService extends BaseService {
     this.publicationRepository = getRepository(Publication);
   }
 
+  /**
+   * Get's all publication's the user has access to. The publication includes the organization relation.
+   *
+   * @param userId
+   * @param page 
+   * @param perPage 
+   * @param skip 
+   * @param take 
+   */
   async findAll(userId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Publication[]>> {
     const [publications, total] = await this.publicationRepository
       .createQueryBuilder('publication')
       .innerJoin('publication.users', 'user', 'user.id = :userId', { userId })
+      .leftJoinAndSelect('publication.organization', 'organization') // required
       .skip(skip)
       .take(take)
       .getManyAndCount()

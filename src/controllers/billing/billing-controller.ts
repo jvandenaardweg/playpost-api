@@ -14,16 +14,18 @@ export class BillingController extends BaseController {
     return res.status(200).send('OK');
   };
 
+  /**
+   * Gets all subscription plans from Stripe.
+   */
   getAllPlans = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user!.id;
-
-    // const requestQuery = this.validatePagingParams(req.query);
-    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
     const response = await this.billingService.findAllPlans();
 
     return res.json(response);
   };
 
+  /**
+   * Gets one subscription plan from Stripe using Stripe subscription Id's.
+   */
   getOnePlan = async (req: Request, res: Response): Promise<Response> => {
     const { stripePlanId } = req.params;
 
@@ -32,16 +34,18 @@ export class BillingController extends BaseController {
     return res.json(response);
   };
 
+  /**
+   * Gets all products from Stripe
+   */
   getAllProducts = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user!.id;
-
-    // const requestQuery = this.validatePagingParams(req.query);
-    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
     const response = await this.billingService.findAllProductsWithPlans();
 
     return res.json(response);
   };
 
+  /**
+   * Gets one product from Stripe
+   */
   getOneProduct = async (req: Request, res: Response): Promise<Response> => {
     const { stripeProductId } = req.params;
 
@@ -51,10 +55,6 @@ export class BillingController extends BaseController {
   };
 
   getAllTaxRates = async (req: Request, res: Response): Promise<Response> => {
-    // const userId = req.user!.id;
-
-    // const requestQuery = this.validatePagingParams(req.query);
-    // const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
     const response = await this.billingService.findAllTaxRates();
 
     return res.json(response);

@@ -21,7 +21,7 @@ export class Organization {
   admin?: User;
 
   // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
-  @OneToOne(type => Customer, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'] })
+  @OneToOne(type => Customer, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'], eager: true })
   @JoinColumn()
   customer?: Customer;
 

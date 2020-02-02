@@ -445,6 +445,9 @@ export class OrganizationsController extends BaseController {
     return res.json(customerUsageRecords);
   };
 
+  /**
+   * Delete (cancel) a subscription using the Stripe subscription ID.
+   */
   public deleteSubscription = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
