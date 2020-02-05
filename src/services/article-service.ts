@@ -48,7 +48,7 @@ export class ArticleService extends BaseService {
       'compatibilityMessage',
       'status',
       'createdAt',
-      'updatedAt',
+      'updatedAt'
     ];
 
     const [articles, total] = await getConnection()
