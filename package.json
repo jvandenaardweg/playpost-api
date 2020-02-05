@@ -129,9 +129,7 @@
     "uuid": "^3.4.0"
   },
   "devDependencies": {
-    "@types/app-root-path": "^1.2.4",
     "@types/bcryptjs": "^2.4.2",
-    "@types/cache-manager": "^2.10.1",
     "@types/compression": "^1.0.1",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.2",
