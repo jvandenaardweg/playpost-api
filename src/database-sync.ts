@@ -1166,7 +1166,7 @@ const updateGoogleVoicesLabel = async () => {
       }
     });
 
-    const voicesToSave: Array<DeepPartial<Voice>> = googleVoices.map(voice => {
+    const voicesToSave: DeepPartial<Voice>[] = googleVoices.map(voice => {
       const voiceMap = voiceLabelMapping.find(voiceLabelMap => voiceLabelMap.name === voice.name);
       const label = voiceMap ? voiceMap.label : voice.name;
 
@@ -1231,7 +1231,7 @@ const updateIsLanguageDefaultForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
+    const voicesToSave: DeepPartial<Voice>[] = voices.map(voice => {
       const isLanguageDefault = !!voiceLanguageDefaultMapping.find(voiceName => voiceName === voice.name) || undefined;
       const isUnsubscribedLanguageDefault = !!voiceLanguageDefaultMapping.find(voiceName => voiceName === voice.name) || undefined;
 
@@ -2009,7 +2009,7 @@ const updateIsActiveIsPremiumForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
+    const voicesToSave: DeepPartial<Voice>[] = voices.map(voice => {
       const isActive = !!isActiveMapping.find(mapping => mapping.languageCode === voice.languageCode);
       const isPremium = !!premiumVoicesMapping.find(mapping => mapping.name === voice.name);
 
@@ -2135,7 +2135,7 @@ const updateIsSubscribedLanguageDefault = async () => {
   try {
     logger.info(loggerPrefix, `Update ${isSubscribedLanguageDefaultMapping.length} voices to be isSubscribedLanguageDefault.`);
 
-    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
+    const voicesToSave: DeepPartial<Voice>[] = voices.map(voice => {
       const isSubscribedLanguageDefault = !!isSubscribedLanguageDefaultMapping.find(mapping => mapping.name === voice.name) || undefined;
       logger.info(loggerPrefix, `Should save ${voice.name} isSubscribedLanguageDefault to be: ${isSubscribedLanguageDefault}`);
 
@@ -2164,7 +2164,7 @@ const updateQualityForVoices = async () => {
   try {
     const voices = await voiceRepository.find();
 
-    const voicesToSave: Array<DeepPartial<Voice>> = voices.map(voice => {
+    const voicesToSave: DeepPartial<Voice>[] = voices.map(voice => {
       // AWS Polly and everything else is "normal" quality
       let quality = EVoiceQuality.NORMAL;
 
