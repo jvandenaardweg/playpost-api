@@ -92,7 +92,6 @@
     "express-brute-redis": "0.0.1",
     "express-cluster": "0.0.5",
     "express-rate-limit": "^5.0.0",
-    "express-validator": "^6.3.1",
     "forever": "^2.0.0",
     "fs-extra": "^8.1.0",
     "helmet": "^3.21.2",
