@@ -53,6 +53,7 @@ import { RemoveArticleUrlUniques1577017748366 } from './database/migrations/1577
 import { UsageRecordSetDefault1577017826554 } from './database/migrations/1577017826554-UsageRecordSetDefault';
 import { ApiKeyNulls1577775219312 } from './database/migrations/1577775219312-ApiKeyNulls';
 import { UsageRecordNulls1577775219313 } from './database/migrations/1577775219313-UsageRecordNulls';
+import { UserUniqueActivationToken1580885123963 } from './database/migrations/1580885123963-UserUniqueActivationToken';
 import { UsageRecordNulls1580885123964 } from './database/migrations/1580885123964-UsageRecordNulls';
 
 const config: ConnectionOptions = {
@@ -123,6 +124,8 @@ const config: ConnectionOptions = {
     UsageRecordSetDefault1577017826554,
     ApiKeyNulls1577775219312,
     UsageRecordNulls1577775219313,
+    UserUniqueActivationToken1580885123963,
+    UsageRecordNulls1580885123964
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
