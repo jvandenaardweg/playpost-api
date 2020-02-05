@@ -35,7 +35,7 @@ export class ArticleService extends BaseService {
   }
 
   public findAllSummaries = async (where: string, parameters: object, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
-    const select: Array<keyof ArticleSummary> = [
+    const select: (keyof ArticleSummary)[] = [
       'id',
       'title',
       'url',

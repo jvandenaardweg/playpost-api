@@ -53,7 +53,7 @@ export class ArticleRepository extends Repository<Article> {
     const take = perPageInteger ? perPageInteger : 10
     const skip = (pageInteger && perPageInteger) ? (pageInteger - 1) * perPageInteger : 0;
 
-    const select: Array<keyof ArticleSummary> = [
+    const select: (keyof ArticleSummary)[] = [
       'id',
       'title',
       'url',
