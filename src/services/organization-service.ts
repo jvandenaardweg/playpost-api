@@ -258,7 +258,7 @@ export class OrganizationService extends BaseService {
    * @param authenticatedUserId
    * @param customerUpdateFields 
    */
-  async updateCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams): Promise<Stripe.Customer> {
+  async updateOneCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams): Promise<Stripe.Customer> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -269,7 +269,7 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
     }
 
-    const updateCustomerFields: Stripe.CustomerUpdateParams = {
+    const updateOneCustomerFields: Stripe.CustomerUpdateParams = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
       address: customerUpdateFields.address,
@@ -297,7 +297,7 @@ export class OrganizationService extends BaseService {
     //   // await stripe.customers.deleteTaxId(, taxIds.data[0].v)
     // }
 
-    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateCustomerFields);
+    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateOneCustomerFields);
 
     return updatedStripeCustomer;
   }

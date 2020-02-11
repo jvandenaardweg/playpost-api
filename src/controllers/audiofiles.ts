@@ -40,7 +40,7 @@ export const findById = async (req: Request, res: Response) => {
  * Create's an audiofile using the article's SSML.
  *
  */
-export const createAudiofile = async (req: Request, res: Response) => {
+export const postOneAudiofile = async (req: Request, res: Response) => {
   const hrstart = process.hrtime();
 
   const loggerPrefix = 'Create Audiofile:';

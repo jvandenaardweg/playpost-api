@@ -10,7 +10,7 @@ export class CountriesController extends BaseController {
     this.countryService = new CountryService();
   }
 
-  getIndex = async (req: Request, res: Response): Promise<Response> => {
+  getAll = async (req: Request, res: Response): Promise<Response> => {
     // Get all countries
     const countriesCollection = await this.countryService.findAll(1, 999, 0, 999);
 

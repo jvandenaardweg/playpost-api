@@ -127,7 +127,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get all users within the organization.
    */
-  public getUsers = async (req: Request, res: Response): Promise<Response> => {
+  public getAllUsers = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -140,7 +140,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get the customer information of the organization. This includes data from Stripe.
    */
-  public getCustomer = async (req: Request, res: Response): Promise<Response> => {
+  public getOneCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const customer = await this.organizationService.findOneCustomer(organizationId);
@@ -167,7 +167,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get the admin user of the organization.
    */
-  public getAdmin = async (req: Request, res: Response): Promise<Response> => {
+  public getOneAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const admin = await this.organizationService.findOneAdmin(organizationId);
@@ -183,7 +183,7 @@ export class OrganizationsController extends BaseController {
    * Changes the admin of this organization. The user must already exist.
    * Only admins of an organization can do this.
    */
-  public putAdmin = async (req: Request, res: Response): Promise<Response> => {
+  public putOneAdmin = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const { newAdminUserId } = req.body;
     const userId = req.user!.id;
@@ -206,7 +206,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Creates a publication for the selected organization.
    */
-  public createPublication = async (req: Request, res: Response) => {
+  public createOnePublication = async (req: Request, res: Response) => {
     const { organizationId } = req.params;
     const { name, url } = req.body;
     const userId = req.user!.id;
@@ -241,7 +241,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Associates a existing user to an organization
    */
-  public createUser = async (req: Request, res: Response) => {
+  public createOneUser = async (req: Request, res: Response) => {
     const { organizationId } = req.params;
     const { email } = req.body;
 
@@ -285,7 +285,7 @@ export class OrganizationsController extends BaseController {
     return res.json(updatedOrganization);
   };
 
-  public deleteUser = async (req: Request, res: Response) => {
+  public deleteOneUser = async (req: Request, res: Response) => {
     const { organizationId, userId } = req.params;
 
     const organization = await this.organizationService.findOneById(organizationId);
@@ -333,7 +333,7 @@ export class OrganizationsController extends BaseController {
    * Deletes a publication from the database.
    * IMPORTANT: Very destructive operation.
    */
-  public deletePublication = async (req: Request, res: Response) => {
+  public deleteOnePublication = async (req: Request, res: Response) => {
     const { organizationId, publicationId } = req.params;
 
     const organization = await this.organizationService.findOneById(organizationId);
@@ -356,7 +356,7 @@ export class OrganizationsController extends BaseController {
     return res.status(200).send();
   };
 
-  public patchCustomer = async (req: Request, res: Response): Promise<Response> => {
+  public patchOneCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
     const requestBody = req.body as Stripe.CustomerUpdateParams;
 
@@ -379,12 +379,12 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
-    const updatedCustomer = await this.organizationService.updateCustomer(organizationId, requestBody);
+    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, requestBody);
 
     return res.json(updatedCustomer);
   };
 
-  public getCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
@@ -396,7 +396,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscriptions);
   };
 
-  public getCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
@@ -404,7 +404,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerInvoices.data);
   };
 
-  public getCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
     const customerInvoicesUpcoming = await this.organizationService.findAllCustomerInvoicesUpcoming(organizationId);
@@ -412,7 +412,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerInvoicesUpcoming);
   };
 
-  public getCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
+  public getOneCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
     const customerSubscription = await this.organizationService.findOneCustomerSubscription(stripeSubscriptionId);
@@ -420,7 +420,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscription);
   };
 
-  public getCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
     const customerSubscriptionItems = await this.organizationService.findAllCustomerSubscriptionItems(stripeSubscriptionId);
@@ -446,7 +446,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerPaymentMethods);
   };
 
-  public getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
     const customerUsageRecordsSummaries = await this.organizationService.findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
@@ -454,7 +454,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerUsageRecordsSummaries);
   };
 
-  public getCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 
     const customerUsageRecords = await this.usageRecordService.findAllBySubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
@@ -465,7 +465,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Delete (cancel) a subscription using the Stripe subscription ID.
    */
-  public deleteSubscription = async (req: Request, res: Response): Promise<Response> => {
+  public deleteOneSubscription = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionId } = req.params;
 
     const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);

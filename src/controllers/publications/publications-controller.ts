@@ -99,7 +99,7 @@ export class PublicationsController extends BaseController {
   /**
    * Get a single article of a publication.
    */
-  public getArticle = async (req: Request, res: Response) => {
+  public getOneArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
     const article = await this.articleService.findOneById(articleId, {
@@ -120,7 +120,7 @@ export class PublicationsController extends BaseController {
    * Article is stored as a "draft", so it's not publicaly available (yet).
    *
    */
-  public createImportArticle = async (req: Request, res: Response) => {
+  public postImportArticle = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -184,7 +184,7 @@ export class PublicationsController extends BaseController {
     return res.json(savedArticle);
   };
 
-  public createArticle = async (req: Request, res: Response) => {
+  public postOneArticle = async (req: Request, res: Response) => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -228,7 +228,7 @@ export class PublicationsController extends BaseController {
   /**
    * Deletes a single article from a publication.
    */
-  public deleteArticle = async (req: Request, res: Response) => {
+  public deleteOneArticle = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -265,7 +265,7 @@ export class PublicationsController extends BaseController {
     return res.status(HttpStatus.NoContent).send();
   }
 
-  public createAudiofile = async (req: Request, res: Response) => {
+  public postOneAudiofile = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
     const { voiceId, organizationId } = req.body;
     const userId = req.user!.id;
@@ -372,7 +372,7 @@ export class PublicationsController extends BaseController {
   /**
    * Previews a small ssml paragraph.
    */
-  public previewArticleSSML = async (req: Request, res: Response) => {
+  public postOnePreviewArticleSSML = async (req: Request, res: Response) => {
     const { publicationId, articleId } = req.params;
     const { ssml, voiceId } = req.body;
 
@@ -433,7 +433,7 @@ export class PublicationsController extends BaseController {
     })
   }
 
-  public patchArticle = async (req: Request, res: Response) => {
+  public patchOneArticle = async (req: Request, res: Response) => {
     const { articleId, publicationId } = req.params;
 
     const validationSchema = joi.object().keys({
