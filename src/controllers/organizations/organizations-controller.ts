@@ -365,13 +365,12 @@ export class OrganizationsController extends BaseController {
       name: joi.string().max(50).required(),
       address: joi.object().keys({
         line1: joi.string().max(50).required(),
-        line2: joi.string().allow(null).max(50).optional(),
+        line2: joi.string().allow('').max(50).optional(),
         city: joi.string().required().max(50),
         postal_code: joi.string().max(10).required(),
-        state: joi.string().allow(null).max(50).optional(),
+        state: joi.string().allow('').max(50).optional(),
         country: joi.string().max(50).required()
-      }).required(),
-      phone: joi.string().allow(null).max(100).optional()
+      }).required()
     });
 
     const { error } = validationSchema.validate(req.body);
