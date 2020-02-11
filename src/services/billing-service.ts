@@ -50,9 +50,9 @@ export class BillingService extends BaseService {
   }
 
   async findOnePlan(stripePlanId: string): Promise<Stripe.Plan> {
-    const plans = await this.stripe.plans.retrieve(stripePlanId)
+    const plan = await this.stripe.plans.retrieve(stripePlanId)
 
-    return plans;
+    return plan;
   }
 
   /**
