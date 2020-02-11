@@ -35,6 +35,7 @@ import { OrganizationsController } from './controllers/organizations/organizatio
 import { PublicationsController } from './controllers/publications/publications-controller';
 import { StatusController } from './controllers/status/status-controller';
 import { UserController } from './controllers/user/user-controller';
+import { CountriesController } from './controllers/countries/countries-controller';
 
 import { connectionOptions } from './database/connection-options';
 import { HttpStatus } from './http-error';
@@ -275,6 +276,7 @@ export const setupServer = async () => {
   const usersController = new UsersController();
   const statusController = new StatusController();
   const notFoundController = new NotFoundController();
+  const countriesController = new CountriesController();
 
 
   // API Endpoints
@@ -372,6 +374,8 @@ export const setupServer = async () => {
   app.get('/v1/billing/products/:stripeProductId', IS_PROTECTED_JWT, billingController.getOneProduct);
   app.get('/v1/billing/tax-rates', IS_PROTECTED_JWT, billingController.getAllTaxRates);
   app.get('/v1/billing/tax-rates/:stripeTaxRateId', IS_PROTECTED_JWT, billingController.getOneTaxRate);
+
+  app.get('/v1/countries', IS_PROTECTED_JWT, countriesController.getIndex);
 
   // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);
