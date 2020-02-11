@@ -30,6 +30,13 @@ export class UserService extends BaseService {
     });
   }
 
+  /**
+   * Finds a user by user ID and returns the password hash. Useful before updating a user his password.
+   */
+  findOneByIdWithPassword = async (userId: string) => {
+    return this.userRepository.findOne(userId, { select: ['id', 'password']});
+  }
+
   create = async (email: string, password: string, organization?: { name: string }): Promise<void> => {
     const loggerPrefix = 'Create new user:';
     const emailAddressNormalized = User.normalizeEmail(email);
@@ -178,5 +185,40 @@ export class UserService extends BaseService {
     }
 
     return;
+  }
+
+  /**
+   * Update's the user's e-mail address. Also does a check if the new e-mail address is
+   * available to be used.
+   */
+  updateEmail = async (forUserId: string, newEmail: string) => {
+    const normalizedEmail = User.normalizeEmail(newEmail)
+
+    const existingUserWithSameEmailAddress = await this.userRepository.findOne({
+      where: {
+        email: normalizedEmail
+      }
+    });
+
+    // Check wether the e-mail address is already been used by somebody else
+    if (existingUserWithSameEmailAddress && existingUserWithSameEmailAddress.id !== forUserId) {
+      throw new HttpError(HttpStatus.Conflict, 'There is already another user this e-mail address. Please choose a different e-mail address.')
+    }
+
+    const result = await this.userRepository.update(forUserId, {
+      email: newEmail
+    })
+
+    return result;
+  }
+
+  updatePassword = async (forUserId: string, newPassword: string) => {
+    const newHashedPassword = await User.hashPassword(newPassword);
+
+    const result = await this.userRepository.update(forUserId, {
+      password: newHashedPassword
+    })
+
+    return result;
   }
 }

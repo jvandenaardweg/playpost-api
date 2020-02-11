@@ -409,6 +409,7 @@ export const setupServer = async () => {
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteUser);
 
   app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
+  app.patch('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.updateUser);
 
   // Catch all
   // Should be the last route
