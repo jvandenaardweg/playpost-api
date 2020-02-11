@@ -1,6 +1,5 @@
-import { getRepository, Repository, getConnection } from 'typeorm';
+import { getConnection } from 'typeorm';
 
-import { Language } from '../database/entities/language';
 import { BaseService } from './index';
 import { Country } from '../database/entities/country';
 import { CollectionResponse } from '../typings';
