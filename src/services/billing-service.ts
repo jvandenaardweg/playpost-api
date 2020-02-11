@@ -119,4 +119,40 @@ export class BillingService extends BaseService {
     // TODO: handle scenario where customer was not a subscriber before
     return 'canceled'
   }
+
+  /**
+   * Method to buy a new subscription plan when the user has no subscription yet.
+   * @param stripeCustomerId
+   * @param stripePlanId 
+   */
+  async buyNewSubscriptionPlan(stripeCustomerId: string, stripePlanId: string, stripePaymentMethodId: string): Promise<Stripe.Subscription> {
+    const subscription = await stripe.subscriptions.create({
+      customer: stripeCustomerId,
+      items: [
+        {
+          plan: stripePlanId,
+        }
+      ], 
+      expand: ['latest_invoice.payment_intent'],
+      default_payment_method: stripePaymentMethodId,
+    });
+
+    return subscription
+  }
+
+  /**
+   * Attaches an existing Stripe PaymentMethod to a Stripe Customer. Sets the PaymentMethod as a default.
+   * 
+   * Docs: https://stripe.com/docs/api/payment_methods/attach
+   *
+   * @param stripePaymentMethodId
+   * @param stripeCustomerId 
+   */
+  async attachDefaultPaymentMethodToCustomer(stripePaymentMethodId: string, stripeCustomerId: string): Promise<Stripe.PaymentMethod> {
+    const paymentMethod = await stripe.paymentMethods.attach(stripePaymentMethodId, {
+      customer: stripeCustomerId,
+    });
+
+    return paymentMethod
+  }
 }
