@@ -42,7 +42,8 @@ export class OrganizationsController extends BaseController {
         const validationSchema = joi.object().keys({
           organizationId: joi.string().uuid().required(),
           stripeSubscriptionId: joi.string().optional(),
-          stripeSubscriptionItemId: joi.string().optional()
+          stripeSubscriptionItemId: joi.string().optional(),
+          stripePaymentMethodId: joi.string().optional()
         })
 
         const { error } = validationSchema.validate(req.params);
@@ -444,6 +445,63 @@ export class OrganizationsController extends BaseController {
     const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organizationCustomer.stripeCustomerId);
 
     return res.json(customerPaymentMethods);
+  };
+
+  public patchOneCustomerPaymentMethod = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId, stripePaymentMethodId } = req.params;
+    const { billingDetailsName, cardExpireMonth, cardExpireYear } = req.body;
+
+    const validationSchema = joi.object().keys({
+      billingDetailsName: joi
+        .string()
+        .required(),
+      cardExpireMonth: joi
+        .number()
+        .integer()
+        .min(1) // januari
+        .max(12) // december
+        .required(),
+      cardExpireYear: joi
+        .number()
+        .integer()
+        .min(new Date().getFullYear()) // Card expire year can be no less than the current year
+        .max(new Date().getFullYear() + 10) // Card expire year can be a maximum of 10 years in the future
+        .required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
+    const organizationCustomer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!organizationCustomer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer on organization not found.')
+    }
+
+    if (!organizationCustomer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not a customer.')
+    }
+
+    // Find the current payment method to verify it's existence
+    const currentPaymentMethod = await this.billingService.findOnePaymentMethod(stripePaymentMethodId);
+
+    if (!currentPaymentMethod) {
+      throw new HttpError(HttpStatus.NotFound, 'Current payment method not found.');
+    }
+
+    // Check if the payment method belongs to the customer
+    if (currentPaymentMethod.customer !== organizationCustomer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.BadRequest, 'This payment method does not belong to the customer.');
+    }
+
+    // All good, we can update the payment method information
+
+    const updatedPaymentMethod = await this.billingService.updateOneCustomerPaymentMethod(stripePaymentMethodId, billingDetailsName, cardExpireMonth, cardExpireYear);
+
+    return res.json(updatedPaymentMethod);
   };
 
   public getAllCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
