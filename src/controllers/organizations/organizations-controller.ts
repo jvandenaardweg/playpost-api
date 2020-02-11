@@ -428,6 +428,24 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscriptionItems);
   };
 
+  public getAllCustomerPaymentMethods = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    const organizationCustomer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!organizationCustomer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer on organization not found.')
+    }
+
+    if (!organizationCustomer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not a customer.')
+    }
+
+    const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organizationCustomer.stripeCustomerId);
+
+    return res.json(customerPaymentMethods);
+  };
+
   public getCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
     const { stripeSubscriptionItemId } = req.params;
 

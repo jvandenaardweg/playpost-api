@@ -391,6 +391,7 @@ export const setupServer = async () => {
   // Organization: Customer and Stripe subscriptions
   app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomer);
   app.get('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerSubscriptions);
+  app.get('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerPaymentMethods);
   app.post('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.buyNewSubscriptionPlan);
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getCustomerSubscription);
   app.delete('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteSubscription);

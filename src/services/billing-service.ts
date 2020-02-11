@@ -105,6 +105,15 @@ export class BillingService extends BaseService {
     return subscriptions.data;
   }
 
+  async findAllCustomerPaymentMethods(stripeCustomerId: string): Promise<Stripe.PaymentMethod[]> {
+    const paymentMethods = await this.stripe.paymentMethods.list({
+      customer: stripeCustomerId,
+      type: 'card'
+    });
+
+    return paymentMethods.data;
+  }
+
   async findOneCustomerSubscriptionStatus(stripeCustomerId: string): Promise<Stripe.Subscription.Status> {
     const subscriptions = await stripe.subscriptions.list({
       customer: stripeCustomerId
