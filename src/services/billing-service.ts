@@ -116,6 +116,25 @@ export class BillingService extends BaseService {
     return paymentMethods.data;
   }
 
+  async deleteOneCustomerPaymentMethod(stripePaymentMethodId: string): Promise<Stripe.PaymentMethod> {
+    const paymentMethod = await this.stripe.paymentMethods.detach(stripePaymentMethodId);
+
+    return paymentMethod;
+  }
+
+  /**
+   * Creates a SetupIntent for a customer, useful for saving credit card details for future payments
+   * Docs: https://stripe.com/docs/payments/save-and-reuse
+   */
+  async createOneCustomerSetupIntent(stripeCustomerId: string): Promise<Stripe.SetupIntent> {
+    const setupIntent = await this.stripe.setupIntents.create({
+      usage: 'off_session', // Allow to use the credit card without the user needing to do something
+      customer: stripeCustomerId,
+    });
+
+    return setupIntent;
+  }
+
   async findOnePaymentMethod(stripePaymentMethodId: string): Promise<Stripe.PaymentMethod> {
     const paymentMethod = await this.stripe.paymentMethods.retrieve(stripePaymentMethodId);
 

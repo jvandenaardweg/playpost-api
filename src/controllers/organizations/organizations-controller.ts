@@ -583,4 +583,73 @@ export class OrganizationsController extends BaseController {
 
     return res.json(response);
   };
+
+  /**
+   * Changes the default payment method for a customer. 
+   * Business rule: a customer can only use one payment method.
+   */
+  public postOneCustomerPaymentMethod = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+    const { currentStripePaymentMethodId, newStripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+
+    if (!newStripePaymentMethodId) {
+      throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
+    }
+
+    // Verify if the organization already has a customer object
+    const customer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
+    }
+
+    // Verify if the organization has a Stripe Customer ID
+    if (!customer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    }
+
+    // Verify if the customer exists in Stripe
+    const stripeCustomer = await this.billingService.findOneCustomer(customer.stripeCustomerId);
+
+    if (!stripeCustomer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
+    }
+
+    if (stripeCustomer.deleted) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted on billing service.');
+    }
+    
+    // First, delete the current payment method
+    if (currentStripePaymentMethodId) {
+      await this.billingService.deleteOneCustomerPaymentMethod(currentStripePaymentMethodId)
+    }
+
+    // Attach the payment method to the customer as a default
+    // This payment method will be used for future charges
+    const attachPaymentMethodResponse = await this.billingService.attachDefaultPaymentMethodToCustomer(newStripePaymentMethodId, stripeCustomer.id);
+
+    // If we end up here, the payment method is changed.
+
+    return res.json(attachPaymentMethodResponse);
+  };
+
+  public getOneCustomerSetupIntent = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    const customer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
+    }
+
+    // Verify if the organization has a Stripe Customer ID
+    if (!customer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    }
+    
+    const setupIntent = await this.billingService.createOneCustomerSetupIntent(customer.stripeCustomerId);
+
+    return res.json(setupIntent);
+  }
+  
 }
