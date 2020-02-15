@@ -1,15 +1,39 @@
 import Stripe from 'stripe';
+import SalesTax from 'sales-tax';
 
 import { stripe } from '../billing';
 import { BaseService } from './index';
 
+interface SalesTax {
+  type: string;
+  rate: number;
+  area: 'worldwide' | 'regional' | 'national';
+  exchange: 'business' | 'consumer';
+  charge: {
+    direct: boolean;
+    reverse: boolean;
+  }
+}
+
 export class BillingService extends BaseService {
   private readonly stripe: Stripe;
+  private readonly SalesTax: any;
 
   constructor () {
     super()
 
     this.stripe = stripe;
+
+    // IMPORTANT: Set this
+    // https://github.com/valeriansaliou/node-sales-tax#white_check_mark-specify-the-country-you-charge-from
+    SalesTax.setTaxOriginCountry('NL');
+
+    // Enable hitting against external APIs to verify tax numbers against fraud
+    // Important: might cause delays
+    // SalesTax.toggleEnabledTaxNumberFraudCheck(true);
+    // SalesTax.toggleEnabledTaxNumberValidation(false);
+    
+    this.SalesTax = SalesTax
   }
 
   async findAllProducts(): Promise<Stripe.Product[]> {
@@ -175,7 +199,7 @@ export class BillingService extends BaseService {
    * @param stripeCustomerId
    * @param stripePlanId 
    */
-  async buyNewSubscriptionPlan(stripeCustomerId: string, stripePlanId: string, stripePaymentMethodId: string): Promise<Stripe.Subscription> {
+  async buyNewSubscriptionPlan(stripeCustomerId: string, stripePlanId: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
     const subscription = await stripe.subscriptions.create({
       customer: stripeCustomerId,
       items: [
@@ -183,8 +207,9 @@ export class BillingService extends BaseService {
           plan: stripePlanId,
         }
       ], 
+      trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
       expand: ['latest_invoice.payment_intent'],
-      default_payment_method: stripePaymentMethodId,
+      // default_payment_method: stripePaymentMethodId, // Important: do not use this, so Stripe will use the payment method on the Customer object. Which is what we prefer.
     });
 
     return subscription
@@ -199,10 +224,54 @@ export class BillingService extends BaseService {
    * @param stripeCustomerId 
    */
   async attachDefaultPaymentMethodToCustomer(stripePaymentMethodId: string, stripeCustomerId: string): Promise<Stripe.PaymentMethod> {
+    // Attach the Payment Method to the Customer
     const paymentMethod = await stripe.paymentMethods.attach(stripePaymentMethodId, {
       customer: stripeCustomerId,
     });
 
+    // Set as the default Payment Method for the Customer
+    // This is a required step, so the subscription uses the payment method on the Customer object, instead of the Payment Method on the subscription object
+    await stripe.customers.update(stripeCustomerId, {
+      invoice_settings: {
+        default_payment_method: stripePaymentMethodId,
+      }
+    })
+
     return paymentMethod
+  }
+
+  async createOneCustomerTaxId(stripeCustomerId: string, taxIdType: Stripe.TaxIdCreateParams.Type, value: string): Promise<Stripe.TaxId> {
+    const createdTaxId = await stripe.customers.createTaxId(stripeCustomerId, {
+      type: taxIdType,
+      value,
+    })
+
+    return createdTaxId;
+  }
+
+  async deleteOneCustomerTaxId(stripeCustomerId: string, stripeTaxId: string): Promise<Stripe.DeletedTaxId> {
+    const deletedTaxId = await stripe.customers.deleteTaxId(stripeCustomerId, stripeTaxId);
+
+    return deletedTaxId;
+  }
+
+  async findAllCustomerTaxIds(stripeCustomerId: string): Promise<Stripe.TaxId[]> {
+    const taxIds = await stripe.customers.listTaxIds(stripeCustomerId);
+
+    return taxIds.data;
+  }
+
+  async isValidTaxNumber(countryCode: string, taxNumber: string): Promise<boolean> {
+    // https://github.com/valeriansaliou/node-sales-tax#white_check_mark-validate-tax-number-for-a-customer
+
+    const isValid: boolean = await this.SalesTax.validateTaxNumber(countryCode, taxNumber)
+
+    return isValid
+  }
+
+  async findSalesTax(countryCode: string): Promise<SalesTax> {
+    const salesTax = await this.SalesTax.getSalesTax(countryCode);
+
+    return salesTax;
   }
 }

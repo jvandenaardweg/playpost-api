@@ -12,6 +12,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
+import { request } from 'http';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
@@ -359,7 +360,6 @@ export class OrganizationsController extends BaseController {
 
   public patchOneCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
-    const requestBody = req.body as Stripe.CustomerUpdateParams;
 
     const validationSchema = joi.object().keys({
       email: joi.string().email({ minDomainSegments: 2 }).required(),
@@ -371,7 +371,12 @@ export class OrganizationsController extends BaseController {
         postal_code: joi.string().max(10).required(),
         state: joi.string().allow('').max(50).optional(),
         country: joi.string().max(50).required()
-      }).required()
+      }).required(),
+      // Tax ID is optional, it's not required for non-business customers
+      taxId: joi.object().keys({
+        type: joi.string().required().max(10), // Example: "eu_vat", "cs_qst" etc...
+        value: joi.string().allow('').required().max(30), // Example: "NL002175463B65"
+      }).optional()
     });
 
     const { error } = validationSchema.validate(req.body);
@@ -380,7 +385,26 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
-    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, requestBody);
+    const customerUpdateParams: Stripe.CustomerUpdateParams = {
+      email: req.body.email,
+      name: req.body.name,
+      address: {
+        line1: req.body.address.line1,
+        line2: req.body.address.line2,
+        city: req.body.address.city,
+        postal_code: req.body.address.postal_code,
+        state: req.body.address.state,
+        country: req.body.address.country,
+      }
+    }
+
+    // Optional, only use this when taxId body is filled with a value and a type
+    const taxIdParams: Stripe.TaxIdCreateParams = {
+      type: req.body.taxId.type,
+      value: req.body.taxId.value
+    }
+
+    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, customerUpdateParams, taxIdParams);
 
     return res.json(updatedCustomer);
   };
@@ -405,12 +429,12 @@ export class OrganizationsController extends BaseController {
     return res.json(customerInvoices.data);
   };
 
-  public getAllCustomerInvoicesUpcoming = async (req: Request, res: Response): Promise<Response> => {
+  public getOneCustomerInvoiceUpcoming = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customerInvoicesUpcoming = await this.organizationService.findAllCustomerInvoicesUpcoming(organizationId);
+    const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);
 
-    return res.json(customerInvoicesUpcoming);
+    return res.json(upcomingCustomerInvoice);
   };
 
   public getOneCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
@@ -532,11 +556,11 @@ export class OrganizationsController extends BaseController {
   }
 
   /**
-   * Buys a new subscription plan on behalve of the organization.
+   * Buys a new subscription plan on behalf of the organization.
    */
   public buyNewSubscriptionPlan = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
-    const { stripePlanId, stripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+    const { stripePlanId, stripePaymentMethodId, customTrialEndDate } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
     if (!stripePlanId) {
       throw new HttpError(HttpStatus.BadRequest, 'stripePlanId is required.');
@@ -561,8 +585,13 @@ export class OrganizationsController extends BaseController {
     // Verify if the customer exists in Stripe
     const stripeCustomer = await this.billingService.findOneCustomer(customer.stripeCustomerId);
 
-    if (!stripeCustomer) {
+    if (!stripeCustomer || stripeCustomer.deleted) {
       throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
+    }
+
+    // Make sure the customer has a default payment method
+    if (!stripeCustomer.invoice_settings.default_payment_method) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer has no default payment method.');
     }
 
     // Verify if the subscription plan exists
@@ -572,12 +601,17 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'Subscription plan does not exist on billing service.');
     }
 
+    // The PaymentMethod ID we receive here, has to be authenticated to be used for "off_session" payments.
+    // So we do not require authentication when we charge the user's card in the future.
+    // This authentication has to be done in the frontend using Stripe's confirmCardSetup method.
+    // Docs: https://stripe.com/docs/js/setup_intents/confirm_card_setup
+
     // Attach the payment method to the customer as a default
     // This payment method will be used for future charges
-    const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
+    // const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
 
     // Buy the subscription using the Stripe Customer ID, Stripe Plan ID and Stripe PaymentMethod ID
-    const response = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, paymentMethod.id);
+    const response = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, customTrialEndDate);
 
     // If we end up here, the subscription is bought.
 
@@ -590,7 +624,7 @@ export class OrganizationsController extends BaseController {
    */
   public postOneCustomerPaymentMethod = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
-    const { currentStripePaymentMethodId, newStripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+    const { newStripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
     if (!newStripePaymentMethodId) {
       throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
@@ -618,10 +652,12 @@ export class OrganizationsController extends BaseController {
     if (stripeCustomer.deleted) {
       throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted on billing service.');
     }
+
+    const currentPaymentMethodId = stripeCustomer.invoice_settings.default_payment_method;
     
     // First, delete the current payment method
-    if (currentStripePaymentMethodId) {
-      await this.billingService.deleteOneCustomerPaymentMethod(currentStripePaymentMethodId)
+    if (currentPaymentMethodId && typeof currentPaymentMethodId === 'string') {
+      await this.billingService.deleteOneCustomerPaymentMethod(currentPaymentMethodId)
     }
 
     // Attach the payment method to the customer as a default
@@ -650,6 +686,64 @@ export class OrganizationsController extends BaseController {
     const setupIntent = await this.billingService.createOneCustomerSetupIntent(customer.stripeCustomerId);
 
     return res.json(setupIntent);
+  }
+
+  public getAllCustomerTaxIds = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+
+    const customer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
+    }
+
+    // Verify if the organization has a Stripe Customer ID
+    if (!customer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    }
+    
+    const customerTaxIds = await this.billingService.findAllCustomerTaxIds(customer.stripeCustomerId);
+
+    return res.json(customerTaxIds);
+  }
+
+  public postOneCustomerTaxId = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId } = req.params;
+    const { stripeTaxIdType, stripeTaxIdValue } = req.body;
+
+    const customer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
+    }
+
+    // Verify if the organization has a Stripe Customer ID
+    if (!customer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    }
+    
+    const customerTaxIds = await this.billingService.createOneCustomerTaxId(customer.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
+
+    return res.json(customerTaxIds);
+  }
+
+  public deleteOneCustomerTaxId = async (req: Request, res: Response): Promise<Response> => {
+    const { organizationId, stripeTaxId } = req.params;
+
+    const customer = await this.organizationService.findOneCustomer(organizationId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
+    }
+
+    // Verify if the organization has a Stripe Customer ID
+    if (!customer.stripeCustomerId) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    }
+    
+    const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(customer.stripeCustomerId, stripeTaxId);
+
+    return res.json(deletedCustomerTaxId);
   }
   
 }

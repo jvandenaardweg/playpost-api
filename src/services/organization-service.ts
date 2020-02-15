@@ -10,6 +10,7 @@ import { HttpError, HttpStatus } from '../http-error';
 import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
+import { logger } from '../utils';
 
 export class OrganizationService extends BaseService {
   private readonly organizationRepository: Repository<Organization>;
@@ -258,7 +259,7 @@ export class OrganizationService extends BaseService {
    * @param authenticatedUserId
    * @param customerUpdateFields 
    */
-  async updateOneCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams): Promise<Stripe.Customer> {
+  async updateOneCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams, customerTaxIdParams: Stripe.TaxIdCreateParams): Promise<Stripe.Customer> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -281,21 +282,31 @@ export class OrganizationService extends BaseService {
       },
     }
 
-    // const taxIds = await stripe.customers.listTaxIds(organization.customer.stripeCustomerId);
+    // Get the customer's current tax id's
+    const currentTaxIds = await stripe.customers.listTaxIds(organization.customer.stripeCustomerId);
 
-    // // User has no tax ID, add it.
-    // if (customerUpdateFields && !taxIds.data.length) {
-    //   await stripe.customers.createTaxId(organization.customer.stripeCustomerId, {
-    //     type: 'eu_vat', // TODO: fill in
-    //     value: 'VATNUMBER0123' // TODO: fill in
-    //   })
-    // } else {
-    //   // A user can only have one tax ID
-    //   // const currentTaxId = taxIds;
+    // Check for tax id existence
+    // Use combined "value" and "type". As a user might change his type and value
+    const taxIdExists = currentTaxIds.data.some(taxId => taxId.value === customerTaxIdParams.value && taxId.type === customerTaxIdParams.type);
+    
+    // If the customer has tax id's
+    // But the new tax ID does not exist
+    // Delete the tax id's, so we can add a new one
+    if (currentTaxIds.data.length && !taxIdExists) {
+      for (const taxId of currentTaxIds.data) {
+        logger.info(`Deleting current tax ID: "${taxId.id}" for customer ID: "${organization.customer.stripeCustomerId}"`);
+        await stripe.customers.deleteTaxId(organization.customer.stripeCustomerId, taxId.id)
+      }
+    }
 
-    //   // Update tax ID
-    //   // await stripe.customers.deleteTaxId(, taxIds.data[0].v)
-    // }
+    // Only create a new tax ID when it does not exist and the user has send a "value" and "type"
+    if (!taxIdExists && customerTaxIdParams.value && customerTaxIdParams.type) {
+      logger.info(`Creating new Tax ID for customer ID: "${organization.customer.stripeCustomerId}"`, customerTaxIdParams);
+      await stripe.customers.createTaxId(organization.customer.stripeCustomerId, {
+        type: customerTaxIdParams.type,
+        value: customerTaxIdParams.value
+      })
+    }
 
     const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateOneCustomerFields);
 
@@ -392,7 +403,7 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findAllCustomerInvoicesUpcoming(organizationId: string): Promise<Stripe.Invoice> {
+  async findOneCustomerInvoiceUpcoming(organizationId: string): Promise<Stripe.Invoice> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
