@@ -1,0 +1,14 @@
+components:
+  responses:
+    BadRequestError:
+      description: A bad request
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 400
+              message: 
+                type: string

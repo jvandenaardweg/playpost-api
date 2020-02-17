@@ -12,6 +12,7 @@ import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
+import swaggerJSDoc from 'swagger-jsdoc';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
@@ -42,6 +43,7 @@ import { HttpStatus } from './http-error';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+
 
 logger.info('App init:', 'Starting...');
 
@@ -243,6 +245,75 @@ export const setupServer = async () => {
 
   passport.use('jwt', jwtPassportStrategy);
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
+
+  const swaggerDefinition = {
+    info: {
+      title: 'Playpost API',
+      description: 'This is the documentation of the Playpost API',
+      version,
+      termsOfService: 'https://playpost.app/terms',
+      contact: {
+        name: 'API Support',
+        url: 'https://playpost.app/support',
+        email: 'support@playpost.app'
+      },
+    },
+    openapi: '3.0.0',
+    servers: [
+      {
+        url: 'http://localhost:3000/{basePath}',
+        description: 'Development server',
+        variables: {
+          basePath: {
+            default: 'v1',
+          },
+        }
+      },
+      {
+        url: 'https://api.playpost.app/{basePath}',
+        description: 'Production server',
+        variables: {
+          basePath: {
+            default: 'v1',
+          },
+        }
+      },
+      {
+        url: 'https://playpost-api-test.herokuapp.com/{basePath}',
+        description: 'Test server',
+        variables: {
+          basePath: {
+            default: 'v1',
+          },
+        }
+      }
+    ],
+    components: {},
+    tags: [
+      {
+        name: 'billing',
+        description: 'Billing related endpoints. Mostly Stripe.'
+      }
+    ]
+  };
+  
+  // Options for the swagger docs
+  const options = {
+    // Import swaggerDefinitions
+    swaggerDefinition,
+    // Path to the API docs
+    // Note that this path is relative to the current directory from which the Node.js is ran, not the application itself.
+    apis: ['./src/controllers/**/*.ts', './src/swagger-schemas/internal/**/*.yaml'],
+  };
+  
+  // Initialize swagger-jsdoc -> returns validated swagger spec in json format
+  const swaggerSpec = swaggerJSDoc(options);
+  
+  // Serve swagger docs the way you like (Recommendation: swagger-tools)
+  app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // Temporary measure to make sure users update
   app.all('*', cors(corsOptions), (req, res, next) => {

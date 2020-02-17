@@ -1,0 +1,22 @@
+components:
+  schemas:
+    SalesTax:
+      type: object
+      properties:
+        type: 
+          type: string
+        rate: 
+          type: number
+        area: 
+          type: string
+          enum: [worldwide, regional, national]
+        exchange:
+          type: string
+          enum: [business, consumer]
+        charge:
+          type: object
+          properties:
+            direct:
+              type: boolean
+            reverse:
+              type: boolean

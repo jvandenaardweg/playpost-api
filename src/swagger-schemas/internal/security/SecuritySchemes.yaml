@@ -1,0 +1,18 @@
+# Docs: https://swagger.io/docs/specification/authentication/#multiple
+components:
+  securitySchemes:
+
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+      
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+
+    ApiSecretAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Secret

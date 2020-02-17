@@ -164,3 +164,7 @@ Note: If there are old (not run) migrations in `npm run typeorm migration:show`,
 3. Run: `npm run typeorm schema:sync`
 4. Run `npm run database:sync`
 4. Schema and database is now synced.
+
+
+## Updating Stripe
+1. Make sure to update the OpenAPI schema ref's. Replace `277f09cbb50007241b4d7e92246f4b09a88ecf08` with the latest commit from: https://github.com/stripe/openapi

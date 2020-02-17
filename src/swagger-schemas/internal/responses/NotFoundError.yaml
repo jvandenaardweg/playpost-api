@@ -1,0 +1,14 @@
+components:
+  responses:
+    NotFoundError:
+      description: A not found request
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 404
+              message: 
+                type: string

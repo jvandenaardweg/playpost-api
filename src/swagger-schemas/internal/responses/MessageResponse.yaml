@@ -1,0 +1,11 @@
+components:
+  responses:
+    MessageResponse:
+      description: A normal message response
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              message: 
+                type: string
