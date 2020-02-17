@@ -249,11 +249,11 @@ export const setupServer = async () => {
     const appVersionHeader = req.headers['app-version'] as string;
     const deviceManufacturer = req.headers['device-manufacturer'] as string;
 
-    if (appVersionHeader && ['1.2.2', '1.2.0', '1.1.0', '1.0.0'].includes(appVersionHeader)) {
+    if (appVersionHeader && ['1.7.0', '1.6.0', '1.5.0', '1.4.0', '1.3.1', '1.3.0', '1.2.2', '1.2.0', '1.1.0', '1.0.0'].includes(appVersionHeader)) {
       const storeName = deviceManufacturer === 'Apple' ? 'the App Store' : 'Google Play';
 
       return res.status(400).json({
-        message: `There is a new required Playpost app update available with new features! Please update to the latest version using ${storeName}!`
+        message: `There is a new required Playpost app update available! Please update to the latest version using ${storeName}!`
       })
     }
 
