@@ -79,22 +79,6 @@ export class BillingService extends BaseService {
     return plan;
   }
 
-  /**
-   * Returns all active subscriptions from our customers.
-   * This should not be public facing.
-   */
-  async findAllSubscriptions(): Promise<Stripe.Subscription[]> {
-    const subscriptions = await this.stripe.subscriptions.list();
-
-    return subscriptions.data;
-  }
-
-  async findOneSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
-    const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
-
-    return subscription;
-  }
-
   async findAllTaxRates(): Promise<Stripe.TaxRate[]> {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
@@ -179,19 +163,19 @@ export class BillingService extends BaseService {
     return paymentMethod;
   }
 
-  async findOneCustomerSubscriptionStatus(stripeCustomerId: string): Promise<Stripe.Subscription.Status> {
+  async findOneCustomerSubscriptionStatus(stripeCustomerId: string): Promise<Stripe.Subscription.Status | null> {
     const subscriptions = await stripe.subscriptions.list({
       customer: stripeCustomerId
     });
 
-    if (!subscriptions.data.length) {
+    if (subscriptions.data.length) {
       return subscriptions.data[0].status
     }
 
     // If there is no active subscription, it's either "canceled", or the customer was not a subscriber before
 
     // TODO: handle scenario where customer was not a subscriber before
-    return 'canceled'
+    return null
   }
 
   /**
