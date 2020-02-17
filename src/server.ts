@@ -294,6 +294,9 @@ export const setupServer = async () => {
 
   app.post('/v1/users', usersController.create); // To create user accounts
 
+  // So we can show the correct available countries in a dropdown in public forms
+  app.get('/v1/countries', countriesController.getAll);
+
   app.get('/v1/oembed', oembedController.getAll); // Used by embedly
   app.get('/v1/status', statusController.getAll);
   app.get('/health', rateLimited, healthController.getHealthStatus);
@@ -378,8 +381,6 @@ export const setupServer = async () => {
   // Not Stripe related
   app.post('/v1/billing/tax-number/validate', IS_PROTECTED_JWT, billingController.postOneTaxNumberValidation);
   app.get('/v1/billing/sales-tax/:countryCode', IS_PROTECTED_JWT, billingController.getOneSalesTax);
-
-  app.get('/v1/countries', IS_PROTECTED_JWT, countriesController.getAll);
 
   // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);
