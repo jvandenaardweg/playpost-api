@@ -1,4 +1,5 @@
-import normalizeUrl from 'normalize-url';
+// tslint:disable-next-line: no-var-requires
+const normalizeUrl = require('normalize-url');
 
 /**
  * Trims a string at a certain length and makes sure we don't trim it in the middle of a word.
@@ -18,6 +19,6 @@ export const getNormalizedUrl = (url: string) => {
     stripWWW: false,
     stripAuthentication: true,
     normalizeProtocol: true,
-    defaultProtocol: 'https'
+    defaultProtocol: 'https://'
   });
 };

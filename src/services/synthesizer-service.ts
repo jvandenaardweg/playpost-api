@@ -1,4 +1,5 @@
-import { AudioEncoding as IGoogleAudioEncoding, SynthesizeSpeechRequest, Voice as IGoogleVoice } from '@google-cloud/text-to-speech';
+// tslint:disable-next-line: no-submodule-imports
+import { google } from '@google-cloud/text-to-speech/build/protos/protos';
 import { Polly } from 'aws-sdk';
 import nodeFetch from 'node-fetch';
 import { getRepository, Repository } from 'typeorm';
@@ -7,6 +8,10 @@ import uuid from 'uuid';
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { EVoiceGender, EVoiceSynthesizer } from '../database/entities/voice';
 import { BaseService } from './index';
+
+type IGoogleAudioEncoding = google.cloud.texttospeech.v1.AudioEncoding
+type IGoogleVoice = google.cloud.texttospeech.v1.Voice
+type SynthesizeSpeechRequest = google.cloud.texttospeech.v1.SynthesizeSpeechRequest
 
 export type GoogleAudioEncoding = IGoogleAudioEncoding;
 

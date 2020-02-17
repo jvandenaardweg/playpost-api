@@ -12,7 +12,6 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import { request } from 'http';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;

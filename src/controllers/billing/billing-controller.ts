@@ -84,7 +84,6 @@ export class BillingController extends BaseController {
     }
 
     const isValid = await this.billingService.isValidTaxNumber(countryCode, taxNumber);
-    console.log(isValid)
 
     if (!isValid) {
       throw new HttpError(HttpStatus.BadRequest, `The given tax ID "${taxNumber}" seems to be invalid.`)
