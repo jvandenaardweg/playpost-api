@@ -168,6 +168,7 @@ export const setupServer = async () => {
     'https://playpost.app',
     'https://publisher.playpost.app',
     'https://player.playpost.app',
+    'https://api.playpost.app', // For serving our swagger docs at /docs
 
     // test/staging services
     'https://playpost-website-test.herokuapp.com',
