@@ -13,6 +13,10 @@ import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
 import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import path from 'path';
+import { writeFileSync } from 'fs';
+import expressBasicAuth from 'express-basic-auth';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
@@ -43,7 +47,6 @@ import { HttpStatus } from './http-error';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
-
 
 logger.info('App init:', 'Starting...');
 
@@ -172,10 +175,14 @@ export const setupServer = async () => {
     'https://playpost-publisher.herokuapp.com',
     'https://playpost-player.herokuapp.com',
     'https://playpost-player-test.herokuapp.com',
-
-    // development services
-    'http://localhost:8080'
   ];
+
+  // Only allow these URL's from development
+  const corsDevelopmentWhitelist = [
+    // development services
+    'http://localhost:8080',
+    'http://localhost:3000' // Development api, so we can do requests from swagger
+  ]
 
   // It seems we cannot differentiate between our extensions as the ID is randomly
   // So just use the start of the origin
@@ -189,8 +196,9 @@ export const setupServer = async () => {
       const hasNoOrigin = !origin; // Note: Our React Native app has no origin, we allow it
       const isOnExtensionWhitelist = origin && extensionsWhitelist.some(extensionOriginPart => origin.startsWith(extensionOriginPart));
       const isOnCorsWhitelist = origin && corsWhitelist.some(corsItemUrl => origin === corsItemUrl);
+      const isAllowedOnDevelopment = origin && process.env.NODE_ENV !== 'production' && corsDevelopmentWhitelist.some(corsItemUrl => origin === corsItemUrl);
 
-      if (hasNoOrigin || isOnExtensionWhitelist || isOnCorsWhitelist) {
+      if (hasNoOrigin || isOnExtensionWhitelist || isOnCorsWhitelist || isAllowedOnDevelopment) {
         callback(null, true)
       } else {
         const errorMessage = `"${origin}" is not allowed to do requests.`;
@@ -211,11 +219,13 @@ export const setupServer = async () => {
 
   // Hardening our server using Helmet
   app.use(helmet());
-  app.use(
-    helmet.contentSecurityPolicy({
-      directives: { defaultSrc: ["'self'"], styleSrc: ["'self'"] }
-    })
-  ); // https://helmetjs.github.io/docs/csp/
+  // Do not use blow, keep commented
+  // Enabling this will not work with serving our swagger docs
+  // app.use(
+  //   helmet.contentSecurityPolicy({
+  //     directives: { defaultSrc: ["'self'"], styleSrc: ["'self'"] }
+  //   })
+  // ); // https://helmetjs.github.io/docs/csp/
   app.use(helmet.noCache()); // https://helmetjs.github.io/docs/nocache/
   app.use(helmet.permittedCrossDomainPolicies()); // https://helmetjs.github.io/docs/crossdomain/
   app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // https://helmetjs.github.io/docs/referrer-policy/
@@ -299,21 +309,22 @@ export const setupServer = async () => {
   
   // Options for the swagger docs
   const options = {
-    // Import swaggerDefinitions
     swaggerDefinition,
     // Path to the API docs
     // Note that this path is relative to the current directory from which the Node.js is ran, not the application itself.
-    apis: ['./src/controllers/**/*.ts', './src/swagger-schemas/internal/**/*.yaml'],
+    apis: [
+      './src/controllers/**/*.ts', 
+      './src/swagger-schemas/internal/**/*.yaml'
+    ],
   };
   
   // Initialize swagger-jsdoc -> returns validated swagger spec in json format
   const swaggerSpec = swaggerJSDoc(options);
-  
-  // Serve swagger docs the way you like (Recommendation: swagger-tools)
-  app.get('/api-docs.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
+
+  // Write the Swagger spec to a JSON file
+  // So the json file always reflects the last API version, so we can easily track changes in git
+  const swaggerDocFilePath = path.join(__dirname, '../public/docs/') + 'api-docs.json';
+  writeFileSync(swaggerDocFilePath, JSON.stringify(swaggerSpec, null, 2))
 
   // Temporary measure to make sure users update
   app.all('*', cors(corsOptions), (req, res, next) => {
@@ -335,6 +346,18 @@ export const setupServer = async () => {
   // https://medium.com/@nodepractices/were-under-attack-23-node-js-security-best-practices-e33c146cb87d#cb8f
   app.use(bodyParser.json({ limit: '20mb' })); // We upped the limit because an Apple receipt string is a bit large
   app.use(bodyParser.urlencoded({ limit: '20mb', extended: true, parameterLimit: 5000 }));
+
+  // Serve the docs
+  app.use('/docs', 
+    // Add some basic protection, we do not want the world to see this docs
+    // It will only be used for our internal development purposes for now
+    expressBasicAuth({
+      users: { 'admin': 'demodemo!' },
+      challenge: true
+    }), 
+    swaggerUi.serve, 
+    swaggerUi.setup(require(swaggerDocFilePath))
+  );
 
   // Load controllers
   const meController = new MeController();

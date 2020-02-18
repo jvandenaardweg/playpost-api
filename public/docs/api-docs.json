@@ -1,0 +1,610 @@
+{
+  "info": {
+    "title": "Playpost API",
+    "description": "This is the documentation of the Playpost API",
+    "version": "2.4.0",
+    "termsOfService": "https://playpost.app/terms",
+    "contact": {
+      "name": "API Support",
+      "url": "https://playpost.app/support",
+      "email": "support@playpost.app"
+    }
+  },
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "http://localhost:3000/{basePath}",
+      "description": "Development server",
+      "variables": {
+        "basePath": {
+          "default": "v1"
+        }
+      }
+    },
+    {
+      "url": "https://api.playpost.app/{basePath}",
+      "description": "Production server",
+      "variables": {
+        "basePath": {
+          "default": "v1"
+        }
+      }
+    },
+    {
+      "url": "https://playpost-api-test.herokuapp.com/{basePath}",
+      "description": "Test server",
+      "variables": {
+        "basePath": {
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "components": {
+    "responses": {
+      "BadRequestError": {
+        "description": "A bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 400
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "description": "A normal message response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "A not found request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 404
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 401
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SalesTax": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "worldwide",
+              "regional",
+              "national"
+            ]
+          },
+          "exchange": {
+            "type": "string",
+            "enum": [
+              "business",
+              "consumer"
+            ]
+          },
+          "charge": {
+            "type": "object",
+            "properties": {
+              "direct": {
+                "type": "boolean"
+              },
+              "reverse": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key"
+      },
+      "ApiSecretAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Secret"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "billing",
+      "description": "Billing related endpoints. Mostly Stripe."
+    }
+  ],
+  "paths": {
+    "/billing": {
+      "get": {
+        "operationId": "getIndex",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Index of billing endpoint",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/plans": {
+      "get": {
+        "operationId": "getAllPlans",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get all Plans from Stripe",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "externalDocs": {
+          "url": "https://stripe.com/docs/api/plans"
+        },
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Plan's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/plans/{stripePlanId}": {
+      "get": {
+        "operationId": "getOnePlan",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Gets one subscription plan from Stripe using Stripe subscription Id's.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "stripePlanId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe Plan Id as a string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One Stripe Subscription plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/products": {
+      "get": {
+        "operationId": "getAllProducts",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get all Products from Stripe",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Products's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/products/{stripeProductId}": {
+      "get": {
+        "operationId": "getOneProduct",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Gets one Product from Stripe using Stripe Product Id.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "stripeProductId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe Plan Id as a string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One Stripe Product",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/tax-rates": {
+      "get": {
+        "operationId": "getAllTaxRates",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Get all TaxRate's from Stripe",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe TaxRate's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/tax-rate/{stripeTaxRateId}": {
+      "get": {
+        "operationId": "getOneTaxRate",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Gets one TaxRate from Stripe using Stripe TaxRate Id.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "stripeTaxRateId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe TaxRate Id as a string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One Stripe TaxRate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/tax-number/validate": {
+      "post": {
+        "operationId": "postOneTaxNumberValidation",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Validates a tax number.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "countryCode": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "countryCode": "NL",
+                  "taxNumber": "NL001275562B65"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result when tax number is valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/billing/sales-tax/{countryCode}": {
+      "get": {
+        "operationId": "getOneSalesTax",
+        "tags": [
+          "billing"
+        ],
+        "summary": "Gets one Sales Tax response by countryCode.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "countryCode",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Country code as a string",
+            "example": "NL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One SalesTax object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesTax"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    }
+  }
+}

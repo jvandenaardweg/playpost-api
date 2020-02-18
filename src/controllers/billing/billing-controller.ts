@@ -53,6 +53,8 @@ export class BillingController extends BaseController {
    *        - BearerAuth: []
    *        - ApiKeyAuth: []
    *          ApiSecretAuth: []
+   *      externalDocs:
+   *        url: https://stripe.com/docs/api/plans
    *      responses:
    *        400:
    *          $ref: '#/components/responses/BadRequestError'
