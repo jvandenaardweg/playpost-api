@@ -68,6 +68,9 @@
     "url": "https://github.com/jvandenaardweg/playpost-api/issues"
   },
   "homepage": "https://github.com/jvandenaardweg/playpost-api#readme",
+  "optionalDependencies": {
+    "fsevents": "^2.1.2"
+  },
   "dependencies": {
     "@google-cloud/pubsub": "^1.0.0",
     "@google-cloud/storage": "^4.3.1",
@@ -155,7 +158,6 @@
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^3.4.7",
     "auto-changelog": "^1.16.2",
-    "fsevents": "^2.1.2",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
     "loadtest": "^4.1.0",
