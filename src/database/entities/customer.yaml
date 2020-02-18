@@ -1,0 +1,23 @@
+components:
+  schemas:
+    Customer:
+      type: object
+      required:
+        - id
+        - stripeCustomerId
+        - createdAt
+        - updatedAt
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        stripeCustomerId: 
+          type: string
+          example: cus_GLBNvU7Y4CEL02
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10

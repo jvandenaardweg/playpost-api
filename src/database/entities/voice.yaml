@@ -1,0 +1,96 @@
+
+components:
+  schemas:
+    Voice:
+      type: object
+      required:
+        - id
+        - languageCode
+        - countryCode
+        - name
+        - label
+        - gender
+        - synthesizer
+        - quality
+        - isActive
+        - isPremium
+        - language
+        - country
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        languageCode: 
+          type: string
+          example: nl-NL
+        countryCode: 
+          type: string
+          example: NL
+        name:
+          type: string
+          example: en-US-Wavenet-D
+        label:
+          type: string
+          example: Ineke
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+          example: FEMALE
+        synthesizer:
+          type: string
+          enum: [Google, AWS]
+          example: Google
+        quality:
+          type: string
+          enum: [Normal, High, Very High]
+          example: Very High
+        isActive:
+          type: boolean
+          example: true
+        isPremium:
+          type: boolean
+          example: true
+        isLanguageDefault:
+          type: boolean
+          nullable: true
+          example: true
+        isUnsubscribedLanguageDefault:
+          type: boolean
+          nullable: true
+          example: true
+        isSubscribedLanguageDefault:
+          type: boolean
+          nullable: true
+          example: true
+        exampleAudioUrl:
+          type: string
+          nullable: true
+          example: https://storage.playpost.app/articles/59eaa4e7-9a12-4cc6-a628-75c93b9fb4fc/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3
+        
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+    
+        # Relations
+        language:
+          type: object
+          readOnly: true
+          nullable: true
+          $ref: '#/components/schemas/Language'
+        
+        country:
+          type: object
+          readOnly: true
+          nullable: true
+          $ref: '#/components/schemas/Country'
+        
+        audiofiles:
+          type: array
+          readOnly: true
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Audiofile'

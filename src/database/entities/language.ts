@@ -15,12 +15,12 @@ export class Language {
   @Column()
   name: string; // French
 
-  @Column({ nullable: true })
-  nativeName?: string; // French => Français
-
   @Index()
   @Column()
   code: string; // fr, en, de, nl...
+
+  @Column({ nullable: true })
+  nativeName?: string; // French => Français
 
   @Column({ default: false })
   rightToLeft: boolean; // like Arabic reads from "right to left"

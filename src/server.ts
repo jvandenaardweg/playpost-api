@@ -304,6 +304,10 @@ export const setupServer = async () => {
       {
         name: 'billing',
         description: 'Billing related endpoints. Mostly Stripe.'
+      },
+      {
+        name: 'countries',
+        description: 'Countries related endpoints.'
       }
     ]
   };
@@ -315,7 +319,8 @@ export const setupServer = async () => {
     // Note that this path is relative to the current directory from which the Node.js is ran, not the application itself.
     apis: [
       './src/controllers/**/*.ts', 
-      './src/swagger-schemas/internal/**/*.yaml'
+      './src/swagger-schemas/internal/**/*.yaml',
+      './src/database/entities/**/*.yaml'
     ],
   };
   

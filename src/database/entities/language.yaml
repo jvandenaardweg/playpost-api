@@ -1,0 +1,59 @@
+components:
+  schemas:
+    Language:
+      type: object
+      required:
+        - id
+        - name
+        - code
+        - nativeName
+        - rightToLeft
+        - isActive
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        name: 
+          type: string
+          example: Dutch
+        code: 
+          type: string
+          example: nl # Lowercase
+        nativeName:
+          type: string
+          nullable: true
+          example: Dutch
+        rightToLeft:
+          type: boolean
+          example: false
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+
+        # Relations  
+        voices:
+          type: array
+          # required: false
+          items:
+            $ref: '#/components/schemas/Voice'
+
+        # articles:
+        #   type: string
+        #   required: false
+        #   schema:
+        #     type: array
+        #     items:
+        #       $ref: '#/components/schemas/Article'
+
+        countries:
+          type: array
+          # required: false
+          items:
+            $ref: '#/components/schemas/Article'

@@ -170,6 +170,6 @@ Note: If there are old (not run) migrations in `npm run typeorm migration:show`,
 1. Make sure to update the OpenAPI schema ref's. Replace `277f09cbb50007241b4d7e92246f4b09a88ecf08` with the latest commit from: https://github.com/stripe/openapi
 
 ## Generating API Client
-1. Create an up-to-date Swagger json file in: `./dist/api.json`
-2. Run: `npx openapi-generator generate -i ./dist/api.json -g typescript-axios -o ./generated-api-client`
+1. Create an up-to-date Swagger json file in: `./public/docs/api-docs.json`
+2. Run: `npx openapi-generator generate -i ./public/docs/api-docs.json -g typescript-axios -o ./generated-api-client`
 3. Client can be found in `./generated-api-client`

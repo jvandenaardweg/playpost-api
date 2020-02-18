@@ -1,0 +1,33 @@
+components:
+  schemas:
+    Publication:
+      type: object
+      required:
+        - id
+        - name
+        - organization
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        name: 
+          type: string
+          example: Playpost Blog
+        url: 
+          type: string
+          nullable: true
+          example: https://blog.playpost.app
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+
+        # Relations
+        organization:
+          type: object
+          readOnly: true
+          nullable: false
+          $ref: '#/components/schemas/Organization'

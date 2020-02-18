@@ -1,0 +1,48 @@
+components:
+  schemas:
+    PlaylistItem:
+      type: object
+      required:
+        - id
+        - article
+        - user
+        - order
+        - createdAt
+        - updatedAt
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        order: 
+          type: number
+          example: 0 for the first, 1 for the second, etc...
+        lastPlayedAt:
+          type: string
+          nullable: true
+          example: 2020-02-14 03:30:10
+        archivedAt:
+          type: string
+          nullable: true
+          example: 2020-02-14 03:30:10
+        favoritedAt:
+          type: string
+          nullable: true
+          example: 2020-02-14 03:30:10
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+
+        # Relations
+        user:
+          type: object
+          readOnly: true
+          $ref: '#/components/schemas/User'
+
+        article:
+          type: object
+          readOnly: true
+          $ref: '#/components/schemas/Article'

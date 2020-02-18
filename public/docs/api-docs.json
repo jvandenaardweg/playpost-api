@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.5.1",
+    "version": "2.5.2",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -42,6 +42,36 @@
   ],
   "components": {
     "responses": {
+      "CountriesResponse": {
+        "description": "A Countries collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page": {
+                  "type": "number",
+                  "example": 1
+                },
+                "totalPages": {
+                  "type": "number",
+                  "example": 30
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Country"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "BadRequestError": {
         "description": "A bad request",
         "content": {
@@ -53,21 +83,6 @@
                   "type": "number",
                   "example": 400
                 },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "MessageResponse": {
-        "description": "A normal message response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
                 "message": {
                   "type": "string"
                 }
@@ -106,6 +121,21 @@
                   "type": "number",
                   "example": 401
                 },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "description": "A normal message response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
                 "message": {
                   "type": "string"
                 }
@@ -152,6 +182,741 @@
             }
           }
         }
+      },
+      "Article": {
+        "type": "object",
+        "required": [
+          "id",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "Big Bang Theory Season 13 Confirmed! Here’s What We Know"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "After running the series for twelve consecutive years, the show aired its last season in May 2019. Since the inception of the series in 2007, the show has made a considerably huge fan base. The show..."
+          },
+          "url": {
+            "type": "string",
+            "nullable": false,
+            "example": "https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know"
+          },
+          "canonicalUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know/",
+            "description": "The most unique url of an article"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "crawling",
+              "new",
+              "finished",
+              "failed",
+              "draft"
+            ],
+            "example": "finished"
+          },
+          "sourceName": {
+            "type": "string",
+            "nullable": true,
+            "example": "The Digital Weekly"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg"
+          },
+          "readingTime": {
+            "type": "number",
+            "nullable": true,
+            "example": 147.3
+          },
+          "authorName": {
+            "type": "number",
+            "nullable": true,
+            "example": "HARSH VARDHAN"
+          },
+          "isCompatible": {
+            "type": "boolean",
+            "nullable": false,
+            "example": true
+          },
+          "compatibilityMessage": {
+            "type": "string",
+            "nullable": true,
+            "example": "The amount of paragraphs is below the minimum length of 3 paragraphs."
+          },
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "example": "<div><p>the article contents</p></div>"
+          },
+          "ssml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<speak><p>the article contents</p></speak>"
+          },
+          "documentHtml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<html><body><p>the article contents</p></body></html>"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "user": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": true,
+            "$ref": "#/components/schemas/User"
+          },
+          "language": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": true,
+            "$ref": "#/components/schemas/Language"
+          },
+          "audiofiles": {
+            "type": "array",
+            "readOnly": true,
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/Audiofile"
+            }
+          }
+        }
+      },
+      "Audiofile": {
+        "type": "object",
+        "required": [
+          "id",
+          "mimeType",
+          "voice",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://storage.playpost.app/articles/59eaa4e7-9a12-4cc6-a628-75c93b6fb4ec/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3"
+          },
+          "bucket": {
+            "type": "string",
+            "nullable": true,
+            "example": "storage.playpost.app"
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true,
+            "example": "articles/59eaa4e7-9a12-4cc6-a628-75c93b6fb4ec/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3"
+          },
+          "length": {
+            "type": "number",
+            "nullable": true,
+            "example": 553.488,
+            "description": "The length in seconds"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": [
+              "audio/mpeg",
+              "audio/wav",
+              "audio/pcm",
+              "audio/opus",
+              "audio/ogg"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "voice": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": true,
+            "$ref": "#/components/schemas/Voice"
+          },
+          "user": {
+            "type": "object",
+            "readOnly": true,
+            "required": false,
+            "nullable": true,
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "Country": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "code",
+          "nativeName",
+          "continent",
+          "currency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Netherlands"
+          },
+          "code": {
+            "type": "string",
+            "example": "NL"
+          },
+          "nativeName": {
+            "type": "string",
+            "example": "Nederland"
+          },
+          "continent": {
+            "type": "string",
+            "example": "EU"
+          },
+          "currency": {
+            "type": "string",
+            "example": "EUR"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "languages": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "required": [
+          "id",
+          "stripeCustomerId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "stripeCustomerId": {
+            "type": "string",
+            "example": "cus_GLBNvU7Y4CEL02"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          }
+        }
+      },
+      "Language": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "code",
+          "nativeName",
+          "rightToLeft",
+          "isActive"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Dutch"
+          },
+          "code": {
+            "type": "string",
+            "example": "nl"
+          },
+          "nativeName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Dutch"
+          },
+          "rightToLeft": {
+            "type": "boolean",
+            "example": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Voice"
+            }
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Article"
+            }
+          }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Playpost"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          }
+        }
+      },
+      "PlaylistItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "article",
+          "user",
+          "order",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "order": {
+            "type": "number",
+            "example": "0 for the first, 1 for the second, etc..."
+          },
+          "lastPlayedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "archivedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "favoritedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "user": {
+            "type": "object",
+            "readOnly": true,
+            "$ref": "#/components/schemas/User"
+          },
+          "article": {
+            "type": "object",
+            "readOnly": true,
+            "$ref": "#/components/schemas/Article"
+          }
+        }
+      },
+      "Publication": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "organization"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Playpost Blog"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://blog.playpost.app"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "organization": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": false,
+            "$ref": "#/components/schemas/Organization"
+          }
+        }
+      },
+      "UsageRecord": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "organization"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1251
+          },
+          "isMetered": {
+            "type": "boolean",
+            "nullable": true,
+            "example": true,
+            "description": "A boolean value to determine if the user should pay for this or not"
+          },
+          "timestamp": {
+            "type": "number",
+            "nullable": true,
+            "example": 1582031028
+          },
+          "stripeSubscriptionItemId": {
+            "type": "string",
+            "nullable": true,
+            "example": "si_GjAaZXZqKBEJA7",
+            "description": "The Stripe Subscription Item ID used for this Usage Record in Stripe"
+          },
+          "stripeUsageRecordId": {
+            "type": "string",
+            "nullable": true,
+            "example": "si_GjAaZXZqKBEJA7"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "organization": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": false,
+            "$ref": "#/components/schemas/Organization"
+          }
+        }
+      },
+      "UserVoiceSetting": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "voice",
+          "language"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "user": {
+            "type": "object",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "voice": {
+            "type": "object",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/Voice"
+            }
+          },
+          "language": {
+            "type": "object",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "password",
+          "authenticatedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app"
+          },
+          "password": {
+            "type": "string",
+            "example": "$2a$10$ETNlIhkfuKjTyl0VPdV5XOJQsAQBnLjaIIjasKFTPoC8lsQNPcja"
+          },
+          "resetPasswordToken": {
+            "type": "string",
+            "nullable": true,
+            "example": "ABC123"
+          },
+          "activationToken": {
+            "type": "string",
+            "nullable": true,
+            "example": "f3642b2891284604b4f7368d2831eff7"
+          },
+          "authenticatedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "requestResetPasswordAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "resetPasswordAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "activatedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          }
+        }
+      },
+      "Voice": {
+        "type": "object",
+        "required": [
+          "id",
+          "languageCode",
+          "countryCode",
+          "name",
+          "label",
+          "gender",
+          "synthesizer",
+          "quality",
+          "isActive",
+          "isPremium",
+          "language",
+          "country"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "languageCode": {
+            "type": "string",
+            "example": "nl-NL"
+          },
+          "countryCode": {
+            "type": "string",
+            "example": "NL"
+          },
+          "name": {
+            "type": "string",
+            "example": "en-US-Wavenet-D"
+          },
+          "label": {
+            "type": "string",
+            "example": "Ineke"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ],
+            "example": "FEMALE"
+          },
+          "synthesizer": {
+            "type": "string",
+            "enum": [
+              "Google",
+              "AWS"
+            ],
+            "example": "Google"
+          },
+          "quality": {
+            "type": "string",
+            "enum": [
+              "Normal",
+              "High",
+              "Very High"
+            ],
+            "example": "Very High"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "isPremium": {
+            "type": "boolean",
+            "example": true
+          },
+          "isLanguageDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          },
+          "isUnsubscribedLanguageDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          },
+          "isSubscribedLanguageDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          },
+          "exampleAudioUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://storage.playpost.app/articles/59eaa4e7-9a12-4cc6-a628-75c93b9fb4fc/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "language": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": true,
+            "$ref": "#/components/schemas/Language"
+          },
+          "country": {
+            "type": "object",
+            "readOnly": true,
+            "nullable": true,
+            "$ref": "#/components/schemas/Country"
+          },
+          "audiofiles": {
+            "type": "array",
+            "readOnly": true,
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/Audiofile"
+            }
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -176,6 +941,10 @@
     {
       "name": "billing",
       "description": "Billing related endpoints. Mostly Stripe."
+    },
+    {
+      "name": "countries",
+      "description": "Countries related endpoints."
     }
   ],
   "paths": {
@@ -593,6 +1362,38 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/countries": {
+      "get": {
+        "operationId": "getAll",
+        "tags": [
+          "countries"
+        ],
+        "summary": "Get all countries",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CountriesResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

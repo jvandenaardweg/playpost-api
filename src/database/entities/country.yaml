@@ -1,0 +1,44 @@
+components:
+  schemas:
+    Country:
+      type: object
+      required:
+        - id
+        - name
+        - code
+        - nativeName
+        - continent
+        - currency
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        name: 
+          type: string
+          example: Netherlands
+        code: 
+          type: string
+          example: NL
+        nativeName:
+          type: string
+          example: Nederland
+        continent:
+          type: string
+          example: EU
+        currency:
+          type: string
+          example: EUR
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+    
+        # Relations
+        languages:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Language'

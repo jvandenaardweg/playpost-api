@@ -1,0 +1,61 @@
+components:
+  schemas:
+    Audiofile:
+      type: object
+      required:
+        - id
+        - mimeType
+        - voice
+        - createdAt
+        - updatedAt
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        url: 
+          type: string
+          nullable: true
+          example: https://storage.playpost.app/articles/59eaa4e7-9a12-4cc6-a628-75c93b6fb4ec/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3
+        bucket: 
+          type: string
+          nullable: true
+          example: storage.playpost.app
+        filename:
+          type: string
+          nullable: true
+          example: articles/59eaa4e7-9a12-4cc6-a628-75c93b6fb4ec/audiofiles/d7081cb2-583f-40f8-ae7e-d0b352477ef2.mp3
+        length:
+          type: number
+          nullable: true
+          example: 553.488
+          description: The length in seconds
+        mimeType:
+          type: string
+          enum: [audio/mpeg, audio/wav, audio/pcm, audio/opus, audio/ogg]
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+    
+        # Relations
+        # article:
+        #   type: object
+        #   readOnly: true
+        #   required: false
+        #   $ref: '#/components/schemas/Article'
+        
+        voice:
+          type: object
+          readOnly: true
+          nullable: true
+          $ref: '#/components/schemas/Voice'
+        
+        user:
+          type: object
+          readOnly: true
+          required: false
+          nullable: true
+          $ref: '#/components/schemas/User'

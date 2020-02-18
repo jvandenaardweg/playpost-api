@@ -10,6 +10,29 @@ export class CountriesController extends BaseController {
     this.countryService = new CountryService();
   }
 
+  /**
+   * @swagger
+   *
+   *  /countries:
+   *    get:
+   *      operationId: getAll
+   *      tags:
+   *        - countries
+   *      summary: Get all countries
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      responses:
+   *        '400':
+   *          $ref: '#/components/responses/BadRequestError'
+   *        '401':
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        '404':
+   *          $ref: '#/components/responses/NotFoundError'
+   *        '200':
+   *          $ref: '#/components/responses/CountriesResponse'
+   */
   getAll = async (req: Request, res: Response): Promise<Response> => {
     // Get all countries
     const countriesCollection = await this.countryService.findAll(1, 999, 0, 999);
