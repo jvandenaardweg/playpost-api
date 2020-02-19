@@ -18,6 +18,6 @@
     "axios": "^0.19.2"
   },
   "scripts": {
-    "version": ""
+    "version": "echo \"Nothing...\" && exit 1"
   }
 }
