@@ -1,5 +1,5 @@
 {
-  "name": "playpost-api",
+  "name": "@jvandenaardweg/playpost-api-client",
   "version": "2.7.0",
   "description": "",
   "main": "dist/index.js",
