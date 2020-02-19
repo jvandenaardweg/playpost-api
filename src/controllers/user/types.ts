@@ -9,6 +9,6 @@ export interface PatchOneUserRequestBody {
 
 export interface UserResponse extends Response {
   locals: {
-    user: User
+    user: User;
   }
 }

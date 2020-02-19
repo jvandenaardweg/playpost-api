@@ -12,6 +12,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
+import { OrganizationResponse } from './types';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
@@ -33,7 +34,7 @@ export class OrganizationsController extends BaseController {
    * Handles access permissions.
    */
   public permissions = (roles: PermissionRoles) => {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
+    return async (req: Request, res: OrganizationResponse, next: NextFunction): Promise<void | OrganizationResponse> => {
       const userId = req.user!.id;
       const { organizationId } = req.params;
 
@@ -68,8 +69,8 @@ export class OrganizationsController extends BaseController {
       }
 
       // Only allow access to this resource if it's a user or admin
-      const isAdminInOrganization = organization.admin && organization.admin.id === userId;
-      const isUserInOrganization = organization.users && organization.users.some(user => user.id === userId);
+      const isAdminInOrganization = !!(organization.admin && organization.admin.id === userId);
+      const isUserInOrganization = !!(organization.users && organization.users.some(user => user.id === userId));
 
       if (roles.includes('organization-user') && !isUserInOrganization && !isAdminInOrganization) {
         throw new HttpError(HttpStatus.Forbidden, 'You have no access to this organization.');
@@ -79,6 +80,12 @@ export class OrganizationsController extends BaseController {
         throw new HttpError(HttpStatus.Forbidden, 'You have no admin access to this organization.');
       }
 
+      // Pass the user to the controller using locals
+      // So we do not have to do additional database request to get the user inside the controller method
+      res.locals.organization = organization;
+      res.locals.isAdmin = isAdminInOrganization;
+      res.locals.isUser = isUserInOrganization;
+
       return next();
     }
   }
@@ -86,9 +93,9 @@ export class OrganizationsController extends BaseController {
   /**
    * Finds all organizations belonging to the authenticated user.
    *
-   * @returns Promise<Response>
+   * @returns Promise<OrganizationResponse>
    */
-  public getAll = async (req: Request, res: Response): Promise<Response> => {
+  public getAll = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const userId = req.user!.id;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -101,9 +108,9 @@ export class OrganizationsController extends BaseController {
   /**
    * Get one organization belonging to the authenticated user.
    *
-   * @returns Promise<Response>
+   * @returns Promise<OrganizationResponse>
    */
-  public getOne = async (req: Request, res: Response): Promise<Response> => {
+  public getOne = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const organization = await this.organizationService.findOneById(organizationId);
@@ -115,7 +122,7 @@ export class OrganizationsController extends BaseController {
     return res.json(organization);
   };
 
-  public getPublications = async (req: Request, res: Response): Promise<Response> => {
+  public getPublications = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -128,7 +135,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Get all users within the organization.
    */
-  public getAllUsers = async (req: Request, res: Response): Promise<Response> => {
+  public getAllUsers = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -141,34 +148,17 @@ export class OrganizationsController extends BaseController {
   /**
    * Get the customer information of the organization. This includes data from Stripe.
    */
-  public getOneCustomer = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+  public getOneCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
 
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'This organization does not exist.');
-    }
-
-    const { stripeCustomerId } = organization;
-
-    if (!stripeCustomerId) {
-      return res.status(204).send();
-    }
-
-    const stripeCustomer = await this.billingService.findOneCustomer(stripeCustomerId)
-
-    // const subscriptions = await this.billingService.findOneCustomerSubscriptions(stripeCustomerId)
-    // const isSubscribed = subscriptions[0].current_period_end * 1000 > new Date().getTime();
-    // const lastSubscriptionStatus = (isSubscribed) ? subscriptions[0].status : null;
-
+    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId)
     return res.json(stripeCustomer);
   };
 
   /**
    * Get the admin user of the organization.
    */
-  public getOneAdmin = async (req: Request, res: Response): Promise<Response> => {
+  public getOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const admin = await this.organizationService.findOneAdmin(organizationId);
@@ -184,19 +174,14 @@ export class OrganizationsController extends BaseController {
    * Changes the admin of this organization. The user must already exist.
    * Only admins of an organization can do this.
    */
-  public putOneAdmin = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+  public putOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    // const { organizationId } = req.params;
     const { newAdminUserId } = req.body;
     const userId = req.user!.id;
+    const organization = res.locals.organization;
 
     if (userId === newAdminUserId) {
       throw new HttpError(HttpStatus.BadRequest, 'This user is already an admin of this organization.');
-    }
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
     const updatedOrganization = await this.organizationService.saveAdmin(organization, newAdminUserId);
@@ -207,18 +192,14 @@ export class OrganizationsController extends BaseController {
   /**
    * Creates a publication for the selected organization.
    */
-  public createOnePublication = async (req: Request, res: Response) => {
-    const { organizationId } = req.params;
+  public createOnePublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    // const { organizationId } = req.params;
     const { name, url } = req.body;
     const userId = req.user!.id;
 
+    const organization = res.locals.organization;
+
     // When we end up here, the user is allowed to create a publiction for this organization
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
-    }
 
     const user = await this.usersService.findOneById(userId);
 
@@ -242,20 +223,15 @@ export class OrganizationsController extends BaseController {
   /**
    * Associates a existing user to an organization
    */
-  public createOneUser = async (req: Request, res: Response) => {
-    const { organizationId } = req.params;
+  public createOneUser = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    // const { organizationId } = req.params;
     const { email } = req.body;
+    const organization = res.locals.organization;
 
     const newUser = await this.usersService.findOneByEmail(email);
 
     if (!newUser) {
       throw new HttpError(HttpStatus.NotFound, 'A user with that email address does not exist.');
-    }
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
     if (!organization.users) {
@@ -286,14 +262,9 @@ export class OrganizationsController extends BaseController {
     return res.json(updatedOrganization);
   };
 
-  public deleteOneUser = async (req: Request, res: Response) => {
-    const { organizationId, userId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'The organization does not exist.');
-    }
+  public deleteOneUser = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { userId } = req.params;
+    const organization = res.locals.organization;
 
     if (!organization.users) {
       throw new HttpError(HttpStatus.NotFound, 'Users does not exist on organization.');
@@ -334,14 +305,8 @@ export class OrganizationsController extends BaseController {
    * Deletes a publication from the database.
    * IMPORTANT: Very destructive operation.
    */
-  public deleteOnePublication = async (req: Request, res: Response) => {
-    const { organizationId, publicationId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'The organization does not exist.');
-    }
+  public deleteOnePublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { publicationId } = req.params;
 
     const publication = await this.publicationService.findOneById(publicationId);
 
@@ -357,7 +322,7 @@ export class OrganizationsController extends BaseController {
     return res.status(200).send();
   };
 
-  public patchOneCustomer = async (req: Request, res: Response): Promise<Response> => {
+  public patchOneCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -408,7 +373,7 @@ export class OrganizationsController extends BaseController {
     return res.json(updatedCustomer);
   };
 
-  public getAllCustomerSubscriptions = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
@@ -420,7 +385,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscriptions);
   };
 
-  public getAllCustomerInvoices = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerInvoices = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
@@ -428,7 +393,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerInvoices.data);
   };
 
-  public getOneCustomerInvoiceUpcoming = async (req: Request, res: Response): Promise<Response> => {
+  public getOneCustomerInvoiceUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);
@@ -436,7 +401,7 @@ export class OrganizationsController extends BaseController {
     return res.json(upcomingCustomerInvoice);
   };
 
-  public getOneCustomerSubscription = async (req: Request, res: Response): Promise<Response> => {
+  public getOneCustomerSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
     const customerSubscription = await this.organizationService.findOneCustomerSubscription(stripeSubscriptionId);
@@ -444,7 +409,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscription);
   };
 
-  public getAllCustomerSubscriptionItems = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerSubscriptionItems = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
     const customerSubscriptionItems = await this.organizationService.findAllCustomerSubscriptionItems(stripeSubscriptionId);
@@ -452,22 +417,16 @@ export class OrganizationsController extends BaseController {
     return res.json(customerSubscriptionItems);
   };
 
-  public getAllCustomerPaymentMethods = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization not found.')
-    }
+  public getAllCustomerPaymentMethods = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
 
     const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organization.stripeCustomerId);
 
     return res.json(customerPaymentMethods);
   };
 
-  public patchOneCustomerPaymentMethod = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId, stripePaymentMethodId } = req.params;
+  public patchOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripePaymentMethodId } = req.params;
     const { billingDetailsName, cardExpireMonth, cardExpireYear } = req.body;
 
     const validationSchema = joi.object().keys({
@@ -494,11 +453,7 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization not found.')
-    }
+    const organization = res.locals.organization;
 
     // Find the current payment method to verify it's existence
     const currentPaymentMethod = await this.billingService.findOnePaymentMethod(stripePaymentMethodId);
@@ -519,7 +474,7 @@ export class OrganizationsController extends BaseController {
     return res.json(updatedPaymentMethod);
   };
 
-  public getAllCustomerUsageRecordsSummaries = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerUsageRecordsSummaries = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionItemId } = req.params;
 
     const customerUsageRecordsSummaries = await this.organizationService.findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
@@ -527,7 +482,7 @@ export class OrganizationsController extends BaseController {
     return res.json(customerUsageRecordsSummaries);
   };
 
-  public getAllCustomerUsageRecords = async (req: Request, res: Response): Promise<Response> => {
+  public getAllCustomerUsageRecords = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionItemId } = req.params;
 
     const customerUsageRecords = await this.usageRecordService.findAllBySubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
@@ -538,7 +493,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Delete (cancel) a subscription using the Stripe subscription ID.
    */
-  public deleteOneSubscription = async (req: Request, res: Response): Promise<Response> => {
+  public deleteOneSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
     const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
@@ -549,8 +504,7 @@ export class OrganizationsController extends BaseController {
   /**
    * Buys a new subscription plan on behalf of the organization.
    */
-  public buyNewSubscriptionPlan = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+  public buyNewSubscriptionPlan = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripePlanId, stripePaymentMethodId, customTrialEndDate } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
     if (!stripePlanId) {
@@ -561,11 +515,7 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, 'stripePaymentMethodId is required.');
     }
 
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+    const organization = res.locals.organization;
 
     // Verify if the customer exists in Stripe
     const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
@@ -607,19 +557,14 @@ export class OrganizationsController extends BaseController {
    * Changes the default payment method for a customer. 
    * Business rule: a customer can only use one payment method.
    */
-  public postOneCustomerPaymentMethod = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+  public postOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { newStripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
     if (!newStripePaymentMethodId) {
       throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
     }
 
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+    const organization = res.locals.organization;
 
     // Verify if the customer exists in Stripe
     const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
@@ -648,57 +593,34 @@ export class OrganizationsController extends BaseController {
     return res.json(attachPaymentMethodResponse);
   };
 
-  public getOneCustomerSetupIntent = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+  public getOneCustomerSetupIntent = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
     
     const setupIntent = await this.billingService.createOneCustomerSetupIntent(organization.stripeCustomerId);
 
     return res.json(setupIntent);
   }
 
-  public getAllCustomerTaxIds = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+  public getAllCustomerTaxIds = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
     
     const customerTaxIds = await this.billingService.findAllCustomerTaxIds(organization.stripeCustomerId);
 
     return res.json(customerTaxIds);
   }
 
-  public postOneCustomerTaxId = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId } = req.params;
+  public postOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeTaxIdType, stripeTaxIdValue } = req.body;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+    const organization = res.locals.organization;
     
     const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
 
     return res.json(customerTaxIds);
   }
 
-  public deleteOneCustomerTaxId = async (req: Request, res: Response): Promise<Response> => {
-    const { organizationId, stripeTaxId } = req.params;
-
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
-    }
+  public deleteOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripeTaxId } = req.params;
+    const organization = res.locals.organization;
     
     const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(organization.stripeCustomerId, stripeTaxId);
 
