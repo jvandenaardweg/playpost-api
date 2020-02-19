@@ -1,7 +1,6 @@
 .google-cloud-credentials.json
 .env
 dist
-generated-api-client
 
 # Logs
 logs

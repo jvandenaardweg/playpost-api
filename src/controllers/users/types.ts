@@ -1,4 +1,4 @@
-export interface CreateUserRequestBody {
+export interface PostUsersRequestBody {
   email: string;
   password: string;
   organization?: {

@@ -302,6 +302,14 @@ export const setupServer = async () => {
     components: {},
     tags: [
       {
+        name: 'auth',
+        description: '(public) Endpoint for logging in and requesting new passwords.'
+      },
+      {
+        name: 'users',
+        description: '(public) Endpoint for the currently logged in user.'
+      },
+      {
         name: 'billing',
         description: 'Billing related endpoints. Mostly Stripe.'
       },
@@ -317,10 +325,6 @@ export const setupServer = async () => {
         name: 'user',
         description: 'Endpoint for the currently logged in user.'
       },
-      {
-        name: 'auth',
-        description: 'Endpoint for logging in and requesting new passwords.'
-      }
     ]
   };
   
@@ -407,7 +411,7 @@ export const setupServer = async () => {
   app.post('/v1/auth/reset-password', authController.postAuthResetPasswordMobile); // Used only for the mobile app
   app.post('/v1/auth/update-password', authController.postAuthUpdatePasswordMobile); // Used only for the mobile app
 
-  app.post('/v1/users', usersController.create); // To create user accounts
+  app.post('/v1/users', usersController.postUsers); // To create user accounts
 
   // So we can show the correct available countries in a dropdown in public forms
   app.get('/v1/countries', countriesController.getAllCountries);

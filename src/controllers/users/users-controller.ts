@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { HttpError, HttpStatus } from '../../http-error';
 import { UserService } from '../../services/user-service';
 import { BaseController } from '../index';
-import { CreateUserRequestBody } from './types';
+import { PostUsersRequestBody } from './types';
 
 export class UsersController extends BaseController {
   usersService: UserService;
@@ -14,8 +14,32 @@ export class UsersController extends BaseController {
     this.usersService = new UserService();
   }
 
-  create = async (req: Request, res: Response) => {
-    const { email, password, organization } = req.body as CreateUserRequestBody;
+  /**
+   * @swagger
+   *
+   *  /users:
+   *    post:
+   *      operationId: postUsers
+   *      tags:
+   *        - users
+   *      summary: Create a User
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostUsersRequestBody'
+   *      responses:
+   *        '400':
+   *          $ref: '#/components/responses/BadRequestError'
+   *        '401':
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        '404':
+   *          $ref: '#/components/responses/NotFoundError'
+   *        '200':
+   *          $ref: '#/components/responses/PostUsersResponse'
+   */
+  postUsers = async (req: Request, res: Response) => {
+    const { email, password, organization } = req.body as PostUsersRequestBody;
 
     const validationSchema = joi.object().keys({
       email: joi.string().email({ minDomainSegments: 2 }),

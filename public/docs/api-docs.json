@@ -164,6 +164,30 @@
           }
         }
       },
+      "PostUsersRequestBody": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app",
+            "description": "Email address of the user's Playpost account"
+          },
+          "password": {
+            "type": "string",
+            "example": "newpassword!",
+            "description": "Password of the user's Playpost account"
+          },
+          "orgnaization": {
+            "type": "string",
+            "example": "Playpost",
+            "description": "Optional property to also create an Organization"
+          }
+        }
+      },
       "Collection": {
         "type": "object",
         "properties": {
@@ -1089,6 +1113,17 @@
           }
         }
       },
+      "PostUsersResponse": {
+        "description": "A post Users response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
       "CountriesResponse": {
         "description": "A Countries collection response",
         "content": {
@@ -1214,6 +1249,14 @@
   },
   "tags": [
     {
+      "name": "auth",
+      "description": "(public) Endpoint for logging in and requesting new passwords."
+    },
+    {
+      "name": "users",
+      "description": "(public) Endpoint for the currently logged in user."
+    },
+    {
       "name": "billing",
       "description": "Billing related endpoints. Mostly Stripe."
     },
@@ -1228,10 +1271,6 @@
     {
       "name": "user",
       "description": "Endpoint for the currently logged in user."
-    },
-    {
-      "name": "auth",
-      "description": "Endpoint for logging in and requesting new passwords."
     }
   ],
   "paths": {
@@ -1957,6 +1996,38 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/UserResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "postUsers",
+        "tags": [
+          "users"
+        ],
+        "summary": "Create a User",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostUsersRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PostUsersResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

@@ -1,0 +1,21 @@
+components:
+  schemas:
+    
+    PostUsersRequestBody:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: api@playpost.app
+          description: Email address of the user's Playpost account
+        password:
+          type: string
+          example: newpassword!
+          description: Password of the user's Playpost account
+        orgnaization:
+          type: string
+          example: Playpost
+          description: Optional property to also create an Organization
