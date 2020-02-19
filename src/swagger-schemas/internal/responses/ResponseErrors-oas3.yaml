@@ -1,0 +1,46 @@
+components:
+  responses:
+
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 401
+              message: 
+                type: string
+
+    NotFoundError:
+      description: A not found request
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 404
+              message: 
+                type: string
+                
+    BadRequestError:
+      description: A bad request
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 400
+                description: The HTTP Status code
+              message: 
+                type: string
+                description: A string message summarizing the error
+              details: 
+                type: object
+                description: An additional optional object containing more information about the error

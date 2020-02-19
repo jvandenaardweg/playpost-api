@@ -966,8 +966,28 @@
           }
         }
       },
-      "BadRequestError": {
-        "description": "A bad request",
+      "LanguagesResponse": {
+        "description": "A Language collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LanguagesCollection"
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "description": "A normal message response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Message"
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid",
         "content": {
           "application/json": {
             "schema": {
@@ -975,16 +995,10 @@
               "properties": {
                 "status": {
                   "type": "number",
-                  "example": 400,
-                  "description": "The HTTP Status code"
+                  "example": 401
                 },
                 "message": {
-                  "type": "string",
-                  "description": "A string message summarizing the error"
-                },
-                "details": {
-                  "type": "object",
-                  "description": "An additional optional object containing more information about the error"
+                  "type": "string"
                 }
               }
             }
@@ -1010,8 +1024,8 @@
           }
         }
       },
-      "UnauthorizedError": {
-        "description": "Access token is missing or invalid",
+      "BadRequestError": {
+        "description": "A bad request",
         "content": {
           "application/json": {
             "schema": {
@@ -1019,32 +1033,18 @@
               "properties": {
                 "status": {
                   "type": "number",
-                  "example": 401
+                  "example": 400,
+                  "description": "The HTTP Status code"
                 },
                 "message": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "A string message summarizing the error"
+                },
+                "details": {
+                  "type": "object",
+                  "description": "An additional optional object containing more information about the error"
                 }
               }
-            }
-          }
-        }
-      },
-      "LanguagesResponse": {
-        "description": "A Language collection response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/LanguagesCollection"
-            }
-          }
-        }
-      },
-      "MessageResponse": {
-        "description": "A normal message response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Message"
             }
           }
         }
