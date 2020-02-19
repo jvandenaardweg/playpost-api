@@ -288,17 +288,9 @@ export class BillingController extends BaseController {
    *          ApiSecretAuth: []
    *      requestBody:
    *        content:
-   *          'application/json':
+   *          application/json:
    *            schema:
-   *              type: object
-   *              properties:
-   *                countryCode:
-   *                  type: string
-   *                taxNumber:
-   *                  type: string
-   *              example:
-   *                countryCode: NL
-   *                taxNumber: NL001275562B65
+   *              $ref: '#/components/schemas/PostOneBillingTaxNumberValidationRequestBody'
    *      responses:
    *        400:
    *          $ref: '#/components/responses/BadRequestError'
@@ -308,13 +300,7 @@ export class BillingController extends BaseController {
    *          $ref: '#/components/responses/NotFoundError'
    *        200:
    *          description: The result when tax number is valid
-   *          content:
-   *            'application/json':
-   *              schema:
-   *                type: object
-   *                properties:
-   *                  message: 
-   *                    type: string
+   *          $ref: '#/components/responses/MessageResponse'
    */
   public postOneBillingTaxNumberValidation = async (req: Request, res: Response): Promise<Response> => {
     const { countryCode, taxNumber } = req.body;

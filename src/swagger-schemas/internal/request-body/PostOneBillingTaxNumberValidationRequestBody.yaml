@@ -1,0 +1,11 @@
+components:
+  schemas:
+    PostOneBillingTaxNumberValidationRequestBody:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: NL
+        taxNumber:
+          type: string
+          example: NL001275562B65

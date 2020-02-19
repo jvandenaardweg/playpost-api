@@ -5,18 +5,4 @@ components:
       content:
         'application/json':
           schema:
-            type: object
-            properties:
-              status:
-                type: number
-                example: 10
-              page:
-                type: number
-                example: 1
-              totalPages:
-                type: number
-                example: 30
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Country'
+            $ref: '#/components/schemas/CountriesCollection'

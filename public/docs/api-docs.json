@@ -42,6 +42,67 @@
   ],
   "components": {
     "schemas": {
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "example": 10
+          },
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 30
+          }
+        }
+      },
+      "CountriesCollection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Collection"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "LanguagesCollection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Collection"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Language"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "PatchOneUserRequestBody": {
         "type": "object",
         "properties": {
@@ -56,6 +117,19 @@
           "newPassword": {
             "type": "string",
             "example": "supernewpassword!"
+          }
+        }
+      },
+      "PostOneBillingTaxNumberValidationRequestBody": {
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "example": "NL"
+          },
+          "taxNumber": {
+            "type": "string",
+            "example": "NL001275562B65"
           }
         }
       },
@@ -887,27 +961,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 10
-                },
-                "page": {
-                  "type": "number",
-                  "example": 1
-                },
-                "totalPages": {
-                  "type": "number",
-                  "example": 30
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Country"
-                  }
-                }
-              }
+              "$ref": "#/components/schemas/CountriesCollection"
             }
           }
         }
@@ -976,31 +1030,11 @@
         }
       },
       "LanguagesResponse": {
-        "description": "A Languages collection response",
+        "description": "A Language collection response",
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 10
-                },
-                "page": {
-                  "type": "number",
-                  "example": 1
-                },
-                "totalPages": {
-                  "type": "number",
-                  "example": 30
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Language"
-                  }
-                }
-              }
+              "$ref": "#/components/schemas/LanguagesCollection"
             }
           }
         }
@@ -1010,12 +1044,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/components/schemas/Message"
             }
           }
         }
@@ -1400,19 +1429,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "countryCode": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  }
-                },
-                "example": {
-                  "countryCode": "NL",
-                  "taxNumber": "NL001275562B65"
-                }
+                "$ref": "#/components/schemas/PostOneBillingTaxNumberValidationRequestBody"
               }
             }
           }
@@ -1420,18 +1437,7 @@
         "responses": {
           "200": {
             "description": "The result when tax number is valid",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/MessageResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

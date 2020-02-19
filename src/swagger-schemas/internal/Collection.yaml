@@ -1,0 +1,14 @@
+components:
+  schemas:
+    Collection:
+      type: object
+      properties:
+        status:
+          type: number
+          example: 10
+        page:
+          type: number
+          example: 1
+        totalPages:
+          type: number
+          example: 30
