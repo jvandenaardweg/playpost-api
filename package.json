@@ -1,6 +1,6 @@
 {
   "name": "@jvandenaardweg/playpost-api",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "",
   "main": "dist/index.js",
   "engines": {
