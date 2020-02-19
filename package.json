@@ -31,7 +31,6 @@
     "copy:package": "cp package.json dist/",
     "caches:empty": "ts-node-dev src/empty-cache.ts",
     "worker": "forever -m 5 dist/worker.js",
-    "build:client": "openapi-generator generate -i ./public/docs/api-docs.json -g typescript-axios -o ./client",
     "jest": "NODE_ENV=test jest --silent --maxWorkers=4",
     "test:watch": "NODE_ENV=test jest --watch --coverage",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
@@ -46,7 +45,7 @@
     "tsc:watch": "tsc -p ./ --noEmit -w",
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
-    "preversion": "npm test && npm run build:client && git add .",
+    "preversion": "npm test && git add --all",
     "version": "auto-changelog -p && git add CHANGELOG.md",
     "postversion": "git push --no-verify && git push --tags --no-verify",
     "loadtest": "ts-node-dev loadtests.ts"
@@ -135,7 +134,6 @@
     "uuid": "^3.4.0"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^1.0.10-4.2.3",
     "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.7.0",
     "@types/cors": "^2.8.6",
