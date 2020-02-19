@@ -12,10 +12,8 @@ import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-import { writeFileSync } from 'fs';
 import expressBasicAuth from 'express-basic-auth';
 
 import * as articlesController from './controllers/articles';
@@ -257,99 +255,6 @@ export const setupServer = async () => {
   passport.use('jwt', jwtPassportStrategy);
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
 
-  const swaggerDefinition = {
-    info: {
-      title: 'Playpost API',
-      description: 'This is the documentation of the Playpost API',
-      version,
-      termsOfService: 'https://playpost.app/terms',
-      contact: {
-        name: 'API Support',
-        url: 'https://playpost.app/support',
-        email: 'support@playpost.app'
-      },
-    },
-    openapi: '3.0.0',
-    servers: [
-      {
-        url: 'http://localhost:3000/{basePath}',
-        description: 'Development server',
-        variables: {
-          basePath: {
-            default: 'v1',
-          },
-        }
-      },
-      {
-        url: 'https://api.playpost.app/{basePath}',
-        description: 'Production server',
-        variables: {
-          basePath: {
-            default: 'v1',
-          },
-        }
-      },
-      {
-        url: 'https://playpost-api-test.herokuapp.com/{basePath}',
-        description: 'Test server',
-        variables: {
-          basePath: {
-            default: 'v1',
-          },
-        }
-      }
-    ],
-    components: {},
-    tags: [
-      {
-        name: 'auth',
-        description: '(public) Endpoint for logging in and requesting new passwords.'
-      },
-      {
-        name: 'users',
-        description: '(public) Endpoint for the currently logged in user.'
-      },
-      {
-        name: 'billing',
-        description: 'Billing related endpoints. Mostly Stripe.'
-      },
-      {
-        name: 'countries',
-        description: 'Countries related endpoints.'
-      },
-      {
-        name: 'languages',
-        description: 'Languages related endpoints.'
-      },
-      {
-        name: 'user',
-        description: 'Endpoint for the currently logged in user.'
-      },
-    ]
-  };
-  
-  // Options for the swagger docs
-  const options = {
-    swaggerDefinition,
-    // Path to the API docs
-    // Note that this path is relative to the current directory from which the Node.js is ran, not the application itself.
-    apis: [
-      './src/controllers/**/*.ts', 
-      './src/controllers/**/*.yaml',
-      './src/swagger-schemas/internal/**/*.yaml',
-      './src/database/entities/**/*.yaml',
-      // './src/swagger-schemas/external/stripe-only-schemas.yaml'
-    ],
-  };
-  
-  // Initialize swagger-jsdoc -> returns validated swagger spec in json format
-  const swaggerSpec = swaggerJSDoc(options);
-
-  // Write the Swagger spec to a JSON file
-  // So the json file always reflects the last API version, so we can easily track changes in git
-  const swaggerDocFilePath = path.join(__dirname, '../public/docs/') + 'api-docs.json';
-  writeFileSync(swaggerDocFilePath, JSON.stringify(swaggerSpec, null, 2))
-
   // Temporary measure to make sure users update
   app.all('*', cors(corsOptions), (req, res, next) => {
     const appVersionHeader = req.headers['app-version'] as string;
@@ -380,7 +285,7 @@ export const setupServer = async () => {
       challenge: true
     }), 
     swaggerUi.serve, 
-    swaggerUi.setup(require(swaggerDocFilePath))
+    swaggerUi.setup(require(path.join(__dirname, '../public/docs/') + 'api-docs.json'))
   );
 
   // Load controllers
