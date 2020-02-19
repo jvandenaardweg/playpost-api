@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.5.2",
+    "version": "2.6.0",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -44,67 +44,97 @@
     "schemas": {
       "PostAuthRequestBody": {
         "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
         "properties": {
           "email": {
             "type": "string",
-            "example": "api@playpost.app"
+            "example": "api@playpost.app",
+            "description": "Email address of the user's Playpost account"
           },
           "password": {
             "type": "string",
-            "example": "currentpassword!"
+            "example": "currentpassword!",
+            "description": "Password of the user's Playpost account"
           }
         }
       },
       "PostAuthResetPasswordMobileRequestBody": {
         "type": "object",
+        "required": [
+          "email"
+        ],
         "properties": {
           "email": {
             "type": "string",
-            "example": "api@playpost.app"
+            "example": "api@playpost.app",
+            "description": "Email address of the user's Playpost account"
           }
         }
       },
       "PostAuthUpdatePasswordMobileRequestBody": {
         "type": "object",
+        "required": [
+          "password",
+          "resetPasswordToken"
+        ],
         "properties": {
           "password": {
             "type": "string",
-            "example": "supersecretpassword"
+            "example": "supersecretpassword",
+            "description": "Password of the user's Playpost account"
           },
           "resetPasswordToken": {
             "type": "string",
-            "example": "123ABC"
+            "example": "123ABC",
+            "description": "A token to allow resetting ther user's password"
           }
         }
       },
       "PatchAuthActivateRequestBody": {
         "type": "object",
+        "required": [
+          "activationToken"
+        ],
         "properties": {
           "activationToken": {
             "type": "string",
-            "example": "6aecff0416068f8ca6f7089037783b7b"
+            "example": "6aecff0416068f8ca6f7089037783b7b",
+            "description": "A token to verify and activate a user account"
           }
         }
       },
       "PostAuthResetPasswordRequestBody": {
         "type": "object",
+        "required": [
+          "email"
+        ],
         "properties": {
           "email": {
             "type": "string",
-            "example": "api@playpost.app"
+            "example": "api@playpost.app",
+            "description": "Email address of the user's Playpost account"
           }
         }
       },
       "PatchAuthResetPasswordRequestBody": {
         "type": "object",
+        "required": [
+          "password",
+          "resetPasswordToken"
+        ],
         "properties": {
           "password": {
             "type": "string",
-            "example": "supersecretpassword"
+            "example": "supersecretpassword",
+            "description": "Password of the user's Playpost account"
           },
           "resetPasswordToken": {
             "type": "string",
-            "example": "123ABC"
+            "example": "123ABC",
+            "description": "A token to allow resetting ther user's password"
           }
         }
       },
@@ -1237,18 +1267,20 @@
         }
       }
     },
-    "/auth/reset/password": {
+    "/auth/reset-password": {
       "post": {
-        "operationId": "postAuthResetPassword",
+        "deprecated": true,
+        "operationId": "postAuthResetPasswordMobile",
         "tags": [
           "auth"
         ],
-        "description": "Request a resetPasswordToken to allow resetting a password.",
+        "summary": "Request a reset password token (mobile app only)",
+        "description": "Creates a reset password token to allow an unauthorized user to reset his account's password. The generated token is send to the user his e-mail address and stored in the database. The user can use that token, in combinatation with the /auth/update-password endpoint to reset his password.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostAuthResetPasswordRequestBody"
+                "$ref": "#/components/schemas/PostAuthResetPasswordMobileRequestBody"
               }
             }
           }
@@ -1267,18 +1299,22 @@
             "$ref": "#/components/responses/NotFoundError"
           }
         }
-      },
-      "patch": {
-        "operationId": "patchAuthResetPassword",
+      }
+    },
+    "/auth/update-password": {
+      "post": {
+        "deprecated": true,
+        "operationId": "postAuthUpdatePasswordMobile",
         "tags": [
           "auth"
         ],
-        "description": "Change a password of a user using a resetPasswordToken",
+        "summary": "Update a password using a reset password token (mobile app only)",
+        "description": "Updates the user's password using a reset token. This token can be requested if the user has lost his password.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PatchAuthResetPasswordRequestBody"
+                "$ref": "#/components/schemas/PostAuthUpdatePasswordMobileRequestBody"
               }
             }
           }
@@ -1311,6 +1347,70 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PatchAuthActivateRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/auth/reset/password": {
+      "post": {
+        "operationId": "postAuthResetPassword",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request a reset password token to allow resetting a password.",
+        "description": "Request a resetPasswordToken to allow resetting a password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAuthResetPasswordRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchAuthResetPassword",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change a password using a reset password token",
+        "description": "Change a password of a user using a resetPasswordToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAuthResetPasswordRequestBody"
               }
             }
           }

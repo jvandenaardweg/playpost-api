@@ -132,12 +132,13 @@ export class AuthController extends BaseController {
   /**
    * @swagger
    *
-   *  /auth/reset/password:
+   *  /auth/reset-password:
    *    post:
+   *      deprecated: true
    *      operationId: postAuthResetPasswordMobile
    *      tags:
    *        - auth
-   *      summary: mobile app only
+   *      summary: Request a reset password token (mobile app only)
    *      description:
    *        Creates a reset password token to allow an unauthorized user to reset his account's password.
    *        The generated token is send to the user his e-mail address and stored in the database.
@@ -245,12 +246,13 @@ export class AuthController extends BaseController {
   /**
    * @swagger
    *
-   *  /auth/reset/password:
+   *  /auth/update-password:
    *    post:
+   *      deprecated: true
    *      operationId: postAuthUpdatePasswordMobile
    *      tags:
    *        - auth
-   *      summary: mobile app only
+   *      summary: Update a password using a reset password token (mobile app only)
    *      description:
    *        Updates the user's password using a reset token.
    *        This token can be requested if the user has lost his password.
@@ -356,6 +358,7 @@ export class AuthController extends BaseController {
    *      operationId: postAuthResetPassword
    *      tags:
    *        - auth
+   *      summary: Request a reset password token to allow resetting a password.
    *      description: 
    *        Request a resetPasswordToken to allow resetting a password.
    *      requestBody:
@@ -410,6 +413,7 @@ export class AuthController extends BaseController {
    *      operationId: patchAuthResetPassword
    *      tags:
    *        - auth
+   *      summary: Change a password using a reset password token
    *      description: 
    *        Change a password of a user using a resetPasswordToken
    *      requestBody:

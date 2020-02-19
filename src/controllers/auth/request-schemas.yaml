@@ -1,52 +1,77 @@
 components:
   schemas:
+    
     PostAuthRequestBody:
       type: object
+      required:
+        - email
+        - password
       properties:
         email:
           type: string
           example: api@playpost.app
+          description: Email address of the user's Playpost account
         password:
           type: string
           example: currentpassword!
+          description: Password of the user's Playpost account
 
     PostAuthResetPasswordMobileRequestBody:
       type: object
+      required:
+        - email
       properties:
         email:
           type: string
           example: api@playpost.app
+          description: Email address of the user's Playpost account
 
     PostAuthUpdatePasswordMobileRequestBody:
       type: object
+      required:
+        - password
+        - resetPasswordToken
       properties:
         password:
           type: string
           example: supersecretpassword
+          description: Password of the user's Playpost account
         resetPasswordToken:
           type: string
           example: 123ABC
+          description: A token to allow resetting ther user's password
 
     PatchAuthActivateRequestBody:
       type: object
+      required:
+        - activationToken
       properties:
         activationToken:
           type: string
           example: 6aecff0416068f8ca6f7089037783b7b
+          description: A token to verify and activate a user account
 
     PostAuthResetPasswordRequestBody:
       type: object
+      required:
+        - email
       properties:
         email:
           type: string
           example: api@playpost.app
+          description: Email address of the user's Playpost account
 
     PatchAuthResetPasswordRequestBody:
       type: object
+      required:
+        - password
+        - resetPasswordToken
       properties:
         password:
           type: string
           example: supersecretpassword
+          description: Password of the user's Playpost account
         resetPasswordToken:
           type: string
           example: 123ABC
+          description: A token to allow resetting ther user's password
