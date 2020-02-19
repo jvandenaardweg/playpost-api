@@ -1,6 +1,6 @@
 {
   "name": "@jvandenaardweg/playpost-api-client",
-  "version": "2.10.1",
+  "version": "2.10.2",
   "description": "This package is automatically generated on every new version of the playpost-api",
   "main": "generated/index.ts",
   "engines": {
