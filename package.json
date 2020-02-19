@@ -1,14 +1,14 @@
 {
   "name": "playpost-api",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "",
   "main": "dist/index.js",
   "engines": {
     "node": "^10.15.0",
     "npm": "^6.8.0"
   },
-  "publishConfig": { 
-    "registry": "https://npm.pkg.github.com/" 
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
     "start": "npm run start:server && npm run start:worker",
