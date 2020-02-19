@@ -29,7 +29,7 @@
     "plugins": [
       { "name": "typescript-tslint-plugin" }
     ],
-    "types": ["node"],
+    "types": ["node", "jest"],
     "paths": {
       "*": ["src/typings/*"]
     }
