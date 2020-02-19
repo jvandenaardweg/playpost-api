@@ -312,6 +312,10 @@ export const setupServer = async () => {
       {
         name: 'languages',
         description: 'Languages related endpoints.'
+      },
+      {
+        name: 'user',
+        description: 'Endpoint for the currently logged in user.'
       }
     ]
   };
@@ -444,12 +448,12 @@ export const setupServer = async () => {
   app.get('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.findAll);
+  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.getAll);
   app.post('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.createVoicePreview);
   app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteVoicePreview);
 
   // v1/languages
-  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.findAll);
+  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.getAll);
 
   // v1/subscriptions
   app.get('/v1/in-app-subscriptions', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
@@ -535,8 +539,8 @@ export const setupServer = async () => {
   app.delete('/v1/organizations/:organizationId/users/:userId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOneUser);
 
   // User
-  app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getUser);
-  app.patch('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.updateUser);
+  app.get('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.getOneUser);
+  app.patch('/v1/user', [IS_PROTECTED_JWT, userController.restrictResourceToOwner], userController.patchOneUser);
 
   // Catch all
   // Should be the last route

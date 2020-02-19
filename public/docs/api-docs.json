@@ -41,141 +41,24 @@
     }
   ],
   "components": {
-    "responses": {
-      "CountriesResponse": {
-        "description": "A Countries collection response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 10
-                },
-                "page": {
-                  "type": "number",
-                  "example": 1
-                },
-                "totalPages": {
-                  "type": "number",
-                  "example": 30
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Country"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "BadRequestError": {
-        "description": "A bad request",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 400
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "NotFoundError": {
-        "description": "A not found request",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 404
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "UnauthorizedError": {
-        "description": "Access token is missing or invalid",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 401
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "LanguagesResponse": {
-        "description": "A Languages collection response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number",
-                  "example": 10
-                },
-                "page": {
-                  "type": "number",
-                  "example": 1
-                },
-                "totalPages": {
-                  "type": "number",
-                  "example": 30
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Language"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "MessageResponse": {
-        "description": "A normal message response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "schemas": {
+      "PatchOneUserRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app"
+          },
+          "currentPassword": {
+            "type": "string",
+            "example": "currentpassword!"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "supernewpassword!"
+          }
+        }
+      },
       "SalesTax": {
         "type": "object",
         "properties": {
@@ -574,7 +457,7 @@
             "nullable": true,
             "description": "An array of articles.",
             "items": {
-              "$ref": "#/components/schemas/Articles"
+              "$ref": "#/components/schemas/Article"
             }
           },
           "countries": {
@@ -592,8 +475,7 @@
         "required": [
           "id",
           "name",
-          "createdAt",
-          "updatedAt"
+          "stripeCustomerId"
         ],
         "properties": {
           "id": {
@@ -604,6 +486,11 @@
           "name": {
             "type": "string",
             "example": "Playpost"
+          },
+          "stripeCustomerId": {
+            "type": "string",
+            "example": "cus_GLBNvU7Y4CEL02",
+            "description": "The Stripe Customer ID"
           },
           "createdAt": {
             "type": "string",
@@ -814,7 +701,6 @@
         "required": [
           "id",
           "email",
-          "password",
           "authenticatedAt",
           "createdAt",
           "updatedAt"
@@ -995,6 +881,157 @@
         }
       }
     },
+    "responses": {
+      "CountriesResponse": {
+        "description": "A Countries collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page": {
+                  "type": "number",
+                  "example": 1
+                },
+                "totalPages": {
+                  "type": "number",
+                  "example": 30
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Country"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequestError": {
+        "description": "A bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 400,
+                  "description": "The HTTP Status code"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "A string message summarizing the error"
+                },
+                "details": {
+                  "type": "object",
+                  "description": "An additional optional object containing more information about the error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "A not found request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 404
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 401
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LanguagesResponse": {
+        "description": "A Languages collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page": {
+                  "type": "number",
+                  "example": 1
+                },
+                "totalPages": {
+                  "type": "number",
+                  "example": 30
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "description": "A normal message response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserResponse": {
+        "description": "A User response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
@@ -1025,6 +1062,10 @@
     {
       "name": "languages",
       "description": "Languages related endpoints."
+    },
+    {
+      "name": "user",
+      "description": "Endpoint for the currently logged in user."
     }
   ],
   "paths": {
@@ -1457,7 +1498,7 @@
     },
     "/countries": {
       "get": {
-        "operationId": "getAll",
+        "operationId": "getAllCountries",
         "tags": [
           "countries"
         ],
@@ -1489,7 +1530,7 @@
     },
     "/languages": {
       "get": {
-        "operationId": "findAll",
+        "operationId": "getAllLanguages",
         "tags": [
           "languages"
         ],
@@ -1506,6 +1547,77 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/LanguagesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "getOneUser",
+        "tags": [
+          "user"
+        ],
+        "summary": "Get the currently logged in user",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchOneUser",
+        "tags": [
+          "user"
+        ],
+        "summary": "Patch the currently logged in user",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOneUserRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

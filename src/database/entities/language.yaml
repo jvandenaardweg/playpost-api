@@ -50,7 +50,7 @@ components:
           nullable: true
           description: An array of articles.
           items:
-            $ref: '#/components/schemas/Articles'
+            $ref: '#/components/schemas/Article'
 
         countries:
           type: array

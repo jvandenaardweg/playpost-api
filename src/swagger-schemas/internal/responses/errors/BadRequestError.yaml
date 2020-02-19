@@ -10,5 +10,10 @@ components:
               status:
                 type: number
                 example: 400
+                description: The HTTP Status code
               message: 
                 type: string
+                description: A string message summarizing the error
+              details: 
+                type: object
+                description: An additional optional object containing more information about the error

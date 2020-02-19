@@ -1,0 +1,14 @@
+components:
+  schemas:
+    PatchOneUserRequestBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: api@playpost.app
+        currentPassword:
+          type: string
+          example: currentpassword!
+        newPassword:
+          type: string
+          example: supernewpassword!

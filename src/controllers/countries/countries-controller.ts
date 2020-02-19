@@ -15,7 +15,7 @@ export class CountriesController extends BaseController {
    *
    *  /countries:
    *    get:
-   *      operationId: getAll
+   *      operationId: getAllCountries
    *      tags:
    *        - countries
    *      summary: Get all countries

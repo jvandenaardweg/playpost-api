@@ -1,11 +1,11 @@
 
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 import joi from '@hapi/joi';
 
 import { HttpError, HttpStatus } from '../../http-error';
 import { UserService } from '../../services/user-service';
 import { BaseController } from '../index';
-import { UpdateUserRequesBody } from './types';
+import { PatchOneUserRequestBody, UserResponse } from './types';
 import { User } from '../../database/entities/user';
 import { getConnection } from 'typeorm';
 import * as cacheKeys from '../../cache/keys';
@@ -19,7 +19,7 @@ export class UserController extends BaseController {
     this.usersService = new UserService()
   }
 
-  restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
+  restrictResourceToOwner = async (req: Request, res: UserResponse, next: NextFunction) => {
     const authenticatedUserId = req.user!.id;
 
     const user = await this.usersService.findOneById(authenticatedUserId);
@@ -32,19 +32,70 @@ export class UserController extends BaseController {
       throw new HttpError(HttpStatus.Forbidden, 'You have no access to view this user.');
     }
 
+    // Pass the user to the controller using locals
+    // So we do not have to do additional database request to get the user inside the controller method
+    res.locals.user = user;
+
     return next()
   }
 
-  getUser = async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-
-    const user = await this.usersService.findOneById(userId);
-
-    return res.json(user)
+  /**
+   * @swagger
+   *
+   *  /user:
+   *    get:
+   *      operationId: getOneUser
+   *      tags:
+   *        - user
+   *      summary: Get the currently logged in user
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      responses:
+   *        '400':
+   *          $ref: '#/components/responses/BadRequestError'
+   *        '401':
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        '404':
+   *          $ref: '#/components/responses/NotFoundError'
+   *        '200':
+   *          $ref: '#/components/responses/UserResponse'
+   */
+  getOneUser = async (req: Request, res: UserResponse) => {
+    return res.json(res.locals.user)
   }
 
-  updateUser = async (req: Request, res: Response) => {
-    const { email, currentPassword, newPassword } = req.body as UpdateUserRequesBody;
+  /**
+   * @swagger
+   *
+   *  /user:
+   *    patch:
+   *      operationId: patchOneUser
+   *      tags:
+   *        - user
+   *      summary: Patch the currently logged in user
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PatchOneUserRequestBody'
+   *      responses:
+   *        '400':
+   *          $ref: '#/components/responses/BadRequestError'
+   *        '401':
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        '404':
+   *          $ref: '#/components/responses/NotFoundError'
+   *        '200':
+   *          $ref: '#/components/responses/UserResponse'
+   */
+  patchOneUser = async (req: Request, res: UserResponse) => {
+    const { email, currentPassword, newPassword } = req.body as PatchOneUserRequestBody;
     const userId = req.user!.id;
 
     const validationSchema = joi.object().keys({

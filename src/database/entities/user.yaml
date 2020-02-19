@@ -6,7 +6,6 @@ components:
       required:
         - id
         - email
-        - password
         - authenticatedAt
         - createdAt
         - updatedAt

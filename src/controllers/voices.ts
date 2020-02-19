@@ -9,7 +9,7 @@ import * as storage from '../storage/google-cloud';
 import { CACHE_ONE_DAY } from '../constants/cache';
 import { VoiceRepository } from '../database/repositories/voice';
 
-export const findAll = async (req: Request, res: Response) => {
+export const getAll = async (req: Request, res: Response) => {
   const voiceRepository = getRepository(Voice);
   const { isActive }: {isActive: string } = req.query;
 

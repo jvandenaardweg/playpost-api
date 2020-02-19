@@ -5,8 +5,7 @@ components:
       required:
         - id
         - name
-        - createdAt
-        - updatedAt
+        - stripeCustomerId
       properties:
         id: 
           type: string
@@ -15,6 +14,10 @@ components:
         name: 
           type: string
           example: Playpost
+        stripeCustomerId: 
+          type: string
+          example: cus_GLBNvU7Y4CEL02
+          description: The Stripe Customer ID
         createdAt:
           type: string
           example: 2020-02-14 03:30:10
