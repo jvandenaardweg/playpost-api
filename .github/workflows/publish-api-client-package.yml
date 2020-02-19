@@ -16,7 +16,7 @@ jobs:
       - run: npm ci
       - run: npm run build:client
 
-  publish-gpr:
+  publish-api-client:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-          scope: '@jvandenaardweg'
+          scope: '@jvandenaardweg/playpost-api-client'
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_ACCESS_TOKEN}}
