@@ -1,6 +1,6 @@
 
 import joi from '@hapi/joi';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 
 import { Article, ArticleStatus } from '../../database/entities/article';
 import { HttpError, HttpStatus } from '../../http-error';

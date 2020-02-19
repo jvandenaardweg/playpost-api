@@ -34,7 +34,7 @@ export class UserService extends BaseService {
    * Finds a user by user ID and returns the password hash. Useful before updating a user his password.
    */
   findOneByIdWithPassword = async (userId: string): Promise<User | undefined> => {
-    return this.userRepository.findOne(userId, { select: ['id', 'emai', 'password']});
+    return this.userRepository.findOne(userId, { select: ['id', 'email', 'password']});
   }
 
   findOneByEmailWithPassword = async (email: string): Promise<User | undefined> => {
