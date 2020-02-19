@@ -129,6 +129,36 @@
           }
         }
       },
+      "LanguagesResponse": {
+        "description": "A Languages collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page": {
+                  "type": "number",
+                  "example": 1
+                },
+                "totalPages": {
+                  "type": "number",
+                  "example": 30
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "MessageResponse": {
         "description": "A normal message response",
         "content": {
@@ -180,6 +210,67 @@
                 "type": "boolean"
               }
             }
+          }
+        }
+      },
+      "ApiKey": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4bee0e78-22e1-413d-9a65-8f7f95d9d0ca",
+            "readOnly": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "example": "Playpost App",
+            "description": "A label to remember why this API Key is created"
+          },
+          "key": {
+            "type": "string",
+            "nullable": false,
+            "example": "4696da851b302feed285a0e0906de7d4e353e8d6e3de014c2d49580e6329c280",
+            "description": "The API Key that is used in every request to our API"
+          },
+          "signature": {
+            "type": "string",
+            "nullable": false,
+            "example": "a546c38cbf26832b5db9aa74c39d8612a58f3817601d1e211d9ab637a4e667a4",
+            "description": "A hash generated with the API Key and API Secret.  Both API Key and API Secret is needed to compare the signature."
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "nullable": true,
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "lastUsedIpAddress": {
+            "type": "string",
+            "nullable": true,
+            "example": "127.0.0.1"
+          },
+          "allowedDomain": {
+            "type": "string",
+            "nullable": true,
+            "example": "playpost.app",
+            "description": "Restrict API access to only this given domain"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2020-02-14T03:30:10.000Z"
+          },
+          "user": {
+            "type": "object",
+            "description": "The user that belongs to this API Key",
+            "nullable": false,
+            "$ref": "#/components/schemas/User"
           }
         }
       },
@@ -282,22 +373,22 @@
           },
           "user": {
             "type": "object",
-            "readOnly": true,
+            "description": "The user that belongs to this article",
             "nullable": true,
             "$ref": "#/components/schemas/User"
           },
           "language": {
             "type": "object",
-            "readOnly": true,
+            "description": "The language that belongs to this article",
             "nullable": true,
             "$ref": "#/components/schemas/Language"
           },
           "audiofiles": {
             "type": "array",
-            "readOnly": true,
+            "description": "The audiofiles that belongs to this article",
             "nullable": true,
             "items": {
-              "$ref": "#/components/schemas/Audiofile"
+              "$ref": "#/components/schemas/User"
             }
           }
         }
@@ -417,7 +508,8 @@
           },
           "languages": {
             "type": "array",
-            "readOnly": true,
+            "nullable": true,
+            "description": "An array of languages.",
             "items": {
               "$ref": "#/components/schemas/Language"
             }
@@ -499,14 +591,26 @@
           },
           "voices": {
             "type": "array",
+            "nullable": true,
+            "description": "An array of voices.",
             "items": {
               "$ref": "#/components/schemas/Voice"
             }
           },
+          "articles": {
+            "type": "array",
+            "nullable": true,
+            "description": "An array of articles.",
+            "items": {
+              "$ref": "#/components/schemas/Articles"
+            }
+          },
           "countries": {
             "type": "array",
+            "nullable": true,
+            "description": "An array of countries.",
             "items": {
-              "$ref": "#/components/schemas/Article"
+              "$ref": "#/components/schemas/Country"
             }
           }
         }
@@ -945,6 +1049,10 @@
     {
       "name": "countries",
       "description": "Countries related endpoints."
+    },
+    {
+      "name": "languages",
+      "description": "Languages related endpoints."
     }
   ],
   "paths": {
@@ -1394,6 +1502,38 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/CountriesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/languages": {
+      "get": {
+        "operationId": "findAll",
+        "tags": [
+          "languages"
+        ],
+        "summary": "Get all languages",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LanguagesResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

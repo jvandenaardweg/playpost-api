@@ -1,0 +1,22 @@
+components:
+  responses:
+    LanguagesResponse:
+      description: A Languages collection response
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 10
+              page:
+                type: number
+                example: 1
+              totalPages:
+                type: number
+                example: 30
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'

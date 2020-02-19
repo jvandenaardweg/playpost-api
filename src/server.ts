@@ -308,6 +308,10 @@ export const setupServer = async () => {
       {
         name: 'countries',
         description: 'Countries related endpoints.'
+      },
+      {
+        name: 'languages',
+        description: 'Languages related endpoints.'
       }
     ]
   };
@@ -320,7 +324,8 @@ export const setupServer = async () => {
     apis: [
       './src/controllers/**/*.ts', 
       './src/swagger-schemas/internal/**/*.yaml',
-      './src/database/entities/**/*.yaml'
+      './src/database/entities/**/*.yaml',
+      // './src/swagger-schemas/external/stripe-only-schemas.yaml'
     ],
   };
   

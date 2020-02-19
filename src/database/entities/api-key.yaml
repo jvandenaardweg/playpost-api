@@ -1,0 +1,53 @@
+components:
+  schemas:
+    ApiKey:
+      type: object
+      required:
+        - id
+      properties:
+        id: 
+          type: string
+          example: 4bee0e78-22e1-413d-9a65-8f7f95d9d0ca
+          readOnly: true
+        label: 
+          type: string
+          nullable: true
+          example: Playpost App
+          description: A label to remember why this API Key is created
+        key: 
+          type: string
+          nullable: false
+          example: 4696da851b302feed285a0e0906de7d4e353e8d6e3de014c2d49580e6329c280
+          description: The API Key that is used in every request to our API
+        signature: 
+          type: string
+          nullable: false
+          example: a546c38cbf26832b5db9aa74c39d8612a58f3817601d1e211d9ab637a4e667a4
+          description: A hash generated with the API Key and API Secret.  Both API Key and API Secret is needed to compare the signature.
+        lastUsedAt:
+          type: string
+          nullable: true
+          example: 2020-02-14 03:30:10
+        lastUsedIpAddress:
+          type: string
+          nullable: true
+          example: 127.0.0.1
+        allowedDomain:
+          type: string
+          nullable: true
+          example: playpost.app
+          description: Restrict API access to only this given domain
+        
+        createdAt:
+          type: string
+          example: 2020-02-14 03:30:10
+        updatedAt:
+          type: string
+          example: 2020-02-14 03:30:10
+    
+        # Relations
+        user:
+          type: object
+          description: The user that belongs to this API Key
+          nullable: false
+          $ref: '#/components/schemas/User'

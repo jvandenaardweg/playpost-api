@@ -40,20 +40,21 @@ components:
         # Relations  
         voices:
           type: array
-          # required: false
+          nullable: true
+          description: An array of voices.
           items:
             $ref: '#/components/schemas/Voice'
-
-        # articles:
-        #   type: string
-        #   required: false
-        #   schema:
-        #     type: array
-        #     items:
-        #       $ref: '#/components/schemas/Article'
+    
+        articles:
+          type: array
+          nullable: true
+          description: An array of articles.
+          items:
+            $ref: '#/components/schemas/Articles'
 
         countries:
           type: array
-          # required: false
+          nullable: true
+          description: An array of countries.
           items:
-            $ref: '#/components/schemas/Article'
+            $ref: '#/components/schemas/Country'

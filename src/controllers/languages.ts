@@ -5,6 +5,29 @@ import { Language } from '../database/entities/language';
 
 import { CACHE_ONE_DAY } from '../constants/cache';
 
+/**
+ * @swagger
+ *
+ *  /languages:
+ *    get:
+ *      operationId: findAll
+ *      tags:
+ *        - languages
+ *      summary: Get all languages
+ *      security:
+ *        - BearerAuth: []
+ *        - ApiKeyAuth: []
+ *          ApiSecretAuth: []
+ *      responses:
+ *        '400':
+ *          $ref: '#/components/responses/BadRequestError'
+ *        '401':
+ *          $ref: '#/components/responses/UnauthorizedError'
+ *        '404':
+ *          $ref: '#/components/responses/NotFoundError'
+ *        '200':
+ *          $ref: '#/components/responses/LanguagesResponse'
+ */
 export const findAll = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
   const { isActive }: {isActive: string } = req.query;

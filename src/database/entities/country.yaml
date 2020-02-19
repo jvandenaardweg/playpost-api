@@ -39,6 +39,9 @@ components:
         # Relations
         languages:
           type: array
-          readOnly: true
+          nullable: true
+          description: An array of languages.
           items:
             $ref: '#/components/schemas/Language'
+          
+            

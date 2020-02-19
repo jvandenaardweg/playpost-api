@@ -1,6 +1,7 @@
 
 // Make sure express/passport used the correct user interface
 // https://stackoverflow.com/a/54030446/3194288
+
 declare global {
   namespace Express {
     export interface Request {

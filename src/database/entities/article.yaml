@@ -78,19 +78,19 @@ components:
         # Relations
         user:
           type: object
-          readOnly: true
+          description: The user that belongs to this article
           nullable: true
           $ref: '#/components/schemas/User'
         
         language:
           type: object
-          readOnly: true
+          description: The language that belongs to this article
           nullable: true
           $ref: '#/components/schemas/Language'
         
         audiofiles:
           type: array
-          readOnly: true
+          description: The audiofiles that belongs to this article
           nullable: true
           items:
-            $ref: '#/components/schemas/Audiofile'
+            $ref: '#/components/schemas/User'
