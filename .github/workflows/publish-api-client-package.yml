@@ -27,6 +27,6 @@ jobs:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
           scope: '@jvandenaardweg/playpost-api-client'
-      - run: npm publish
+      - run: npx lerna publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_ACCESS_TOKEN}}

@@ -5,7 +5,7 @@
     "test": "lerna run test --stream",
     "build": "lerna run build --stream",
     "dev": "lerna run dev --stream",
-    "publish": "lerna version --force-publish"
+    "publish": "lerna version --force-publish --amend"
   },
   "devDependencies": {
     "lerna": "^3.20.2",
