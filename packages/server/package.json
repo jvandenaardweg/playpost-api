@@ -45,7 +45,6 @@
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
     "preversion": "npm test",
-    "version:client-package-json": "replace '/v\\d+\\.\\d+\\.\\d+' \"/v$npm_package_version\" ./packages/client/package.json",
     "version": "auto-changelog -p && git add CHANGELOG.md && npm run build:openapi && npm run build:client && npm run version:client-package-json && git add .",
     "postversion": "git push --no-verify && git push --tags --no-verify",
     "loadtest": "ts-node-dev loadtests.ts"
@@ -167,7 +166,6 @@
     "lerna": "^3.20.2",
     "loadtest": "^4.1.0",
     "npm-check": "^5.9.0",
-    "replace": "^1.1.5",
     "ts-jest": "^25.2.0",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
