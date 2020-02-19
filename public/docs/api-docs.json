@@ -42,6 +42,98 @@
   ],
   "components": {
     "schemas": {
+      "PostAuthRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app"
+          },
+          "password": {
+            "type": "string",
+            "example": "currentpassword!"
+          }
+        }
+      },
+      "PostAuthResetPasswordMobileRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app"
+          }
+        }
+      },
+      "PostAuthUpdatePasswordMobileRequestBody": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "supersecretpassword"
+          },
+          "resetPasswordToken": {
+            "type": "string",
+            "example": "123ABC"
+          }
+        }
+      },
+      "PatchAuthActivateRequestBody": {
+        "type": "object",
+        "properties": {
+          "activationToken": {
+            "type": "string",
+            "example": "6aecff0416068f8ca6f7089037783b7b"
+          }
+        }
+      },
+      "PostAuthResetPasswordRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "api@playpost.app"
+          }
+        }
+      },
+      "PatchAuthResetPasswordRequestBody": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "supersecretpassword"
+          },
+          "resetPasswordToken": {
+            "type": "string",
+            "example": "123ABC"
+          }
+        }
+      },
+      "Auth": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU3ZTRjM1Y3LWQ2ODEtNGJiOS04NTdhLWExY2JlMDQ2Y2FiMCIsImVtYWlsIjoiam9yZHl2YW5kZW5hYXJkm2VnQGdtYWlsLmNvbSIsImlhdCI6MTU4MjEwOTQzNn0.QnpLWnCdrMVbCNF8GrBjBI-aGAaYvZjnlTJny8gRY0Y",
+            "description": "A JWT token"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAtMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedAtMs": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
       "Collection": {
         "type": "object",
         "properties": {
@@ -956,6 +1048,17 @@
       }
     },
     "responses": {
+      "PostAuthResponse": {
+        "description": "A Auth response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "$ref": "#/components/schemas/Auth"
+            }
+          }
+        }
+      },
       "CountriesResponse": {
         "description": "A Countries collection response",
         "content": {
@@ -1095,9 +1198,139 @@
     {
       "name": "user",
       "description": "Endpoint for the currently logged in user."
+    },
+    {
+      "name": "auth",
+      "description": "Endpoint for logging in and requesting new passwords."
     }
   ],
   "paths": {
+    "/auth": {
+      "post": {
+        "operationId": "postAuth",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get an authentication token using email and password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAuthRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PostAuthResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/auth/reset/password": {
+      "post": {
+        "operationId": "postAuthResetPassword",
+        "tags": [
+          "auth"
+        ],
+        "description": "Request a resetPasswordToken to allow resetting a password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAuthResetPasswordRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchAuthResetPassword",
+        "tags": [
+          "auth"
+        ],
+        "description": "Change a password of a user using a resetPasswordToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAuthResetPasswordRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/auth/activate": {
+      "patch": {
+        "operationId": "patchAuthActivate",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Activate a user account using an activation token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAuthActivateRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/billing": {
       "get": {
         "operationId": "getBillingIndex",

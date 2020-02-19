@@ -1,0 +1,52 @@
+components:
+  schemas:
+    PostAuthRequestBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: api@playpost.app
+        password:
+          type: string
+          example: currentpassword!
+
+    PostAuthResetPasswordMobileRequestBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: api@playpost.app
+
+    PostAuthUpdatePasswordMobileRequestBody:
+      type: object
+      properties:
+        password:
+          type: string
+          example: supersecretpassword
+        resetPasswordToken:
+          type: string
+          example: 123ABC
+
+    PatchAuthActivateRequestBody:
+      type: object
+      properties:
+        activationToken:
+          type: string
+          example: 6aecff0416068f8ca6f7089037783b7b
+
+    PostAuthResetPasswordRequestBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: api@playpost.app
+
+    PatchAuthResetPasswordRequestBody:
+      type: object
+      properties:
+        password:
+          type: string
+          example: supersecretpassword
+        resetPasswordToken:
+          type: string
+          example: 123ABC

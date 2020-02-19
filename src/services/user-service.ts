@@ -16,11 +16,11 @@ export class UserService extends BaseService {
     this.userRepository = getRepository(User);
   }
 
-  findOneById = async (userId: string) => {
+  findOneById = async (userId: string): Promise<User | undefined> => {
     return this.userRepository.findOne(userId);
   }
 
-  findOneByEmail = async (email: string) => {
+  findOneByEmail = async (email: string): Promise<User | undefined> => {
     const normalizedEmail = User.normalizeEmail(email)
 
     return this.userRepository.findOne({
@@ -30,10 +30,37 @@ export class UserService extends BaseService {
     });
   }
 
+  findOneByEmailWithPassword = async (email: string): Promise<User | undefined> => {
+    const normalizedEmail = User.normalizeEmail(email)
+
+    return this.userRepository.findOne({
+      select: ['id', 'email', 'password'],
+      where: {
+        email: normalizedEmail
+      }
+    });
+  }
+
+  findOneByResetPasswordToken = async (resetPasswordToken: string): Promise<User | undefined> => {
+    return this.userRepository.findOne({
+      where: {
+        resetPasswordToken
+      }
+    });
+  }
+
+  findOneByActivationToken = async (activationToken: string): Promise<User | undefined> => {
+    return this.userRepository.findOne({
+      where: {
+        activationToken
+      }
+    });
+  }
+
   /**
    * Finds a user by user ID and returns the password hash. Useful before updating a user his password.
    */
-  findOneByIdWithPassword = async (userId: string) => {
+  findOneByIdWithPassword = async (userId: string): Promise<User | undefined> => {
     return this.userRepository.findOne(userId, { select: ['id', 'password']});
   }
 
@@ -210,11 +237,40 @@ export class UserService extends BaseService {
     return result;
   }
 
-  updatePassword = async (forUserId: string, newPassword: string) => {
+  updatePassword = async (forUserId: string, newPassword: string, resetPasswordToken?: string, resetPasswordAt?: Date) => {
     const newHashedPassword = await User.hashPassword(newPassword);
 
     const result = await this.userRepository.update(forUserId, {
-      password: newHashedPassword
+      password: newHashedPassword,
+      resetPasswordToken,
+      resetPasswordAt
+    })
+
+    return result;
+  }
+
+  updateAuthenticatedAt = async (forUserId: string, authenticatedAt: Date) => {
+    const result = await this.userRepository.update(forUserId, {
+      authenticatedAt,
+      resetPasswordToken: undefined // Because a login is successfull, we can also remove the resetPasswordToken if it exists. It's not needed anymore.
+    })
+
+    return result;
+  }
+
+  updateResetPasswordToken = async (forUserId: string, resetPasswordToken: string, requestResetPasswordAt: Date) => {
+    const result = await this.userRepository.update(forUserId, {
+      resetPasswordToken,
+      requestResetPasswordAt
+    })
+
+    return result;
+  }
+
+  updateUserAsActivated = async (forUserId: string) => {
+    const result = await this.userRepository.update(forUserId, {
+      activationToken: undefined,
+      activatedAt: new Date()
     })
 
     return result;

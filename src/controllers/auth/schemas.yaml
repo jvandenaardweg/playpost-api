@@ -1,0 +1,21 @@
+components:
+  schemas:
+    Auth:
+      type: object
+      properties:
+        token:
+          type: string
+          example: yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU3ZTRjM1Y3LWQ2ODEtNGJiOS04NTdhLWExY2JlMDQ2Y2FiMCIsImVtYWlsIjoiam9yZHl2YW5kZW5hYXJkm2VnQGdtYWlsLmNvbSIsImlhdCI6MTU4MjEwOTQzNn0.QnpLWnCdrMVbCNF8GrBjBI-aGAaYvZjnlTJny8gRY0Y
+          description: A JWT token
+        expiresAt:
+          type: string
+          nullable: true
+        expiresAtMs:
+          type: number
+          nullable: true
+        issuedAt:
+          type: string
+          nullable: true
+        issuedAtMs:
+          type: number
+          nullable: true

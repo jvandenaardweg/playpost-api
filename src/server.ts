@@ -20,7 +20,6 @@ import expressBasicAuth from 'express-basic-auth';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
-import * as authController from './controllers/auth';
 import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
 import * as languagesController from './controllers/languages/languages-controller';
@@ -41,6 +40,7 @@ import { PublicationsController } from './controllers/publications/publications-
 import { StatusController } from './controllers/status/status-controller';
 import { UserController } from './controllers/user/user-controller';
 import { CountriesController } from './controllers/countries/countries-controller';
+import { AuthController } from './controllers/auth/auth-controller';
 
 import { connectionOptions } from './database/connection-options';
 import { HttpStatus } from './http-error';
@@ -316,6 +316,10 @@ export const setupServer = async () => {
       {
         name: 'user',
         description: 'Endpoint for the currently logged in user.'
+      },
+      {
+        name: 'auth',
+        description: 'Endpoint for logging in and requesting new passwords.'
       }
     ]
   };
@@ -327,6 +331,7 @@ export const setupServer = async () => {
     // Note that this path is relative to the current directory from which the Node.js is ran, not the application itself.
     apis: [
       './src/controllers/**/*.ts', 
+      './src/controllers/**/*.yaml',
       './src/swagger-schemas/internal/**/*.yaml',
       './src/database/entities/**/*.yaml',
       // './src/swagger-schemas/external/stripe-only-schemas.yaml'
@@ -386,20 +391,21 @@ export const setupServer = async () => {
   const statusController = new StatusController();
   const notFoundController = new NotFoundController();
   const countriesController = new CountriesController();
+  const authController = new AuthController();
 
 
   // API Endpoints
 
   // Public
   // TODO: Use expressBrute to increase the delay between each requests
-  app.post('/v1/auth', authController.getAuthenticationToken);
-  app.patch('/v1/auth/activate', authController.patchUserActivate);
-  app.post('/v1/auth/reset/password', authController.postUserResetPassword); // Send a reset password token to the given email address
-  app.patch('/v1/auth/reset/password', authController.patchUserResetPassword); // Change the password of the user using a password reset token
+  app.post('/v1/auth', authController.postAuth);
+  app.patch('/v1/auth/activate', authController.patchAuthActivate);
+  app.post('/v1/auth/reset/password', authController.postAuthResetPassword); // Send a reset password token to the given email address
+  app.patch('/v1/auth/reset/password', authController.patchAuthResetPassword); // Change the password of the user using a password reset token
 
   // Only used in our mobile app:
-  app.post('/v1/auth/reset-password', authController.getResetPasswordToken); // Used only for the mobile app
-  app.post('/v1/auth/update-password', authController.updatePasswordUsingToken); // Used only for the mobile app
+  app.post('/v1/auth/reset-password', authController.postAuthResetPasswordMobile); // Used only for the mobile app
+  app.post('/v1/auth/update-password', authController.postAuthUpdatePasswordMobile); // Used only for the mobile app
 
   app.post('/v1/users', usersController.create); // To create user accounts
 

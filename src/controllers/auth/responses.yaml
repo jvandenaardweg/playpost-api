@@ -1,0 +1,9 @@
+components:
+  responses:
+    PostAuthResponse:
+      description: A Auth response
+      content:
+        'application/json':
+          schema:
+            type: object
+            $ref: '#/components/schemas/Auth'
