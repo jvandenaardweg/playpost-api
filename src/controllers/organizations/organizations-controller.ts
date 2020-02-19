@@ -1,5 +1,5 @@
 import joi from '@hapi/joi';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 import Stripe from 'stripe';
 
 import { Publication } from '../../database/entities/publication';

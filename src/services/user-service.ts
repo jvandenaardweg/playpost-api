@@ -30,6 +30,13 @@ export class UserService extends BaseService {
     });
   }
 
+  /**
+   * Finds a user by user ID and returns the password hash. Useful before updating a user his password.
+   */
+  findOneByIdWithPassword = async (userId: string): Promise<User | undefined> => {
+    return this.userRepository.findOne(userId, { select: ['id', 'emai', 'password']});
+  }
+
   findOneByEmailWithPassword = async (email: string): Promise<User | undefined> => {
     const normalizedEmail = User.normalizeEmail(email)
 
@@ -57,12 +64,7 @@ export class UserService extends BaseService {
     });
   }
 
-  /**
-   * Finds a user by user ID and returns the password hash. Useful before updating a user his password.
-   */
-  findOneByIdWithPassword = async (userId: string): Promise<User | undefined> => {
-    return this.userRepository.findOne(userId, { select: ['id', 'password']});
-  }
+  
 
   create = async (email: string, password: string, organization?: { name: string }): Promise<void> => {
     const loggerPrefix = 'Create new user:';

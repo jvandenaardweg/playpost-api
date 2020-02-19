@@ -129,6 +129,10 @@ export class UserController extends BaseController {
         throw new HttpError(HttpStatus.NotFound, 'User to update the password for is not found.');
       }
 
+      if (!userObjectWithPassword.password) {
+        throw new HttpError(HttpStatus.InternalServerError, 'Password could not be reset due to an unknown error. We have been notified by this and will fix this problem asap.');
+      }
+
       // Compare the currentPassword with our password hash in the database
       // If they match, validation is true
       const validateCurrentPassword = await User.comparePassword(currentPassword, userObjectWithPassword.password);
