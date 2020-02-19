@@ -1,6 +1,6 @@
 {
   "name": "@jvandenaardweg/playpost-api-client",
-  "version": "2.10.6",
+  "version": "2.10.7",
   "description": "This package is automatically generated on every new version of the playpost-api",
   "main": "generated/index.ts",
   "engines": {
@@ -19,8 +19,5 @@
   },
   "devDependencies": {
     "typescript": "^3.7.5"
-  },
-  "scripts": {
-    "version": "git add ."
   }
 }
