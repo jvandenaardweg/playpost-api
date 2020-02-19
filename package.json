@@ -1,5 +1,5 @@
 {
-  "name": "playpost-api",
+  "name": "@jvandenaardweg/playpost-api",
   "version": "2.8.2",
   "description": "",
   "main": "dist/index.js",

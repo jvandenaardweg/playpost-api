@@ -10,6 +10,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jvandenaardweg/playpost-api.git"
+  },
   "dependencies": {
     "axios": "^0.19.2"
   }
