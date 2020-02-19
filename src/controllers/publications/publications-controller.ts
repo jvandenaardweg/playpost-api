@@ -13,6 +13,7 @@ import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
+import { PublicationResponse } from './types';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -36,7 +37,7 @@ export class PublicationsController extends BaseController {
   /**
    * Method to make sure the logged-in user is the owner of the Publication.
    */
-  public restrictResourceToOwner = async (req: Request, res: Response, next: NextFunction) => {
+  public restrictResourceToOwner = async (req: Request, res: PublicationResponse, next: NextFunction) => {
     const { publicationId } = req.params;
     const userId = req.user!.id;
 
@@ -52,13 +53,15 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.Forbidden, 'You have no access to this publication.');
     }
 
+    res.locals.publication = publication;
+
     return next()
   }
 
   /**
    * Get the publications the user has access to.
    */
-  public getAll = async (req: Request, res: Response) => {
+  public getAll = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const userId = req.user!.id;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -71,11 +74,8 @@ export class PublicationsController extends BaseController {
   /**
    * Get one publication the user has access to.
    */
-  public getOne = async (req: Request, res: Response) => {
-    const { publicationId } = req.params;
-    const userId = req.user!.id;
-
-    const publicationOfUser = await this.publicationService.findOneByIdOfUser(publicationId, userId);
+  public getOne = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+    const publicationOfUser = res.locals.publication;
 
     return res.json(publicationOfUser);
   }
@@ -84,7 +84,7 @@ export class PublicationsController extends BaseController {
    * Get all article summaries from a publication.
    * This list includes draft articles, which are not available outside the organization.
    */
-  public getAllArticles = async (req: Request, res: Response): Promise<Response> => {
+  public getAllArticles = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -99,7 +99,7 @@ export class PublicationsController extends BaseController {
   /**
    * Get a single article of a publication.
    */
-  public getOneArticle = async (req: Request, res: Response) => {
+  public getOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
     const article = await this.articleService.findOneById(articleId, {
@@ -120,7 +120,7 @@ export class PublicationsController extends BaseController {
    * Article is stored as a "draft", so it's not publicaly available (yet).
    *
    */
-  public postImportArticle = async (req: Request, res: Response) => {
+  public postImportArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -136,11 +136,7 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
-    const publication = await this.publicationService.findOneById(publicationId);
-
-    if (!publication) {
-      throw new HttpError(HttpStatus.NotFound, 'Publication does not exist.');
-    }
+    const publication = res.locals.publication;
 
     // Find out if this publication already has this article URL
     const existingArticle = await this.articleService.findOne({
@@ -184,7 +180,7 @@ export class PublicationsController extends BaseController {
     return res.json(savedArticle);
   };
 
-  public postOneArticle = async (req: Request, res: Response) => {
+  public postOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -228,7 +224,7 @@ export class PublicationsController extends BaseController {
   /**
    * Deletes a single article from a publication.
    */
-  public deleteOneArticle = async (req: Request, res: Response) => {
+  public deleteOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -265,7 +261,7 @@ export class PublicationsController extends BaseController {
     return res.status(HttpStatus.NoContent).send();
   }
 
-  public postOneAudiofile = async (req: Request, res: Response) => {
+  public postOneAudiofile = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
     const { voiceId, organizationId } = req.body;
     const userId = req.user!.id;
@@ -372,7 +368,7 @@ export class PublicationsController extends BaseController {
   /**
    * Previews a small ssml paragraph.
    */
-  public postOnePreviewArticleSSML = async (req: Request, res: Response) => {
+  public postOnePreviewArticleSSML = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
     const { ssml, voiceId } = req.body;
 
@@ -433,7 +429,7 @@ export class PublicationsController extends BaseController {
     })
   }
 
-  public patchOneArticle = async (req: Request, res: Response) => {
+  public patchOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { articleId, publicationId } = req.params;
 
     const validationSchema = joi.object().keys({
