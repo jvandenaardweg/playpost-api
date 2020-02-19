@@ -164,6 +164,7 @@
     "auto-changelog": "^1.16.2",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
+    "lerna": "^3.20.2",
     "loadtest": "^4.1.0",
     "npm-check": "^5.9.0",
     "replace": "^1.1.5",
