@@ -23,7 +23,7 @@ import * as audiofileController from './controllers/audiofiles';
 import * as authController from './controllers/auth';
 import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
-import * as languagesController from './controllers/languages';
+import * as languagesController from './controllers/languages/languages-controller';
 import { MeController } from './controllers/me';
 import { OembedController } from './controllers/oembed/oembed-controller';
 import * as playlistController from './controllers/playlist';
@@ -404,7 +404,7 @@ export const setupServer = async () => {
   app.post('/v1/users', usersController.create); // To create user accounts
 
   // So we can show the correct available countries in a dropdown in public forms
-  app.get('/v1/countries', countriesController.getAll);
+  app.get('/v1/countries', countriesController.getAllCountries);
 
   app.get('/v1/oembed', oembedController.getAll); // Used by embedly
   app.get('/v1/status', statusController.getAll);
@@ -453,7 +453,7 @@ export const setupServer = async () => {
   app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteVoicePreview);
 
   // v1/languages
-  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.getAll);
+  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.getAllLanguages);
 
   // v1/subscriptions
   app.get('/v1/in-app-subscriptions', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
@@ -479,17 +479,17 @@ export const setupServer = async () => {
   app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOneAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteOneArticle);
 
-  app.get('/v1/billing', IS_PROTECTED_JWT, billingController.getIndex);
-  app.get('/v1/billing/plans', IS_PROTECTED_JWT, billingController.getAllPlans);
-  app.get('/v1/billing/plans/:stripePlanId', IS_PROTECTED_JWT, billingController.getOnePlan);
-  app.get('/v1/billing/products', IS_PROTECTED_JWT, billingController.getAllProducts);
-  app.get('/v1/billing/products/:stripeProductId', IS_PROTECTED_JWT, billingController.getOneProduct);
-  app.get('/v1/billing/tax-rates', IS_PROTECTED_JWT, billingController.getAllTaxRates);
-  app.get('/v1/billing/tax-rates/:stripeTaxRateId', IS_PROTECTED_JWT, billingController.getOneTaxRate);
+  app.get('/v1/billing', IS_PROTECTED_JWT, billingController.getBillingIndex);
+  app.get('/v1/billing/plans', IS_PROTECTED_JWT, billingController.getAllBillingPlans);
+  app.get('/v1/billing/plans/:stripePlanId', IS_PROTECTED_JWT, billingController.getOneBillingPlan);
+  app.get('/v1/billing/products', IS_PROTECTED_JWT, billingController.getAllBillingProducts);
+  app.get('/v1/billing/products/:stripeProductId', IS_PROTECTED_JWT, billingController.getOneBillingProduct);
+  app.get('/v1/billing/tax-rates', IS_PROTECTED_JWT, billingController.getAllBillingTaxRates);
+  app.get('/v1/billing/tax-rates/:stripeTaxRateId', IS_PROTECTED_JWT, billingController.getOneBillingTaxRate);
 
   // Not Stripe related
-  app.post('/v1/billing/tax-number/validate', IS_PROTECTED_JWT, billingController.postOneTaxNumberValidation);
-  app.get('/v1/billing/sales-tax/:countryCode', IS_PROTECTED_JWT, billingController.getOneSalesTax);
+  app.post('/v1/billing/tax-number/validate', IS_PROTECTED_JWT, billingController.postOneBillingTaxNumberValidation);
+  app.get('/v1/billing/sales-tax/:countryCode', IS_PROTECTED_JWT, billingController.getOneBillingSalesTax);
 
   // Available for all users to see their organizations
   app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);
@@ -544,7 +544,7 @@ export const setupServer = async () => {
 
   // Catch all
   // Should be the last route
-  app.all('*', notFoundController.getAll);
+  app.all('*', notFoundController.getAllNotFound);
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {

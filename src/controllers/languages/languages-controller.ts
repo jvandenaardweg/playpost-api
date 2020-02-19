@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { FindConditions, getRepository } from 'typeorm';
 
-import { Language } from '../database/entities/language';
+import { Language } from '../../database/entities/language';
 
-import { CACHE_ONE_DAY } from '../constants/cache';
+import { CACHE_ONE_DAY } from '../../constants/cache';
 
 /**
  * @swagger
@@ -28,7 +28,7 @@ import { CACHE_ONE_DAY } from '../constants/cache';
  *        '200':
  *          $ref: '#/components/responses/LanguagesResponse'
  */
-export const getAll = async (req: Request, res: Response) => {
+export const getAllLanguages = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
   const { isActive }: {isActive: string } = req.query;
 

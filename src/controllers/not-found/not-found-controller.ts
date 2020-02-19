@@ -7,7 +7,7 @@ export class NotFoundController extends BaseController {
     super()
   }
 
-  getAll = (req: Request, res: Response) => {
+  public getAllNotFound = (req: Request, res: Response) => {
     return res.status(404).json({ message: `No route found for ${req.method} ${req.url}` });
   }
 }

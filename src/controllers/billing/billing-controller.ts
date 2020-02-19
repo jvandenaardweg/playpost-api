@@ -16,7 +16,7 @@ export class BillingController extends BaseController {
    *
    *  /billing:
    *    get:
-   *      operationId: getIndex
+   *      operationId: getBillingIndex
    *      tags:
    *        - billing
    *      summary: Index of billing endpoint
@@ -34,7 +34,7 @@ export class BillingController extends BaseController {
    *        200:
    *          $ref: '#/components/responses/MessageResponse'
    */
-  getIndex = async (req: Request, res: Response): Promise<Response> => {
+  public getBillingIndex = async (req: Request, res: Response): Promise<Response> => {
     return res.json({
       message: 'OK'
     });
@@ -45,7 +45,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/plans:
    *    get:
-   *      operationId: getAllPlans
+   *      operationId: getAllBillingPlans
    *      tags:
    *        - billing
    *      summary: Get all Plans from Stripe
@@ -71,7 +71,7 @@ export class BillingController extends BaseController {
    *                items:
    *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan'
    */
-  getAllPlans = async (req: Request, res: Response): Promise<Response> => {
+  public getAllBillingPlans = async (req: Request, res: Response): Promise<Response> => {
     const response = await this.billingService.findAllPlans();
 
     return res.json(response);
@@ -82,7 +82,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/plans/{stripePlanId}:
    *    get:
-   *      operationId: getOnePlan
+   *      operationId: getOneBillingPlan
    *      tags:
    *        - billing
    *      summary: Gets one subscription plan from Stripe using Stripe subscription Id's.
@@ -111,7 +111,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan'
    */
-  getOnePlan = async (req: Request, res: Response): Promise<Response> => {
+  public getOneBillingPlan = async (req: Request, res: Response): Promise<Response> => {
     const { stripePlanId } = req.params;
 
     const response = await this.billingService.findOnePlan(stripePlanId);
@@ -124,7 +124,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/products:
    *    get:
-   *      operationId: getAllProducts
+   *      operationId: getAllBillingProducts
    *      tags:
    *        - billing
    *      summary: Get all Products from Stripe
@@ -148,7 +148,7 @@ export class BillingController extends BaseController {
    *                items:
    *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product'
    */
-  getAllProducts = async (req: Request, res: Response): Promise<Response> => {
+  public getAllBillingProducts = async (req: Request, res: Response): Promise<Response> => {
     const response = await this.billingService.findAllProductsWithPlans();
 
     return res.json(response);
@@ -159,7 +159,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/products/{stripeProductId}:
    *    get:
-   *      operationId: getOneProduct
+   *      operationId: getOneBillingProduct
    *      tags:
    *        - billing
    *      summary: Gets one Product from Stripe using Stripe Product Id.
@@ -188,7 +188,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product'
    */
-  getOneProduct = async (req: Request, res: Response): Promise<Response> => {
+  public getOneBillingProduct = async (req: Request, res: Response): Promise<Response> => {
     const { stripeProductId } = req.params;
 
     const response = await this.billingService.findOneProduct(stripeProductId);
@@ -201,7 +201,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/tax-rates:
    *    get:
-   *      operationId: getAllTaxRates
+   *      operationId: getAllBillingTaxRates
    *      tags:
    *        - billing
    *      summary: Get all TaxRate's from Stripe
@@ -225,7 +225,7 @@ export class BillingController extends BaseController {
    *                items:
    *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate'
    */
-  getAllTaxRates = async (req: Request, res: Response): Promise<Response> => {
+  public getAllBillingTaxRates = async (req: Request, res: Response): Promise<Response> => {
     const response = await this.billingService.findAllTaxRates();
 
     return res.json(response);
@@ -236,7 +236,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/tax-rate/{stripeTaxRateId}:
    *    get:
-   *      operationId: getOneTaxRate
+   *      operationId: getOneBillingTaxRate
    *      tags:
    *        - billing
    *      summary: Gets one TaxRate from Stripe using Stripe TaxRate Id.
@@ -265,7 +265,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate'
    */
-  getOneTaxRate = async (req: Request, res: Response): Promise<Response> => {
+  public getOneBillingTaxRate = async (req: Request, res: Response): Promise<Response> => {
     const { stripeTaxRateId } = req.params;
 
     const response = await this.billingService.findOneTaxRate(stripeTaxRateId);
@@ -278,7 +278,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/tax-number/validate:
    *    post:
-   *      operationId: postOneTaxNumberValidation
+   *      operationId: postOneBillingTaxNumberValidation
    *      tags:
    *        - billing
    *      summary: Validates a tax number.
@@ -316,7 +316,7 @@ export class BillingController extends BaseController {
    *                  message: 
    *                    type: string
    */
-  postOneTaxNumberValidation = async (req: Request, res: Response): Promise<Response> => {
+  public postOneBillingTaxNumberValidation = async (req: Request, res: Response): Promise<Response> => {
     const { countryCode, taxNumber } = req.body;
 
     if (!countryCode) {
@@ -343,7 +343,7 @@ export class BillingController extends BaseController {
    *
    *  /billing/sales-tax/{countryCode}:
    *    get:
-   *      operationId: getOneSalesTax
+   *      operationId: getOneBillingSalesTax
    *      tags:
    *        - billing
    *      summary: Gets one Sales Tax response by countryCode.
@@ -373,7 +373,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                $ref: '#/components/schemas/SalesTax'
    */
-  getOneSalesTax = async (req: Request, res: Response): Promise<Response> => {
+  public getOneBillingSalesTax = async (req: Request, res: Response): Promise<Response> => {
     const { countryCode } = req.params;
 
     if (!countryCode) {

@@ -33,7 +33,7 @@ export class CountriesController extends BaseController {
    *        '200':
    *          $ref: '#/components/responses/CountriesResponse'
    */
-  getAll = async (req: Request, res: Response): Promise<Response> => {
+  getAllCountries = async (req: Request, res: Response): Promise<Response> => {
     // Get all countries
     const countriesCollection = await this.countryService.findAll(1, 999, 0, 999);
 
