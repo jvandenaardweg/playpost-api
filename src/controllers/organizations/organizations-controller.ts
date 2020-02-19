@@ -144,13 +144,13 @@ export class OrganizationsController extends BaseController {
   public getOneCustomer = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization does not exist.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'This organization does not exist.');
     }
 
-    const { stripeCustomerId } = customer;
+    const { stripeCustomerId } = organization;
 
     if (!stripeCustomerId) {
       return res.status(204).send();
@@ -455,17 +455,13 @@ export class OrganizationsController extends BaseController {
   public getAllCustomerPaymentMethods = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const organizationCustomer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!organizationCustomer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer on organization not found.')
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization not found.')
     }
 
-    if (!organizationCustomer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not a customer.')
-    }
-
-    const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organizationCustomer.stripeCustomerId);
+    const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organization.stripeCustomerId);
 
     return res.json(customerPaymentMethods);
   };
@@ -498,14 +494,10 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
-    const organizationCustomer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!organizationCustomer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer on organization not found.')
-    }
-
-    if (!organizationCustomer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization is not a customer.')
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization not found.')
     }
 
     // Find the current payment method to verify it's existence
@@ -516,7 +508,7 @@ export class OrganizationsController extends BaseController {
     }
 
     // Check if the payment method belongs to the customer
-    if (currentPaymentMethod.customer !== organizationCustomer.stripeCustomerId) {
+    if (currentPaymentMethod.customer !== organization.stripeCustomerId) {
       throw new HttpError(HttpStatus.BadRequest, 'This payment method does not belong to the customer.');
     }
 
@@ -569,20 +561,14 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, 'stripePaymentMethodId is required.');
     }
 
-    // Verify if the organization already has a customer object
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
 
     // Verify if the customer exists in Stripe
-    const stripeCustomer = await this.billingService.findOneCustomer(customer.stripeCustomerId);
+    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
 
     if (!stripeCustomer || stripeCustomer.deleted) {
       throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
@@ -629,20 +615,14 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
     }
 
-    // Verify if the organization already has a customer object
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
 
     // Verify if the customer exists in Stripe
-    const stripeCustomer = await this.billingService.findOneCustomer(customer.stripeCustomerId);
+    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
 
     if (!stripeCustomer) {
       throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
@@ -671,18 +651,13 @@ export class OrganizationsController extends BaseController {
   public getOneCustomerSetupIntent = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
     
-    const setupIntent = await this.billingService.createOneCustomerSetupIntent(customer.stripeCustomerId);
+    const setupIntent = await this.billingService.createOneCustomerSetupIntent(organization.stripeCustomerId);
 
     return res.json(setupIntent);
   }
@@ -690,18 +665,13 @@ export class OrganizationsController extends BaseController {
   public getAllCustomerTaxIds = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId } = req.params;
 
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
     
-    const customerTaxIds = await this.billingService.findAllCustomerTaxIds(customer.stripeCustomerId);
+    const customerTaxIds = await this.billingService.findAllCustomerTaxIds(organization.stripeCustomerId);
 
     return res.json(customerTaxIds);
   }
@@ -710,18 +680,13 @@ export class OrganizationsController extends BaseController {
     const { organizationId } = req.params;
     const { stripeTaxIdType, stripeTaxIdValue } = req.body;
 
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
     
-    const customerTaxIds = await this.billingService.createOneCustomerTaxId(customer.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
+    const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
 
     return res.json(customerTaxIds);
   }
@@ -729,18 +694,13 @@ export class OrganizationsController extends BaseController {
   public deleteOneCustomerTaxId = async (req: Request, res: Response): Promise<Response> => {
     const { organizationId, stripeTaxId } = req.params;
 
-    const customer = await this.organizationService.findOneCustomer(organizationId);
+    const organization = await this.organizationService.findOneById(organizationId);
 
-    if (!customer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization is not found.');
-    }
-
-    // Verify if the organization has a Stripe Customer ID
-    if (!customer.stripeCustomerId) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer for this organization has no billing customer ID.');
+    if (!organization) {
+      throw new HttpError(HttpStatus.NotFound, 'Organization is not found.');
     }
     
-    const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(customer.stripeCustomerId, stripeTaxId);
+    const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(organization.stripeCustomerId, stripeTaxId);
 
     return res.json(deletedCustomerTaxId);
   }

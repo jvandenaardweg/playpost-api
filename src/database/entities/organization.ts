@@ -1,6 +1,5 @@
 import { IsDate, IsUUID, Length } from 'class-validator';
 import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Customer } from './customer';
 import { Publication } from './publication';
 import { User } from './user';
 
@@ -15,15 +14,15 @@ export class Organization {
   @Length(1, 50)
   name: string; // Playpost
 
+  // When creating a new customer, a Stripe Customer ID is required.
+  @Column('varchar', { length: 255, nullable: false })
+  @Length(1, 255)
+  stripeCustomerId: string; // cus_GLBNvU7Y4CEL02
+
   // Restrict deletion of an Organization when a User is deleted
   @OneToOne(type => User, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn()
   admin?: User;
-
-  // Use cascade: ['insert'] to automatically insert and attach a new Organization to a User
-  @OneToOne(type => Customer, { nullable: true, onDelete: 'SET NULL', cascade: ['insert'], eager: true })
-  @JoinColumn()
-  customer?: Customer;
 
   @OneToMany(type => Publication, publication => publication.organization)
   publications?: Publication[];

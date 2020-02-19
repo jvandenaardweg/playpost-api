@@ -2,7 +2,6 @@ import Stripe from 'stripe';
 import { getConnection, getRepository, Repository } from 'typeorm';
 
 import { stripe } from '../billing';
-import { Customer } from '../database/entities/customer';
 import { Organization } from '../database/entities/organization';
 import { Publication } from '../database/entities/publication';
 import { User } from '../database/entities/user';
@@ -79,7 +78,6 @@ export class OrganizationService extends BaseService {
   async findOneById(organizationId: string): Promise<Organization | undefined> {
     const organization = await this.organizationRepository
       .createQueryBuilder('organization')
-      .leftJoinAndSelect("organization.customer", "customer")
       .leftJoinAndSelect("organization.publications", "publication")
       .leftJoinAndSelect("organization.users", "users")
       .leftJoinAndSelect("organization.admin", "admin")
@@ -149,25 +147,6 @@ export class OrganizationService extends BaseService {
     }
 
     return response
-  }
-
-  /**
-   * Find the customer object of the organization.
-   *
-   * @param organizationId
-   */
-  async findOneCustomer(organizationId: string): Promise<Customer | undefined> {
-    const organization = await this.findOneById(organizationId);
-
-    if (!organization) {
-      return undefined;
-    }
-
-    if (!organization.customer) {
-      return undefined;
-    }
-
-    return organization.customer;
   }
 
   /**
@@ -266,24 +245,20 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    if (!organization.customer) {
-      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
-    }
-
     const updateOneCustomerFields: Stripe.CustomerUpdateParams = {
       email: customerUpdateFields.email,
       name: customerUpdateFields.name,
       address: customerUpdateFields.address,
       phone: customerUpdateFields.phone,
       metadata: {
-        customerId: organization.customer.id,
+        customerId: organization.stripeCustomerId,
         organizationId: organization.id,
         adminEmail: organization.admin ? organization.admin.email : ''
       },
     }
 
     // Get the customer's current tax id's
-    const currentTaxIds = await stripe.customers.listTaxIds(organization.customer.stripeCustomerId);
+    const currentTaxIds = await stripe.customers.listTaxIds(organization.stripeCustomerId);
 
     // Check for tax id existence
     // Use combined "value" and "type". As a user might change his type and value
@@ -294,21 +269,21 @@ export class OrganizationService extends BaseService {
     // Delete the tax id's, so we can add a new one
     if (currentTaxIds.data.length && !taxIdExists) {
       for (const taxId of currentTaxIds.data) {
-        logger.info(`Deleting current tax ID: "${taxId.id}" for customer ID: "${organization.customer.stripeCustomerId}"`);
-        await stripe.customers.deleteTaxId(organization.customer.stripeCustomerId, taxId.id)
+        logger.info(`Deleting current tax ID: "${taxId.id}" for customer ID: "${organization.stripeCustomerId}"`);
+        await stripe.customers.deleteTaxId(organization.stripeCustomerId, taxId.id)
       }
     }
 
     // Only create a new tax ID when it does not exist and the user has send a "value" and "type"
     if (!taxIdExists && customerTaxIdParams.value && customerTaxIdParams.type) {
-      logger.info(`Creating new Tax ID for customer ID: "${organization.customer.stripeCustomerId}"`, customerTaxIdParams);
-      await stripe.customers.createTaxId(organization.customer.stripeCustomerId, {
+      logger.info(`Creating new Tax ID for customer ID: "${organization.stripeCustomerId}"`, customerTaxIdParams);
+      await stripe.customers.createTaxId(organization.stripeCustomerId, {
         type: customerTaxIdParams.type,
         value: customerTaxIdParams.value
       })
     }
 
-    const updatedStripeCustomer = await stripe.customers.update(organization.customer.stripeCustomerId, updateOneCustomerFields);
+    const updatedStripeCustomer = await stripe.customers.update(organization.stripeCustomerId, updateOneCustomerFields);
 
     return updatedStripeCustomer;
   }
@@ -325,12 +300,8 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    if (!organization.customer) {
-      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
-    }
-
     const subscriptions = await stripe.subscriptions.list({
-      customer: organization.customer.stripeCustomerId,
+      customer: organization.stripeCustomerId,
       // Also get the complete product, customer and latest invoice object's
       // So we do not need to do seperate calls to Stripe to get these required details we want to present to our users
       expand: ['data.plan.product', 'data.customer', 'data.latest_invoice'],
@@ -387,12 +358,8 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    if (!organization.customer) {
-      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
-    }
-
     const invoices = await stripe.invoices.list({
-      customer: organization.customer.stripeCustomerId
+      customer: organization.stripeCustomerId
     })
 
     return invoices;
@@ -410,12 +377,8 @@ export class OrganizationService extends BaseService {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    if (!organization.customer) {
-      throw new HttpError(HttpStatus.BadRequest, 'This organization is not a customer yet.');
-    }
-
     const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
-      customer: organization.customer.stripeCustomerId
+      customer: organization.stripeCustomerId
     })
 
     return invoicesUpcoming;

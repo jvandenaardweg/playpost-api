@@ -13,7 +13,6 @@ import { UserVoiceSetting } from './database/entities/user-voice-setting';
 import { Voice } from './database/entities/voice';
 
 // Migrations
-import { Customer } from './database/entities/customer';
 import { Organization } from './database/entities/organization';
 import { Publication } from './database/entities/publication';
 import { UsageRecord } from './database/entities/usage-record';
@@ -55,6 +54,9 @@ import { ApiKeyNulls1577775219312 } from './database/migrations/1577775219312-Ap
 import { UsageRecordNulls1577775219313 } from './database/migrations/1577775219313-UsageRecordNulls';
 import { UserUniqueActivationToken1580885123963 } from './database/migrations/1580885123963-UserUniqueActivationToken';
 import { UsageRecordNulls1580885123964 } from './database/migrations/1580885123964-UsageRecordNulls';
+import { MoveStripeCustomerIdToOrganization1582099944020 } from './database/migrations/1582099944020-MoveStripeCustomerIdToOrganization';
+import { MakeStripeCustomerIdRequired1582100050678 } from './database/migrations/1582100050679-MakeStripeCustomerIdRequired';
+import { RemoveCustomerTable1582100050680 } from './database/migrations/1582100050680-RemoveCustomerTable';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -82,7 +84,6 @@ const config: ConnectionOptions = {
     Country,
     ApiKey,
     UserInAppSubscriptionGoogle,
-    Customer,
     Organization,
     Publication,
     UsageRecord
@@ -125,7 +126,10 @@ const config: ConnectionOptions = {
     ApiKeyNulls1577775219312,
     UsageRecordNulls1577775219313,
     UserUniqueActivationToken1580885123963,
-    UsageRecordNulls1580885123964
+    UsageRecordNulls1580885123964,
+    MoveStripeCustomerIdToOrganization1582099944020,
+    MakeStripeCustomerIdRequired1582100050678,
+    RemoveCustomerTable1582100050680
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

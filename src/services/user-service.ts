@@ -104,8 +104,6 @@ export class UserService extends BaseService {
 
         // const savedCustomer = await queryRunner.manager.save(Customer, newCustomer);
 
-        // newOrganization.customer = savedCustomer;
-
         newOrganization.users = [savedUser];
 
         logger.info(loggerPrefix, `Create organization:`, newOrganization);

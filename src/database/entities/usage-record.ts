@@ -46,7 +46,7 @@ export class UsageRecord {
   stripeSubscriptionItemId?: string;
 
   @Index()
-  @Column({ nullable: true, default: null }) // Could be empty if the usage record we insert is not metered
+  @Column({ nullable: true }) // Could be empty if the usage record we insert is not metered
   stripeUsageRecordId?: string;
 
   @Index()
