@@ -47,7 +47,7 @@
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
     "preversion": "npm test",
-    "version": "auto-changelog -p && git add CHANGELOG.md && npm run build && npm run version:client-package-json && git add .",
+    "version": "auto-changelog -p && git add CHANGELOG.md && npm run build && git add .",
     "postversion": "git push --no-verify && git push --tags --no-verify",
     "loadtest": "ts-node-dev loadtests.ts"
   },
