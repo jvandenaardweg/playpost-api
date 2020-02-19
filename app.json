@@ -1,3 +1,7 @@
 {
-
+  "scripts": {
+    "dokku": {
+      "predeploy": "lerna run build"
+    }
+  }
 }
