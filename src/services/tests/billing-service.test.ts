@@ -33,19 +33,6 @@ describe('billing-service', () => {
     expect(products).toMatchObject(productsWithPlansMock);
   })
 
-  it('findAllProductsWithPlans should return an array with Stripe Products including the related Stripe Plans.', async () => {
-    const billingService = new BillingService();
-    const spyStripeProductsList = jest.spyOn(stripe.products, 'list').mockResolvedValue({ data: productsWithPlansMock } as any)
-    const spyStripePlansList = jest.spyOn(stripe.plans, 'list').mockResolvedValue({ data: plansMock } as any)
-
-    const productsWithPlans = await billingService.findAllProductsWithPlans()
-    
-    expect(spyStripeProductsList).toHaveBeenCalledTimes(1);
-    expect(spyStripePlansList).toHaveBeenCalledTimes(1);
-
-    expect(productsWithPlans).toMatchObject(productsWithPlansMock);
-  })
-
   it('findOneProduct should return a Stripe Product object.', async () => {
     const billingService = new BillingService();
     const spyStripeProductsRetrieve = jest.spyOn(stripe.products, 'retrieve').mockResolvedValue(productMock as any)
