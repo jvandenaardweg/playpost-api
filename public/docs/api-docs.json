@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.10",
+    "version": "2.10.11",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -317,16 +317,31 @@
         }
       },
       "StripePlan": {
-        "description": "A Stripe Plan. You need to annotate this yourself.",
-        "type": "object"
+        "description": "A Stripe Plan. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
       },
       "StripeProduct": {
-        "description": "A Stripe Product. You need to annotate this yourself.",
-        "type": "object"
+        "description": "A Stripe Product. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
       },
       "StripeTaxRate": {
-        "description": "A Stripe Tax Rate. You need to annotate this yourself.",
-        "type": "object"
+        "description": "A Stripe Tax Rate. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
       },
       "ApiKey": {
         "type": "object",
