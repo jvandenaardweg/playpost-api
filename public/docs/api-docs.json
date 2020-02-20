@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.14",
+    "version": "2.10.15",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -191,7 +191,7 @@
                 "description": "The name of the organization"
               },
               "countryId": {
-                "type": "string;",
+                "type": "string",
                 "example": "81d7ae31-3715-4c7b-81b1-0ad36d85c58a",
                 "description": "The ID of the Country the Organization is in.",
                 "nullable": true
