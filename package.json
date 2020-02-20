@@ -28,6 +28,7 @@
     "heroku-postbuild": "npm run build",
     "build:typescript": "npx tsc",
     "build:typescript:production": "npx tsc -p tsconfig.production.json",
+    "build:api-docs": "swagger-jsdoc -d swagger.js -o ./public/docs/api-docs.json",
     "copy:package": "cp package.json dist/",
     "caches:empty": "ts-node-dev src/empty-cache.ts",
     "worker": "forever -m 5 dist/worker.js",
@@ -45,8 +46,8 @@
     "tsc:watch": "tsc -p ./ --noEmit -w",
     "typescript:check": "tsc -p ./ --noEmit",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -f ./src/ormconfig.ts",
-    "preversion": "npm test && git add --all",
-    "version": "auto-changelog -p && git add CHANGELOG.md",
+    "preversion": "npm test",
+    "version": "auto-changelog -p && npm run build:api-docs && git add --all",
     "postversion": "git push --no-verify && git push --tags --no-verify",
     "loadtest": "ts-node-dev loadtests.ts"
   },
