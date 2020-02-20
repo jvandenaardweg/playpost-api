@@ -20,7 +20,7 @@ components:
           nullable: true
           properties:
             name:
-              type: string;
+              type: string
               example: Playpost
               description: The name of the organization
             countryId:
