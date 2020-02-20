@@ -302,10 +302,7 @@ export class AuthController extends BaseController {
     }
 
     // Update the password and set the correct date at resetPasswordAt
-
-    const hashedPassword = await User.hashPassword(password);
-
-    await this.usersService.updatePassword(user.id, hashedPassword, undefined, new Date());
+    await this.usersService.updatePassword(user.id, password, undefined, new Date());
 
     return res.json({ message: 'Your password is updated. You can now login again.' });
   };
@@ -440,11 +437,8 @@ export class AuthController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'The user to reset the password for could not be found.');
     }
 
-    // User exists
-    const newPassword = await User.hashPassword(password);
-
     // Set the new password and remove the reset password token
-    await this.usersService.updatePassword(user.id, newPassword, undefined, new Date());
+    await this.usersService.updatePassword(user.id, password, undefined, new Date());
 
     return res.json({ message: `Great succes! You have changed your password.` });
   }

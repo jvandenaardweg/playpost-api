@@ -239,8 +239,8 @@ export class UserService extends BaseService {
     return result;
   }
 
-  updatePassword = async (forUserId: string, newPassword: string, resetPasswordToken?: string, resetPasswordAt?: Date) => {
-    const newHashedPassword = await User.hashPassword(newPassword);
+  updatePassword = async (forUserId: string, plainTextPassword: string, resetPasswordToken?: string, resetPasswordAt?: Date) => {
+    const newHashedPassword = await User.hashPassword(plainTextPassword);
 
     const result = await this.userRepository.update(forUserId, {
       password: newHashedPassword,
