@@ -1310,6 +1310,10 @@
     {
       "name": "user",
       "description": "Endpoint for the currently logged in user."
+    },
+    {
+      "name": "voices",
+      "description": "Voices related endpoints."
     }
   ],
   "paths": {
@@ -2067,6 +2071,140 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/PostUsersResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/voices": {
+      "get": {
+        "operationId": "getAllVoices",
+        "tags": [
+          "voices"
+        ],
+        "summary": "Get all voices",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Voice's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Voice"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/voices/{voiceId}/preview": {
+      "post": {
+        "operationId": "postOneVoicePreview",
+        "tags": [
+          "voices"
+        ],
+        "summary": "Creates a Voice preview",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voiceId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of a Voice"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Voice with the new preview in it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Voice"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteOneVoicePreview",
+        "tags": [
+          "voices"
+        ],
+        "summary": "Deletes a Voice preview",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voiceId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of a Voice"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MessageResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

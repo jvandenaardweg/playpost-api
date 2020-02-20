@@ -28,7 +28,6 @@ import { OembedController } from './controllers/oembed/oembed-controller';
 import * as playlistController from './controllers/playlist';
 import * as synthesizersController from './controllers/synthesizers';
 import { UsersController } from './controllers/users/users-controller';
-import * as voicesController from './controllers/voices';
 
 import { apiKeySecretPassportStrategy, jwtPassportStrategy } from './config/passport';
 
@@ -41,6 +40,7 @@ import { StatusController } from './controllers/status/status-controller';
 import { UserController } from './controllers/user/user-controller';
 import { CountriesController } from './controllers/countries/countries-controller';
 import { AuthController } from './controllers/auth/auth-controller';
+import { VoicesController } from './controllers/voices/voices-controller';
 
 import { connectionOptions } from './database/connection-options';
 import { HttpStatus } from './http-error';
@@ -311,6 +311,7 @@ export const setupServer = async () => {
   const notFoundController = new NotFoundController();
   const countriesController = new CountriesController();
   const authController = new AuthController();
+  const voicesController = new VoicesController()
 
 
   // API Endpoints
@@ -373,9 +374,9 @@ export const setupServer = async () => {
   app.get('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.getAll);
-  app.post('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.createVoicePreview);
-  app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteVoicePreview);
+  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.getAllVoices);
+  app.post('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.postOneVoicePreview);
+  app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteOneVoicePreview);
 
   // v1/languages
   app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.getAllLanguages);

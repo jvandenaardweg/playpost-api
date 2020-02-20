@@ -68,6 +68,10 @@ module.exports = {
       name: 'user',
       description: 'Endpoint for the currently logged in user.'
     },
+    {
+      name: 'voices',
+      description: 'Voices related endpoints.'
+    },
   ],
   apis: [
     './src/controllers/**/*.ts', 
