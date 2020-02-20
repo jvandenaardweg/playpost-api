@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.13",
+    "version": "2.10.14",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -186,7 +186,7 @@
             "nullable": true,
             "properties": {
               "name": {
-                "type": "string;",
+                "type": "string",
                 "example": "Playpost",
                 "description": "The name of the organization"
               },
