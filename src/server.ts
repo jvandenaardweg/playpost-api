@@ -12,10 +12,10 @@ import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
-import swaggerJSDoc from 'swagger-jsdoc';
+// import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-import { writeFileSync } from 'fs';
+// import { writeFileSync } from 'fs';
 import expressBasicAuth from 'express-basic-auth';
 
 import * as articlesController from './controllers/articles';
@@ -258,12 +258,12 @@ export const setupServer = async () => {
   passport.use('x-api-key-secret', apiKeySecretPassportStrategy);
   
   // Initialize swagger-jsdoc -> returns validated swagger spec in json format
-  const swaggerSpec = swaggerJSDoc(require(path.join(__dirname, '../swagger.js')));
+  // const swaggerSpec = swaggerJSDoc(require(path.join(__dirname, '../swagger.js')));
 
   // Write the Swagger spec to a JSON file
   // So the json file always reflects the last API version, so we can easily track changes in git
   const swaggerDocFilePath = path.join(__dirname, '../public/docs/') + 'api-docs.json';
-  writeFileSync(swaggerDocFilePath, JSON.stringify(swaggerSpec, null, 2))
+  // writeFileSync(swaggerDocFilePath, JSON.stringify(swaggerSpec, null, 2))
 
   // Temporary measure to make sure users update
   app.all('*', cors(corsOptions), (req, res, next) => {
