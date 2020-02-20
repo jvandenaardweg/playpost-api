@@ -42,25 +42,6 @@ export class BillingService extends BaseService {
     return products.data;
   }
 
-  async findAllProductsWithPlans(): Promise<Stripe.Product[]> {
-    // Get products an plans together
-    const [products, plans] = await Promise.all([
-      this.stripe.products.list(),
-      this.stripe.plans.list()
-    ]);
-
-    const productsWithPlans = products.data.map(product => {
-      const matchingPlans = plans.data.filter(plan => plan.product === product.id);
-
-      return {
-        ...product,
-        plans: matchingPlans
-      }
-    })
-
-    return productsWithPlans;
-  }
-
   async findOneProduct(stripeProductId: string): Promise<Stripe.Product> {
     const product = await this.stripe.products.retrieve(stripeProductId);
 

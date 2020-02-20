@@ -149,7 +149,7 @@ export class BillingController extends BaseController {
    *                  $ref: '#/components/schemas/StripeProduct'
    */
   public getAllBillingProducts = async (req: Request, res: Response): Promise<Response> => {
-    const response = await this.billingService.findAllProductsWithPlans();
+    const response = await this.billingService.findAllProducts();
 
     return res.json(response);
   };

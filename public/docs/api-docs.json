@@ -181,10 +181,22 @@
             "example": "newpassword!",
             "description": "Password of the user's Playpost account"
           },
-          "orgnaization": {
-            "type": "string",
-            "example": "Playpost",
-            "description": "Optional property to also create an Organization"
+          "organization": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "name": {
+                "type": "string;",
+                "example": "Playpost",
+                "description": "The name of the organization"
+              },
+              "countryId": {
+                "type": "string;",
+                "example": "81d7ae31-3715-4c7b-81b1-0ad36d85c58a",
+                "description": "The ID of the Country the Organization is in.",
+                "nullable": true
+              }
+            }
           }
         }
       },
