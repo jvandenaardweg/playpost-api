@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.6.2",
+    "version": "2.10.9",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -315,6 +315,18 @@
             }
           }
         }
+      },
+      "StripePlan": {
+        "description": "A Stripe Plan. You need to annotate this yourself.",
+        "type": "object"
+      },
+      "StripeProduct": {
+        "description": "A Stripe Product. You need to annotate this yourself.",
+        "type": "object"
+      },
+      "StripeTaxRate": {
+        "description": "A Stripe Tax Rate. You need to annotate this yourself.",
+        "type": "object"
       },
       "ApiKey": {
         "type": "object",
@@ -1529,7 +1541,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan"
+                    "$ref": "#/components/schemas/StripePlan"
                   }
                 }
               }
@@ -1580,7 +1592,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan"
+                  "$ref": "#/components/schemas/StripePlan"
                 }
               }
             }
@@ -1621,7 +1633,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product"
+                    "$ref": "#/components/schemas/StripeProduct"
                   }
                 }
               }
@@ -1672,7 +1684,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product"
+                  "$ref": "#/components/schemas/StripeProduct"
                 }
               }
             }
@@ -1713,7 +1725,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate"
+                    "$ref": "#/components/schemas/StripeTaxRate"
                   }
                 }
               }
@@ -1764,7 +1776,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate"
+                  "$ref": "#/components/schemas/StripeTaxRate"
                 }
               }
             }

@@ -1,0 +1,5 @@
+components:
+  schemas:
+    StripePlan:
+      description: A Stripe Plan. You need to annotate this yourself.
+      type: object

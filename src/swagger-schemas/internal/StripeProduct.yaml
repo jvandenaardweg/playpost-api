@@ -1,0 +1,5 @@
+components:
+  schemas:
+    StripeProduct:
+      description: A Stripe Product. You need to annotate this yourself.
+      type: object

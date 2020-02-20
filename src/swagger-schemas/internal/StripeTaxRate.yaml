@@ -1,0 +1,5 @@
+components:
+  schemas:
+    StripeTaxRate:
+      description: A Stripe Tax Rate. You need to annotate this yourself.
+      type: object

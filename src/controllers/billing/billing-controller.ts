@@ -69,12 +69,12 @@ export class BillingController extends BaseController {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan'
+   *                  $ref: '#/components/schemas/StripePlan'
    */
   public getAllBillingPlans = async (req: Request, res: Response): Promise<Response> => {
-    const response = await this.billingService.findAllPlans();
+    const plans = await this.billingService.findAllPlans();
 
-    return res.json(response);
+    return res.json(plans);
   };
 
   /**
@@ -109,7 +109,7 @@ export class BillingController extends BaseController {
    *          content:
    *            'application/json':
    *              schema:
-   *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/plan'
+   *                $ref: '#/components/schemas/StripePlan'
    */
   public getOneBillingPlan = async (req: Request, res: Response): Promise<Response> => {
     const { stripePlanId } = req.params;
@@ -146,7 +146,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product'
+   *                  $ref: '#/components/schemas/StripeProduct'
    */
   public getAllBillingProducts = async (req: Request, res: Response): Promise<Response> => {
     const response = await this.billingService.findAllProductsWithPlans();
@@ -186,7 +186,7 @@ export class BillingController extends BaseController {
    *          content:
    *            'application/json':
    *              schema:
-   *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/product'
+   *                $ref: '#/components/schemas/StripeProduct'
    */
   public getOneBillingProduct = async (req: Request, res: Response): Promise<Response> => {
     const { stripeProductId } = req.params;
@@ -223,7 +223,7 @@ export class BillingController extends BaseController {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate'
+   *                  $ref: '#/components/schemas/StripeTaxRate'
    */
   public getAllBillingTaxRates = async (req: Request, res: Response): Promise<Response> => {
     const response = await this.billingService.findAllTaxRates();
@@ -263,7 +263,7 @@ export class BillingController extends BaseController {
    *          content:
    *            'application/json':
    *              schema:
-   *                $ref: 'https://raw.githubusercontent.com/stripe/openapi/277f09cbb50007241b4d7e92246f4b09a88ecf08/openapi/spec3.yaml#/components/schemas/tax_rate'
+   *                $ref: '#/components/schemas/StripeTaxRate'
    */
   public getOneBillingTaxRate = async (req: Request, res: Response): Promise<Response> => {
     const { stripeTaxRateId } = req.params;
