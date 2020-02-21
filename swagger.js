@@ -15,31 +15,16 @@ module.exports = {
   openapi: '3.0.3',
   servers: [
     {
-      url: 'http://localhost:3000/{basePath}',
-      description: 'Development server',
-      variables: {
-        basePath: {
-          default: 'v1',
-        },
-      }
+      url: 'http://localhost:3000/v1',
+      description: 'Development server'
     },
     {
-      url: 'https://api.playpost.app/{basePath}',
-      description: 'Production server',
-      variables: {
-        basePath: {
-          default: 'v1',
-        },
-      }
+      url: 'https://api.playpost.app/v1',
+      description: 'Production server'
     },
     {
-      url: 'https://playpost-api-test.herokuapp.com/{basePath}',
-      description: 'Test server',
-      variables: {
-        basePath: {
-          default: 'v1',
-        },
-      }
+      url: 'https://playpost-api-test.herokuapp.com/v1',
+      description: 'Test server'
     }
   ],
   components: {},
