@@ -381,7 +381,7 @@
               "data": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ArticleSummary"
+                  "$ref": "#/components/schemas/Article"
                 }
               }
             }
@@ -476,7 +476,7 @@
           }
         }
       },
-      "ArticleSummary": {
+      "Article": {
         "type": "object",
         "description": "A subset of a complete Article. This Article summary does not include html and ssml.",
         "required": [
@@ -551,6 +551,21 @@
             ],
             "example": "finished"
           },
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "example": "<div><p>the article contents</p></div>"
+          },
+          "ssml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<speak><p>the article contents</p></speak>"
+          },
+          "documentHtml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<html><body><p>the article contents</p></body></html>"
+          },
           "createdAt": {
             "type": "string",
             "example": "2020-02-14T03:30:10.000Z"
@@ -580,33 +595,6 @@
             }
           }
         }
-      },
-      "Article": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ArticleSummary"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "html": {
-                "type": "string",
-                "nullable": true,
-                "example": "<div><p>the article contents</p></div>"
-              },
-              "ssml": {
-                "type": "string",
-                "nullable": true,
-                "example": "<speak><p>the article contents</p></speak>"
-              },
-              "documentHtml": {
-                "type": "string",
-                "nullable": true,
-                "example": "<html><body><p>the article contents</p></body></html>"
-              }
-            }
-          }
-        ]
       },
       "Audiofile": {
         "type": "object",

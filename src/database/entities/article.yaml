@@ -1,7 +1,7 @@
 components:
   schemas:
     
-    ArticleSummary:
+    Article:
       type: object
       description: A subset of a complete Article. This Article summary does not include html and ssml.
       required:
@@ -57,6 +57,18 @@ components:
           type: string
           enum: [crawling, new, finished, failed, draft]
           example: finished
+        html:
+          type: string
+          nullable: true
+          example: <div><p>the article contents</p></div>
+        ssml:
+          type: string
+          nullable: true
+          example: <speak><p>the article contents</p></speak>
+        documentHtml:
+          type: string
+          nullable: true
+          example: <html><body><p>the article contents</p></body></html>
         createdAt:
           type: string
           example: 2020-02-14 03:30:10
@@ -80,24 +92,6 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/User'
-    
-    Article:
-      allOf:
-        - $ref: "#/components/schemas/ArticleSummary"
-        - type: object
-          properties:
-            html:
-              type: string
-              nullable: true
-              example: <div><p>the article contents</p></div>
-            ssml:
-              type: string
-              nullable: true
-              example: <speak><p>the article contents</p></speak>
-            documentHtml:
-              type: string
-              nullable: true
-              example: <html><body><p>the article contents</p></body></html>
         
         
         

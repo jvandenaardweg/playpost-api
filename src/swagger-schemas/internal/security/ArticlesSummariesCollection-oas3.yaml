@@ -8,4 +8,4 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/ArticleSummary'
+                $ref: '#/components/schemas/Article'
