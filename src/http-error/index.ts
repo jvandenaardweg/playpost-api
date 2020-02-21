@@ -14,7 +14,7 @@ export class HttpError extends Error {
 
     Object.setPrototypeOf(this, new.target.prototype);
 
-    logger.error(this.statusCode.toString(), this.message, JSON.stringify(this.details));
+    logger.error('Code:', this.statusCode.toString(), '- Message:', this.message, '- Details:', JSON.stringify(this.details));
 
     Error.captureStackTrace(this);
   }

@@ -6,7 +6,7 @@ import compression from 'compression';
 import cors, { CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
-import ExpressRateLimit from 'express-rate-limit';
+import expressRateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import md5 from 'md5';
 import passport from 'passport';
@@ -17,6 +17,7 @@ import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 // import { writeFileSync } from 'fs';
 import expressBasicAuth from 'express-basic-auth';
+import cookieParser from 'cookie-parser';
 
 import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
@@ -47,6 +48,7 @@ import { HttpStatus } from './http-error';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
+import { createAnonymousUserId, getAnonymousUserId } from './utils/anonymous-user-id';
 
 logger.info('App init:', 'Starting...');
 
@@ -128,28 +130,6 @@ export const setupServer = async () => {
   const IS_PROTECTED_JWT = passport.authenticate(['jwt'], {
     session: false,
     failWithError: true
-  });
-
-  const rateLimited = new ExpressRateLimit({
-    // We'll use the in-memory cache, not Redis
-    windowMs: 1 * 60 * 1000, // 1 minute
-    max: process.env.NODE_ENV === 'production' ? 60 : 999999, // 60 requests allowed per minute, so at most: 1 per second
-    keyGenerator: req => {
-      const authorizationHeaders = req.headers.authorization as string;
-      const ipAddressOfUser = getRealUserIpAddress(req);
-
-      // Create a key based on the authorization headers and the ip address
-      // So we can filter on a per-user basis, so we don't block multiple users behind the same ip address
-      const key = md5(`${authorizationHeaders}${ipAddressOfUser}`);
-
-      return key;
-    },
-    handler: (req, res, next) => {
-      // Send JSON so we can read the message
-      return res.status(429).json({
-        message: 'Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again later.'
-      });
-    }
   });
 
   logger.info('App init:', 'Connecting with database...');
@@ -237,6 +217,78 @@ export const setupServer = async () => {
   // Compress the output
   app.use(compression());
 
+  // Required for our anonymousId for rate limiting
+  app.use(cookieParser());
+
+  // Set the anonymousUserId cookie to track unique users anonymously
+  // Set the sessionId cookie to track sessions of users
+  // To identify individual users behind a shared ip address
+  // Save the cookie for a year
+  // Important: use this app.use BEFORE our rate limiter, so our rate limiter can use the same cookie value
+  app.use('*', (req: Request, res: Response, next: NextFunction) => {
+    const currentAnonymousUserIdCookie = req.cookies.anonymousUserId;
+
+    // If there is no cookie yet, create one
+    if (!currentAnonymousUserIdCookie) {
+      const anonymousUserId = createAnonymousUserId();
+
+      const expiresInDays = 365;
+      const currentDate = new Date();
+      const expires = new Date(currentDate.setTime(currentDate.getTime() + (expiresInDays * 24 * 60 * 60 * 1000)))
+
+      const cookieConfig = {
+        expires,
+        secure: process.env.NODE_ENV === 'production', // Only use secure in production, as we have https there
+        httpOnly: true
+      }
+
+      // Send the cookie to our user
+      res.cookie('anonymousUserId' , anonymousUserId, cookieConfig)
+    }
+
+    // Continue with the request
+    next();
+  });
+
+  const rateLimited = (maxRequestsPerMinute?: number) => expressRateLimit({
+    // We'll use the in-memory cache, not Redis
+    windowMs: 1 * 60 * 1000, // 1 minute
+    // Do not use arrow function here, as "this.keyGenerator" is not available then
+    // tslint:disable-next-line: object-literal-shorthand
+    onLimitReached: function (req, res) {
+      const rateLimitedIp = getRealUserIpAddress(req);
+      const rateLimitedKey = this.keyGenerator ? this.keyGenerator(req, res) : getAnonymousUserId(req);
+      const tryAfterDate = req.rateLimit.resetTime
+      const message = `Rate limit reached on: ${req.method} ${req.path}. Details are logged to Sentry.`;
+
+      // Only log the message when the limit is reached
+      // So we do not flood our error logging
+      Sentry.configureScope(scope => {
+        Sentry.captureMessage(message)
+        scope.setExtra('rateLimitedKey', rateLimitedKey)
+        scope.setExtra('rateLimitedIp', rateLimitedIp)
+        scope.setExtra('tryAfterDate', tryAfterDate)
+        scope.setExtra('req', req)
+      })
+    },
+    max: maxRequestsPerMinute ? maxRequestsPerMinute : 60, // Max 60 request per minute
+    keyGenerator: (req) => getAnonymousUserId(req),
+    // Do not use arrow function here, as "this.keyGenerator" is not available then
+    // tslint:disable-next-line: object-literal-shorthand
+    handler: function (req, res) {
+      const rateLimitedIp = getRealUserIpAddress(req);
+      const rateLimitedKey = this.keyGenerator ? this.keyGenerator(req, res) : getAnonymousUserId(req);
+      const tryAfterDate = req.rateLimit.resetTime;
+      const loggerPrefix = `Rate limit reached on: ${req.method} ${req.path}`;
+  
+      logger.warn(loggerPrefix, `anonymousUserId: ${rateLimitedKey}`, `- IP address: ${rateLimitedIp}`);
+      
+      const message = `Ho, ho. Slow down! It seems like you are doing too many requests. Please cooldown and try again after: ${tryAfterDate}`;
+      
+      return res.status(429).json({ message });
+    }
+  });
+
   // Send API version information
   app.use((req, res, next) => {
     res.append('X-API-Version', version);
@@ -316,83 +368,83 @@ export const setupServer = async () => {
 
   // API Endpoints
 
-  // Public
+  // Public (rate limited)
   // TODO: Use expressBrute to increase the delay between each requests
-  app.post('/v1/auth', authController.postAuth);
-  app.patch('/v1/auth/activate', authController.patchAuthActivate);
-  app.post('/v1/auth/reset/password', authController.postAuthResetPassword); // Send a reset password token to the given email address
-  app.patch('/v1/auth/reset/password', authController.patchAuthResetPassword); // Change the password of the user using a password reset token
+  app.post('/v1/auth', rateLimited(10), authController.postAuth);
+  app.patch('/v1/auth/activate', rateLimited(10), authController.patchAuthActivate);
+  app.post('/v1/auth/reset/password', rateLimited(10), authController.postAuthResetPassword); // Send a reset password token to the given email address
+  app.patch('/v1/auth/reset/password', rateLimited(10), authController.patchAuthResetPassword); // Change the password of the user using a password reset token
 
   // Only used in our mobile app:
-  app.post('/v1/auth/reset-password', authController.postAuthResetPasswordMobile); // Used only for the mobile app
-  app.post('/v1/auth/update-password', authController.postAuthUpdatePasswordMobile); // Used only for the mobile app
+  app.post('/v1/auth/reset-password', rateLimited(10), authController.postAuthResetPasswordMobile); // Used only for the mobile app
+  app.post('/v1/auth/update-password', rateLimited(10), authController.postAuthUpdatePasswordMobile); // Used only for the mobile app
 
-  app.post('/v1/users', usersController.postUsers); // To create user accounts
+  app.post('/v1/users', rateLimited(10), usersController.postUsers); // To create user accounts
 
   // So we can show the correct available countries in a dropdown in public forms
-  app.get('/v1/countries', countriesController.getAllCountries);
+  app.get('/v1/countries', rateLimited, countriesController.getAllCountries);
 
-  app.get('/v1/oembed', oembedController.getAll); // Used by embedly
-  app.get('/v1/status', statusController.getAll);
+  app.get('/v1/status', rateLimited, statusController.getAll);
   app.get('/health', rateLimited, healthController.getHealthStatus);
 
+  app.get('/v1/oembed', oembedController.getAll); // Used by embedly, not rate limited
 
   // Private routes
 
   // /v1/me
   // Used only in our mobile app
-  app.get('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.findCurrentUser);
-  app.patch('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.patchMe);
-  app.post('/v1/me/voices', [rateLimited, IS_PROTECTED_JWT], meController.createSelectedVoice); // Setting the default voice per language for the user
-  app.delete('/v1/me', [rateLimited, IS_PROTECTED_JWT], meController.deleteCurrentUser);
+  app.get('/v1/me', [IS_PROTECTED_JWT], meController.findCurrentUser);
+  app.patch('/v1/me', [IS_PROTECTED_JWT], meController.patchMe);
+  app.post('/v1/me/voices', [IS_PROTECTED_JWT], meController.createSelectedVoice); // Setting the default voice per language for the user
+  app.delete('/v1/me', [IS_PROTECTED_JWT], meController.deleteCurrentUser);
 
   // /v1/me/api-keys
-  app.get('/v1/me/api-keys', [rateLimited, IS_PROTECTED_JWT], meController.findAllApiKeys);
-  app.delete('/v1/me/api-keys/:apiKeyId', [rateLimited, IS_PROTECTED_JWT], meController.deleteApiKey);
-  app.post('/v1/me/api-keys', [rateLimited, IS_PROTECTED_JWT], meController.createApiKey);
+  app.get('/v1/me/api-keys', [IS_PROTECTED_JWT], meController.findAllApiKeys);
+  app.delete('/v1/me/api-keys/:apiKeyId', [IS_PROTECTED_JWT], meController.deleteApiKey);
+  app.post('/v1/me/api-keys', [IS_PROTECTED_JWT], meController.createApiKey);
 
   // /v1/playlist
-  app.get('/v1/playlist', [rateLimited, IS_PROTECTED_JWT], playlistController.findAllPlaylistItems);
-  app.post('/v1/playlist/articles', [rateLimited, IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleUrl);
-  app.post('/v1/playlist/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleId);
-  app.delete('/v1/playlist/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], playlistController.deletePlaylistItem);
-  app.patch('/v1/playlist/articles/:articleId/order', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemOrder);
-  app.patch('/v1/playlist/articles/:articleId/favoritedat', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemFavoritedAt);
-  app.patch('/v1/playlist/articles/:articleId/archivedat', [rateLimited, IS_PROTECTED_JWT], playlistController.patchPlaylistItemArchivedAt);
+  app.get('/v1/playlist', [IS_PROTECTED_JWT], playlistController.findAllPlaylistItems);
+  app.post('/v1/playlist/articles', [IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleUrl);
+  app.post('/v1/playlist/articles/:articleId', [IS_PROTECTED_JWT], playlistController.createPlaylistItemByArticleId);
+  app.delete('/v1/playlist/articles/:articleId', [IS_PROTECTED_JWT], playlistController.deletePlaylistItem);
+  app.patch('/v1/playlist/articles/:articleId/order', [IS_PROTECTED_JWT], playlistController.patchPlaylistItemOrder);
+  app.patch('/v1/playlist/articles/:articleId/favoritedat', [IS_PROTECTED_JWT], playlistController.patchPlaylistItemFavoritedAt);
+  app.patch('/v1/playlist/articles/:articleId/archivedat', [IS_PROTECTED_JWT], playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
   app.get('/v1/articles', IS_PROTECTED_APIKEY, articlesController.findAllArticles);
   app.get('/v1/articles/:articleId', IS_PROTECTED_APIKEY, articlesController.findArticleById);
-  app.put('/v1/articles/:articleId/sync', [rateLimited, IS_PROTECTED_JWT], articlesController.syncArticleWithSource);
-  app.delete('/v1/articles/:articleId', [rateLimited, IS_PROTECTED_JWT], articlesController.deleteById); // Admin only
-  app.get('/v1/articles/:articleId/audiofiles', [rateLimited, IS_PROTECTED_JWT], articlesController.findAudiofileByArticleId);
-  app.post('/v1/articles/:articleId/audiofiles', [rateLimited, IS_PROTECTED_JWT], audiofileController.postOneAudiofile);
+  app.put('/v1/articles/:articleId/sync', [IS_PROTECTED_JWT], articlesController.syncArticleWithSource);
+  app.delete('/v1/articles/:articleId', [IS_PROTECTED_JWT], articlesController.deleteById); // Admin only
+  app.get('/v1/articles/:articleId/audiofiles', [IS_PROTECTED_JWT], articlesController.findAudiofileByArticleId);
+  app.post('/v1/articles/:articleId/audiofiles', [IS_PROTECTED_JWT], audiofileController.postOneAudiofile);
 
   // v1/audiofiles
-  app.get('/v1/audiofiles', [rateLimited, IS_PROTECTED_JWT], audiofileController.findAllAudiofiles);
-  app.delete('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.deleteById); // Admin only
-  app.get('/v1/audiofiles/:audiofileId', [rateLimited, IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
+  app.get('/v1/audiofiles', [IS_PROTECTED_JWT], audiofileController.findAllAudiofiles);
+  app.delete('/v1/audiofiles/:audiofileId', [IS_PROTECTED_JWT], audiofileController.deleteById); // Admin only
+  app.get('/v1/audiofiles/:audiofileId', [IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
 
   // v1/voices
-  app.get('/v1/voices', [rateLimited, IS_PROTECTED_JWT], voicesController.getAllVoices);
-  app.post('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.postOneVoicePreview);
-  app.delete('/v1/voices/:voiceId/preview', [rateLimited, IS_PROTECTED_JWT], voicesController.deleteOneVoicePreview);
+  app.get('/v1/voices', [IS_PROTECTED_JWT], voicesController.getAllVoices);
+  app.post('/v1/voices/:voiceId/preview', [IS_PROTECTED_JWT], voicesController.postOneVoicePreview);
+  app.delete('/v1/voices/:voiceId/preview', [IS_PROTECTED_JWT], voicesController.deleteOneVoicePreview);
 
   // v1/languages
-  app.get('/v1/languages', [rateLimited, IS_PROTECTED_JWT], languagesController.getAllLanguages);
+  app.get('/v1/languages', [IS_PROTECTED_JWT], languagesController.getAllLanguages);
 
   // v1/subscriptions
-  app.get('/v1/in-app-subscriptions', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
-  app.post('/v1/in-app-subscriptions/validate', [rateLimited, IS_PROTECTED_JWT], inAppSubscriptionsController.validateInAppSubscriptionReceipt);
+  app.get('/v1/in-app-subscriptions', [IS_PROTECTED_JWT], inAppSubscriptionsController.findAll);
+  app.post('/v1/in-app-subscriptions/validate', [IS_PROTECTED_JWT], inAppSubscriptionsController.validateInAppSubscriptionReceipt);
 
-  app.get('/v1/in-app-subscriptions/sync', rateLimited, inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
+  app.get('/v1/in-app-subscriptions/sync', inAppSubscriptionsController.syncAllExpiredUserSubscriptions); // Endpoint is used on a cron job, so should be available publically
 
-  app.get('/v1/synthesizers/:synthesizerName/voices', rateLimited, synthesizersController.findAllVoices);
+  app.get('/v1/synthesizers/:synthesizerName/voices', synthesizersController.findAllVoices);
 
   app.post('/v1/analytics/events', IS_PROTECTED_JWT, analyticsController.createEvent);
 
   // Available for all users to see their publications
-  app.get('/v1/publications', IS_PROTECTED_JWT, publicationsController.getAllPublications);
+  app.get('/v1/publications', [IS_PROTECTED_JWT], publicationsController.getAllPublications);
 
   // Restricted to users who are in a publication
   app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOnePublication);
@@ -405,20 +457,20 @@ export const setupServer = async () => {
   app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteOnePublicationArticle);
 
-  app.get('/v1/billing', IS_PROTECTED_JWT, billingController.getBillingIndex);
-  app.get('/v1/billing/plans', IS_PROTECTED_JWT, billingController.getAllBillingPlans);
-  app.get('/v1/billing/plans/:stripePlanId', IS_PROTECTED_JWT, billingController.getOneBillingPlan);
-  app.get('/v1/billing/products', IS_PROTECTED_JWT, billingController.getAllBillingProducts);
-  app.get('/v1/billing/products/:stripeProductId', IS_PROTECTED_JWT, billingController.getOneBillingProduct);
-  app.get('/v1/billing/tax-rates', IS_PROTECTED_JWT, billingController.getAllBillingTaxRates);
-  app.get('/v1/billing/tax-rates/:stripeTaxRateId', IS_PROTECTED_JWT, billingController.getOneBillingTaxRate);
+  app.get('/v1/billing', [IS_PROTECTED_JWT], billingController.getBillingIndex);
+  app.get('/v1/billing/plans', [IS_PROTECTED_JWT], billingController.getAllBillingPlans);
+  app.get('/v1/billing/plans/:stripePlanId', [IS_PROTECTED_JWT], billingController.getOneBillingPlan);
+  app.get('/v1/billing/products', [IS_PROTECTED_JWT], billingController.getAllBillingProducts);
+  app.get('/v1/billing/products/:stripeProductId', [IS_PROTECTED_JWT], billingController.getOneBillingProduct);
+  app.get('/v1/billing/tax-rates', [IS_PROTECTED_JWT], billingController.getAllBillingTaxRates);
+  app.get('/v1/billing/tax-rates/:stripeTaxRateId', [IS_PROTECTED_JWT], billingController.getOneBillingTaxRate);
 
   // Not Stripe related
-  app.post('/v1/billing/tax-number/validate', IS_PROTECTED_JWT, billingController.postOneBillingTaxNumberValidation);
-  app.get('/v1/billing/sales-tax/:countryCode', IS_PROTECTED_JWT, billingController.getOneBillingSalesTax);
+  app.post('/v1/billing/tax-number/validate', [IS_PROTECTED_JWT], billingController.postOneBillingTaxNumberValidation);
+  app.get('/v1/billing/sales-tax/:countryCode', [IS_PROTECTED_JWT], billingController.getOneBillingSalesTax);
 
   // Available for all users to see their organizations
-  app.get('/v1/organizations', IS_PROTECTED_JWT, organizationsController.permissions(['user']), organizationsController.getAll);
+  app.get('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.getAll);
 
   // Organization: Info
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOne);
@@ -470,7 +522,7 @@ export const setupServer = async () => {
 
   // Catch all
   // Should be the last route
-  app.all('*', notFoundController.getAllNotFound);
+  app.all('*', rateLimited, notFoundController.getAllNotFound);
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
