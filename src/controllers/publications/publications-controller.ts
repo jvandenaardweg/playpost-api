@@ -13,7 +13,7 @@ import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
-import { PublicationResponse, AudioPreview } from './types';
+import { PublicationResponse, AudioPreview, PostImportArticleRequestBody, PostOnePreviewArticleSSMLRequestBody, PatchOnePublicationArticleRequestBody } from './types';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -285,7 +285,7 @@ export class PublicationsController extends BaseController {
    */
   public postOnePublicationImportArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
-    const { url } = req.body;
+    const { url } = req.body as PostImportArticleRequestBody;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),
@@ -564,9 +564,6 @@ export class PublicationsController extends BaseController {
   }
 
   /**
-   * Previews a small ssml paragraph.
-   */
-  /**
    * @swagger
    *
    *  /publications/{publicationId}/articles/{articleId}/preview-ssml:
@@ -574,7 +571,7 @@ export class PublicationsController extends BaseController {
    *      operationId: postOnePublicationPreviewSSML
    *      tags:
    *        - publications
-   *      summary: Get a single article of a publication.
+   *      summary: Generate a audio preview using SSML.
    *      security:
    *        - BearerAuth: []
    *        - ApiKeyAuth: []
@@ -614,7 +611,7 @@ export class PublicationsController extends BaseController {
    */
   public postOnePublicationPreviewSSML = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
-    const { ssml, voiceId } = req.body;
+    const { ssml, voiceId } = req.body as PostOnePreviewArticleSSMLRequestBody;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),
@@ -674,8 +671,50 @@ export class PublicationsController extends BaseController {
     return res.json(response)
   }
 
+  /**
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles/{articleId}:
+   *    patch:
+   *      operationId: patchOnePublicationArticle
+   *      tags:
+   *        - publications
+   *      summary: Patches one article.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *        - in: path
+   *          name: articleId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Article.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PatchOnePublicationArticleRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        204:
+   *          description: An empty success response
+   */
   public patchOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { articleId, publicationId } = req.params;
+    const requestBody = req.body as PatchOnePublicationArticleRequestBody;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),
@@ -684,18 +723,16 @@ export class PublicationsController extends BaseController {
       // All properties are optional so we can just update a single property
       url: joi.string().uri().optional(),
       title: joi.string().optional(),
-      canonicalUrl: joi.string().optional(),
       status: joi.string().valid('draft', 'finished').lowercase().optional(),
-      readingTime: joi.number().optional(),
-      html: joi.string().optional(),
       ssml: joi.string().optional(),
-      sourceName: joi.string().optional(),
-      imageUrl: joi.string().uri().optional(),
       description: joi.string().optional(),
+      sourceName: joi.string().optional(),
       authorName: joi.string().optional(),
+      imageUrl: joi.string().uri().optional(),
+      html: joi.string().optional()
     });
 
-    const userValidationResult = validationSchema.validate({ ...req.body, ...req.params }, {
+    const userValidationResult = validationSchema.validate({ ...requestBody, ...req.params }, {
       allowUnknown: false // Do not allow other properties to be updated
     });
 
@@ -704,7 +741,7 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
-    if (!Object.keys(req.body).length) {
+    if (!Object.keys(requestBody).length) {
       throw new HttpError(HttpStatus.BadRequest, 'Nothing to update.');
     }
 
@@ -723,14 +760,16 @@ export class PublicationsController extends BaseController {
     const updatedArticleProperties = new Article();
 
     // Only add the updated properties
-    Object.keys(req.body).map(property => {
-      updatedArticleProperties[property] = req.body[property];
+    Object.keys(requestBody).map(property => {
+      updatedArticleProperties[property] = requestBody[property];
     });
 
     // TODO: if html/ssml changes, also create a new audiofile?
 
     await this.articleService.update(articleId, updatedArticleProperties);
 
+    // Send no content, make the API consumer request the Article using the article endpoint
+    // So we can leverage proper caching
     return res.status(HttpStatus.NoContent).send()
 
   }

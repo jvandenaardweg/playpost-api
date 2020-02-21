@@ -35,4 +35,43 @@ components:
           type: string
           example: e7e4c3f7-d681-4bb9-957a-a1cbe046cab0
           description: The UUID of the Voice to be used for this preview.
-          
+
+    PatchOnePublicationArticleRequestBody:
+      type: object
+      properties:
+        title: 
+          type: string
+          nullable: true
+          example: Big Bang Theory Season 13 Confirmed! Here’s What We Know
+        description: 
+          type: string
+          nullable: true
+          example: After running the series for twelve consecutive years, the show aired its last season in May 2019. Since the inception of the series in 2007, the show has made a considerably huge fan base. The show...
+        url:
+          type: string
+          nullable: false
+          example: https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know
+        sourceName:
+          type: string
+          nullable: true
+          example: The Digital Weekly
+        imageUrl:
+          type: string
+          nullable: true
+          example: https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg
+        authorName:
+          type: number
+          nullable: true
+          example: HARSH VARDHAN
+        status:
+          type: string
+          enum: [crawling, new, finished, failed, draft]
+          example: finished
+        html:
+          type: string
+          nullable: true
+          example: <div><p>the article contents</p></div>
+        ssml:
+          type: string
+          nullable: true
+          example: <speak><p>the article contents</p></speak>

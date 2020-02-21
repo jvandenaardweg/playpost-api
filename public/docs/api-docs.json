@@ -209,6 +209,62 @@
           }
         }
       },
+      "PatchOnePublicationArticleRequestBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "Big Bang Theory Season 13 Confirmed! Here’s What We Know"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "After running the series for twelve consecutive years, the show aired its last season in May 2019. Since the inception of the series in 2007, the show has made a considerably huge fan base. The show..."
+          },
+          "url": {
+            "type": "string",
+            "nullable": false,
+            "example": "https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know"
+          },
+          "sourceName": {
+            "type": "string",
+            "nullable": true,
+            "example": "The Digital Weekly"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg"
+          },
+          "authorName": {
+            "type": "number",
+            "nullable": true,
+            "example": "HARSH VARDHAN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "crawling",
+              "new",
+              "finished",
+              "failed",
+              "draft"
+            ],
+            "example": "finished"
+          },
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "example": "<div><p>the article contents</p></div>"
+          },
+          "ssml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<speak><p>the article contents</p></speak>"
+          }
+        }
+      },
       "PostUsersRequestBody": {
         "type": "object",
         "required": [
@@ -2329,6 +2385,65 @@
             "$ref": "#/components/responses/NotFoundError"
           }
         }
+      },
+      "patch": {
+        "operationId": "patchOnePublicationArticle",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Patches one article.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          },
+          {
+            "in": "path",
+            "name": "articleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Article."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOnePublicationArticleRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "An empty success response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
       }
     },
     "/publications/{publicationId}/import/article": {
@@ -2401,7 +2516,7 @@
         "tags": [
           "publications"
         ],
-        "summary": "Get a single article of a publication.",
+        "summary": "Generate a audio preview using SSML.",
         "security": [
           {
             "BearerAuth": []
