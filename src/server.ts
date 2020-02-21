@@ -39,6 +39,7 @@ import { UserController } from './controllers/user/user-controller';
 import { CountriesController } from './controllers/countries/countries-controller';
 import { AuthController } from './controllers/auth/auth-controller';
 import { VoicesController } from './controllers/voices/voices-controller';
+import { ApiKeysController } from './controllers/api-keys/api-keys-controller';
 
 import { connectionOptions } from './database/connection-options';
 import { HttpStatus } from './http-error';
@@ -360,7 +361,8 @@ export const setupServer = async () => {
   const notFoundController = new NotFoundController();
   const countriesController = new CountriesController();
   const authController = new AuthController();
-  const voicesController = new VoicesController()
+  const voicesController = new VoicesController();
+  const apiKeysController = new ApiKeysController()
 
 
   // API Endpoints
@@ -395,10 +397,10 @@ export const setupServer = async () => {
   app.post('/v1/me/voices', [IS_PROTECTED_JWT], meController.createSelectedVoice); // Setting the default voice per language for the user
   app.delete('/v1/me', [IS_PROTECTED_JWT], meController.deleteCurrentUser);
 
-  // /v1/me/api-keys
-  app.get('/v1/me/api-keys', [IS_PROTECTED_JWT], meController.findAllApiKeys);
-  app.delete('/v1/me/api-keys/:apiKeyId', [IS_PROTECTED_JWT], meController.deleteApiKey);
-  app.post('/v1/me/api-keys', [IS_PROTECTED_JWT], meController.createApiKey);
+  // /v1/api-keys
+  app.get('/v1/api-keys', [IS_PROTECTED_JWT], apiKeysController.getAllApiKeys);
+  app.delete('/v1/api-keys/:apiKeyId', [IS_PROTECTED_JWT], apiKeysController.deleteOneApiKey);
+  app.post('/v1/api-keys', [IS_PROTECTED_JWT], apiKeysController.postOneApiKey);
 
   // /v1/playlist
   app.get('/v1/playlist', [IS_PROTECTED_JWT], playlistController.findAllPlaylistItems);

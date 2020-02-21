@@ -4,7 +4,6 @@ import { Request, Response } from 'express';
 import { getConnection, getCustomRepository, getRepository, Repository } from 'typeorm';
 
 import * as inAppSubscriptionsController from '../controllers/in-app-subscriptions';
-import { ApiKey } from '../database/entities/api-key';
 import { User } from '../database/entities/user';
 import { UserVoiceSetting } from '../database/entities/user-voice-setting';
 import { Voice } from '../database/entities/voice';
@@ -21,16 +20,12 @@ export class MeController {
   customUserRepository: UserRepository
   userVoiceSettingRepository: Repository<UserVoiceSetting>
   voiceRepository: Repository<Voice>
-  apiKeyRepository: Repository<ApiKey>
-  apiKeyEntity: typeof ApiKey
   userEntity: typeof User
 
   constructor() {
     this.customUserRepository = getCustomRepository(UserRepository)
     this.userVoiceSettingRepository = getRepository(UserVoiceSetting)
     this.voiceRepository = getRepository(Voice)
-    this.apiKeyRepository = getRepository(ApiKey)
-    this.apiKeyEntity = ApiKey
     this.userEntity = User
   }
 
@@ -250,111 +245,4 @@ export class MeController {
       return res.status(400).json({ message: errorMessage });
     }
   };
-
-  /**
-   * Returns all the API keys of the user.
-   *
-   */
-  findAllApiKeys = async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-
-    const userKeys = await this.apiKeyRepository.find({
-      user: {
-        id: userId
-      }
-    });
-
-    return res.json(userKeys);
-  };
-
-  /**
-   * Method to delete an API Key from the database.
-   * This could only be done by the owner of the API key.
-   *
-   * @param req
-   * @param res
-   */
-  deleteApiKey = async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const { apiKeyId } = req.params;
-
-    const validationSchema = joi.object().keys({
-      apiKeyId: joi.string().uuid().required()
-    });
-
-    const { error } = validationSchema.validate(req.params);
-
-    if (error) {
-      const messageDetails = error.details.map(detail => detail.message).join(' and ');
-      return res.status(400).json({ message: messageDetails });
-    }
-
-    // Verify if the user has access to that key
-    const existingKey = await this.apiKeyRepository.findOne(apiKeyId, {
-      where: {
-        user: {
-          id: userId
-        }
-      }
-    })
-
-    if (!existingKey) {
-      return res.status(400).json({ message: 'API key could not be found, or you do not have access to use this API key.' });
-    }
-
-    await this.apiKeyRepository.remove(existingKey);
-
-    return res.json({ message: 'API Key is successfully deleted!' });
-  };
-
-  /**
-   * Method to delete an API Key from the database.
-   * This could only be done by the owner of the API key.
-   *
-   * @param req
-   * @param res
-   */
-  createApiKey = async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const { label, allowedDomain } = req.body;
-
-    const validationSchema = joi.object().keys({
-      label: joi.string().required(),
-      allowedDomain: joi.string().optional()
-    });
-
-    const { error } = validationSchema.validate(req.body);
-
-    if (error) {
-      const messageDetails = error.details.map(detail => detail.message).join(' and ');
-      return res.status(400).json({ message: messageDetails });
-    }
-
-    // IMPORTANT: Only show this "apiKey" and "apiSecret" to the user ONCE
-    const apiKey = this.apiKeyEntity.generateApiKey();
-    const apiSecret = this.apiKeyEntity.generateApiSecret();
-
-    // Store the signature in our database, so we can compare the user's API Key and API Secret when they send it to our server
-    const signature = this.apiKeyEntity.generateApiKeySignature(apiKey, apiSecret);
-
-    const normalizedAllowedDomain = allowedDomain ? allowedDomain.toLowerCase() : undefined;
-
-    const apiKeyToCreate = this.apiKeyRepository.create({
-      key: apiKey,
-      signature,
-      allowedDomain: normalizedAllowedDomain,
-      label,
-      user: {
-        id: userId
-      }
-    });
-
-    await this.apiKeyRepository.save(apiKeyToCreate);
-
-    return res.json({
-      apiKey,
-      apiSecret
-    });
-  };
-
 }

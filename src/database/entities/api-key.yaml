@@ -4,6 +4,13 @@ components:
       type: object
       required:
         - id
+        - label
+        - key
+        - lastUsedAt
+        - lastUsedIpAddress
+        - allowedDomain
+        - createdAt
+        - updatedAt
       properties:
         id: 
           type: string

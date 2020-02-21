@@ -42,6 +42,10 @@ module.exports = {
       description: '(public) Countries related endpoints.'
     },
     {
+      name: 'api-keys',
+      description: 'API Key related endpoints.'
+    },
+    {
       name: 'billing',
       description: 'Billing related endpoints. Mostly Stripe.'
     },

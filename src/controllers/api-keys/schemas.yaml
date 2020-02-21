@@ -1,0 +1,18 @@
+components:
+  schemas:
+    
+    PostOneApiKeyRequestBody:
+      type: object
+      required:
+        - label
+      properties:
+        label: 
+          type: string
+          nullable: true
+          example: Playpost App
+          description: A label to remember why this API Key is created
+        allowedDomain:
+          type: string
+          nullable: true
+          example: playpost.app
+          description: Restrict API access to only this given domain

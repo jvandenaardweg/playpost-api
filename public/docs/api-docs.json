@@ -27,6 +27,26 @@
   ],
   "components": {
     "schemas": {
+      "PostOneApiKeyRequestBody": {
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "example": "Playpost App",
+            "description": "A label to remember why this API Key is created"
+          },
+          "allowedDomain": {
+            "type": "string",
+            "nullable": true,
+            "example": "playpost.app",
+            "description": "Restrict API access to only this given domain"
+          }
+        }
+      },
       "PostAuthRequestBody": {
         "type": "object",
         "required": [
@@ -518,7 +538,14 @@
       "ApiKey": {
         "type": "object",
         "required": [
-          "id"
+          "id",
+          "label",
+          "key",
+          "lastUsedAt",
+          "lastUsedIpAddress",
+          "allowedDomain",
+          "createdAt",
+          "updatedAt"
         ],
         "properties": {
           "id": {
@@ -1496,6 +1523,10 @@
       "description": "(public) Countries related endpoints."
     },
     {
+      "name": "api-keys",
+      "description": "API Key related endpoints."
+    },
+    {
       "name": "billing",
       "description": "Billing related endpoints. Mostly Stripe."
     },
@@ -1517,6 +1548,137 @@
     }
   ],
   "paths": {
+    "/api-keys": {
+      "get": {
+        "operationId": "getAllApiKeys",
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Get the user's API Key's",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of API Key's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKey"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOneApiKey",
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Creates an API Key for the user",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOneApiKeyRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One API Key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKey"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/api-keys/{apiKeyId}": {
+      "delete": {
+        "operationId": "deleteOneApiKey",
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Deletes a API key",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "apiKeyId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of a API Key"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "An empty success response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/auth": {
       "post": {
         "operationId": "postAuth",
