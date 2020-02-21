@@ -379,7 +379,7 @@ export class OrganizationsController extends BaseController {
     const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
 
     if (!customerSubscriptions) {
-      return res.status(HttpStatus.NoContent).json(customerSubscriptions);
+      return res.json([]);
     }
 
     return res.json(customerSubscriptions);
@@ -524,6 +524,12 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
     }
 
+    const isAlreadySubscribed = stripeCustomer.subscriptions && stripeCustomer.subscriptions.data.some(subscription => subscription.plan && subscription.plan.id === stripePlanId);
+
+    if (isAlreadySubscribed) {
+      throw new HttpError(HttpStatus.Conflict, 'You are already subscribed to this subscription plan.');
+    }
+
     // Make sure the customer has a default payment method
     if (!stripeCustomer.invoice_settings.default_payment_method) {
       throw new HttpError(HttpStatus.NotFound, 'Customer has no default payment method.');
@@ -590,7 +596,7 @@ export class OrganizationsController extends BaseController {
 
     // If we end up here, the payment method is changed.
 
-    return res.json(attachPaymentMethodResponse);
+    return res.status(HttpStatus.Created).json(attachPaymentMethodResponse);
   };
 
   public getOneCustomerSetupIntent = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
@@ -615,7 +621,7 @@ export class OrganizationsController extends BaseController {
     
     const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
 
-    return res.json(customerTaxIds);
+    return res.status(HttpStatus.Created).json(customerTaxIds);
   }
 
   public deleteOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {

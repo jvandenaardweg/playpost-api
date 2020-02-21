@@ -112,7 +112,7 @@ export class VoicesController extends BaseController {
   
     const updatedVoice = await voiceRepository.createVoicePreview(voiceId);
   
-    return res.json(updatedVoice);
+    return res.status(HttpStatus.Created).json(updatedVoice);
   };
   
   /**

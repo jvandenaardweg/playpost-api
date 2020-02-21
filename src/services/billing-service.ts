@@ -78,6 +78,11 @@ export class BillingService extends BaseService {
     return taxRate;
   }
 
+  /**
+   * Get's a Customer from Stripe. This Customer object includes the active subscription.
+   * 
+   * @param stripeCustomerId 
+   */
   async findOneCustomer(stripeCustomerId: string): Promise<Stripe.Customer | Stripe.DeletedCustomer> {
     const customer = await this.stripe.customers.retrieve(stripeCustomerId);
 

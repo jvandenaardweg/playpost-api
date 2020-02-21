@@ -178,6 +178,6 @@ export class ApiKeysController extends BaseController {
 
     const createdApiKey = await this.apiKeysService.createOne(newApiKey);
 
-    return res.json(createdApiKey);
+    return res.status(HttpStatus.Created).json(createdApiKey);
   };
 }

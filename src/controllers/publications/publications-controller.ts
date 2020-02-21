@@ -425,7 +425,7 @@ export class PublicationsController extends BaseController {
 
     // TODO: create an article with the publication as an owner of that article
 
-    return res.json({ message: 'should add new article', publicationId, requestBody: req.body });
+    return res.status(HttpStatus.Created).json({ message: 'should add new article', publicationId, requestBody: req.body });
   }
 
   /**
@@ -602,7 +602,7 @@ export class PublicationsController extends BaseController {
       isMetered: true // Sends metered usage to Stripe
     })
 
-    return res.json(createdAudiofile)
+    return res.status(HttpStatus.Created).json(createdAudiofile)
   }
 
   /**
@@ -710,7 +710,7 @@ export class PublicationsController extends BaseController {
     const response: AudioPreview = {
       audio: audioBase64String
     }
-    return res.json(response)
+    return res.status(HttpStatus.Created).json(response)
   }
 
   /**
