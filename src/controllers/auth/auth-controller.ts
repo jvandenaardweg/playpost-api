@@ -61,7 +61,7 @@ export class AuthController extends BaseController {
 
       logger.error(loggerPrefix, message);
       
-      throw new HttpError(HttpStatus.BadRequest, message);
+      throw new HttpError(HttpStatus.BadRequest, message, error.details);
     }
 
     logger.info(loggerPrefix, 'Starting...');
@@ -173,7 +173,7 @@ export class AuthController extends BaseController {
       const message = error.details.map(detail => detail.message).join(' and ');
   
       logger.error(loggerPrefix, message);
-      throw new HttpError(HttpStatus.BadRequest, message);
+      throw new HttpError(HttpStatus.BadRequest, message, error.details);
     }
   
     const user = await this.usersService.findOneByEmail(email);
@@ -219,7 +219,7 @@ export class AuthController extends BaseController {
     // `;
   
     const htmlBody = `
-      <h1>Reset your password</h1>
+      <h2>Reset your password</h2>
       <p>You have requested to reset your password. You can use the code below to change your password within the Playpost App.</p>
       <p>Your reset password code:<br /><h1><strong>${resetPasswordToken}</strong></h1></p>
       <p>Copy and paste this in the Playpost App.</p>
@@ -288,7 +288,7 @@ export class AuthController extends BaseController {
 
       logger.error(loggerPrefix, message);
 
-      throw new HttpError(HttpStatus.BadRequest, message);
+      throw new HttpError(HttpStatus.BadRequest, message, error.details);
     }
 
     const user = await this.usersService.findOneByResetPasswordToken(resetPasswordToken);
@@ -388,11 +388,10 @@ export class AuthController extends BaseController {
     await this.usersService.updateResetPasswordToken(user.id, resetPasswordToken, new Date());
 
     const htmlBody = `
-      <h1>Forgot your password?</h1>
+      <h2>Forgot your password?</h2>
       <p>We got a request to change the password for your Playpost account.</p>
-      <p>If you don't want to reset your password, you can ignore this email.</p>
       <a href="${process.env.PUBLISHERS_BASE_URL}/auth/forgot/${resetPasswordToken}">Reset your password</a>
-      <p>If you didn't request this change, you may want to review your account security.</p>
+      <p>If you didn't request this change, you can ignore this email, but you may want to review your account security.</p>
       <p>Need more help? E-mail us at info@playpost.app or reply to this e-mail. We are happy to help you!</p>
     `;
 
