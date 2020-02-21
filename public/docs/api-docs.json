@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.26",
+    "version": "2.10.27",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -1507,16 +1507,16 @@
       "description": "(public) Endpoint for the currently logged in user."
     },
     {
+      "name": "countries",
+      "description": "(public) Countries related endpoints."
+    },
+    {
       "name": "billing",
       "description": "Billing related endpoints. Mostly Stripe."
     },
     {
       "name": "publications",
       "description": "Publications related endpoints."
-    },
-    {
-      "name": "countries",
-      "description": "Countries related endpoints."
     },
     {
       "name": "languages",
@@ -2139,15 +2139,6 @@
           "countries"
         ],
         "summary": "Get all countries",
-        "security": [
-          {
-            "BearerAuth": []
-          },
-          {
-            "ApiKeyAuth": [],
-            "ApiSecretAuth": []
-          }
-        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/CountriesResponse"
