@@ -34,6 +34,14 @@ export class ArticleService extends BaseService {
     });
   }
 
+  public findOneByIdFull = (articleId: string, options: FindOneOptions<Article> | undefined) => {
+    return this.articleRepository.findOne(articleId, {
+      ...options,
+      select: ['id', 'ssml', 'html', 'language', 'canonicalUrl', 'compatibilityMessage', 'createdAt', 'updatedAt', 'description', 'imageUrl', 'isCompatible', 'authorName', 'readingTime', 'sourceName', 'status', 'title'],
+      relations: this.defaultRelations
+    });
+  }
+
   public findAllSummaries = async (where: string, parameters: object, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
     const select: (keyof ArticleSummary)[] = [
       'id',

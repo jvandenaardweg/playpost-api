@@ -164,6 +164,48 @@
           }
         }
       },
+      "AudioPreview": {
+        "type": "object",
+        "properties": {
+          "audio": {
+            "type": "string",
+            "format": "byte",
+            "description": "A base64-encoded string containing the audio. If you decode this, you have audio."
+          }
+        }
+      },
+      "PostImportArticleRequestBody": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://www.nu.nl/economie/6032254/mensen-die-vrijwilligerswerk-doen-zijn-gelukkiger.html",
+            "description": "A URL of an article to be imported."
+          }
+        }
+      },
+      "PostOnePreviewArticleSSMLRequestBody": {
+        "type": "object",
+        "required": [
+          "ssml",
+          "voiceId"
+        ],
+        "properties": {
+          "ssml": {
+            "type": "string",
+            "example": "<speak><p>some text to be synthesized</p></speak>",
+            "description": "SSML to be synthesized."
+          },
+          "voiceId": {
+            "type": "string",
+            "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
+            "description": "The UUID of the Voice to be used for this preview."
+          }
+        }
+      },
       "PostUsersRequestBody": {
         "type": "object",
         "required": [
@@ -416,8 +458,9 @@
           }
         }
       },
-      "Article": {
+      "ArticleSummary": {
         "type": "object",
+        "description": "A subset of a complete Article. This Article summary does not include html and ssml.",
         "required": [
           "id",
           "url"
@@ -449,16 +492,10 @@
             "example": "https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know/",
             "description": "The most unique url of an article"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "crawling",
-              "new",
-              "finished",
-              "failed",
-              "draft"
-            ],
-            "example": "finished"
+          "readingTime": {
+            "type": "number",
+            "nullable": true,
+            "example": 147.3
           },
           "sourceName": {
             "type": "string",
@@ -469,11 +506,6 @@
             "type": "string",
             "nullable": true,
             "example": "https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg"
-          },
-          "readingTime": {
-            "type": "number",
-            "nullable": true,
-            "example": 147.3
           },
           "authorName": {
             "type": "number",
@@ -490,20 +522,16 @@
             "nullable": true,
             "example": "The amount of paragraphs is below the minimum length of 3 paragraphs."
           },
-          "html": {
+          "status": {
             "type": "string",
-            "nullable": true,
-            "example": "<div><p>the article contents</p></div>"
-          },
-          "ssml": {
-            "type": "string",
-            "nullable": true,
-            "example": "<speak><p>the article contents</p></speak>"
-          },
-          "documentHtml": {
-            "type": "string",
-            "nullable": true,
-            "example": "<html><body><p>the article contents</p></body></html>"
+            "enum": [
+              "crawling",
+              "new",
+              "finished",
+              "failed",
+              "draft"
+            ],
+            "example": "finished"
           },
           "createdAt": {
             "type": "string",
@@ -532,6 +560,31 @@
             "items": {
               "$ref": "#/components/schemas/User"
             }
+          }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ArticleSummary"
+          }
+        ],
+        "properties": {
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "example": "<div><p>the article contents</p></div>"
+          },
+          "ssml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<speak><p>the article contents</p></speak>"
+          },
+          "documentHtml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<html><body><p>the article contents</p></body></html>"
           }
         }
       },
@@ -849,7 +902,7 @@
           "organization": {
             "type": "object",
             "readOnly": true,
-            "nullable": false,
+            "nullable": true,
             "$ref": "#/components/schemas/Organization"
           }
         }
@@ -1152,6 +1205,16 @@
           }
         }
       },
+      "ArticleSummariesResponse": {
+        "description": "A ArticleSummary collection response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ArticleSummariesCollection"
+            }
+          }
+        }
+      },
       "PostUsersResponse": {
         "description": "A post Users response",
         "content": {
@@ -1256,6 +1319,31 @@
           }
         }
       },
+      "ConflictError": {
+        "description": "A conflict request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 409,
+                  "description": "The HTTP Status code"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "A string message summarizing the error"
+                },
+                "details": {
+                  "type": "object",
+                  "description": "An additional optional object containing more information about the error"
+                }
+              }
+            }
+          }
+        }
+      },
       "UserResponse": {
         "description": "A User response",
         "content": {
@@ -1298,6 +1386,10 @@
     {
       "name": "billing",
       "description": "Billing related endpoints. Mostly Stripe."
+    },
+    {
+      "name": "publications",
+      "description": "Publications related endpoints."
     },
     {
       "name": "countries",
@@ -1981,6 +2073,386 @@
         }
       }
     },
+    "/publications": {
+      "get": {
+        "operationId": "getAllPublications",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Get the Publications the user has access to.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Publication's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Publication"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/publications/{publicationId}": {
+      "get": {
+        "operationId": "getAllPublications",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Get a single Publication the user has access to.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A publication object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Publication"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/publications/{publicationId}/articles": {
+      "get": {
+        "operationId": "getAllPublicationArticles",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Get all the Publication's Article's.",
+        "description": "Returns a summary of Article's. Not the complete article object.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ArticleSummariesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/publications/{publicationId}/articles/{articleId}": {
+      "get": {
+        "operationId": "getOnePublicationArticle",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Get a single article of a publication.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          },
+          {
+            "in": "path",
+            "name": "articleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Article."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A complete Article object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Article"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteOnePublicationArticle",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Delete a single Article of a Publication.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          },
+          {
+            "in": "path",
+            "name": "articleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Article."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "An empty success response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/publications/{publicationId}/import/article": {
+      "post": {
+        "operationId": "postOnePublicationImportArticle",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Import an article in our database using a URL.",
+        "description": "Inserts an article in our database using a URL. Our crawler will fetch the required article contents. Article is stored as a \"draft\", so it's not publicaly available (yet).",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostImportArticleRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A complete Article object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Article"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          }
+        }
+      }
+    },
+    "/publications/{publicationId}/articles/{articleId}/preview-ssml": {
+      "post": {
+        "operationId": "postOnePublicationPreviewSSML",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Get a single article of a publication.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          },
+          {
+            "in": "path",
+            "name": "articleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Article."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOnePreviewArticleSSMLRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A AudioPreview object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/AudioPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/user": {
       "get": {
         "operationId": "getOneUser",
@@ -2203,8 +2675,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "$ref": "#/components/responses/MessageResponse"
+          "204": {
+            "description": "An empty success response"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

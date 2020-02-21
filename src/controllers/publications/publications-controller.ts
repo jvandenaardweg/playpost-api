@@ -13,7 +13,7 @@ import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
-import { PublicationResponse } from './types';
+import { PublicationResponse, AudioPreview } from './types';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -59,22 +59,77 @@ export class PublicationsController extends BaseController {
   }
 
   /**
-   * Get the publications the user has access to.
+   * @swagger
+   *
+   *  /publications:
+   *    get:
+   *      operationId: getAllPublications
+   *      tags:
+   *        - publications
+   *      summary: Get the Publications the user has access to.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Publication's
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Publication'
    */
-  public getAll = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getAllPublications = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const userId = req.user!.id;
-
-    const requestQuery = this.validatePagingParams(req.query);
-    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-    const response = await this.publicationService.findAll(userId, page, perPage, skip, take);
+    const response = await this.publicationService.findAllPublicationsForUser(userId);
 
     return res.json(response);
   }
 
   /**
-   * Get one publication the user has access to.
+   * @swagger
+   *
+   *  /publications/{publicationId}:
+   *    get:
+   *      operationId: getAllPublications
+   *      tags:
+   *        - publications
+   *      summary: Get a single Publication the user has access to.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A publication object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Publication'
    */
-  public getOne = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getOnePublication = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const publicationOfUser = res.locals.publication;
 
     return res.json(publicationOfUser);
@@ -84,7 +139,39 @@ export class PublicationsController extends BaseController {
    * Get all article summaries from a publication.
    * This list includes draft articles, which are not available outside the organization.
    */
-  public getAllArticles = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+
+  /**
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles:
+   *    get:
+   *      operationId: getAllPublicationArticles
+   *      tags:
+   *        - publications
+   *      summary: Get all the Publication's Article's.
+   *      description: Returns a summary of Article's. Not the complete article object.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        '200':
+   *          $ref: '#/components/responses/ArticleSummariesResponse'
+   */
+  public getAllPublicationArticles = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -97,30 +184,106 @@ export class PublicationsController extends BaseController {
   }
 
   /**
-   * Get a single article of a publication.
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles/{articleId}:
+   *    get:
+   *      operationId: getOnePublicationArticle
+   *      tags:
+   *        - publications
+   *      summary: Get a single article of a publication.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *        - in: path
+   *          name: articleId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Article.
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A complete Article object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Article'
    */
-  public getOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
-    const article = await this.articleService.findOneById(articleId, {
+    const fullArticle = await this.articleService.findOneByIdFull(articleId, {
       where: {
         publication: {
           id: publicationId
         }
       },
-      // TODO: make better
-      select: ['id', 'ssml', 'language', 'canonicalUrl', 'compatibilityMessage', 'createdAt', 'updatedAt', 'description', 'imageUrl', 'isCompatible', 'authorName', 'readingTime', 'sourceName', 'status', 'title']
     })
 
-    return res.json(article)
+    return res.json(fullArticle)
   }
 
   /**
-   * Inserts an article in our database using a URL. Our crawler will fetch the required article contents.
-   * Article is stored as a "draft", so it's not publicaly available (yet).
+   * @swagger
    *
+   *  /publications/{publicationId}/import/article:
+   *    post:
+   *      operationId: postOnePublicationImportArticle
+   *      tags:
+   *        - publications
+   *      summary: Import an article in our database using a URL.
+   *      description: 
+   *        Inserts an article in our database using a URL. Our crawler will fetch the required article contents. 
+   *        Article is stored as a "draft", so it's not publicaly available (yet).
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostImportArticleRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        409:
+   *          $ref: '#/components/responses/ConflictError'
+   *        200:
+   *          description: A complete Article object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Article'
    */
-  public postImportArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationImportArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -177,10 +340,12 @@ export class PublicationsController extends BaseController {
 
     const savedArticle = await this.articleService.save(crawledArticle);
 
-    return res.json(savedArticle);
+    const fullArticle = await this.articleService.findOneByIdFull(savedArticle.id, {})
+
+    return res.json(fullArticle);
   };
 
-  public postOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
     const { url } = req.body;
 
@@ -222,9 +387,42 @@ export class PublicationsController extends BaseController {
   }
 
   /**
-   * Deletes a single article from a publication.
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles/{articleId}:
+   *    delete:
+   *      operationId: deleteOnePublicationArticle
+   *      tags:
+   *        - publications
+   *      summary: Delete a single Article of a Publication.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *        - in: path
+   *          name: articleId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Article.
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        204:
+   *          description: An empty success response
    */
-  public deleteOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public deleteOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -261,7 +459,7 @@ export class PublicationsController extends BaseController {
     return res.status(HttpStatus.NoContent).send();
   }
 
-  public postOneAudiofile = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationAudiofile = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
     const { voiceId, organizationId } = req.body;
     const userId = req.user!.id;
@@ -368,7 +566,53 @@ export class PublicationsController extends BaseController {
   /**
    * Previews a small ssml paragraph.
    */
-  public postOnePreviewArticleSSML = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  /**
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles/{articleId}/preview-ssml:
+   *    post:
+   *      operationId: postOnePublicationPreviewSSML
+   *      tags:
+   *        - publications
+   *      summary: Get a single article of a publication.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *        - in: path
+   *          name: articleId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Article.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOnePreviewArticleSSMLRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A AudioPreview object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/AudioPreview'
+   */
+  public postOnePublicationPreviewSSML = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
     const { ssml, voiceId } = req.body;
 
@@ -424,12 +668,13 @@ export class PublicationsController extends BaseController {
       voiceSsmlGender: voice.gender
     });
 
-    return res.json({
+    const response: AudioPreview = {
       audio: audioBase64String
-    })
+    }
+    return res.json(response)
   }
 
-  public patchOneArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public patchOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
     const { articleId, publicationId } = req.params;
 
     const validationSchema = joi.object().keys({

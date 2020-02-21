@@ -7,6 +7,7 @@ import { Voice } from '../../database/entities/voice';
 import { CACHE_ONE_DAY } from '../../constants/cache';
 import { VoiceRepository } from '../../database/repositories/voice';
 import * as storage from '../../storage/google-cloud';
+import { HttpStatus, HttpError } from '../../http-error';
 
 export class VoicesController extends BaseController {
   billingService: BillingService;
@@ -141,8 +142,8 @@ export class VoicesController extends BaseController {
    *          $ref: '#/components/responses/UnauthorizedError'
    *        404:
    *          $ref: '#/components/responses/NotFoundError'
-   *        200:
-   *          $ref: '#/components/responses/MessageResponse'
+   *        204:
+   *          description: An empty success response
    */
   public deleteOneVoicePreview = async (req: Request, res: Response) => {
     const userEmail = req.user!.email;
@@ -160,14 +161,18 @@ export class VoicesController extends BaseController {
   
     if (error) {
       const messageDetails = error.details.map(detail => detail.message).join(' and ');
-      return res.status(400).json({ message: messageDetails });
+      throw new HttpError(HttpStatus.BadRequest, messageDetails, error.details)
     }
   
     const voice = await voiceRepository.findOne(voiceId);
   
-    if (!voice) { return res.status(400).json({ message: 'Voice not found!' }); }
+    if (!voice) { 
+      throw new HttpError(HttpStatus.NotFound, 'Voice not found!')
+    }
   
-    if (!voice.exampleAudioUrl) { return res.status(400).json({ message: 'This voice has no voice preview. Nothing to be deleted!' }); }
+    if (!voice.exampleAudioUrl) { 
+      throw new HttpError(HttpStatus.BadRequest, 'This voice has no voice preview. Nothing to be deleted!')
+    }
   
     // Delete the URL from the voice in the database
     await voiceRepository.update(voiceId, {
@@ -177,7 +182,7 @@ export class VoicesController extends BaseController {
     // Dlete the file from our storage
     await storage.deleteVoicePreview(voiceId);
   
-    return res.json({ message: 'Voice preview is deleted!' });
+    return res.status(HttpStatus.NoContent).send();
   };
 
 }

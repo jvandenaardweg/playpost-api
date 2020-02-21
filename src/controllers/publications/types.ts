@@ -6,3 +6,7 @@ export interface PublicationResponse extends Response {
     publication: Publication;
   }
 }
+
+export interface AudioPreview {
+  audio: string;
+}

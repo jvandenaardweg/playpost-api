@@ -57,6 +57,10 @@ module.exports = {
       description: 'Billing related endpoints. Mostly Stripe.'
     },
     {
+      name: 'publications',
+      description: 'Publications related endpoints.'
+    },
+    {
       name: 'countries',
       description: 'Countries related endpoints.'
     },

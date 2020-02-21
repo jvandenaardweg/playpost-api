@@ -8,6 +8,7 @@ export interface ArticleSummary {
   title?: Article['title'];
   url: Article['url'];
   canonicalUrl?: Article['canonicalUrl'];
+  description?: Article['description'];
   readingTime?: Article['readingTime'];
   sourceName?: Article['sourceName'];
   imageUrl?: Article['imageUrl'];

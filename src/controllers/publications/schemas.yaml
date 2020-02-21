@@ -1,0 +1,36 @@
+components:
+  schemas:
+    
+    AudioPreview:
+      type: object
+      properties:
+        audio:
+          type: string
+          format: byte
+          description: A base64-encoded string containing the audio. If you decode this, you have audio.
+
+    PostImportArticleRequestBody:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          example: https://www.nu.nl/economie/6032254/mensen-die-vrijwilligerswerk-doen-zijn-gelukkiger.html
+          description: A URL of an article to be imported.
+
+    PostOnePreviewArticleSSMLRequestBody:
+      type: object
+      required:
+        - ssml
+        - voiceId
+      properties:
+        ssml:
+          type: string
+          example: <speak><p>some text to be synthesized</p></speak>
+          description: SSML to be synthesized.
+        voiceId:
+          type: string
+          example: e7e4c3f7-d681-4bb9-957a-a1cbe046cab0
+          description: The UUID of the Voice to be used for this preview.
+          

@@ -29,5 +29,5 @@ components:
         organization:
           type: object
           readOnly: true
-          nullable: false
+          nullable: true
           $ref: '#/components/schemas/Organization'

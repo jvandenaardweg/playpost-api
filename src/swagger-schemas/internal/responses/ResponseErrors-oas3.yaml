@@ -44,3 +44,21 @@ components:
               details: 
                 type: object
                 description: An additional optional object containing more information about the error
+
+    ConflictError:
+      description: A conflict request
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 409
+                description: The HTTP Status code
+              message: 
+                type: string
+                description: A string message summarizing the error
+              details: 
+                type: object
+                description: An additional optional object containing more information about the error
