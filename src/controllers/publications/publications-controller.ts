@@ -13,7 +13,7 @@ import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
-import { PublicationResponse, AudioPreview, PostImportArticleRequestBody, PostOnePreviewArticleSSMLRequestBody, PatchOnePublicationArticleRequestBody } from './types';
+import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest } from './types';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -87,7 +87,7 @@ export class PublicationsController extends BaseController {
    *                items:
    *                  $ref: '#/components/schemas/Publication'
    */
-  public getAllPublications = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getAllPublications = async (req: GetAllPublicationsRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const userId = req.user!.id;
     const response = await this.publicationService.findAllPublicationsForUser(userId);
 
@@ -129,7 +129,7 @@ export class PublicationsController extends BaseController {
    *                type: object
    *                $ref: '#/components/schemas/Publication'
    */
-  public getOnePublication = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getOnePublication = async (req: GetOnePublicationRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const publicationOfUser = res.locals.publication;
 
     return res.json(publicationOfUser);
@@ -171,7 +171,7 @@ export class PublicationsController extends BaseController {
    *        '200':
    *          $ref: '#/components/responses/ArticleSummariesResponse'
    */
-  public getAllPublicationArticles = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getAllPublicationArticles = async (req: GetAllPublicationArticlesRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -224,7 +224,7 @@ export class PublicationsController extends BaseController {
    *                type: object
    *                $ref: '#/components/schemas/Article'
    */
-  public getOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getOnePublicationArticle = async (req: GetOnePublicationArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
     const fullArticle = await this.articleService.findOneByIdFull(articleId, {
@@ -283,9 +283,9 @@ export class PublicationsController extends BaseController {
    *                type: object
    *                $ref: '#/components/schemas/Article'
    */
-  public postOnePublicationImportArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationImportArticle = async (req: PostOnePublicationImportArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
-    const { url } = req.body as PostImportArticleRequestBody;
+    const { url } = req.body;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),
@@ -345,10 +345,52 @@ export class PublicationsController extends BaseController {
     return res.json(fullArticle);
   };
 
-  public postOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  /**
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles:
+   *    post:
+   *      operationId: postOnePublicationArticle
+   *      tags:
+   *        - publications
+   *      summary: Creates an Article
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOnePublicationArticleRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        409:
+   *          $ref: '#/components/responses/ConflictError'
+   *        200:
+   *          description: A complete Article object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Article'
+   */
+  public postOnePublicationArticle = async (req: PostOnePublicationArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
-    const { url } = req.body;
 
+    // TODO: check if validation is right
     const validationSchema = joi.object().keys({
       title: joi.string().required(),
       description: joi.string().required(),
@@ -383,7 +425,7 @@ export class PublicationsController extends BaseController {
 
     // TODO: create an article with the publication as an owner of that article
 
-    return res.json({ message: 'ok', url, publicationId });
+    return res.json({ message: 'should add new article', publicationId, requestBody: req.body });
   }
 
   /**
@@ -422,7 +464,7 @@ export class PublicationsController extends BaseController {
    *        204:
    *          description: An empty success response
    */
-  public deleteOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public deleteOnePublicationArticle = async (req: DeleteOnePublicationArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
 
     const validationSchema = joi.object().keys({
@@ -459,7 +501,7 @@ export class PublicationsController extends BaseController {
     return res.status(HttpStatus.NoContent).send();
   }
 
-  public postOnePublicationAudiofile = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationAudiofile = async (req: PostOnePublicationAudiofileRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
     const { voiceId, organizationId } = req.body;
     const userId = req.user!.id;
@@ -609,9 +651,9 @@ export class PublicationsController extends BaseController {
    *                type: object
    *                $ref: '#/components/schemas/AudioPreview'
    */
-  public postOnePublicationPreviewSSML = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public postOnePublicationPreviewSSML = async (req: PostOnePublicationPreviewSSMLRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
-    const { ssml, voiceId } = req.body as PostOnePreviewArticleSSMLRequestBody;
+    const { ssml, voiceId } = req.body;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),
@@ -712,9 +754,9 @@ export class PublicationsController extends BaseController {
    *        204:
    *          description: An empty success response
    */
-  public patchOnePublicationArticle = async (req: Request, res: PublicationResponse): Promise<PublicationResponse> => {
+  public patchOnePublicationArticle = async (req: PatchOnePublicationArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { articleId, publicationId } = req.params;
-    const requestBody = req.body as PatchOnePublicationArticleRequestBody;
+    const requestBody = req.body;
 
     const validationSchema = joi.object().keys({
       publicationId: joi.string().uuid().required(),

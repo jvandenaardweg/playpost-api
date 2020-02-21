@@ -265,6 +265,62 @@
           }
         }
       },
+      "PostOnePublicationArticleRequestBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "Big Bang Theory Season 13 Confirmed! Here’s What We Know"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "After running the series for twelve consecutive years, the show aired its last season in May 2019. Since the inception of the series in 2007, the show has made a considerably huge fan base. The show..."
+          },
+          "url": {
+            "type": "string",
+            "nullable": false,
+            "example": "https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know"
+          },
+          "sourceName": {
+            "type": "string",
+            "nullable": true,
+            "example": "The Digital Weekly"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg"
+          },
+          "authorName": {
+            "type": "number",
+            "nullable": true,
+            "example": "HARSH VARDHAN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "crawling",
+              "new",
+              "finished",
+              "failed",
+              "draft"
+            ],
+            "example": "finished"
+          },
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "example": "<div><p>the article contents</p></div>"
+          },
+          "ssml": {
+            "type": "string",
+            "nullable": true,
+            "example": "<speak><p>the article contents</p></speak>"
+          }
+        }
+      },
       "PostUsersRequestBody": {
         "type": "object",
         "required": [
@@ -2273,6 +2329,67 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOnePublicationArticle",
+        "tags": [
+          "publications"
+        ],
+        "summary": "Creates an Article",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The UUID of a Publication."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOnePublicationArticleRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A complete Article object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Article"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
           }
         }
       }
