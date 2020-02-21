@@ -8,14 +8,11 @@ import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
 import expressRateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import md5 from 'md5';
 import passport from 'passport';
 import responseTime from 'response-time';
 import { createConnection } from 'typeorm';
-// import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-// import { writeFileSync } from 'fs';
 import expressBasicAuth from 'express-basic-auth';
 import cookieParser from 'cookie-parser';
 
@@ -264,7 +261,7 @@ export const setupServer = async () => {
       // Only log the message when the limit is reached
       // So we do not flood our error logging
       Sentry.configureScope(scope => {
-        Sentry.captureMessage(message)
+        Sentry.captureMessage(message, Sentry.Severity.Critical)
         scope.setExtra('rateLimitedKey', rateLimitedKey)
         scope.setExtra('rateLimitedIp', rateLimitedIp)
         scope.setExtra('tryAfterDate', tryAfterDate)
