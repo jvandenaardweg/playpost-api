@@ -379,10 +379,10 @@ export const setupServer = async () => {
   app.post('/v1/users', rateLimited(10), usersController.postUsers); // To create user accounts
 
   // So we can show the correct available countries in a dropdown in public forms
-  app.get('/v1/countries', rateLimited, countriesController.getAllCountries);
+  app.get('/v1/countries', rateLimited(), countriesController.getAllCountries);
 
-  app.get('/v1/status', rateLimited, statusController.getAll);
-  app.get('/health', rateLimited, healthController.getHealthStatus);
+  app.get('/v1/status', rateLimited(), statusController.getAll);
+  app.get('/health', rateLimited(), healthController.getHealthStatus);
 
   app.get('/v1/oembed', oembedController.getAll); // Used by embedly, not rate limited
 
@@ -519,7 +519,7 @@ export const setupServer = async () => {
 
   // Catch all
   // Should be the last route
-  app.all('*', rateLimited, notFoundController.getAllNotFound);
+  app.all('*', rateLimited(), notFoundController.getAllNotFound);
 
   // Handle error exceptions
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
