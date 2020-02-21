@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.18",
+    "version": "2.10.19",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -2117,7 +2117,7 @@
     },
     "/publications/{publicationId}": {
       "get": {
-        "operationId": "getAllPublications",
+        "operationId": "getOnePublication",
         "tags": [
           "publications"
         ],
