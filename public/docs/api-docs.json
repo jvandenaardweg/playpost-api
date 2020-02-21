@@ -370,6 +370,24 @@
           }
         }
       },
+      "ArticleSummariesCollection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Collection"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ArticleSummary"
+                }
+              }
+            }
+          }
+        ]
+      },
       "StripePlan": {
         "description": "A Stripe Plan. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
         "type": "object",

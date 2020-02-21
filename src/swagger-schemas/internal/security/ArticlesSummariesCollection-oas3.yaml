@@ -1,0 +1,11 @@
+components:
+  schemas:
+    ArticleSummariesCollection:
+      allOf:
+        - $ref: '#/components/schemas/Collection'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ArticleSummary'
