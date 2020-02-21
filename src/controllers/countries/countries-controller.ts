@@ -19,10 +19,6 @@ export class CountriesController extends BaseController {
    *      tags:
    *        - countries
    *      summary: Get all countries
-   *      security:
-   *        - BearerAuth: []
-   *        - ApiKeyAuth: []
-   *          ApiSecretAuth: []
    *      responses:
    *        '400':
    *          $ref: '#/components/responses/BadRequestError'

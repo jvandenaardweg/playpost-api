@@ -53,16 +53,16 @@ module.exports = {
       description: '(public) Endpoint for the currently logged in user.'
     },
     {
+      name: 'countries',
+      description: '(public) Countries related endpoints.'
+    },
+    {
       name: 'billing',
       description: 'Billing related endpoints. Mostly Stripe.'
     },
     {
       name: 'publications',
       description: 'Publications related endpoints.'
-    },
-    {
-      name: 'countries',
-      description: 'Countries related endpoints.'
     },
     {
       name: 'languages',
