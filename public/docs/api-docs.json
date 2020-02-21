@@ -586,25 +586,28 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/ArticleSummary"
-          }
-        ],
-        "properties": {
-          "html": {
-            "type": "string",
-            "nullable": true,
-            "example": "<div><p>the article contents</p></div>"
           },
-          "ssml": {
-            "type": "string",
-            "nullable": true,
-            "example": "<speak><p>the article contents</p></speak>"
-          },
-          "documentHtml": {
-            "type": "string",
-            "nullable": true,
-            "example": "<html><body><p>the article contents</p></body></html>"
+          {
+            "type": "object",
+            "properties": {
+              "html": {
+                "type": "string",
+                "nullable": true,
+                "example": "<div><p>the article contents</p></div>"
+              },
+              "ssml": {
+                "type": "string",
+                "nullable": true,
+                "example": "<speak><p>the article contents</p></speak>"
+              },
+              "documentHtml": {
+                "type": "string",
+                "nullable": true,
+                "example": "<html><body><p>the article contents</p></body></html>"
+              }
+            }
           }
-        }
+        ]
       },
       "Audiofile": {
         "type": "object",
