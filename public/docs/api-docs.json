@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.21",
+    "version": "2.10.22",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -582,7 +582,6 @@
         }
       },
       "Article": {
-        "type": "object",
         "allOf": [
           {
             "$ref": "#/components/schemas/ArticleSummary"
