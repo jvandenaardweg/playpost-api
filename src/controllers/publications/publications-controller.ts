@@ -99,7 +99,7 @@ export class PublicationsController extends BaseController {
    *
    *  /publications/{publicationId}:
    *    get:
-   *      operationId: getAllPublications
+   *      operationId: getOnePublication
    *      tags:
    *        - publications
    *      summary: Get a single Publication the user has access to.
