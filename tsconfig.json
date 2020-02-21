@@ -19,7 +19,7 @@
     "downlevelIteration": true,
     "lib": ["es5", "es6"], // es6 = typeOrm requirement
     "moduleResolution": "node",
-    "noEmit": true,
+    // "noEmit": true,
     "outDir": "dist",
     "target": "es6",
     "module": "commonjs",
