@@ -82,7 +82,6 @@ components:
             $ref: '#/components/schemas/User'
     
     Article:
-      type: object
       allOf:
         - $ref: "#/components/schemas/ArticleSummary"
         - type: object
