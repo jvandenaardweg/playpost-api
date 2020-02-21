@@ -12,7 +12,7 @@ module.exports = {
       email: 'support@playpost.app'
     },
   },
-  openapi: '3.0.0',
+  openapi: '3.0.3',
   servers: [
     {
       url: 'http://localhost:3000/{basePath}',
