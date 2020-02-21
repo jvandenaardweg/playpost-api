@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import { EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils/logger';
+import { HttpError, HttpStatus } from '../http-error';
 
 export const findAllVoices = async (req: Request, res: Response) => {
   const loggerPrefix = 'Synthesizers Controller:';
@@ -11,7 +12,7 @@ export const findAllVoices = async (req: Request, res: Response) => {
   const { status }: { status: string } = req.query;
 
   if (!synthesizerName) {
-    return res.status(400).json({ message: 'synthesizerName is required.' });
+    throw new HttpError(HttpStatus.BadRequest, 'synthesizerName is required.')
   }
 
   try {
@@ -83,7 +84,7 @@ export const findAllVoices = async (req: Request, res: Response) => {
       return res.json(voices)
     }
 
-    return res.status(400).json({ message: `Synthesizer "${synthesizerName}" does not exist.`});
+    throw new HttpError(HttpStatus.NotFound, `Synthesizer "${synthesizerName}" does not exist.`)
 
   } catch (err) {
     logger.error(loggerPrefix, err);

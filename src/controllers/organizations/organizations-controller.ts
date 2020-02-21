@@ -319,7 +319,7 @@ export class OrganizationsController extends BaseController {
 
     await this.publicationService.remove(publication);
 
-    return res.status(200).send();
+    return res.status(HttpStatus.NoContent).send();
   };
 
   public patchOneCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {

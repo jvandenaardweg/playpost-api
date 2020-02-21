@@ -42,7 +42,7 @@ import { VoicesController } from './controllers/voices/voices-controller';
 import { ApiKeysController } from './controllers/api-keys/api-keys-controller';
 
 import { connectionOptions } from './database/connection-options';
-import { HttpStatus } from './http-error';
+import { HttpStatus, HttpError } from './http-error';
 import { Sentry } from './sentry';
 import { logger } from './utils';
 import { getRealUserIpAddress } from './utils/ip-address';
@@ -323,9 +323,7 @@ export const setupServer = async () => {
     if (appVersionHeader && ['1.7.0', '1.6.0', '1.5.0', '1.4.0', '1.3.1', '1.3.0', '1.2.2', '1.2.0', '1.1.0', '1.0.0'].includes(appVersionHeader)) {
       const storeName = deviceManufacturer === 'Apple' ? 'the App Store' : 'Google Play';
 
-      return res.status(400).json({
-        message: `There is a new required Playpost app update available! Please update to the latest version using ${storeName}!`
-      })
+      throw new HttpError(HttpStatus.UpgradeRequired, `There is a new required Playpost app update available! Please update to the latest version using ${storeName}!`)
     }
 
     return next()

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { BaseController } from '../index';
+import { HttpStatus } from '../../http-error';
 
 export class StatusController extends BaseController {
   constructor() {
@@ -8,6 +9,6 @@ export class StatusController extends BaseController {
   }
 
   getAll = (req: Request, res: Response) => {
-    return res.status(200).json({ message: 'OK' });
+    return res.status(HttpStatus.OK).json({ message: 'OK' });
   }
 }

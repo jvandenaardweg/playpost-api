@@ -150,7 +150,9 @@ export class VoicesController extends BaseController {
     const { voiceId } = req.params;
     const voiceRepository = getRepository(Voice);
   
-    if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
+    if (userEmail !== 'jordyvandenaardweg@gmail.com') { 
+      throw new HttpError(HttpStatus.Forbidden, 'You dont have access to this endpoint.')
+    }
   
     const validationSchema = joi.object().keys({
       id: joi.string().uuid().required(),
