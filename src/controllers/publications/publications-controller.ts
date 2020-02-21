@@ -145,10 +145,10 @@ export class PublicationsController extends BaseController {
    *
    *  /publications/{publicationId}/articles:
    *    get:
-   *      operationId: getAllPublicationArticles
+   *      operationId: getAllPublicationArticleSummaries
    *      tags:
    *        - publications
-   *      summary: Get all the Publication's Article's.
+   *      summary: Get all the Publication's Article summaries.
    *      description: Returns a summary of Article's. Not the complete article object.
    *      security:
    *        - BearerAuth: []
@@ -171,7 +171,7 @@ export class PublicationsController extends BaseController {
    *        '200':
    *          $ref: '#/components/responses/ArticleSummariesResponse'
    */
-  public getAllPublicationArticles = async (req: GetAllPublicationArticlesRequest, res: PublicationResponse): Promise<PublicationResponse> => {
+  public getAllPublicationArticleSummaries = async (req: GetAllPublicationArticlesRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);

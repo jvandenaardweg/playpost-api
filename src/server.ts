@@ -396,7 +396,7 @@ export const setupServer = async () => {
 
   // Restricted to users who are in a publication
   app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOnePublication);
-  app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getAllPublicationArticles);
+  app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getAllPublicationArticleSummaries);
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationArticle);
   app.post('/v1/publications/:publicationId/import/article', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationImportArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOnePublicationArticle);

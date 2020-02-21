@@ -48,11 +48,8 @@ export interface GetOnePublicationRequest extends Request {
   };
 }
 
-export interface GetAllPublicationsRequest extends Request {
-  params: {
-    publicationId: string;
-  };
-}
+// tslint:disable-next-line: no-empty-interface
+export interface GetAllPublicationsRequest extends Request { }
 
 export interface DeleteOnePublicationArticleRequest extends Request {
   params: {
