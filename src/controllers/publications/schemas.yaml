@@ -3,6 +3,8 @@ components:
     
     AudioPreview:
       type: object
+      required:
+        - audio
       properties:
         audio:
           type: string
