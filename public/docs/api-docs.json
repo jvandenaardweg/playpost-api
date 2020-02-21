@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.25",
+    "version": "2.10.26",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -2291,11 +2291,11 @@
     },
     "/publications/{publicationId}/articles": {
       "get": {
-        "operationId": "getAllPublicationArticles",
+        "operationId": "getAllPublicationArticleSummaries",
         "tags": [
           "publications"
         ],
-        "summary": "Get all the Publication's Article's.",
+        "summary": "Get all the Publication's Article summaries.",
         "description": "Returns a summary of Article's. Not the complete article object.",
         "security": [
           {
