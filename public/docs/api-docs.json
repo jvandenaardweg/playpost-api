@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.32",
+    "version": "2.10.33",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -608,10 +608,7 @@
         "description": "A subset of a complete Article. This Article summary does not include html and ssml.",
         "required": [
           "id",
-          "url",
-          "language",
-          "audiofiles",
-          "publication"
+          "url"
         ],
         "properties": {
           "id": {
