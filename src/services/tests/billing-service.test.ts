@@ -244,6 +244,7 @@ describe('billing-service', () => {
   it('attachDefaultPaymentMethodToCustomer should attach a new default Stripe Payment Method to a Stripe Customer.', async () => {
     const billingService = new BillingService();
     const spyStripePaymentMethodsAttach = jest.spyOn(stripe.paymentMethods, 'attach').mockResolvedValue(paymentMethodMock as any)
+    jest.spyOn(stripe.customers, 'update').mockResolvedValue({} as any)
 
     const attachedPaymentMethod = await billingService.attachDefaultPaymentMethodToCustomer('pm_1GCRSVLbygOvfi9ojuY8DFOq', 'cus_GLBNvU7Y4CEL02')
     
