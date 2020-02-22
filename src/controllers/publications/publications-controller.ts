@@ -14,7 +14,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
 import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest } from './types';
-import { FindOneOptions } from 'typeorm';
+import { FindOneOptions, FindManyOptions } from 'typeorm';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -173,13 +173,15 @@ export class PublicationsController extends BaseController {
     const requestQuery = this.validatePagingParams(req.query);
     const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
     
-    const where: FindOneOptions<Article>['where'] = {
-      publication: {
-        id: publicationId
+    const where: FindManyOptions<Article> = {
+      where: {
+        publication: {
+          id: publicationId
+        }
       }
     }
     
-    const articleSummariesResponse = await this.articleService.findAllSummaries(where, page, perPage, skip, take);
+    const articleSummariesResponse = await this.articleService.findAllSummariesCollection(where, page, perPage, skip, take);
 
     return res.json(articleSummariesResponse)
   }

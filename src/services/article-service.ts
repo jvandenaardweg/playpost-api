@@ -1,5 +1,5 @@
 import nodeFetch from 'node-fetch';
-import { FindOneOptions, getConnection, getRepository, Repository, UpdateResult } from 'typeorm';
+import { FindOneOptions, getRepository, Repository, UpdateResult, FindManyOptions } from 'typeorm';
 import urlParse from 'url-parse';
 
 import { Article } from '../database/entities/article';
@@ -12,12 +12,37 @@ import { LanguageService } from './language-service';
 export class ArticleService extends BaseService {
   private readonly articleRepository: Repository<Article>;
   private readonly defaultRelations: string[];
+  private readonly selectSummary: (keyof ArticleSummary)[];
+  private readonly selectFull: (keyof Article)[];
 
   constructor() {
     super()
 
     this.defaultRelations = ['audiofiles', 'publication'];
     this.articleRepository = getRepository(Article);
+
+    this.selectSummary = [
+      'id',
+      'title',
+      'url',
+      'canonicalUrl',
+      'description',
+      'readingTime',
+      'sourceName',
+      'imageUrl',
+      'authorName',
+      'isCompatible',
+      'compatibilityMessage',
+      'status',
+      'createdAt',
+      'updatedAt'
+    ];
+
+    this.selectFull = [
+      ...this.selectSummary,
+      'ssml', 
+      'html'
+    ]
   }
 
   public findOneById = (articleId: string, options?: FindOneOptions<Article> | undefined) => {
@@ -37,38 +62,34 @@ export class ArticleService extends BaseService {
   public findOneByIdFull = (articleId: string, options: FindOneOptions<Article> | undefined) => {
     return this.articleRepository.findOne(articleId, {
       ...options,
-      select: ['id', 'ssml', 'html', 'language', 'canonicalUrl', 'compatibilityMessage', 'createdAt', 'updatedAt', 'description', 'imageUrl', 'isCompatible', 'authorName', 'readingTime', 'sourceName', 'status', 'title'],
+      select: this.selectFull,
       relations: this.defaultRelations
     });
   }
 
-  public findAllSummaries = async (where: FindOneOptions<Article>['where'], page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
-    const select: (keyof ArticleSummary)[] = [
-      'id',
-      'title',
-      'url',
-      'canonicalUrl',
-      'description',
-      'readingTime',
-      'sourceName',
-      'imageUrl',
-      'authorName',
-      'isCompatible',
-      'compatibilityMessage',
-      'status',
-      'createdAt',
-      'updatedAt'
-    ];
-
+  public findAllSummaries = async (options: FindManyOptions<Article> | undefined): Promise<[ArticleSummary[], number]> => {
     const [articles, total] = await this.articleRepository.findAndCount({
-      where,
-      skip,
-      take,
+      ...options,
       order: {
         createdAt: 'DESC'
       },
-      select,
+      select: this.selectSummary,
       relations: ['audiofiles', 'language']
+    })
+
+    const articleSummaries: ArticleSummary[] = articles;
+
+    return [
+      articleSummaries,
+      total
+    ]
+  }
+
+  public findAllSummariesCollection = async (options: FindManyOptions<Article>, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
+    const [articleSummaries, total] = await this.findAllSummaries({
+      ...options,
+      skip,
+      take
     })
 
     const totalPages = this.getTotalPages(total, perPage);
@@ -78,7 +99,7 @@ export class ArticleService extends BaseService {
       page,
       perPage,
       totalPages,
-      data: articles
+      data: articleSummaries
     }
 
     return response
