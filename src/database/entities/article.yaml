@@ -7,9 +7,6 @@ components:
       required:
         - id
         - url
-        - language
-        - audiofiles
-        - publication
       properties:
         id: 
           type: string
