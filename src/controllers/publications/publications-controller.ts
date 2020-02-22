@@ -14,7 +14,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
 import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest } from './types';
-import { FindOneOptions, FindManyOptions } from 'typeorm';
+import { FindManyOptions } from 'typeorm';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;

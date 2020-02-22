@@ -18,7 +18,7 @@ export class ArticleService extends BaseService {
   constructor() {
     super()
 
-    this.defaultRelations = ['audiofiles', 'publication'];
+    this.defaultRelations = ['audiofiles', 'publication', 'language'];
     this.articleRepository = getRepository(Article);
 
     this.selectSummary = [
@@ -74,7 +74,7 @@ export class ArticleService extends BaseService {
         createdAt: 'DESC'
       },
       select: this.selectSummary,
-      relations: ['audiofiles', 'language']
+      relations: this.defaultRelations
     })
 
     const articleSummaries: ArticleSummary[] = articles;

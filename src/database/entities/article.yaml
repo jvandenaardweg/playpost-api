@@ -9,6 +9,7 @@ components:
         - url
         - language
         - audiofiles
+        - publication
       properties:
         id: 
           type: string
@@ -78,14 +79,19 @@ components:
           type: string
           example: 2020-02-14 03:30:10
         # Relations
+        publication:
+          type: object
+          description: The Publication that belongs to this article
+          nullable: true
+          $ref: '#/components/schemas/Publication'
         language:
           type: object
-          description: The language that belongs to this article
+          description: The Language that belongs to this article
           nullable: true
           $ref: '#/components/schemas/Language'
         audiofiles:
           type: array
-          description: The audiofiles that belongs to this article
+          description: The Audiofiles that belongs to this article
           nullable: true
           items:
             $ref: '#/components/schemas/Audiofile'
