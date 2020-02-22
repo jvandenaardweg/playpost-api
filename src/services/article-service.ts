@@ -42,12 +42,13 @@ export class ArticleService extends BaseService {
     });
   }
 
-  public findAllSummaries = async (where: string, parameters: object, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
+  public findAllSummaries = async (where: FindOneOptions<Article>['where'], page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<ArticleSummary[]>> => {
     const select: (keyof ArticleSummary)[] = [
       'id',
       'title',
       'url',
       'canonicalUrl',
+      'description',
       'readingTime',
       'sourceName',
       'imageUrl',
@@ -59,16 +60,16 @@ export class ArticleService extends BaseService {
       'updatedAt'
     ];
 
-    const [articles, total] = await getConnection()
-      .getRepository(Article)
-      .createQueryBuilder('article')
-      .leftJoinAndSelect("article.publication", "publication")
-      .select(select.map(item => `article.${item}`))
-      .where(where, parameters)
-      .skip(skip)
-      .take(take)
-      .orderBy('article.createdAt', 'DESC')
-      .getManyAndCount()
+    const [articles, total] = await this.articleRepository.findAndCount({
+      where,
+      skip,
+      take,
+      order: {
+        createdAt: 'DESC'
+      },
+      select,
+      relations: ['audiofiles', 'language']
+    })
 
     const totalPages = this.getTotalPages(total, perPage);
 

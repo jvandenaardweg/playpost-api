@@ -7,6 +7,8 @@ components:
       required:
         - id
         - url
+        - language
+        - audiofiles
       properties:
         id: 
           type: string
@@ -76,11 +78,6 @@ components:
           type: string
           example: 2020-02-14 03:30:10
         # Relations
-        user:
-          type: object
-          description: The user that belongs to this article
-          nullable: true
-          $ref: '#/components/schemas/User'
         language:
           type: object
           description: The language that belongs to this article
