@@ -91,7 +91,7 @@ components:
           description: The audiofiles that belongs to this article
           nullable: true
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/Audiofile'
         
         
         
