@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.31",
+    "version": "2.10.32",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -608,7 +608,10 @@
         "description": "A subset of a complete Article. This Article summary does not include html and ssml.",
         "required": [
           "id",
-          "url"
+          "url",
+          "language",
+          "audiofiles",
+          "publication"
         ],
         "properties": {
           "id": {
@@ -701,24 +704,24 @@
             "type": "string",
             "example": "2020-02-14T03:30:10.000Z"
           },
-          "user": {
+          "publication": {
             "type": "object",
-            "description": "The user that belongs to this article",
+            "description": "The Publication that belongs to this article",
             "nullable": true,
-            "$ref": "#/components/schemas/User"
+            "$ref": "#/components/schemas/Publication"
           },
           "language": {
             "type": "object",
-            "description": "The language that belongs to this article",
+            "description": "The Language that belongs to this article",
             "nullable": true,
             "$ref": "#/components/schemas/Language"
           },
           "audiofiles": {
             "type": "array",
-            "description": "The audiofiles that belongs to this article",
+            "description": "The Audiofiles that belongs to this article",
             "nullable": true,
             "items": {
-              "$ref": "#/components/schemas/User"
+              "$ref": "#/components/schemas/Audiofile"
             }
           }
         }
