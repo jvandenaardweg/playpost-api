@@ -13,10 +13,11 @@ import { UserRepository } from '../database/repositories/user';
 import { AudiofileService } from '../services/audiofile-service';
 import { SynthesizerService } from '../services/synthesizer-service';
 import { logger } from '../utils';
+import { HttpError, HttpStatus } from '../http-error';
 
 export const findById = async (req: Request, res: Response) => {
   const { audiofileId } = req.params;
-  const audiofileRepository = getRepository(Audiofile);
+  const audiofileService = new AudiofileService();
 
   const validationSchema = joi.object().keys({
     audiofileId: joi.string().uuid().required()
@@ -26,12 +27,14 @@ export const findById = async (req: Request, res: Response) => {
 
   if (error) {
     const messageDetails = error.details.map(detail => detail.message).join(' and ');
-    return res.status(400).json({ message: messageDetails });
+    throw new HttpError(HttpStatus.BadRequest, messageDetails, error.details)
   }
 
-  const audiofile = await audiofileRepository.findOne(audiofileId, { relations: ['voice'] });
+  const audiofile = await audiofileService.findOneById(audiofileId);
 
-  if (!audiofile) { return res.status(400).json({ message: 'Audiofile not found.' }); }
+  if (!audiofile) { 
+    throw new HttpError(HttpStatus.NotFound, 'Audiofile not found.')
+  }
 
   return res.json(audiofile);
 };

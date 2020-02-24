@@ -12,8 +12,10 @@ export class AudiofileService extends BaseService {
     this.audiofileRepository = getRepository(Audiofile);
   }
 
-  public findOneById = (audiofileId: string): Promise<Audiofile | undefined> => {
-    return this.audiofileRepository.findOne(audiofileId);
+  public findOneById = async (audiofileId: string): Promise<Audiofile | undefined> => {
+    return this.audiofileRepository.findOne(audiofileId, {
+      relations: ['article', 'voice']
+    });
   }
 
   public save = async (audiofile: Audiofile): Promise<Audiofile> => {
