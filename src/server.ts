@@ -120,7 +120,7 @@ export const setupServer = async () => {
 
   const PORT = process.env.PORT || 3000;
 
-  const IS_PROTECTED_APIKEY = passport.authenticate(['jwt', 'x-api-key-secret'], {
+  const IS_PROTECTED_JWT_APIKEY = passport.authenticate(['jwt', 'x-api-key-secret'], {
     session: false,
     failWithError: true
   });
@@ -410,8 +410,8 @@ export const setupServer = async () => {
   app.patch('/v1/playlist/articles/:articleId/archivedat', [IS_PROTECTED_JWT], playlistController.patchPlaylistItemArchivedAt);
 
   // /v1/articles
-  app.get('/v1/articles', IS_PROTECTED_APIKEY, articlesController.findAllArticles);
-  app.get('/v1/articles/:articleId', IS_PROTECTED_APIKEY, articlesController.findArticleById);
+  app.get('/v1/articles', IS_PROTECTED_JWT_APIKEY, articlesController.findAllArticles);
+  app.get('/v1/articles/:articleId', IS_PROTECTED_JWT_APIKEY, articlesController.findArticleById);
   app.put('/v1/articles/:articleId/sync', [IS_PROTECTED_JWT], articlesController.syncArticleWithSource);
   app.delete('/v1/articles/:articleId', [IS_PROTECTED_JWT], articlesController.deleteById); // Admin only
   app.get('/v1/articles/:articleId/audiofiles', [IS_PROTECTED_JWT], articlesController.findAudiofileByArticleId);
@@ -420,7 +420,7 @@ export const setupServer = async () => {
   // v1/audiofiles
   app.get('/v1/audiofiles', [IS_PROTECTED_JWT], audiofileController.findAllAudiofiles);
   app.delete('/v1/audiofiles/:audiofileId', [IS_PROTECTED_JWT], audiofileController.deleteById); // Admin only
-  app.get('/v1/audiofiles/:audiofileId', [IS_PROTECTED_JWT], audiofileController.findById); // Now in use by our iOS App
+  app.get('/v1/audiofiles/:audiofileId', IS_PROTECTED_JWT_APIKEY, audiofileController.findById);
 
   // v1/voices
   app.get('/v1/voices', [IS_PROTECTED_JWT], voicesController.getAllVoices);
