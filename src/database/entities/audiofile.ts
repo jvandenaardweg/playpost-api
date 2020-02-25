@@ -7,6 +7,7 @@ import { Voice } from './voice';
 
 import * as cache from '../../cache';
 import { ColumnNumericTransformer } from '../utils';
+import { Publication } from './publication';
 
 // encoding formats supported by Google and AWS Polly
 export enum AudiofileMimeType {
@@ -46,8 +47,18 @@ export class Audiofile {
   @ManyToOne(() => Voice, { nullable: true, onDelete: 'SET NULL', eager: true }) // On delete of an Voices, set this column to null. So the audiofile stays available.
   voice: Voice;
 
+  // An audiofile belonging to a publication means that publication can manage (edit) this audiofile
+  // On delete of a Publication, also delete it's audiofiles
+  @ManyToOne(() => Publication, { nullable: true, onDelete: 'CASCADE', eager: true }) 
+  publication?: Publication;
+
+  // Make the Audiofile object contain only the publicationId
+  // @Column({ nullable: true })
+  // publicationId?: string;
+
+  // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
   @Index()
-  @ManyToOne(() => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) // On delete of a User, keep the Audiofile in the database, but set its userId to "null"
+  @ManyToOne(() => User, user => user.audiofiles, { nullable: true, onDelete: 'SET NULL' }) 
   user?: User;
 
   @Index()

@@ -52,6 +52,12 @@ components:
           readOnly: true
           nullable: true
           $ref: '#/components/schemas/Voice'
+
+        publication:
+          type: object
+          readOnly: true
+          nullable: true
+          $ref: '#/components/schemas/Publication'
         
         user:
           type: object

@@ -24,7 +24,7 @@ export class Publication {
   // Multiple Publications can belong to an Organization
   // On delete of an Organization, delete it's Publication's (CASCADE)
   // A Publication MUST be part of an Organization (nullable: false)
-  @ManyToOne(() => Organization, { nullable: false, onDelete: 'CASCADE', eager: true })
+  @ManyToOne(() => Organization, { nullable: false, onDelete: 'CASCADE' })
   organization?: Organization;
 
   // A Publication is owner of multiple Article's
