@@ -26,14 +26,20 @@ export class CountriesController extends BaseController {
    *          $ref: '#/components/responses/UnauthorizedError'
    *        '404':
    *          $ref: '#/components/responses/NotFoundError'
-   *        '200':
-   *          $ref: '#/components/responses/CountriesResponse'
+   *        200:
+   *          description: An array of Languages
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Country'
    */
   getAllCountries = async (req: Request, res: Response): Promise<Response> => {
     // Get all countries
-    const countriesCollection = await this.countryService.findAll(1, 999, 0, 999);
+    const countries = await this.countryService.findAll();
 
-    return res.json(countriesCollection);
+    return res.json(countries);
   };
 
 }
