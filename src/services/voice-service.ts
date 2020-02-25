@@ -1,22 +1,37 @@
 import LocaleCode from 'locale-code';
-import { getRepository, Repository } from 'typeorm';
+import { getRepository, Repository, FindManyOptions } from 'typeorm';
 
 import { BaseService } from '.';
 import { EVoiceGender, EVoiceSynthesizer, Voice } from '../database/entities/voice';
 import { Sentry } from '../sentry';
 import { logger } from '../utils';
 import { SynthesizerService } from './synthesizer-service';
+import { CACHE_ONE_DAY } from '../constants/cache';
 
 export class VoiceService extends BaseService {
   private readonly voiceRepository: Repository<Voice>;
+  private readonly defaultRelations: string[];
 
   constructor() {
     super();
     this.voiceRepository = getRepository(Voice);
+    this.defaultRelations = ['language']
   }
 
-  public findAll = (): Promise<Voice[]> => {
-    return this.voiceRepository.find();
+  public findAll = (options?: FindManyOptions<Voice> | undefined): Promise<Voice[]> => {
+    const cacheKey = options && options.where ? JSON.stringify(options.where) : 'all';
+
+    return this.voiceRepository.find({
+      ...options,
+      order: {
+        label: 'ASC'
+      },
+      relations: this.defaultRelations,
+      cache: {
+        id: `${Voice.name}:${cacheKey}`,
+        milliseconds: CACHE_ONE_DAY
+      }
+    });
   }
 
   public findOneByIdWhereActive = (voiceId: string): Promise<Voice | undefined> => {

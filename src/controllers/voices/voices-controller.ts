@@ -1,20 +1,20 @@
 import { Request, Response } from 'express';
-import { BillingService } from '../../services/billing-service';
-import { BaseController } from '../index';
-import joi from '@hapi/joi';
 import { getRepository, FindConditions, getCustomRepository } from 'typeorm';
+import joi from '@hapi/joi';
+
+import { BaseController } from '../index';
 import { Voice } from '../../database/entities/voice';
-import { CACHE_ONE_DAY } from '../../constants/cache';
 import { VoiceRepository } from '../../database/repositories/voice';
 import * as storage from '../../storage/google-cloud';
 import { HttpStatus, HttpError } from '../../http-error';
+import { VoiceService } from '../../services/voice-service';
 
 export class VoicesController extends BaseController {
-  billingService: BillingService;
+  private readonly voiceService: VoiceService;
 
   constructor() {
     super()
-    this.billingService = new BillingService();
+    this.voiceService = new VoiceService();
   }
 
   /**
@@ -47,7 +47,6 @@ export class VoicesController extends BaseController {
    *                  $ref: '#/components/schemas/Voice'
    */
   public getAllVoices = async (req: Request, res: Response): Promise<Response> => {
-    const voiceRepository = getRepository(Voice);
     const { isActive }: {isActive: string } = req.query;
 
     const where: FindConditions<Voice> = {}
@@ -56,15 +55,8 @@ export class VoicesController extends BaseController {
       where.isActive = isActive === 'true' ? true : isActive === 'false' ? false : undefined
     }
 
-    const cacheKey = JSON.stringify(where);
-
-    const voices = await voiceRepository.find({
-      where,
-      relations: ['language'],
-      cache: {
-        id: `${Voice.name}:${cacheKey}`,
-        milliseconds: CACHE_ONE_DAY
-      }
+    const voices = await this.voiceService.findAll({
+      where
     });
 
     return res.json(voices);
