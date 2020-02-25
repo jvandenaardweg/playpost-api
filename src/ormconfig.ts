@@ -58,6 +58,7 @@ import { MoveStripeCustomerIdToOrganization1582099944020 } from './database/migr
 import { MakeStripeCustomerIdRequired1582100050678 } from './database/migrations/1582100050679-MakeStripeCustomerIdRequired';
 import { RemoveCustomerTable1582100050680 } from './database/migrations/1582100050680-RemoveCustomerTable';
 import { AudiofilePublication1582626625547 } from './database/migrations/1582626625547-AudiofilePublication';
+import { AudiofileUniques1582627681232 } from './database/migrations/1582627681232-AudiofileUniques';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -131,7 +132,8 @@ const config: ConnectionOptions = {
     MoveStripeCustomerIdToOrganization1582099944020,
     MakeStripeCustomerIdRequired1582100050678,
     RemoveCustomerTable1582100050680,
-    AudiofilePublication1582626625547
+    AudiofilePublication1582626625547,
+    AudiofileUniques1582627681232
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,

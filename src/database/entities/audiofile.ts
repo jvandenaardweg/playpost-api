@@ -1,5 +1,5 @@
 import { IsUrl, IsUUID } from 'class-validator';
-import { BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn, Unique } from 'typeorm';
 import { logger } from '../../utils';
 import { Article } from './article';
 import { User } from './user';
@@ -19,6 +19,8 @@ export enum AudiofileMimeType {
 }
 
 @Entity()
+@Unique(['publication', 'article']) // Don't allow multiple Audiofiles for the same Article for a Publication
+@Unique(['user', 'article', 'voice']) // Don't allow multiple Audiofiles with the same Voice for an Article for a User
 export class Audiofile {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
