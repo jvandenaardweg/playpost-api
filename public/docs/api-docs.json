@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.10.35",
+    "version": "2.10.36",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -378,42 +378,6 @@
             "example": 30
           }
         }
-      },
-      "CountriesCollection": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Collection"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Country"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "LanguagesCollection": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Collection"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Language"
-                }
-              }
-            }
-          }
-        ]
       },
       "Message": {
         "type": "object",
@@ -1361,26 +1325,6 @@
           }
         }
       },
-      "CountriesResponse": {
-        "description": "A Countries collection response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/CountriesCollection"
-            }
-          }
-        }
-      },
-      "LanguagesResponse": {
-        "description": "A Language collection response",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/LanguagesCollection"
-            }
-          }
-        }
-      },
       "MessageResponse": {
         "description": "A normal message response",
         "content": {
@@ -2288,7 +2232,17 @@
         "summary": "Get all countries",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/CountriesResponse"
+            "description": "An array of Languages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Country"
+                  }
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -2320,7 +2274,17 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/LanguagesResponse"
+            "description": "An array of Languages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language"
+                  }
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
