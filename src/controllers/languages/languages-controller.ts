@@ -25,8 +25,14 @@ import { CACHE_ONE_DAY } from '../../constants/cache';
  *          $ref: '#/components/responses/UnauthorizedError'
  *        '404':
  *          $ref: '#/components/responses/NotFoundError'
- *        '200':
- *          $ref: '#/components/responses/LanguagesResponse'
+ *        200:
+ *          description: An array of Languages
+ *          content:
+ *            'application/json':
+ *              schema:
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Language'
  */
 export const getAllLanguages = async (req: Request, res: Response) => {
   const languageRepository = getRepository(Language);
