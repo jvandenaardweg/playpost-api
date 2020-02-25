@@ -20,7 +20,9 @@ export enum AudiofileMimeType {
 
 @Entity()
 @Unique(['publication', 'article']) // Don't allow multiple Audiofiles for the same Article for a Publication
-@Unique(['user', 'article', 'voice']) // Don't allow multiple Audiofiles with the same Voice for an Article for a User
+
+// Using the unique below errors on production, dont do that for now
+// @Unique(['user', 'article', 'voice']) // Don't allow multiple Audiofiles with the same Voice for an Article for a User
 export class Audiofile {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
