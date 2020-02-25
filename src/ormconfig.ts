@@ -59,6 +59,7 @@ import { MakeStripeCustomerIdRequired1582100050678 } from './database/migrations
 import { RemoveCustomerTable1582100050680 } from './database/migrations/1582100050680-RemoveCustomerTable';
 import { AudiofilePublication1582626625547 } from './database/migrations/1582626625547-AudiofilePublication';
 import { AudiofileUniques1582627681232 } from './database/migrations/1582627681232-AudiofileUniques';
+import { AudiofileUniquesUser1582629459375 } from './database/migrations/1582629459375-AudiofileUniquesUser';
 
 const config: ConnectionOptions = {
   name: 'default',
@@ -133,7 +134,8 @@ const config: ConnectionOptions = {
     MakeStripeCustomerIdRequired1582100050678,
     RemoveCustomerTable1582100050680,
     AudiofilePublication1582626625547,
-    AudiofileUniques1582627681232
+    AudiofileUniques1582627681232,
+    AudiofileUniquesUser1582629459375
   ],
   migrationsRun: true, // Run migrations on start.
   dropSchema: false,
