@@ -1,15 +1,33 @@
-import { getRepository, Repository } from 'typeorm';
+import { getRepository, Repository, FindManyOptions } from 'typeorm';
 
 import { Language } from '../database/entities/language';
 import { BaseService } from './index';
+import { CACHE_ONE_DAY } from '../constants/cache';
 
 export class LanguageService extends BaseService {
   private readonly languageRepository: Repository<Language>;
+  private readonly defaultRelations: string[];
 
   constructor () {
     super()
 
     this.languageRepository = getRepository(Language);
+    this.defaultRelations = ['voices']
+  }
+
+  public findAll = async (options: FindManyOptions<Language> | undefined) => {
+    const cacheKey = options && options.where ? JSON.stringify(options.where) : 'all';
+
+    const languages = await this.languageRepository.find({
+      ...options,
+      relations: this.defaultRelations,
+      cache: {
+        id: `${Language.name}:${cacheKey}`,
+        milliseconds: CACHE_ONE_DAY
+      }
+    });
+
+    return languages
   }
 
   public findOneByCode = async (languageCode: string): Promise<Language | undefined> => {

@@ -20,7 +20,7 @@ import * as articlesController from './controllers/articles';
 import * as audiofileController from './controllers/audiofiles';
 import * as healthController from './controllers/health';
 import * as inAppSubscriptionsController from './controllers/in-app-subscriptions';
-import * as languagesController from './controllers/languages/languages-controller';
+import { LanguagesController } from './controllers/languages/languages-controller';
 import { MeController } from './controllers/me';
 import { OembedController } from './controllers/oembed/oembed-controller';
 import * as playlistController from './controllers/playlist';
@@ -360,7 +360,8 @@ export const setupServer = async () => {
   const countriesController = new CountriesController();
   const authController = new AuthController();
   const voicesController = new VoicesController();
-  const apiKeysController = new ApiKeysController()
+  const apiKeysController = new ApiKeysController();
+  const languagesController = new LanguagesController();
 
 
   // API Endpoints
