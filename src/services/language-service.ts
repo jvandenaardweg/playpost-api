@@ -20,6 +20,9 @@ export class LanguageService extends BaseService {
 
     const languages = await this.languageRepository.find({
       ...options,
+      order: {
+        name: 'ASC'
+      },
       relations: this.defaultRelations,
       cache: {
         id: `${Language.name}:${cacheKey}`,
