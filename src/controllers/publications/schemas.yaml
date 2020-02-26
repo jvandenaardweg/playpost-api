@@ -75,9 +75,26 @@ components:
           type: string
           nullable: true
           example: <speak><p>the article contents</p></speak>
+        language: 
+          type: object
+          properties:
+            id:
+              type: string
+              nullable: false # required
+              example: e7e4c3f7-d681-4bb9-957a-a1cbe046cab0
+              description: The UUID of the Language for this Article 
     
     PostOnePublicationArticleRequestBody:
       type: object
+      required:
+        - title
+        - url
+        - description
+        - sourceName
+        - authorName
+        - ssml
+        - language
+        - status
       properties:
         title: 
           type: string
@@ -89,7 +106,7 @@ components:
           example: After running the series for twelve consecutive years, the show aired its last season in May 2019. Since the inception of the series in 2007, the show has made a considerably huge fan base. The show...
         url:
           type: string
-          nullable: false
+          nullable: true
           example: https://thedigitalweekly.com/2020/02/16/big-bang-theory-season-13-confirmed-heres-what-we-know
         sourceName:
           type: string
@@ -115,4 +132,12 @@ components:
           type: string
           nullable: true
           example: <speak><p>the article contents</p></speak>
+        language: 
+          type: object
+          properties:
+            id:
+              type: string
+              nullable: false # required
+              example: e7e4c3f7-d681-4bb9-957a-a1cbe046cab0
+              description: The UUID of the Language for this Article 
 

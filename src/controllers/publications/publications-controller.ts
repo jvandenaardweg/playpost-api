@@ -398,15 +398,19 @@ export class PublicationsController extends BaseController {
       title: joi.string().required(),
       description: joi.string().required(),
       url: joi.string().uri().required(),
-      canonicalUrl: joi.string().uri().required(),
       sourceName: joi.string().required(),
+      ssml: joi.string().required(),
+      status: joi.string().required(),
+
+      language: joi.object().keys({
+        id: joi.string().uuid().required()
+      }).required(),
+      
+      // optional
+      canonicalUrl: joi.string().uri().optional(),
       imageUrl: joi.string().uri().optional(),
       authorName: joi.string().optional(),
-      html: joi.string().required(),
-      ssml: joi.string().required(),
-      voice: joi.object().keys({
-        id: joi.string().uuid().required()
-      }).required()
+      html: joi.string().optional(), // TODO: let our app handle articles without HTML (link directly to url)
     });
 
     const userValidationResult = validationSchema.validate(req.body, {
@@ -761,20 +765,24 @@ export class PublicationsController extends BaseController {
     const { articleId, publicationId } = req.params;
     const requestBody = req.body;
 
+    // Same as POST endpoint, but all properties are optional here
     const validationSchema = joi.object().keys({
-      publicationId: joi.string().uuid().required(),
-      articleId: joi.string().uuid().required(),
-
-      // All properties are optional so we can just update a single property
-      url: joi.string().uri().optional(),
       title: joi.string().optional(),
-      status: joi.string().valid('draft', 'finished').lowercase().optional(),
-      ssml: joi.string().optional(),
       description: joi.string().optional(),
+      url: joi.string().uri().optional(),
       sourceName: joi.string().optional(),
-      authorName: joi.string().optional(),
+      ssml: joi.string().optional(),
+      status: joi.string().valid('draft', 'finished').lowercase().optional(),
+
+      language: joi.object().keys({
+        id: joi.string().uuid().required()
+      }).optional(),
+      
+      // optional
+      canonicalUrl: joi.string().uri().optional(),
       imageUrl: joi.string().uri().optional(),
-      html: joi.string().optional()
+      authorName: joi.string().optional(),
+      html: joi.string().optional(), // TODO: let our app handle articles without HTML (link directly to url)
     });
 
     const userValidationResult = validationSchema.validate({ ...requestBody, ...req.params }, {
