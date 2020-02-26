@@ -60,7 +60,7 @@ components:
           nullable: true
           example: https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg
         authorName:
-          type: number
+          type: string
           nullable: true
           example: HARSH VARDHAN
         status:
@@ -100,7 +100,7 @@ components:
           nullable: true
           example: https://thedigitalweekly.com/wp-content/uploads/2020/02/TV-Series-Finale.jpg
         authorName:
-          type: number
+          type: string
           nullable: true
           example: HARSH VARDHAN
         status:
