@@ -109,6 +109,9 @@ export class ArticleService extends BaseService {
     return this.articleRepository.remove(article);
   }
 
+  /**
+   * Saves a given Article in the database. If the Article does not exist in the database then inserts, otherwise updates.
+   */
   public save = async (article: Article): Promise<{ id: string }> => {
     const savedArticle = await this.articleRepository.save(article);
 

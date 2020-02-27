@@ -382,7 +382,7 @@ export class PublicationsController extends BaseController {
    *          $ref: '#/components/responses/NotFoundError'
    *        409:
    *          $ref: '#/components/responses/ConflictError'
-   *        200:
+   *        201:
    *          description: A complete Article object
    *          content:
    *            'application/json':
@@ -423,16 +423,25 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
-    // TODO: get readingtime from html
-    // const readingTime = 0;
+    const articleToCreate = new Article();
 
-    // const crawledArticle = await fetchFullArticleContents(url);
+    // Only add the updated properties
+    Object.keys(req.body).map(property => {
+      articleToCreate[property] = req.body[property];
+    });
 
-    // TODO: store in database as "draft" (not public)
+    articleToCreate.publication = {
+      id: publicationId
+    } as any;
 
-    // TODO: create an article with the publication as an owner of that article
+    // TODO: generate readingtime
+    // TODO: generate HTML based on SSML
 
-    return res.status(HttpStatus.Created).json({ message: 'should add new article', publicationId, requestBody: req.body });
+    const { id } = await this.articleService.save(articleToCreate);
+
+    const article = await this.articleService.findOneById(id);
+
+    return res.status(HttpStatus.Created).json(article);
   }
 
   /**
@@ -785,7 +794,7 @@ export class PublicationsController extends BaseController {
       html: joi.string().optional(), // TODO: let our app handle articles without HTML (link directly to url)
     });
 
-    const userValidationResult = validationSchema.validate({ ...requestBody, ...req.params }, {
+    const userValidationResult = validationSchema.validate(requestBody, {
       allowUnknown: false // Do not allow other properties to be updated
     });
 
