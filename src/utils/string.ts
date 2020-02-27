@@ -1,5 +1,4 @@
-// tslint:disable-next-line: no-var-requires
-const normalizeUrl = require('normalize-url');
+import normalizeUrl from 'normalize-url';
 
 /**
  * Trims a string at a certain length and makes sure we don't trim it in the middle of a word.
@@ -22,3 +21,20 @@ export const getNormalizedUrl = (url: string) => {
     defaultProtocol: 'https://'
   });
 };
+
+export const getTextFromSSML = (ssml: string) => {
+  const textFromSSML = ssml.replace(/<[^>]+>/g, '').replace(/\./g, '. ').trim()
+  return textFromSSML;
+}
+
+export const getHTMLFromSSML = (ssml: string) => {
+  const strippedSSML = ssml
+  // Strip XML tags except <p>
+  .replace(/<\/?(?!(?:p)\b)[a-z](?:[^>"']|"[^"]*"|'[^']*')*>/g, '')
+  // Make sure there is correct spacing between periods (sentence endings)
+  .replace(/\./g, '. ')
+  // Make sure the is no space on an paragraph ending with a period
+  .replace(/.\s<\/p>/g, '.</p>')
+  .trim()
+  return strippedSSML;
+}

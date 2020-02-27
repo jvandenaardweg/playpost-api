@@ -118,6 +118,7 @@
     "pino": "^5.16.0",
     "pino-pretty": "^3.6.0",
     "rate-limit-redis": "^1.7.0",
+    "reading-time": "^1.2.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "response-time": "^2.3.2",

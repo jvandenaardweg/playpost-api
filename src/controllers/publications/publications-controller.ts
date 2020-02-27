@@ -15,6 +15,9 @@ import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
 import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest } from './types';
 import { FindManyOptions } from 'typeorm';
+import { LanguageService } from '../../services/language-service';
+import { getPossibleListeningTimeInSeconds } from '../../utils/reading-time';
+import { trimTextAtWords, getTextFromSSML, getHTMLFromSSML } from '../../utils/string';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -23,6 +26,7 @@ export class PublicationsController extends BaseController {
   private readonly audiofileService: AudiofileService;
   private readonly usageRecordService: UsageRecordService;
   private readonly organizationService: OrganizationService;
+  private readonly languageService: LanguageService;
 
   constructor() {
     super();
@@ -33,6 +37,7 @@ export class PublicationsController extends BaseController {
     this.audiofileService = new AudiofileService();
     this.usageRecordService = new UsageRecordService();
     this.organizationService = new OrganizationService();
+    this.languageService = new LanguageService();
   }
 
   /**
@@ -393,12 +398,11 @@ export class PublicationsController extends BaseController {
   public postOnePublicationArticle = async (req: PostOnePublicationArticleRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId } = req.params;
 
-    // TODO: check if validation is right
     const validationSchema = joi.object().keys({
       title: joi.string().required(),
-      description: joi.string().required(),
       url: joi.string().uri().required(),
       sourceName: joi.string().required(),
+      authorName: joi.string().required(),
       ssml: joi.string().required(),
       status: joi.string().required(),
 
@@ -407,9 +411,9 @@ export class PublicationsController extends BaseController {
       }).required(),
       
       // optional
+      description: joi.string().optional(),
       canonicalUrl: joi.string().uri().optional(),
       imageUrl: joi.string().uri().optional(),
-      authorName: joi.string().optional(),
       html: joi.string().optional(), // TODO: let our app handle articles without HTML (link directly to url)
     });
 
@@ -423,6 +427,37 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
+    const ssml = req.body.ssml ? req.body.ssml : null;
+    const languageId = req.body.language ? req.body.language.id : null;
+
+    if (!ssml) {
+      throw new HttpError(HttpStatus.BadRequest, 'SSML not found in request body.');
+    }
+
+    if (!languageId) {
+      throw new HttpError(HttpStatus.BadRequest, 'Language ID not found in request body.');
+    }
+
+    const language = await this.languageService.findOneById(languageId)
+
+    if (!language) {
+      throw new HttpError(HttpStatus.NotFound, `Language with ID ${languageId} not found.`);
+    }
+
+    // Generate basic HTML based on the SSML
+    // This generally just keeps the <p>'s intact, and strips the rest
+    const html = getHTMLFromSSML(ssml);
+
+    // Strip tags from SSML, so we end up with only the text contents
+    // And make sure there's a correct space between dots.
+    const ssmlTextContents = getTextFromSSML(ssml)
+
+    // Prefer to get the listening time instead of the reading time
+    // As that makes more sense
+    const possibleListeningTimeInSeconds = getPossibleListeningTimeInSeconds(ssmlTextContents, language.code);
+
+    const description = trimTextAtWords(ssmlTextContents, 200);
+
     const articleToCreate = new Article();
 
     // Only add the updated properties
@@ -434,8 +469,9 @@ export class PublicationsController extends BaseController {
       id: publicationId
     } as any;
 
-    // TODO: generate readingtime
-    // TODO: generate HTML based on SSML
+    articleToCreate.readingTime = possibleListeningTimeInSeconds;
+    articleToCreate.description = description;
+    articleToCreate.html = html;
 
     const { id } = await this.articleService.save(articleToCreate);
 

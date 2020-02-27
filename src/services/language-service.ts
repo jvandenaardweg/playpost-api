@@ -15,6 +15,10 @@ export class LanguageService extends BaseService {
     this.defaultRelations = ['voices']
   }
 
+  public findOneById = async (languageId: string): Promise<Language | undefined> => {
+    return this.languageRepository.findOne(languageId)
+  }
+
   public findAll = async (options?: FindManyOptions<Language> | undefined) => {
     const cacheKey = options && options.where ? JSON.stringify(options.where) : 'all';
 

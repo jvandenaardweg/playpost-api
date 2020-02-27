@@ -83,13 +83,12 @@ components:
               nullable: false # required
               example: e7e4c3f7-d681-4bb9-957a-a1cbe046cab0
               description: The UUID of the Language for this Article 
-    
+  
     PostOnePublicationArticleRequestBody:
       type: object
       required:
         - title
         - url
-        - description
         - sourceName
         - authorName
         - ssml
