@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.7",
+    "version": "2.11.8",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -199,7 +199,7 @@
         "type": "object",
         "required": [
           "ssml",
-          "voiceId"
+          "voice"
         ],
         "properties": {
           "ssml": {
@@ -207,10 +207,25 @@
             "example": "<speak><p>some text to be synthesized</p></speak>",
             "description": "SSML to be synthesized."
           },
-          "voiceId": {
-            "type": "string",
-            "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
-            "description": "The UUID of the Voice to be used for this preview."
+          "voice": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
+                "description": "The UUID of the Voice to be used for this preview."
+              }
+            }
+          },
+          "article": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
+                "description": "The UUID of the Article to be used for this preview."
+              }
+            }
           }
         }
       },
@@ -2766,7 +2781,7 @@
         }
       }
     },
-    "/publications/{publicationId}/articles/{articleId}/preview-ssml": {
+    "/publications/{publicationId}/preview-ssml": {
       "post": {
         "operationId": "postOnePublicationPreviewSSML",
         "tags": [
@@ -2791,15 +2806,6 @@
             },
             "required": true,
             "description": "The UUID of a Publication."
-          },
-          {
-            "in": "path",
-            "name": "articleId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "The UUID of a Article."
           }
         ],
         "requestBody": {
