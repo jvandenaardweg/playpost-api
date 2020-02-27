@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.6",
+    "version": "2.11.7",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -286,7 +286,6 @@
         "required": [
           "title",
           "url",
-          "description",
           "sourceName",
           "authorName",
           "ssml",
