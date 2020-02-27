@@ -3,7 +3,7 @@ import { google } from '@google-cloud/text-to-speech/build/protos/protos';
 import { Polly } from 'aws-sdk';
 import nodeFetch from 'node-fetch';
 import { getRepository, Repository } from 'typeorm';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 
 import { Audiofile, AudiofileMimeType } from '../database/entities/audiofile';
 import { EVoiceGender, EVoiceSynthesizer } from '../database/entities/voice';
