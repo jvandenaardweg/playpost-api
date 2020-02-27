@@ -19,7 +19,12 @@ export interface PostImportArticleRequestBody {
 
 export interface PostOnePreviewArticleSSMLRequestBody {
   ssml: string;
-  voiceId: string;
+  voice: {
+    id: string;
+  };
+  article?: {
+    id: string; // Not required, as the user can create a new article without the article already in our database
+  }
 }
 
 export interface PatchOnePublicationArticleRequestBody {

@@ -660,7 +660,7 @@ export class PublicationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /publications/{publicationId}/articles/{articleId}/preview-ssml:
+   *  /publications/{publicationId}/preview-ssml:
    *    post:
    *      operationId: postOnePublicationPreviewSSML
    *      tags:
@@ -677,12 +677,6 @@ export class PublicationsController extends BaseController {
    *            type: string
    *          required: true
    *          description: The UUID of a Publication.
-   *        - in: path
-   *          name: articleId
-   *          schema:
-   *            type: string
-   *          required: true
-   *          description: The UUID of a Article.
    *      requestBody:
    *        content:
    *          application/json:
@@ -704,14 +698,21 @@ export class PublicationsController extends BaseController {
    *                $ref: '#/components/schemas/AudioPreview'
    */
   public postOnePublicationPreviewSSML = async (req: PostOnePublicationPreviewSSMLRequest, res: PublicationResponse): Promise<PublicationResponse> => {
-    const { publicationId, articleId } = req.params;
-    const { ssml, voiceId } = req.body;
+    const { publicationId } = req.params;
+    const { ssml, voice, article } = req.body;
 
     const validationSchema = joi.object().keys({
+      // required
       publicationId: joi.string().uuid().required(),
-      articleId: joi.string().uuid().required(),
-      voiceId: joi.string().uuid().required(),
-      ssml: joi.string().required()
+      voice: joi.object({
+        id: joi.string().uuid().optional(),
+      }).required(),
+      ssml: joi.string().required(),
+
+      // optional
+      article: joi.object({
+        id: joi.string().uuid().optional(),
+      }).optional()
     });
 
     const validationResult = validationSchema.validate({ ...req.body, ...req.params });
@@ -726,37 +727,45 @@ export class PublicationsController extends BaseController {
 
     // To prevent abuse, we set a max. We need to figure out if this max is enough.
     if (ssml.length > 2000) {
-      const errorMessage = 'Paragraph length is too long to be previewed.';
+      const errorMessage = 'Paragraph length is too long to be previewed. Please break it up in smaller parts to preview this.';
       Sentry.captureMessage(errorMessage, Sentry.Severity.Critical);
       throw new HttpError(HttpStatus.BadRequest, errorMessage)
     }
 
-    const article = await this.articleService.findOneById(articleId, {
-      where: {
-        publication: {
-          id: publicationId
+    if (article && article.id) {
+      const foundArticle = await this.articleService.findOneById(article.id, {
+        where: {
+          publication: {
+            id: publicationId
+          }
         }
+      });
+  
+      if (!foundArticle) {
+        throw new HttpError(HttpStatus.NotFound, 'Article does not exist.');
       }
-    });
-
-    if (!article) {
-      throw new HttpError(HttpStatus.NotFound, 'Article does not exist.');
     }
 
-    const voice = await this.voiceService.findOneByIdWhereActive(voiceId);
+    if (!voice || !voice.id) {
+      throw new HttpError(HttpStatus.BadRequest, 'A voice ID in the request body is required.');
+    }
+  
+    const foundVoice = await this.voiceService.findOneByIdWhereActive(voice.id);
 
-    if (!voice) {
+    if (!foundVoice) {
       throw new HttpError(HttpStatus.NotFound, 'Active voice does not exist.')
     }
 
-    const synthesizerService = new SynthesizerService(voice.synthesizer);
+    const synthesizerService = new SynthesizerService(foundVoice.synthesizer);
+
+    // TODO: track preview characters
 
     const audioBase64String = await synthesizerService.preview({
       outputFormat: 'mp3',
       ssml,
-      voiceLanguageCode: voice.languageCode,
-      voiceName: voice.name,
-      voiceSsmlGender: voice.gender
+      voiceLanguageCode: foundVoice.languageCode,
+      voiceName: foundVoice.name,
+      voiceSsmlGender: foundVoice.gender
     });
 
     const response: AudioPreview = {

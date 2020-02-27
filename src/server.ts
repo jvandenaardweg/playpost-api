@@ -448,10 +448,11 @@ export const setupServer = async () => {
   app.get('/v1/publications/:publicationId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOnePublication);
   app.get('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getAllPublicationArticleSummaries);
   app.post('/v1/publications/:publicationId/articles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationArticle);
+  app.post('/v1/publications/:publicationId/preview-ssml', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationPreviewSSML);
   app.post('/v1/publications/:publicationId/import/article', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationImportArticle);
   app.get('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.getOnePublicationArticle);
   app.patch('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.patchOnePublicationArticle);
-  app.post('/v1/publications/:publicationId/articles/:articleId/preview-ssml', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationPreviewSSML);
+  
   app.post('/v1/publications/:publicationId/articles/:articleId/audiofiles', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.postOnePublicationAudiofile);
   app.delete('/v1/publications/:publicationId/articles/:articleId', [IS_PROTECTED_JWT, publicationsController.restrictResourceToOwner], publicationsController.deleteOnePublicationArticle);
 
