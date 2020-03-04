@@ -3,7 +3,7 @@ const { version } = require('../../package.json');
 import Stripe from 'stripe';
 
 const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`, {
-  apiVersion: '2019-12-03',
+  apiVersion: '2020-03-02',
   maxNetworkRetries: 3,
   typescript: true,
   appInfo: {
