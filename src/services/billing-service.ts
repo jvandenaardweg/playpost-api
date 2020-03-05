@@ -15,6 +15,14 @@ interface SalesTax {
   }
 }
 
+interface CreateStripeCustomerOptions {
+  organizationName: string;
+  countryCode: string; 
+  email: string;
+  organizationId: string;
+  userId: string;
+}
+
 export class BillingService extends BaseService {
   private readonly stripe: Stripe;
   private readonly SalesTax: any;
@@ -243,5 +251,24 @@ export class BillingService extends BaseService {
     const salesTax = await this.SalesTax.getSalesTax(countryCode);
 
     return salesTax;
+  }
+
+  async createCustomer(options: CreateStripeCustomerOptions): Promise<Stripe.Customer> {
+    const createdCustomer = await stripe.customers.create({
+      name: options.organizationName,
+      address: {
+        country: options.countryCode,
+        line1: '',
+      },
+      email: options.email,
+      preferred_locales: ['en'],
+      metadata: {
+        organizationId: options.organizationId,
+        adminEmail: options.email,
+        userId: options.userId,
+      }
+    })
+
+    return createdCustomer
   }
 }

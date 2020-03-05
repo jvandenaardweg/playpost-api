@@ -13,6 +13,9 @@ import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
 import { OrganizationResponse } from './types';
+import { Organization } from '../../database/entities/organization';
+import { getConnection } from 'typeorm';
+import * as uuid from 'uuid';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
@@ -103,6 +106,68 @@ export class OrganizationsController extends BaseController {
     const response = await this.organizationService.findAll(userId, page, perPage, skip, take);
 
     return res.json(response);
+  };
+
+  /**
+   * Create an Organization in our database. With the creation we also create a Stripe Customer.
+   */
+  public postOne = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const userId = req.user!.id;
+    const { name, countryCode } = req.body;
+
+    const user = await this.usersService.findOneById(userId);
+
+    if (!user) {
+      throw new HttpError(HttpStatus.NotFound, 'User could not be found.');
+    }
+
+    // TODO: check if user already has organization, do not allow it to create one if he already has one
+
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
+
+    // establish real database connection using our new query runner
+    await queryRunner.connect();
+
+    // Create a transaction to make sure our separate calls finish properly
+    await queryRunner.startTransaction();
+
+    const organizationToCreate = new Organization();
+    organizationToCreate.name = name;
+    organizationToCreate.id = uuid.v4(); // Create a UUID, we can use in our Stripe call
+
+    // Add the current user as an admin
+    organizationToCreate.admin = user;
+    organizationToCreate.users = [user];
+    organizationToCreate.stripeCustomerId = '';
+
+    // First, create the organization without a Stripe Customer ID
+    // So we do not end up with unused customers in Stripe when a database insertion failed
+    await queryRunner.manager.save(organizationToCreate);
+
+    // First, create a Customer
+    const createdCustomer = await this.billingService.createCustomer({
+      organizationId: organizationToCreate.id,
+      organizationName: organizationToCreate.name,
+      countryCode,
+      email: user.email,
+      userId: user.id,
+    })
+
+    // Attach the Stripe Customer ID to the Organization
+    organizationToCreate.stripeCustomerId = createdCustomer.id;
+
+    // Update the Organization with the new Stripe Customer ID
+    const createdOrganization = await queryRunner.manager.save(organizationToCreate);
+
+    // By wrapping the above in a transaction, we make sure the organization does not get created if we fail to create a customer
+
+    // Commit the transaction
+    await queryRunner.commitTransaction();
+
+    await queryRunner.release();
+
+    return res.json(createdOrganization);
   };
 
   /**
