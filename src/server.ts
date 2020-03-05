@@ -548,8 +548,24 @@ export const setupServer = async () => {
         });
       }
 
+      const databaseError = err.table ? err : undefined;
+
       // If we have a status code, use our custom error response
       if (statusCode) {
+        if (databaseError) {
+          return res.status(statusCode).json({
+            status: statusCode ? statusCode : undefined,
+            message: `An unexpected database error occurred. Please try again or contact us when this happens again.`,
+            details: {
+              detail: err.detail,
+              table: err.table,
+              constraint: err.constraint,
+              routine: err.routine,
+              code: err.code,
+            }
+          });
+        }
+
         return res.status(statusCode).json({
           status: statusCode ? statusCode : undefined,
           message: err.message ? err.message : 'An unexpected error occurred. Please try again or contact us when this happens again.',
