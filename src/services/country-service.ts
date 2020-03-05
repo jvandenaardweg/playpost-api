@@ -18,4 +18,12 @@ export class CountryService extends BaseService {
       }
     })
   }
+
+  public findOneByCountryCode = async (countryCode: string): Promise<Country | undefined> => {
+    return this.countryRepository.findOne({
+      where: {
+        code: countryCode
+      }
+    })
+  }
 }
