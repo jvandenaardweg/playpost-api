@@ -1,7 +1,6 @@
 import { getConnection, getRepository, Repository } from 'typeorm';
 
 import * as cacheKeys from '../cache/keys';
-import { Organization } from '../database/entities/organization';
 import { User } from '../database/entities/user';
 import { HttpError, HttpStatus } from '../http-error';
 import { addEmailToMailchimpList } from '../mailers/mailchimp';
@@ -64,9 +63,7 @@ export class UserService extends BaseService {
     });
   }
 
-  
-
-  create = async (email: string, password: string, organization?: { name: string }): Promise<void> => {
+  createOne = async (email: string, password: string): Promise<void> => {
     const loggerPrefix = 'Create new user:';
     const emailAddressNormalized = User.normalizeEmail(email);
     const existingUser = await this.userRepository.findOne({ email: emailAddressNormalized });
@@ -98,47 +95,8 @@ export class UserService extends BaseService {
       // First, create a user
       logger.info(loggerPrefix, `Should create user:`, newUser);
 
+      // Create the user
       const savedUser = await queryRunner.manager.save(newUser);
-
-      // If a organization name is giving during signup, create the organization and attach it to the user
-      if (organization) {
-        const newOrganization = new Organization();
-        // const newCustomer = new Customer();
-
-        // newCustomer.id = uuid.v4();
-
-        newOrganization.name = organization.name;
-
-        // Add the current user as an admin
-        newOrganization.admin = savedUser;
-
-        // Use the organization name to add it to stripe
-        // try {
-        //   logger.info(loggerPrefix, `Adding organization to Stripe...`);
-        //   const stripeCustomer = await stripe.customers.create({
-        //     name: newOrganization.name,
-        //     email: savedUser.email,
-        //     preferred_locales: ['en-US'], // https://support.stripe.com/questions/language-options-for-customer-emails
-        //     metadata: {
-        //       customerId: newCustomer.id,
-        //       userId: savedUser.id
-        //     }
-        //   })
-
-        //   newCustomer.stripeCustomerId = stripeCustomer.id;
-        // } catch (err) {
-        //   logger.error(loggerPrefix, `Failed to add organization to Stripe:`, JSON.stringify(err));
-        //   throw err;
-        // }
-
-        // const savedCustomer = await queryRunner.manager.save(Customer, newCustomer);
-
-        newOrganization.users = [savedUser];
-
-        logger.info(loggerPrefix, `Create organization:`, newOrganization);
-
-        await queryRunner.manager.save(Organization, newOrganization);
-      }
 
       const user = await queryRunner.manager.findOne(User, savedUser.id, {
         select: ['id', 'email', 'activationToken']
@@ -147,23 +105,6 @@ export class UserService extends BaseService {
       if (!user) {
         logger.info(loggerPrefix, `Could not find the user after creating it.`);
         throw new Error('Oops! Could not find the new user after creating it.');
-      }
-
-      // If the user signs up as an organization, only send the activation mail
-      // As this is only for our "Playpost for Publishers" service
-      // Our mobile app users also use this endpoint, without the organization
-      if (organization) {
-        try {
-          if (!user.activationToken) {
-            throw new HttpError(HttpStatus.BadRequest, 'No activation token found.');
-          }
-
-          logger.info(loggerPrefix, `Sending activation email to: ${user.email} using token: ${user.activationToken}`);
-          await User.sendActivationEmail(user.activationToken, user.email);
-        } catch (err) {
-          logger.error(loggerPrefix, `Failed to send activation mail to: ${user.email}`, err);
-          throw err;
-        }
       }
 
       try {

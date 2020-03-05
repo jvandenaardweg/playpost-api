@@ -39,12 +39,11 @@ export class UsersController extends BaseController {
    *          $ref: '#/components/responses/PostUsersResponse'
    */
   postUsers = async (req: Request, res: Response) => {
-    const { email, password, organization } = req.body as PostUsersRequestBody;
+    const { email, password } = req.body as PostUsersRequestBody;
 
     const validationSchema = joi.object().keys({
       email: joi.string().email({ minDomainSegments: 2 }),
-      password: joi.string().min(6),
-      organization: joi.object().optional()
+      password: joi.string().min(6)
     });
 
     const userValidationResult = validationSchema.validate(req.body);
@@ -55,34 +54,7 @@ export class UsersController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, firstError.message, userValidationResult.error.details);
     }
 
-    if (organization) {
-      const organizationValidationSchema = joi.object().keys({
-        organization: joi.object().keys({
-          name: joi
-            .string()
-            .max(50)
-            .required()
-            .messages({
-              'string.base': 'Organization name must be a string.',
-              'string.empty': 'Organization name cannot be empty.',
-              'string.max': 'Organization name should have a maximum length of {#limit}.',
-              'any.required': 'An organization name is required.'
-            })
-        })
-      });
-
-      // Only validate the organization object, remove email and password
-      const organizationBody = { organization: req.body.organization };
-      const organizationValidation = organizationValidationSchema.validate(organizationBody);
-
-      if (organizationValidation.error) {
-        const firstErrorMessage = organizationValidation.error.details[0].message;
-
-        throw new HttpError(HttpStatus.BadRequest, firstErrorMessage, organizationValidation.error.details);
-      }
-    }
-
-    await this.usersService.create(email, password, organization);
+    await this.usersService.createOne(email, password);
 
     // Get the user and return it
     // Our App needs this user info
