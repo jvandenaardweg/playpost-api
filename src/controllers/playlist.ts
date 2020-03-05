@@ -7,6 +7,7 @@ import { Article, ArticleStatus } from '../database/entities/article';
 import { PlaylistItem } from '../database/entities/playlist-item';
 import { logger } from '../utils';
 import { getNormalizedUrl } from '../utils/string';
+import { HttpError, HttpStatus } from '../http-error';
 
 const MESSAGE_PLAYLISTS_NO_ACCESS_PLAYLIST = 'You have no access to this playlist because it is not yours.';
 const MESSAGE_PLAYLISTS_PLAYLIST_ITEM_NOT_FOUND = 'The given article does not exist in your playlist.';
@@ -277,7 +278,8 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     logger.error(loggerPrefix, message);
-    return res.status(400).json({ message });
+
+    throw new HttpError(HttpStatus.BadRequest, message)
   }
 
   // Normalize the URL
@@ -285,6 +287,10 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // For this we'll do an extra check later in the updateArticleToFull() method, to ensure we don't get duplicates
   // By doing it this way, we keep this method very quick and responsive for our user
   const normalizedUrl = getNormalizedUrl(articleUrl);
+
+  if (!normalizedUrl.startsWith('http')) {
+    throw new HttpError(HttpStatus.BadRequest, 'The given URL is not a website URL. We currently only support websites.');
+  }
 
   // Correctly escape the string
   const { stringifiedDocumentHtml } = JSON.parse(JSON.stringify({ stringifiedDocumentHtml: documentHtml }));
@@ -312,7 +318,7 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
     });
 
     if (playlistItem) {
-      return res.status(400).json({ message: MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST });
+      throw new HttpError(HttpStatus.BadRequest, MESSAGE_PLAYLISTS_ARTICLE_EXISTS_IN_PLAYLIST);
     }
   } else {
     // If we do not have an article yet, create one in the database...
