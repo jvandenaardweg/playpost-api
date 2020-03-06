@@ -94,16 +94,38 @@ export class OrganizationsController extends BaseController {
   }
 
   /**
-   * Finds all organizations belonging to the authenticated user.
+   * @swagger
    *
-   * @returns Promise<OrganizationResponse>
+   *  /organizations:
+   *    get:
+   *      operationId: getAllOrganizations
+   *      tags:
+   *        - organizations
+   *      summary: Get the Organizations the user has access to.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Organization's
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Organization'
    */
-  public getAll = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public getAllOrganizations = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const userId = req.user!.id;
 
-    const requestQuery = this.validatePagingParams(req.query);
-    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-    const response = await this.organizationService.findAll(userId, page, perPage, skip, take);
+    const response = await this.organizationService.findAllByUserId(userId);
 
     return res.json(response);
   };

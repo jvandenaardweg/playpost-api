@@ -33,26 +33,14 @@ export class OrganizationService extends BaseService {
    * @param skip 
    * @param take 
    */
-  async findAll(userId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<Organization[]>> {
-    const [organizations, total] = await this.organizationRepository
+  async findAllByUserId(userId: string): Promise<Organization[]> {
+    const organizations = await this.organizationRepository
       .createQueryBuilder('organization')
       .innerJoin('organization.users', 'user', 'user.id = :userId', { userId })
       .select()
-      .skip(skip)
-      .take(take)
-      .getManyAndCount()
+      .getMany()
 
-    const totalPages = this.getTotalPages(total, perPage);
-
-    const response: CollectionResponse<Organization[]> = {
-      total,
-      page,
-      perPage,
-      totalPages,
-      data: organizations
-    }
-
-    return response
+    return organizations
   }
 
   /**

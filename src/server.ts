@@ -469,7 +469,7 @@ export const setupServer = async () => {
   app.get('/v1/billing/sales-tax/:countryCode', [IS_PROTECTED_JWT], billingController.getOneBillingSalesTax);
 
   // Available for all users to see their organizations
-  app.get('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.getAll);
+  app.get('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.getAllOrganizations);
   app.post('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.postOne);
 
   // Organization: Info
