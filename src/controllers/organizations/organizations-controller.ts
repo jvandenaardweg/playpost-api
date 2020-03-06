@@ -170,6 +170,17 @@ export class OrganizationsController extends BaseController {
     const userId = req.user!.id;
     const { name, countryId } = req.body as PostOneOrganizationRequestBody;
 
+    const validationSchema = joi.object().keys({
+      name: joi.string().max(50).required(),
+      countryId: joi.string().uuid().required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
     const user = await this.usersService.findOneById(userId);
 
     if (!user) {
@@ -210,7 +221,7 @@ export class OrganizationsController extends BaseController {
     const createdCustomer = await this.billingService.createCustomer({
       organizationId: organizationToCreate.id,
       organizationName: organizationToCreate.name,
-      countryCode,
+      countryCode: country.code.toUpperCase(),
       email: user.email,
       userId: user.id,
     })
