@@ -10,11 +10,15 @@ import * as AWSSes from '../mailers/aws-ses';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
 import { logger } from '../utils';
+// tslint:disable-next-line: no-submodule-imports
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { BillingService } from './billing-service';
 
 export class OrganizationService extends BaseService {
   private readonly organizationRepository: Repository<Organization>;
   private readonly publicationRepository: Repository<Publication>;
   private readonly userRepository: Repository<User>;
+  private readonly billingService: BillingService;
 
   constructor () {
     super()
@@ -22,6 +26,7 @@ export class OrganizationService extends BaseService {
     this.organizationRepository = getRepository(Organization);
     this.publicationRepository = getRepository(Publication);
     this.userRepository = getRepository(User);
+    this.billingService = new BillingService();
   }
 
   /**
@@ -167,6 +172,10 @@ export class OrganizationService extends BaseService {
     return getConnection().manager.save(organization);
   }
 
+  async update(organizationId: string, partialEntity: QueryDeepPartialEntity<Organization>) {
+    return this.organizationRepository.update({ id: organizationId }, partialEntity)
+  }
+
   /**
    * Save a user as the admin for the organization.
    *
@@ -245,33 +254,38 @@ export class OrganizationService extends BaseService {
       },
     }
 
+    // Update the organization name in our database
+    await this.update(organizationId, {
+      name: organization.name
+    })
+
     // Get the customer's current tax id's
-    const currentTaxIds = await stripe.customers.listTaxIds(organization.stripeCustomerId);
+    const currentTaxIds = await this.billingService.listCustomerTaxIds(organization.stripeCustomerId)
 
     // Check for tax id existence
     // Use combined "value" and "type". As a user might change his type and value
-    const taxIdExists = currentTaxIds.data.some(taxId => taxId.value === customerTaxIdParams.value && taxId.type === customerTaxIdParams.type);
+    const taxIdExists = currentTaxIds.some(taxId => taxId.value === customerTaxIdParams.value && taxId.type === customerTaxIdParams.type);
     
     // If the customer has tax id's
     // But the new tax ID does not exist
     // Delete the tax id's, so we can add a new one
-    if (currentTaxIds.data.length && !taxIdExists) {
-      for (const taxId of currentTaxIds.data) {
+    if (currentTaxIds.length && !taxIdExists) {
+      for (const taxId of currentTaxIds) {
         logger.info(`Deleting current tax ID: "${taxId.id}" for customer ID: "${organization.stripeCustomerId}"`);
-        await stripe.customers.deleteTaxId(organization.stripeCustomerId, taxId.id)
+        await this.billingService.deleteCustomerTaxId(organization.stripeCustomerId, taxId.id)
       }
     }
 
     // Only create a new tax ID when it does not exist and the user has send a "value" and "type"
     if (!taxIdExists && customerTaxIdParams.value && customerTaxIdParams.type) {
       logger.info(`Creating new Tax ID for customer ID: "${organization.stripeCustomerId}"`, customerTaxIdParams);
-      await stripe.customers.createTaxId(organization.stripeCustomerId, {
+      await this.billingService.createCustomerTaxId(organization.stripeCustomerId, {
         type: customerTaxIdParams.type,
         value: customerTaxIdParams.value
       })
     }
 
-    const updatedStripeCustomer = await stripe.customers.update(organization.stripeCustomerId, updateOneCustomerFields);
+    const updatedStripeCustomer = await this.billingService.updateCustomer(organization.stripeCustomerId, updateOneCustomerFields);
 
     return updatedStripeCustomer;
   }

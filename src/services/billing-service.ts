@@ -271,4 +271,28 @@ export class BillingService extends BaseService {
 
     return createdCustomer
   }
+
+  async listCustomerTaxIds(stripeCustomerId: string): Promise<Stripe.TaxId[]> {
+    const taxIdsResult = await stripe.customers.listTaxIds(stripeCustomerId)
+
+    return taxIdsResult.data;
+  }
+
+  async deleteCustomerTaxId(stripeCustomerId: string, stripeTaxIdId: string): Promise<Stripe.DeletedTaxId> {
+    const taxIdsResult = await stripe.customers.deleteTaxId(stripeCustomerId, stripeTaxIdId)
+
+    return taxIdsResult;
+  }
+
+  async createCustomerTaxId(stripeCustomerId: string, params: Stripe.TaxIdCreateParams, options?: Stripe.RequestOptions | undefined): Promise<Stripe.TaxId> {
+    const createTaxIdResult = await stripe.customers.createTaxId(stripeCustomerId, params)
+
+    return createTaxIdResult
+  }
+
+  async updateCustomer(stripeCustomerId: string, params?: Stripe.CustomerUpdateParams | undefined) {
+    const updateResult = await stripe.customers.update(stripeCustomerId, params);
+
+    return updateResult;
+  }
 }
