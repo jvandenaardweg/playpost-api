@@ -12,6 +12,6 @@ components:
           example: Playpost
           description: The name of the organization.
         countryId:
-          type: string;
-          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11;
+          type: string
+          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
           description: The UUID of the Country.
