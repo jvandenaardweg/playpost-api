@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.13",
+    "version": "2.11.14",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -166,6 +166,25 @@
           "issuedAtMs": {
             "type": "number",
             "nullable": true
+          }
+        }
+      },
+      "PostOneOrganizationRequestBody": {
+        "type": "object",
+        "required": [
+          "name",
+          "countryId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Playpost",
+            "description": "The name of the organization."
+          },
+          "countryId": {
+            "type": "string;",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11;",
+            "description": "The UUID of the Country."
           }
         }
       },
@@ -2317,6 +2336,95 @@
                   "items": {
                     "$ref": "#/components/schemas/Language"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations": {
+      "get": {
+        "operationId": "getAllOrganizations",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Organizations the user has access to.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Organization's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOneOrganization",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Create on Organization for the user.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOneOrganizationRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A Organization object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Organization"
                 }
               }
             }
