@@ -470,7 +470,7 @@ export const setupServer = async () => {
 
   // Available for all users to see their organizations
   app.get('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.getAllOrganizations);
-  app.post('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.postOne);
+  app.post('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.postOneOrganization);
 
   // Organization: Info
   app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOne);

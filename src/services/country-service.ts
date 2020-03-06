@@ -19,6 +19,10 @@ export class CountryService extends BaseService {
     })
   }
 
+  public findOneById = async (countryId: string): Promise<Country | undefined> => {
+    return this.countryRepository.findOne(countryId)
+  }
+
   public findOneByCountryCode = async (countryCode: string): Promise<Country | undefined> => {
     return this.countryRepository.findOne({
       where: {

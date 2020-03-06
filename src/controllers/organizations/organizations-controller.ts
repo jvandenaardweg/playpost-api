@@ -12,10 +12,11 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import { OrganizationResponse } from './types';
+import { OrganizationResponse, PostOneOrganizationRequestBody } from './types';
 import { Organization } from '../../database/entities/organization';
 import { getConnection } from 'typeorm';
 import * as uuid from 'uuid';
+import { CountryService } from '../../services/country-service';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
@@ -23,6 +24,7 @@ export class OrganizationsController extends BaseController {
   private billingService: BillingService;
   private usersService: UserService;
   private publicationService: PublicationService;
+  private countryService: CountryService;
 
   constructor() {
     super()
@@ -31,6 +33,7 @@ export class OrganizationsController extends BaseController {
     this.billingService = new BillingService();
     this.usersService = new UserService()
     this.publicationService = new PublicationService()
+    this.countryService = new CountryService()
   }
 
   /**
@@ -131,16 +134,52 @@ export class OrganizationsController extends BaseController {
   };
 
   /**
-   * Create an Organization in our database. With the creation we also create a Stripe Customer.
+   * @swagger
+   *
+   *  /organizations:
+   *    post:
+   *      operationId: postOneOrganization
+   *      tags:
+   *        - organizations
+   *      summary: Create on Organization for the user.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneOrganizationRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Organization object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Organization'
    */
-  public postOne = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public postOneOrganization = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const userId = req.user!.id;
-    const { name, countryCode } = req.body;
+    const { name, countryId } = req.body as PostOneOrganizationRequestBody;
 
     const user = await this.usersService.findOneById(userId);
 
     if (!user) {
       throw new HttpError(HttpStatus.NotFound, 'User could not be found.');
+    }
+
+    const country = await this.countryService.findOneById(countryId)
+
+    if (!country) {
+      throw new HttpError(HttpStatus.NotFound, 'The given country could not be found.');
     }
 
     // TODO: check if user already has organization, do not allow it to create one if he already has one

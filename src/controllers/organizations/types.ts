@@ -8,3 +8,7 @@ export interface OrganizationResponse extends Response {
     isUser: boolean;
   }
 }
+export interface PostOneOrganizationRequestBody {
+  name: string;
+  countryId: string;
+}
