@@ -38,3 +38,22 @@ export const getHTMLFromSSML = (ssml: string) => {
   .trim()
   return strippedSSML;
 }
+
+export const validateIfUrlIsAllowed = (url: string) => {
+  return new Promise((resolve, reject) => {
+    const regexYoutube = /((?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/|youtube\-nocookie\.com\/embed\/)([a-zA-Z0-9-]*))/g
+
+    // Validate if the URL starts with a HTTP
+    // For example, app users could send "file://" url's, but we cannot process that
+    if (!url.startsWith('http')) {
+      return reject(new Error('The given URL is not a website URL. We currently only support websites.'))
+    }
+
+    // It seems some users try to add youtube urls. Just prevent it.
+    if (['https://www.youtube.com', 'https://youtube.com', 'https://youtu.be'].includes(url) || url.match(regexYoutube)) {
+      return reject(new Error('Playpost does not support YouTube URLs.'))
+    }
+
+    resolve(url);
+  })
+}

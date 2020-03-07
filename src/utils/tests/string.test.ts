@@ -1,6 +1,28 @@
-import { trimTextAtWords, getNormalizedUrl, getHTMLFromSSML, getTextFromSSML } from '../string';
+import { trimTextAtWords, getNormalizedUrl, getHTMLFromSSML, getTextFromSSML, validateIfUrlIsAllowed } from '../string';
 
 describe('credentials', () => {
+
+  describe('validateIfUrlIsAllowed()', () => {
+
+    it('Should correctly show an error when the url is not allowed.', async () => {
+      await expect(validateIfUrlIsAllowed('https://www.youtube.com')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://youtu.be')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://youtube.com')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://youtu.be/dQw4w9WgXcQ')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://www.youtube.com/embed/dQw4w9WgXcQ')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      await expect(validateIfUrlIsAllowed('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')).rejects.toThrowError('Playpost does not support YouTube URLs.')
+      
+      await expect(validateIfUrlIsAllowed('file://some/path')).rejects.toThrowError('The given URL is not a website URL. We currently only support websites.')
+    });
+
+    it('Should not show an error when the URL is allowed.', async () => {
+      await expect(validateIfUrlIsAllowed('https://nu.nl')).resolves.toBeTruthy()
+      await expect(validateIfUrlIsAllowed('https://google.com')).resolves.toBeTruthy()
+      await expect(validateIfUrlIsAllowed('http://google.com')).resolves.toBeTruthy()
+    });
+  });
+
 
   describe('trimTextAtWords()', () => {
 
