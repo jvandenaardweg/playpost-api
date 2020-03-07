@@ -288,8 +288,15 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   // By doing it this way, we keep this method very quick and responsive for our user
   const normalizedUrl = getNormalizedUrl(articleUrl);
 
+  // Validate if the URL starts with a HTTP
+  // For example, app users could send "file://" url's, but we cannot process that
   if (!normalizedUrl.startsWith('http')) {
     throw new HttpError(HttpStatus.BadRequest, 'The given URL is not a website URL. We currently only support websites.');
+  }
+  
+  // It seems some users try to add youtube urls. Just prevent it.
+  if (normalizedUrl.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$)/)) {
+    throw new HttpError(HttpStatus.BadRequest, 'Playpost does not support YouTube.');
   }
 
   // Correctly escape the string
