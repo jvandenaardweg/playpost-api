@@ -318,9 +318,9 @@ export class PublicationsController extends BaseController {
     }
     
     // It seems some users try to add youtube urls. Just prevent it.
-    if (normalizedUrl.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$)/)) {
-      throw new HttpError(HttpStatus.BadRequest, 'Playpost does not support YouTube.');
-    }
+    // if (normalizedUrl.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$)/)) {
+    //   throw new HttpError(HttpStatus.BadRequest, 'Playpost does not support YouTube.');
+    // }
 
     const publication = res.locals.publication;
 

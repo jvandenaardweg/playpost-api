@@ -295,9 +295,9 @@ export const createPlaylistItemByArticleUrl = async (req: Request, res: Response
   }
   
   // It seems some users try to add youtube urls. Just prevent it.
-  if (normalizedUrl.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$)/)) {
-    throw new HttpError(HttpStatus.BadRequest, 'Playpost does not support YouTube.');
-  }
+  // if (normalizedUrl.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$)/)) {
+  //   throw new HttpError(HttpStatus.BadRequest, 'Playpost does not support YouTube.');
+  // }
 
   // Correctly escape the string
   const { stringifiedDocumentHtml } = JSON.parse(JSON.stringify({ stringifiedDocumentHtml: documentHtml }));
