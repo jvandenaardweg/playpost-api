@@ -475,8 +475,7 @@ export class OrganizationsController extends BaseController {
       }).required(),
       // Tax ID is optional, it's not required for non-business customers
       taxId: joi.object().keys({
-        type: joi.string().required().max(10), // Example: "eu_vat", "cs_qst" etc...
-        value: joi.string().allow('').required().max(30), // Example: "NL002175463B65"
+        value: joi.string().allow('').required().max(20), // Example: "NL002175463B65"
       }).optional()
     });
 
@@ -499,13 +498,7 @@ export class OrganizationsController extends BaseController {
       }
     }
 
-    // Optional, only use this when taxId body is filled with a value and a type
-    const taxIdParams: Stripe.TaxIdCreateParams = {
-      type: req.body.taxId.type,
-      value: req.body.taxId.value
-    }
-
-    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, customerUpdateParams, taxIdParams);
+    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, customerUpdateParams, req.body.taxId.value);
 
     return res.json(updatedCustomer);
   };

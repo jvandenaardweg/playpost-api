@@ -23,9 +23,20 @@ interface CreateStripeCustomerOptions {
   userId: string;
 }
 
+interface SelectTaxIdOption {
+  countryName: string;
+  description: string;
+  type: Stripe.TaxIdCreateParams.Type;
+}
+
+interface TaxIdTypes {
+  [key: string]: SelectTaxIdOption[];
+}
+
 export class BillingService extends BaseService {
   private readonly stripe: Stripe;
   private readonly SalesTax: any;
+  public readonly taxIdTypes: TaxIdTypes;
 
   constructor () {
     super()
@@ -42,6 +53,327 @@ export class BillingService extends BaseService {
     // SalesTax.toggleEnabledTaxNumberValidation(false);
     
     this.SalesTax = SalesTax
+    
+    this.taxIdTypes = {
+      'CA': [
+        {
+          countryName: 'Canada',
+          description: 'CA BN',
+          type: 'ca_bn',
+        },
+        {
+          countryName: 'Canada',
+          description: 'CA QST',
+          type: 'ca_qst',
+        }
+      ],
+      'AU': [
+        {
+          countryName: 'Australian',
+          description: 'AU ABN',
+          type: 'au_abn'
+        }
+      ],
+      'ES': [
+        {
+          countryName: 'Spain',
+          description: 'ES CIF',
+          type: 'es_cif'
+        },
+        {
+          countryName: 'Spain',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'AS': [
+        {
+          countryName: 'Austria',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'BE': [
+        {
+          countryName: 'Belgium',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'BG': [
+        {
+          countryName: 'Bulgaria',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'CY': [
+        {
+          countryName: 'Cyprus',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'CZ': [
+        {
+          countryName: 'Czech',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'DE': [
+        {
+          countryName: 'Germany',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'DK': [
+        {
+          countryName: 'Denmark',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'EE': [
+        {
+          countryName: 'Estonia',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'FI': [
+        {
+          countryName: 'Finland',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'UK': [
+        {
+          countryName: 'United Kingdom',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'GR': [
+        {
+          countryName: 'Greece',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'HR': [
+        {
+          countryName: 'Croatia',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'HU': [
+        {
+          countryName: 'Hungary',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'IE': [
+        {
+          countryName: 'Ireland',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'IT': [
+        {
+          countryName: 'Italy',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'LT': [
+        {
+          countryName: 'Lithuania',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'LU': [
+        {
+          countryName: 'Luxembourg',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'LV': [
+        {
+          countryName: 'Latvia',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'MT': [
+        {
+          countryName: 'Malta',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'NL': [
+        {
+          countryName: 'Netherlands',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'PL': [
+        {
+          countryName: 'Poland',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'PT': [
+        {
+          countryName: 'Portugal',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'RO': [
+        {
+          countryName: 'Romania',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'SE': [
+        {
+          countryName: 'Sweden',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'SI': [
+        {
+          countryName: 'Slovenia',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'SK': [
+        {
+          countryName: 'Slovakia',
+          description: 'EU VAT',
+          type: 'eu_vat'
+        }
+      ],
+      'HK': [
+        {
+          countryName: 'Hong Kong',
+          description: 'HK BR',
+          type: 'hk_br'
+        }
+      ],
+      'IN': [
+        {
+          countryName: 'India',
+          description: 'IN GST',
+          type: 'in_gst'
+        }
+      ],
+      'JP': [
+        {
+          countryName: 'Japan',
+          description: 'JP CN',
+          type: 'jp_cn'
+        }
+      ],
+      'KR': [
+        {
+          countryName: 'South Korea',
+          description: 'KR BRN',
+          type: 'kr_brn'
+        }
+      ],
+      'LI': [
+        {
+          countryName: 'Liechtenstein',
+          description: 'LI UID',
+          type: 'li_uid'
+        }
+      ],
+      'MX': [
+        {
+          countryName: 'Mexico',
+          description: 'MX RFC',
+          type: 'mx_rfc'
+        }
+      ],
+      'MY': [
+        {
+          countryName: 'Malaysia',
+          description: 'MY ITN',
+          type: 'my_itn'
+        }
+      ],
+      'NO': [
+        {
+          countryName: 'Norway',
+          description: 'NO VAT',
+          type: 'no_vat'
+        }
+      ],
+      'NZ': [
+        {
+          countryName: 'New Zealand',
+          description: 'NZ GST',
+          type: 'nz_gst'
+        }
+      ],
+      'RU': [
+        {
+          countryName: 'Russia',
+          description: 'RU INN',
+          type: 'ru_inn'
+        }
+      ],
+      'SG': [
+        {
+          countryName: 'Singapore',
+          description: 'SG UEN',
+          type: 'sg_uen'
+        }
+      ],
+      'TH': [
+        {
+          countryName: 'Thailand',
+          description: 'TH VAT',
+          type: 'th_vat'
+        }
+      ],
+      'TW': [
+        {
+          countryName: 'Taiwan',
+          description: 'TW VAT',
+          type: 'tw_vat'
+        }
+      ],
+      'US': [
+        {
+          countryName: 'United States',
+          description: 'US EIN',
+          type: 'us_ein'
+        }
+      ],
+      'ZA': [
+        {
+          countryName: 'South Africa',
+          description: 'ZA VAT',
+          type: 'za_vat'
+        }
+      ]
+    }
   }
 
   async findAllProducts(): Promise<Stripe.Product[]> {

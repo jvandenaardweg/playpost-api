@@ -235,7 +235,7 @@ export class OrganizationService extends BaseService {
    * @param authenticatedUserId
    * @param customerUpdateFields 
    */
-  async updateOneCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams, customerTaxIdParams: Stripe.TaxIdCreateParams): Promise<Stripe.Customer> {
+  async updateOneCustomer(organizationId: string, customerUpdateFields: Stripe.CustomerUpdateParams, taxIdValue?: string): Promise<Stripe.Customer> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
@@ -261,10 +261,16 @@ export class OrganizationService extends BaseService {
 
     // Get the customer's current tax id's
     const currentTaxIds = await this.billingService.listCustomerTaxIds(organization.stripeCustomerId)
+    
+    // Get the correct Stripe TaxId type based on the user's Country Code
+    const countryCode = customerUpdateFields.address?.country?.toUpperCase();
+    const taxIdForCountry = countryCode ? this.billingService.taxIdTypes[countryCode] : undefined;
+    const taxIdType = taxIdForCountry && taxIdForCountry[0] ? taxIdForCountry[0].type : undefined;
+    const normalizedTaxIdValue = taxIdValue ? taxIdValue.toUpperCase().replace(/\s/g, '').trim() : taxIdValue;
 
     // Check for tax id existence
     // Use combined "value" and "type". As a user might change his type and value
-    const taxIdExists = currentTaxIds.some(taxId => taxId.value === customerTaxIdParams.value && taxId.type === customerTaxIdParams.type);
+    const taxIdExists = currentTaxIds.some(taxId => taxId.value === normalizedTaxIdValue && taxId.type === taxIdType);
     
     // If the customer has tax id's
     // But the new tax ID does not exist
@@ -277,11 +283,11 @@ export class OrganizationService extends BaseService {
     }
 
     // Only create a new tax ID when it does not exist and the user has send a "value" and "type"
-    if (!taxIdExists && customerTaxIdParams.value && customerTaxIdParams.type) {
-      logger.info(`Creating new Tax ID for customer ID: "${organization.stripeCustomerId}"`, customerTaxIdParams);
+    if (!taxIdExists && normalizedTaxIdValue && taxIdType) {
+      logger.info(`Creating new Tax ID for customer ID: "${organization.stripeCustomerId}"`, taxIdType, normalizedTaxIdValue);
       await this.billingService.createCustomerTaxId(organization.stripeCustomerId, {
-        type: customerTaxIdParams.type,
-        value: customerTaxIdParams.value
+        type: taxIdType,
+        value: normalizedTaxIdValue
       })
     }
 
