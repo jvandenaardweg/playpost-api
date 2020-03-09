@@ -463,6 +463,8 @@ export const setupServer = async () => {
   app.get('/v1/billing/products/:stripeProductId', [IS_PROTECTED_JWT], billingController.getOneBillingProduct);
   app.get('/v1/billing/tax-rates', [IS_PROTECTED_JWT], billingController.getAllBillingTaxRates);
   app.get('/v1/billing/tax-rates/:stripeTaxRateId', [IS_PROTECTED_JWT], billingController.getOneBillingTaxRate);
+  app.post('/v1/billing/checkout/new', [IS_PROTECTED_JWT], billingController.postOneBillingCheckoutSessionNew);
+  app.post('/v1/billing/checkout/update', [IS_PROTECTED_JWT], billingController.postOneBillingCheckoutSessionUpdate);
 
   // Not Stripe related
   app.post('/v1/billing/tax-number/validate', [IS_PROTECTED_JWT], billingController.postOneBillingTaxNumberValidation);

@@ -370,4 +370,132 @@ export class BillingController extends BaseController {
 
     return res.json(salesTax);
   };
+  
+  /**
+   * @swagger
+   *
+   *  /billing/checkout/new:
+   *    get:
+   *      operationId: postOneBillingCheckoutSessionNew
+   *      tags:
+   *        - billing
+   *      summary: Get a Checkout Sessions for Stripe Checkout for buying a new Subscription
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneBillingCheckoutSessionNew'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: One Session object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                $ref: '#/components/schemas/StripeSession'
+   */
+  public postOneBillingCheckoutSessionNew = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeCustomerId, stripePlanId } = req.body;
+
+    if (!stripeCustomerId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripeCustomerId in request body is required.');
+    }
+
+    if (!stripePlanId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripePlanId in request body is required.');
+    }
+
+    const customer = await this.billingService.findOneCustomer(stripeCustomerId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer not found.');
+    }
+
+    if (customer.deleted) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted.');
+    }
+
+    const plan = await this.billingService.findOnePlan(stripePlanId)
+
+    if (!plan) {
+      throw new HttpError(HttpStatus.NotFound, 'Plan not found.');
+    }
+
+    const session = await this.billingService.createNewSubscriptionSession(customer.id, stripePlanId)
+
+    return res.json(session);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /billing/checkout/update:
+   *    get:
+   *      operationId: postOneBillingCheckoutSessionUpdate
+   *      tags:
+   *        - billing
+   *      summary: Get a Checkout Sessions for Stripe Checkout for updating a Subscription
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneBillingCheckoutSessionUpdate'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: One Session object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                $ref: '#/components/schemas/StripeSession'
+   */
+  public postOneBillingCheckoutSessionUpdate = async (req: Request, res: Response): Promise<Response> => {
+    const { stripeCustomerId, stripeSubscriptionId } = req.body;
+
+    if (!stripeCustomerId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripeCustomerId in request body is required.');
+    }
+
+    if (!stripeSubscriptionId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripeSubscriptionId in request body is required.');
+    }
+
+    const customer = await this.billingService.findOneCustomer(stripeCustomerId);
+
+    if (!customer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer not found.');
+    }
+
+    if (customer.deleted) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted.');
+    }
+
+    const subscription = await this.billingService.findOneCustomerSubscription(stripeSubscriptionId);
+
+    if (!subscription) {
+      throw new HttpError(HttpStatus.NotFound, 'Subscription not found.');
+    }
+
+    const session = await this.billingService.createUpdateSubscriptionSession(customer.id, stripeSubscriptionId)
+
+    return res.json(session);
+  };
 }

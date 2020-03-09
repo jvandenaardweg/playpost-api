@@ -1,0 +1,32 @@
+components:
+  schemas:
+
+    PostOneBillingTaxNumberValidationRequestBody:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: NL
+        taxNumber:
+          type: string
+          example: NL001275562B65
+    
+    PostOneBillingCheckoutSessionNew:
+      type: object
+      properties:
+        stripeCustomerId:
+          type: string
+          example: cus_Grq9Fn4jKI0jvy
+        stripePlanId:
+          type: string
+          example: plan_GjA6MM7vp1T0Tn
+    
+    PostOneBillingCheckoutSessionUpdate:
+      type: object
+      properties:
+        stripeCustomerId:
+          type: string
+          example: cus_Grq9Fn4jKI0jvy
+        stripeSubscriptionId:
+          type: string
+          example: sub_GnG6F8ywfKaYjO
