@@ -643,3 +643,32 @@ export const deleteById = async (req: Request, res: Response) => {
 
   return res.json({ message: 'Audiofile is deleted!' });
 };
+
+/**
+ * Cleanup leftover audiofiles from deleted users.
+ */
+export const cleanupUnused = async (req: Request, res: Response) => {
+  const userEmail = req.user!.email;
+  const audiofileRepository = getRepository(Audiofile);
+  const loggerPrefix = 'Cleanup Unused Audiofiles';
+
+  if (userEmail !== 'jordyvandenaardweg@gmail.com') { return res.status(403).json({ message: 'You dont have access to this endpoint.' }); }
+
+  const audiofiles = await audiofileRepository.find({ 
+    where: {
+      user: {
+        id: null
+      }
+    },
+    relations: ['article'] });
+
+  logger.info(loggerPrefix, `Found ${audiofiles.length} to cleanup...`);
+
+  for(const audiofile of audiofiles) {
+    logger.info(loggerPrefix, `Deleting ${audiofile.id}...`)
+    await audiofileRepository.remove(audiofile);
+    await storage.deleteAudiofile(audiofile.article.id, audiofile.id);
+  }
+
+  return res.json({ message: `${audiofiles.length} audiofiles deleted` });
+};
