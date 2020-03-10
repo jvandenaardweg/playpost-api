@@ -404,7 +404,9 @@ export class BillingService extends BaseService {
     // The correct taxRate type does not seem to exist when we added this
     // TODO: check for new Stripe types version
     // @ts-ignore
-    const taxRates = await this.stripe.taxRates.list();
+    const taxRates = await this.stripe.taxRates.list({
+      limit: 100 // list all
+    });
 
     return taxRates.data;
   }
@@ -523,6 +525,21 @@ export class BillingService extends BaseService {
     });
 
     return subscription
+  }
+
+  /**
+   * Allows to upgrade or downgrade a subscription.
+   */
+  async updateSubscriptionPlan(stripeCurrentSubscriptionId: string, stripeNewPlanId: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
+    const subscription = await stripe.subscriptions.update(stripeCurrentSubscriptionId, {
+      items: [{
+        plan: stripeNewPlanId
+      }],
+      trial_end: customTrialEndDate, // no trial on upgrade
+      expand: ['latest_invoice.payment_intent'],
+    })
+
+    return subscription;
   }
 
   /**
