@@ -393,7 +393,7 @@ export class OrganizationService extends BaseService {
       return invoicesUpcoming;
     } catch (err) {
       // If there is no upcoming invoice, just return undefined
-      if (err.raw.invoice_upcoming_none) {
+      if (err.raw.code === 'invoice_upcoming_none') {
         return undefined;
       }
 
