@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.25",
+    "version": "2.11.26",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -3291,16 +3291,6 @@
             "required": true,
             "description": "A UUID of the Organization",
             "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
-          },
-          {
-            "in": "path",
-            "name": "stripePaymentMethodId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "A Stripe Payment Method ID",
-            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq"
           }
         ],
         "requestBody": {
