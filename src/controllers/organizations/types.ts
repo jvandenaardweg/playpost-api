@@ -43,7 +43,8 @@ export interface PatchOneCustomerPaymentMethodRequestBody {
 export interface PostOneOrganizationSubscriptionRequestBody {
   stripePlanId: string;
   stripePaymentMethodId: string;
-  customTrialEndDate: number | 'now' | undefined;
+  stripeTaxRateId?: string;
+  customTrialEndDate?: number | 'now';
 }
 
 export interface PostOneOrganizationCustomerPaymentMethodRequestBody {

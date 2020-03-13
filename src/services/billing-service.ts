@@ -511,12 +511,13 @@ export class BillingService extends BaseService {
    * @param stripeCustomerId
    * @param stripePlanId 
    */
-  async buyNewSubscriptionPlan(stripeCustomerId: string, stripePlanId: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
+  async buyNewSubscriptionPlan(stripeCustomerId: string, stripePlanId: string, stripeTaxRateId?: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
     const subscription = await stripe.subscriptions.create({
       customer: stripeCustomerId,
       items: [
         {
           plan: stripePlanId,
+          tax_rates: stripeTaxRateId ? [stripeTaxRateId] : []
         }
       ], 
       trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.

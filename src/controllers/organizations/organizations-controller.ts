@@ -1013,7 +1013,7 @@ export class OrganizationsController extends BaseController {
    *                $ref: '#/components/schemas/StripeSubscription'
    */
   public postOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripePlanId, stripePaymentMethodId, customTrialEndDate } = req.body as PostOneOrganizationSubscriptionRequestBody; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+    const { stripePlanId, stripePaymentMethodId, stripeTaxRateId, customTrialEndDate } = req.body as PostOneOrganizationSubscriptionRequestBody; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
     if (!stripePlanId) {
       throw new HttpError(HttpStatus.BadRequest, 'stripePlanId is required.');
@@ -1060,7 +1060,7 @@ export class OrganizationsController extends BaseController {
     // const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
 
     // Buy the subscription using the Stripe Customer ID, Stripe Plan ID and Stripe PaymentMethod ID
-    const subscriptionResult = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, customTrialEndDate);
+    const subscriptionResult = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, stripeTaxRateId, customTrialEndDate);
 
     // If we end up here, the subscription is bought.
 
