@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.20",
+    "version": "2.11.22",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -224,6 +224,152 @@
             "type": "string",
             "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11",
             "description": "The UUID of the Country."
+          }
+        }
+      },
+      "PostOneOrganizationPublicationRequestBody": {
+        "type": "object",
+        "required": [
+          "name",
+          "url"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Playpost Blog",
+            "description": "The name of the publication."
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.nu.nl",
+            "description": "A URL of the publication website."
+          }
+        }
+      },
+      "PatchOneOrganizationCustomerRequestBody": {
+        "type": "object",
+        "required": [
+          "email",
+          "name",
+          "address"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "finance@playpost.app",
+            "description": "The e-mail address of the customer."
+          },
+          "name": {
+            "type": "string",
+            "example": "Playpost",
+            "description": "The name of the customer."
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "line1",
+              "city",
+              "postal_code",
+              "country"
+            ],
+            "properties": {
+              "line1": {
+                "type": "string"
+              },
+              "line2": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "postal_code": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              }
+            },
+            "description": "An Stripe address object for the customer."
+          },
+          "taxId": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "PatchOneCustomerPaymentMethodRequestBody": {
+        "type": "object",
+        "required": [
+          "billingDetailsName",
+          "cardExpireMonth",
+          "cardExpireYear"
+        ],
+        "properties": {
+          "billingDetailsName": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "The name on the Credit Card."
+          },
+          "cardExpireMonth": {
+            "type": "number",
+            "example": 1,
+            "description": "The number of the expire month."
+          },
+          "cardExpireYear": {
+            "type": "number",
+            "example": 2020,
+            "description": "The number of the expire year."
+          }
+        }
+      },
+      "PostOneOrganizationSubscriptionRequestBody": {
+        "type": "object",
+        "required": [
+          "stripePlanId",
+          "stripePaymentMethodId"
+        ],
+        "properties": {
+          "stripePlanId": {
+            "type": "string",
+            "example": "plan_GLVHSLbMkT1UX8",
+            "description": "The Stripe Plan ID."
+          },
+          "stripePaymentMethodId": {
+            "type": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
+            "example": 1,
+            "description": "The Stripe Payment Method ID."
+          },
+          "customTrialEndDate": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": "now",
+            "description": "Unix Timestamp (number) or \"now\" (string)"
+          }
+        }
+      },
+      "PostOneOrganizationCustomerPaymentMethodRequestBody": {
+        "type": "object",
+        "required": [
+          "newStripePaymentMethodId"
+        ],
+        "properties": {
+          "newStripePaymentMethodId": {
+            "type": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
+            "example": 1,
+            "description": "The new Stripe Payment Method ID."
           }
         }
       },
@@ -546,6 +692,33 @@
           }
         ]
       },
+      "StripeCustomer": {
+        "description": "A Stripe Customer. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "StripeInvoice": {
+        "description": "A Stripe Invoice. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "StripePaymentMethod": {
+        "description": "A Stripe Payment Method. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
       "StripePlan": {
         "description": "A Stripe Session. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
         "type": "object",
@@ -557,6 +730,24 @@
       },
       "StripeProduct": {
         "description": "A Stripe Product. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "StripeSetupIntent": {
+        "description": "A Stripe Setup Intent. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "StripeSubscription": {
+        "description": "A Stripe Subscription. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.",
         "type": "object",
         "properties": {
           "id": {
@@ -2547,6 +2738,865 @@
                 "schema": {
                   "type": "object",
                   "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId": {
+      "get": {
+        "operationId": "getOneOrganization",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get one organization belonging to the authenticated user.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A Organization object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/publications": {
+      "get": {
+        "operationId": "getAllOrganizationPublications",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Publications of the Organization",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Publications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Publication"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer": {
+      "get": {
+        "operationId": "getOneOrganizationCustomer",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Stripe Customer of an Organization",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A Stripe Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeCustomer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOneOrganizationPublication",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Creates a publication for the selected organization.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOneOrganizationPublicationRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A Publication object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Publication"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchOneOrganizationCustomer",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Updates the Stripe Customer attached to this Organization",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOneOrganizationCustomerRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A Stripe Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeCustomer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/publications/:publicationId": {
+      "delete": {
+        "operationId": "deleteOneOrganizationPublication",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Deletes a Publication from the selected Organization.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          },
+          {
+            "in": "path",
+            "name": "publicationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Publication",
+            "example": "5ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Just a NoContent response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/subscriptions": {
+      "get": {
+        "operationId": "getAllOrganizationCustomerSubscriptions",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Subscriptions of a Customer",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StripeSubscription"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOneOrganizationPublication",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Buys a new subscription plan on behalf of the organization.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOneOrganizationSubscriptionRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A Stripe Subscription object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeSubscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/invoices": {
+      "get": {
+        "operationId": "getAllOrganizationCustomerInvoices",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Invoices of a Customer",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StripeInvoice"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/invoices/upcoming": {
+      "get": {
+        "operationId": "getAllOrganizationCustomerInvoicesUpcoming",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Invoices of a Customer",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StripeInvoice"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/payment-methods": {
+      "get": {
+        "operationId": "getAllOrganizationCustomerPaymentMethods",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Invoices of a Customer",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StripePaymentMethod"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postOneOrganizationCustomerPaymentMethod",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Changes the default payment method for a customer, a customer can only use one payment method.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          },
+          {
+            "in": "path",
+            "name": "stripePaymentMethodId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe Payment Method ID",
+            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOneOrganizationCustomerPaymentMethodRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripePaymentMethod"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId": {
+      "patch": {
+        "operationId": "getAllOrganizationCustomerPaymentMethods",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Invoices of a Customer",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          },
+          {
+            "in": "path",
+            "name": "stripePaymentMethodId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe Payment Method ID",
+            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOneCustomerPaymentMethodRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An array of Stripe Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripePaymentMethod"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId": {
+      "delete": {
+        "operationId": "deleteOneOrganizationSubscription",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Delete (cancel) a subscription using the Stripe subscription ID.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          },
+          {
+            "in": "path",
+            "name": "stripeSubscriptionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A Stripe Subscription ID",
+            "example": "sub_1GCRSVLbygOvfi9ojuY8DFOq"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled Stripe Subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeSubscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/:organizationId/customer/setup-intent": {
+      "get": {
+        "operationId": "getOneOrganizationCustomerSetupIntent",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get's a Stripe Setup Intent.",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A Stripe Setup Intent object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeSetupIntent"
                 }
               }
             }
