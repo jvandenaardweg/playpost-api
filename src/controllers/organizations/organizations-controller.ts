@@ -688,10 +688,10 @@ export class OrganizationsController extends BaseController {
    *
    *  /organizations/:organizationId/customer/invoices/upcoming:
    *    get:
-   *      operationId: getAllOrganizationCustomerInvoicesUpcoming
+   *      operationId: getOneOrganizationCustomerInvoicesUpcoming
    *      tags:
    *        - organizations
-   *      summary: Get the Invoices of a Customer
+   *      summary: Get the Upcoming Stripe Invoice of a Customer
    *      security:
    *        - BearerAuth: []
    *        - ApiKeyAuth: []
@@ -720,7 +720,7 @@ export class OrganizationsController extends BaseController {
    *                items:
    *                  $ref: '#/components/schemas/StripeInvoice'
    */
-  public getAllOrganizationCustomerInvoicesUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public getOneOrganizationCustomerInvoicesUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);

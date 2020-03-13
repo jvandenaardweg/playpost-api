@@ -507,7 +507,7 @@ export const setupServer = async () => {
 
   // Invoices
   app.get('/v1/organizations/:organizationId/customer/invoices', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerInvoices);
-  app.get('/v1/organizations/:organizationId/customer/invoices/upcoming', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerInvoicesUpcoming);
+  app.get('/v1/organizations/:organizationId/customer/invoices/upcoming', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneOrganizationCustomerInvoicesUpcoming);
   
   // Organization: manage Admins and Users
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user', 'organization-admin'])], organizationsController.createOneUser);
