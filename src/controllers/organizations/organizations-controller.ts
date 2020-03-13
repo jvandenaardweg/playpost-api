@@ -794,13 +794,6 @@ export class OrganizationsController extends BaseController {
    *          required: true
    *          description: A UUID of the Organization
    *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
-   *        - in: path
-   *          name: stripePaymentMethodId
-   *          schema:
-   *            type: string
-   *          required: true
-   *          description: A Stripe Payment Method ID
-   *          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
    *      requestBody:
    *        content:
    *          application/json:
