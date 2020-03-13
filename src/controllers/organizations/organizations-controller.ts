@@ -712,13 +712,12 @@ export class OrganizationsController extends BaseController {
    *        404:
    *          $ref: '#/components/responses/NotFoundError'
    *        200:
-   *          description: An array of Stripe Subscriptions
+   *          description: The next upcoming invoice of the Customer
    *          content:
    *            'application/json':
    *              schema:
-   *                type: array
-   *                items:
-   *                  $ref: '#/components/schemas/StripeInvoice'
+   *                type: object
+   *                $ref: '#/components/schemas/StripeInvoice'
    */
   public getOneOrganizationCustomerInvoicesUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
