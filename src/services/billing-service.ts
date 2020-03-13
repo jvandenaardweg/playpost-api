@@ -517,7 +517,7 @@ export class BillingService extends BaseService {
       items: [
         {
           plan: stripePlanId,
-          tax_rates: stripeTaxRateId ? [stripeTaxRateId] : []
+          ...(stripeTaxRateId) ? { tax_rates: [stripeTaxRateId] } : {},
         }
       ], 
       trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.

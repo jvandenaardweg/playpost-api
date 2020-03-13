@@ -240,6 +240,28 @@ describe('billing-service', () => {
 
     expect(createdSubscription).toMatchObject(subscriptionMock);
   })
+
+  it('buyNewSubscriptionPlan should create a new Stripe Subscription for the Customer when using a TaxRate ID.', async () => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsCreate = jest.spyOn(stripe.subscriptions, 'create').mockResolvedValue(subscriptionMock as any)
+
+    const createdSubscription = await billingService.buyNewSubscriptionPlan('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn', 'txr_2GL2OtLbygOvfi9ox7vpowV2')
+    
+    expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
+    expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
+      customer: 'cus_GLBNvU7Y4CEL02',
+      items: [
+        {
+          plan: 'plan_GjA6MM7vp1T0Tn',
+          tax_rates: ['txr_2GL2OtLbygOvfi9ox7vpowV2']
+        }
+      ], 
+      trial_end: undefined,
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    expect(createdSubscription).toMatchObject(subscriptionMock);
+  })
   
   it('attachDefaultPaymentMethodToCustomer should attach a new default Stripe Payment Method to a Stripe Customer.', async () => {
     const billingService = new BillingService();

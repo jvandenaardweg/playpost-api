@@ -350,6 +350,11 @@
             "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
             "description": "The Stripe Payment Method ID."
           },
+          "stripeTaxRateId": {
+            "type": "string",
+            "example": "txr_2GL2OtLbygOvfi9ox7vpowV2",
+            "description": "Optional Stripe Tax Rate ID."
+          },
           "customTrialEndDate": {
             "oneOf": [
               {
