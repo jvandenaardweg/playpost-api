@@ -245,7 +245,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId:
+   *  /organizations/{organizationId}:
    *    get:
    *      operationId: getOneOrganization
    *      tags:
@@ -293,7 +293,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/publications:
+   *  /organizations/{organizationId}/publications:
    *    get:
    *      operationId: getAllOrganizationPublications
    *      tags:
@@ -340,7 +340,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer:
+   *  /organizations/{organizationId}/customer:
    *    get:
    *      operationId: getOneOrganizationCustomer
    *      tags:
@@ -383,7 +383,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer:
+   *  /organizations/{organizationId}/customer:
    *    post:
    *      operationId: postOneOrganizationPublication
    *      tags:
@@ -451,7 +451,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/publications/:publicationId:
+   *  /organizations/{organizationId}/publications/{publicationId}:
    *    delete:
    *      operationId: deleteOneOrganizationPublication
    *      tags:
@@ -506,7 +506,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer:
+   *  /organizations/{organizationId}/customer:
    *    patch:
    *      operationId: patchOneOrganizationCustomer
    *      tags:
@@ -592,7 +592,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/subscriptions:
+   *  /organizations/{organizationId}/customer/subscriptions:
    *    get:
    *      operationId: getAllOrganizationCustomerSubscriptions
    *      tags:
@@ -641,7 +641,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/invoices:
+   *  /organizations/{organizationId}/customer/invoices:
    *    get:
    *      operationId: getAllOrganizationCustomerInvoices
    *      tags:
@@ -686,7 +686,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/invoices/upcoming:
+   *  /organizations/{organizationId}/customer/invoices/upcoming:
    *    get:
    *      operationId: getOneOrganizationCustomerInvoicesUpcoming
    *      tags:
@@ -730,7 +730,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/payment-methods:
+   *  /organizations/{organizationId}/customer/payment-methods:
    *    get:
    *      operationId: getAllOrganizationCustomerPaymentMethods
    *      tags:
@@ -775,7 +775,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/payment-methods:
+   *  /organizations/{organizationId}/customer/payment-methods:
    *    post:
    *      operationId: postOneOrganizationCustomerPaymentMethod
    *      tags:
@@ -852,7 +852,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId:
+   *  /organizations/{organizationId}/customer/payment-methods/{stripePaymentMethodId}:
    *    patch:
    *      operationId: patchOneOrganizationCustomerPaymentMethod
    *      tags:
@@ -949,7 +949,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId:
+   *  /organizations/{organizationId}/customer/subscriptions/{stripeSubscriptionId}:
    *    delete:
    *      operationId: deleteOneOrganizationSubscription
    *      tags:
@@ -1000,7 +1000,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/subscriptions:
+   *  /organizations/{organizationId}/customer/subscriptions:
    *    post:
    *      operationId: postOneOrganizationSubscription
    *      tags:
@@ -1096,7 +1096,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/:organizationId/customer/setup-intent:
+   *  /organizations/{organizationId}/customer/setup-intent:
    *    get:
    *      operationId: getOneOrganizationCustomerSetupIntent
    *      tags:
