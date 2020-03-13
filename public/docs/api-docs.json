@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.28",
+    "version": "2.11.29",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -2662,7 +2662,7 @@
         }
       }
     },
-    "/organizations/:organizationId": {
+    "/organizations/{organizationId}": {
       "get": {
         "operationId": "getOneOrganization",
         "tags": [
@@ -2714,7 +2714,7 @@
         }
       }
     },
-    "/organizations/:organizationId/publications": {
+    "/organizations/{organizationId}/publications": {
       "get": {
         "operationId": "getAllOrganizationPublications",
         "tags": [
@@ -2768,7 +2768,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer": {
+    "/organizations/{organizationId}/customer": {
       "get": {
         "operationId": "getOneOrganizationCustomer",
         "tags": [
@@ -2938,7 +2938,7 @@
         }
       }
     },
-    "/organizations/:organizationId/publications/:publicationId": {
+    "/organizations/{organizationId}/publications/{publicationId}": {
       "delete": {
         "operationId": "deleteOneOrganizationPublication",
         "tags": [
@@ -2992,7 +2992,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/subscriptions": {
+    "/organizations/{organizationId}/customer/subscriptions": {
       "get": {
         "operationId": "getAllOrganizationCustomerSubscriptions",
         "tags": [
@@ -3105,7 +3105,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/invoices": {
+    "/organizations/{organizationId}/customer/invoices": {
       "get": {
         "operationId": "getAllOrganizationCustomerInvoices",
         "tags": [
@@ -3159,7 +3159,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/invoices/upcoming": {
+    "/organizations/{organizationId}/customer/invoices/upcoming": {
       "get": {
         "operationId": "getOneOrganizationCustomerInvoicesUpcoming",
         "tags": [
@@ -3211,7 +3211,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/payment-methods": {
+    "/organizations/{organizationId}/customer/payment-methods": {
       "get": {
         "operationId": "getAllOrganizationCustomerPaymentMethods",
         "tags": [
@@ -3324,7 +3324,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId": {
+    "/organizations/{organizationId}/customer/payment-methods/{stripePaymentMethodId}": {
       "patch": {
         "operationId": "patchOneOrganizationCustomerPaymentMethod",
         "tags": [
@@ -3395,7 +3395,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId": {
+    "/organizations/{organizationId}/customer/subscriptions/{stripeSubscriptionId}": {
       "delete": {
         "operationId": "deleteOneOrganizationSubscription",
         "tags": [
@@ -3457,7 +3457,7 @@
         }
       }
     },
-    "/organizations/:organizationId/customer/setup-intent": {
+    "/organizations/{organizationId}/customer/setup-intent": {
       "get": {
         "operationId": "getOneOrganizationCustomerSetupIntent",
         "tags": [
