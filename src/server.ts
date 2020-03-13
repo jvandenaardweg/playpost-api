@@ -463,8 +463,6 @@ export const setupServer = async () => {
   app.get('/v1/billing/products/:stripeProductId', [IS_PROTECTED_JWT], billingController.getOneBillingProduct);
   app.get('/v1/billing/tax-rates', [IS_PROTECTED_JWT], billingController.getAllBillingTaxRates);
   app.get('/v1/billing/tax-rates/:stripeTaxRateId', [IS_PROTECTED_JWT], billingController.getOneBillingTaxRate);
-  app.post('/v1/billing/checkout/new', [IS_PROTECTED_JWT], billingController.postOneBillingCheckoutSessionNew);
-  app.post('/v1/billing/checkout/update', [IS_PROTECTED_JWT], billingController.postOneBillingCheckoutSessionUpdate);
 
   // Not Stripe related
   app.post('/v1/billing/tax-number/validate', [IS_PROTECTED_JWT], billingController.postOneBillingTaxNumberValidation);
@@ -498,7 +496,7 @@ export const setupServer = async () => {
   // Payment Methods
   app.get('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerPaymentMethods);
   app.post('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneOrganizationCustomerPaymentMethod);
-  app.patch('/v1/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.patchOneCustomerPaymentMethod);
+  app.patch('/v1/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.patchOneOrganizationCustomerPaymentMethod);
 
   app.get('/v1/organizations/:organizationId/customer/setup-intent', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneOrganizationCustomerSetupIntent);
 

@@ -862,7 +862,7 @@ export class OrganizationsController extends BaseController {
    *
    *  /organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId:
    *    patch:
-   *      operationId: getAllOrganizationCustomerPaymentMethods
+   *      operationId: patchOneOrganizationCustomerPaymentMethod
    *      tags:
    *        - organizations
    *      summary: Get the Invoices of a Customer
@@ -905,7 +905,7 @@ export class OrganizationsController extends BaseController {
    *                type: object
    *                $ref: '#/components/schemas/StripePaymentMethod'
    */
-  public patchOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public patchOneOrganizationCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripePaymentMethodId } = req.params;
     const { billingDetailsName, cardExpireMonth, cardExpireYear } = req.body as PatchOneCustomerPaymentMethodRequestBody;
 
@@ -1010,7 +1010,7 @@ export class OrganizationsController extends BaseController {
    *
    *  /organizations/:organizationId/customer/subscriptions:
    *    post:
-   *      operationId: postOneOrganizationPublication
+   *      operationId: postOneOrganizationSubscription
    *      tags:
    *        - organizations
    *      summary: Buys a new subscription plan on behalf of the organization.

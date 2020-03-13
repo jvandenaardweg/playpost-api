@@ -342,8 +342,8 @@
             "description": "The Stripe Plan ID."
           },
           "stripePaymentMethodId": {
-            "type": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
-            "example": 1,
+            "type": "string",
+            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
             "description": "The Stripe Payment Method ID."
           },
           "customTrialEndDate": {
@@ -367,8 +367,8 @@
         ],
         "properties": {
           "newStripePaymentMethodId": {
-            "type": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
-            "example": 1,
+            "type": "string",
+            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
             "description": "The new Stripe Payment Method ID."
           }
         }
@@ -2494,102 +2494,6 @@
         }
       }
     },
-    "/billing/checkout/new": {
-      "get": {
-        "operationId": "postOneBillingCheckoutSessionNew",
-        "tags": [
-          "billing"
-        ],
-        "summary": "Get a Checkout Sessions for Stripe Checkout for buying a new Subscription",
-        "security": [
-          {
-            "BearerAuth": []
-          },
-          {
-            "ApiKeyAuth": [],
-            "ApiSecretAuth": []
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostOneBillingCheckoutSessionNew"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "One Session object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StripeSession"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      }
-    },
-    "/billing/checkout/update": {
-      "get": {
-        "operationId": "postOneBillingCheckoutSessionUpdate",
-        "tags": [
-          "billing"
-        ],
-        "summary": "Get a Checkout Sessions for Stripe Checkout for updating a Subscription",
-        "security": [
-          {
-            "BearerAuth": []
-          },
-          {
-            "ApiKeyAuth": [],
-            "ApiSecretAuth": []
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostOneBillingCheckoutSessionUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "One Session object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StripeSession"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      }
-    },
     "/countries": {
       "get": {
         "operationId": "getAllCountries",
@@ -3138,7 +3042,7 @@
         }
       },
       "post": {
-        "operationId": "postOneOrganizationPublication",
+        "operationId": "postOneOrganizationSubscription",
         "tags": [
           "organizations"
         ],
@@ -3430,7 +3334,7 @@
     },
     "/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId": {
       "patch": {
-        "operationId": "getAllOrganizationCustomerPaymentMethods",
+        "operationId": "patchOneOrganizationCustomerPaymentMethod",
         "tags": [
           "organizations"
         ],

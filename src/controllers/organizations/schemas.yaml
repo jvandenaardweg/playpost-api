@@ -104,8 +104,8 @@ components:
           example: plan_GLVHSLbMkT1UX8
           description: The Stripe Plan ID.
         stripePaymentMethodId:
-          type: pm_1GCRSVLbygOvfi9ojuY8DFOq
-          example: 1
+          type: string
+          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
           description: The Stripe Payment Method ID.
         customTrialEndDate:
           oneOf:
@@ -120,6 +120,6 @@ components:
         - newStripePaymentMethodId
       properties:
         newStripePaymentMethodId:
-          type: pm_1GCRSVLbygOvfi9ojuY8DFOq
-          example: 1
+          type: string
+          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
           description: The new Stripe Payment Method ID.

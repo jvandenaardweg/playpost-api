@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "npm run start:server && npm run start:worker",
-    "test": "npm run lint && npm run typescript:check && npm run jest",
+    "test": "npm run lint && npm run typescript:check && npm run jest && npm run build:api-docs && npm run openapi-client:check && npm run openapi-client:cleanup",
     "start:server": "forever -m 5 dist/index.js",
     "start:worker": "forever -m 5 dist/worker.js",
     "dev": "npm run dev:database && npm run dev:worker & npm run dev:index",
@@ -49,7 +49,9 @@
     "preversion": "npm test",
     "version": "auto-changelog -p && npm run build:api-docs && git add --all",
     "postversion": "git push --no-verify && git push --tags --no-verify",
-    "loadtest": "ts-node-dev loadtests.ts"
+    "loadtest": "ts-node-dev loadtests.ts",
+    "openapi-client:check": "openapi-generator generate -i ./public/docs/api-docs.json -g typescript-axios -o ./build/api/generated-client --remove-operation-id-prefix --type-mappings object=any --additional-properties=supportsES6=true",
+    "openapi-client:cleanup": "rimraf ./build/api"
   },
   "repository": {
     "type": "git",
@@ -137,6 +139,7 @@
     "uuid": "^7.0.1"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^1.0.10-4.2.3",
     "@types/bcryptjs": "^2.4.2",
     "@types/compression": "^1.7.0",
     "@types/cookie-parser": "^1.4.2",
@@ -168,6 +171,7 @@
     "jest": "^25.1.0",
     "loadtest": "^4.1.0",
     "npm-check": "^5.9.2",
+    "rimraf": "^3.0.2",
     "ts-jest": "^25.2.1",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",

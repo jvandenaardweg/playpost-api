@@ -1,6 +1,7 @@
 .google-cloud-credentials.json
 .env
 dist
+build
 
 # Logs
 logs
