@@ -1,6 +1,6 @@
 {
   "name": "playpost-api",
-  "version": "2.11.26",
+  "version": "2.11.27",
   "description": "",
   "main": "dist/index.js",
   "engines": {
