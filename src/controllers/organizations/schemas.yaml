@@ -69,6 +69,8 @@ components:
           description: An Stripe address object for the customer.
         taxId:
           type: object
+          required:
+            - value
           properties:
             value:
               type: string
