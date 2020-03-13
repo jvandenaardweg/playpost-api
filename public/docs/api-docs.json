@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.29",
+    "version": "2.11.30",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -3143,58 +3143,6 @@
                   "items": {
                     "$ref": "#/components/schemas/StripeInvoice"
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      }
-    },
-    "/organizations/{organizationId}/customer/invoices/upcoming": {
-      "get": {
-        "operationId": "getOneOrganizationCustomerInvoicesUpcoming",
-        "tags": [
-          "organizations"
-        ],
-        "summary": "Get the Upcoming Stripe Invoice of a Customer",
-        "security": [
-          {
-            "BearerAuth": []
-          },
-          {
-            "ApiKeyAuth": [],
-            "ApiSecretAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "organizationId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "A UUID of the Organization",
-            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The next upcoming invoice of the Customer",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "$ref": "#/components/schemas/StripeInvoice"
                 }
               }
             }
