@@ -378,18 +378,28 @@ export class OrganizationService extends BaseService {
    *
    * @param organizationId
    */
-  async findOneCustomerInvoiceUpcoming(organizationId: string): Promise<Stripe.Invoice> {
+  async findOneCustomerInvoiceUpcoming(organizationId: string): Promise<Stripe.Invoice | undefined> {
     const organization = await this.findOneById(organizationId);
 
     if (!organization) {
       throw new HttpError(HttpStatus.NotFound, 'Organization does not exist.');
     }
 
-    const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
-      customer: organization.stripeCustomerId
-    })
+    try {
+      const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
+        customer: organization.stripeCustomerId
+      })
 
-    return invoicesUpcoming;
+      return invoicesUpcoming;
+    } catch (err) {
+      // If there is no upcoming invoice, just return undefined
+      if (err.raw.invoice_upcoming_none) {
+        return undefined;
+      }
+
+      // Else, just throw the api error we get from Stripe
+      throw err;
+    }
   }
 
   /**

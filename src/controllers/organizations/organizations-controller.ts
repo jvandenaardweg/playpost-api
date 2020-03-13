@@ -678,53 +678,27 @@ export class OrganizationsController extends BaseController {
   public getAllOrganizationCustomerInvoices = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
-    const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
+    const [customerInvoices, customerUpcomingInvoice] = await Promise.all([
+      this.organizationService.findAllCustomerInvoices(organizationId),
+      this.organizationService.findOneCustomerInvoiceUpcoming(organizationId)
+    ]);
 
-    return res.json(customerInvoices.data);
-  };
+    if (!customerInvoices) {
+      return res.json([])
+    }
 
-  /**
-   * @swagger
-   *
-   *  /organizations/{organizationId}/customer/invoices/upcoming:
-   *    get:
-   *      operationId: getOneOrganizationCustomerInvoicesUpcoming
-   *      tags:
-   *        - organizations
-   *      summary: Get the Upcoming Stripe Invoice of a Customer
-   *      security:
-   *        - BearerAuth: []
-   *        - ApiKeyAuth: []
-   *          ApiSecretAuth: []
-   *      parameters:
-   *        - in: path
-   *          name: organizationId
-   *          schema:
-   *            type: string
-   *          required: true
-   *          description: A UUID of the Organization
-   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
-   *      responses:
-   *        400:
-   *          $ref: '#/components/responses/BadRequestError'
-   *        401:
-   *          $ref: '#/components/responses/UnauthorizedError'
-   *        404:
-   *          $ref: '#/components/responses/NotFoundError'
-   *        200:
-   *          description: The next upcoming invoice of the Customer
-   *          content:
-   *            'application/json':
-   *              schema:
-   *                type: object
-   *                $ref: '#/components/schemas/StripeInvoice'
-   */
-  public getOneOrganizationCustomerInvoicesUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
+    // If there is no upcoming invoice, just return the normal invoices
+    if (!customerUpcomingInvoice) {
+      return res.json(customerInvoices)
+    }
 
-    const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);
+    // Merge the upcoming invoice in the other invoices
+    const invoices: Stripe.Invoice[] = [
+      customerUpcomingInvoice,
+      ...customerInvoices.data,
+    ]
 
-    return res.json(upcomingCustomerInvoice);
+    return res.json(invoices);
   };
 
   /**
