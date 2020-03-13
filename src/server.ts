@@ -475,41 +475,41 @@ export const setupServer = async () => {
   app.post('/v1/organizations', [IS_PROTECTED_JWT], organizationsController.permissions(['user']), organizationsController.postOneOrganization);
 
   // Organization: Info
-  app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOne);
+  app.get('/v1/organizations/:organizationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneOrganization);
 
   // Organization: Publications
-  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getPublications);
-  app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.createOnePublication);
-  app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOnePublication);
+  app.get('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationPublications);
+  app.post('/v1/organizations/:organizationId/publications', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneOrganizationPublication);
+  app.delete('/v1/organizations/:organizationId/publications/:publicationId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOneOrganizationPublication);
 
   // Customer
-  app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneCustomer);
-  app.patch('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchOneCustomer);
+  app.get('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneOrganizationCustomer);
+  app.patch('/v1/organizations/:organizationId/customer', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchOneOrganizationCustomer);
 
   // Subscriptions
-  app.get('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerSubscriptions);
-  app.post('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.buyNewSubscriptionPlan);
+  app.get('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerSubscriptions);
+  app.post('/v1/organizations/:organizationId/customer/subscriptions', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneOrganizationSubscription);
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneCustomerSubscription);
-  app.delete('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOneSubscription);
+  app.delete('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOneOrganizationSubscription);
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerSubscriptionItems);
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records-summaries', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerUsageRecordsSummaries);
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerUsageRecords);
 
   // Payment Methods
-  app.get('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerPaymentMethods);
-  app.post('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneCustomerPaymentMethod);
+  app.get('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerPaymentMethods);
+  app.post('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneOrganizationCustomerPaymentMethod);
   app.patch('/v1/organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.patchOneCustomerPaymentMethod);
 
-  app.get('/v1/organizations/:organizationId/customer/setup-intent', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneCustomerSetupIntent);
+  app.get('/v1/organizations/:organizationId/customer/setup-intent', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneOrganizationCustomerSetupIntent);
 
   // Tax Id's
-  app.get('/v1/organizations/:organizationId/customer/tax-ids', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerTaxIds);
+  app.get('/v1/organizations/:organizationId/customer/tax-ids', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerTaxIds);
   app.post('/v1/organizations/:organizationId/customer/tax-ids', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.postOneCustomerTaxId);
   app.delete('/v1/organizations/:organizationId/customer/tax-ids/:stripeTaxId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.deleteOneCustomerTaxId);
 
   // Invoices
-  app.get('/v1/organizations/:organizationId/customer/invoices', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerInvoices);
-  app.get('/v1/organizations/:organizationId/customer/invoices/upcoming', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneCustomerInvoiceUpcoming);
+  app.get('/v1/organizations/:organizationId/customer/invoices', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerInvoices);
+  app.get('/v1/organizations/:organizationId/customer/invoices/upcoming', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerInvoicesUpcoming);
   
   // Organization: manage Admins and Users
   app.post('/v1/organizations/:organizationId/users', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user', 'organization-admin'])], organizationsController.createOneUser);

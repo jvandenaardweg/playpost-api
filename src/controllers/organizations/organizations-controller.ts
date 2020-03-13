@@ -12,7 +12,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import { OrganizationResponse, PostOneOrganizationRequestBody } from './types';
+import { OrganizationResponse, PostOneOrganizationRequestBody, PostOneOrganizationPublicationRequestBody, PatchOneOrganizationCustomerRequestBody, PatchOneCustomerPaymentMethodRequestBody, PostOneOrganizationSubscriptionRequestBody, PostOneOrganizationCustomerPaymentMethodRequestBody } from './types';
 import { Organization } from '../../database/entities/organization';
 import { getConnection } from 'typeorm';
 import * as uuid from 'uuid';
@@ -243,11 +243,42 @@ export class OrganizationsController extends BaseController {
   };
 
   /**
-   * Get one organization belonging to the authenticated user.
+   * @swagger
    *
-   * @returns Promise<OrganizationResponse>
+   *  /organizations/:organizationId:
+   *    get:
+   *      operationId: getOneOrganization
+   *      tags:
+   *        - organizations
+   *      summary: Get one organization belonging to the authenticated user.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Organization object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Organization'
    */
-  public getOne = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public getOneOrganization = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const organization = await this.organizationService.findOneById(organizationId);
@@ -259,7 +290,44 @@ export class OrganizationsController extends BaseController {
     return res.json(organization);
   };
 
-  public getPublications = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/publications:
+   *    get:
+   *      operationId: getAllOrganizationPublications
+   *      tags:
+   *        - organizations
+   *      summary: Get the Publications of the Organization
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Publications
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Publication'
+   */
+  public getAllOrganizationPublications = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
     const requestQuery = this.validatePagingParams(req.query);
@@ -270,22 +338,42 @@ export class OrganizationsController extends BaseController {
   };
 
   /**
-   * Get all users within the organization.
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer:
+   *    get:
+   *      operationId: getOneOrganizationCustomer
+   *      tags:
+   *        - organizations
+   *      summary: Get the Stripe Customer of an Organization
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Stripe Customer object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeCustomer'
    */
-  public getAllUsers = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const requestQuery = this.validatePagingParams(req.query);
-    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
-    const users = await this.organizationService.findAllUsers(organizationId, page, perPage, skip, take);
-
-    return res.json(users);
-  };
-
-  /**
-   * Get the customer information of the organization. This includes data from Stripe.
-   */
-  public getOneCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+  public getOneOrganizationCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const organization = res.locals.organization;
 
     const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId)
@@ -293,45 +381,48 @@ export class OrganizationsController extends BaseController {
   };
 
   /**
-   * Get the admin user of the organization.
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer:
+   *    post:
+   *      operationId: postOneOrganizationPublication
+   *      tags:
+   *        - organizations
+   *      summary: Creates a publication for the selected organization.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneOrganizationPublicationRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Publication object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Publication'
    */
-  public getOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const admin = await this.organizationService.findOneAdmin(organizationId);
-
-    if (!admin) {
-      throw new HttpError(HttpStatus.NotFound, 'Admin for this organization does not exist.');
-    }
-
-    return res.json(admin);
-  };
-
-  /**
-   * Changes the admin of this organization. The user must already exist.
-   * Only admins of an organization can do this.
-   */
-  public putOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    // const { organizationId } = req.params;
-    const { newAdminUserId } = req.body;
-    const userId = req.user!.id;
-    const organization = res.locals.organization;
-
-    if (userId === newAdminUserId) {
-      throw new HttpError(HttpStatus.BadRequest, 'This user is already an admin of this organization.');
-    }
-
-    const updatedOrganization = await this.organizationService.saveAdmin(organization, newAdminUserId);
-
-    return res.json(updatedOrganization);
-  };
-
-  /**
-   * Creates a publication for the selected organization.
-   */
-  public createOnePublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    // const { organizationId } = req.params;
-    const { name, url } = req.body;
+  public postOneOrganizationPublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { name, url } = req.body as PostOneOrganizationPublicationRequestBody;
     const userId = req.user!.id;
 
     const organization = res.locals.organization;
@@ -355,6 +446,777 @@ export class OrganizationsController extends BaseController {
     const createdPublication = await this.publicationService.save(newPublication);
 
     return res.json(createdPublication);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/publications/:publicationId:
+   *    delete:
+   *      operationId: deleteOneOrganizationPublication
+   *      tags:
+   *        - organizations
+   *      summary: Deletes a Publication from the selected Organization.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Publication
+   *          example: 5ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        204:
+   *          description: Just a NoContent response
+   */
+  public deleteOneOrganizationPublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { publicationId } = req.params;
+
+    const publication = await this.publicationService.findOneById(publicationId);
+
+    if (!publication) {
+      throw new HttpError(HttpStatus.NotFound, 'The publication does not exist.');
+    }
+
+    // TODO: delete publication articles
+    // TODO: delete publication audiofiles
+
+    await this.publicationService.remove(publication);
+
+    return res.status(HttpStatus.NoContent).send();
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer:
+   *    patch:
+   *      operationId: patchOneOrganizationCustomer
+   *      tags:
+   *        - organizations
+   *      summary: Updates the Stripe Customer attached to this Organization
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PatchOneOrganizationCustomerRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Stripe Customer object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeCustomer'
+   */
+  public patchOneOrganizationCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+    const requestBody: PatchOneOrganizationCustomerRequestBody = req.body;
+
+    const validationSchema = joi.object().keys({
+      email: joi.string().email({ minDomainSegments: 2 }).required(),
+      name: joi.string().max(50).required(),
+      address: joi.object().keys({
+        line1: joi.string().max(50).required(),
+        line2: joi.string().allow('').max(50).optional(),
+        city: joi.string().required().max(50),
+        postal_code: joi.string().max(10).required(),
+        state: joi.string().allow('').max(50).optional(),
+        country: joi.string().max(50).required()
+      }).required(),
+      // Tax ID is optional, it's not required for non-business customers
+      taxId: joi.object().keys({
+        value: joi.string().allow('').optional().max(20), // Example: "NL002175463B65"
+      })
+    });
+
+    const { error } = validationSchema.validate(requestBody);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
+    const customerUpdateParams: Stripe.CustomerUpdateParams = {
+      email: requestBody.email,
+      name: requestBody.name,
+      address: {
+        line1: requestBody.address.line1,
+        line2: requestBody.address.line2,
+        city: requestBody.address.city,
+        postal_code: requestBody.address.postal_code,
+        state: requestBody.address.state,
+        country: requestBody.address.country,
+      }
+    }
+
+    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, customerUpdateParams, requestBody.taxId.value);
+
+    return res.json(updatedCustomer);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/subscriptions:
+   *    get:
+   *      operationId: getAllOrganizationCustomerSubscriptions
+   *      tags:
+   *        - organizations
+   *      summary: Get the Subscriptions of a Customer
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/StripeSubscription'
+   */
+  public getAllOrganizationCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+
+    const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
+
+    if (!customerSubscriptions) {
+      return res.json([]);
+    }
+
+    return res.json(customerSubscriptions);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/invoices:
+   *    get:
+   *      operationId: getAllOrganizationCustomerInvoices
+   *      tags:
+   *        - organizations
+   *      summary: Get the Invoices of a Customer
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/StripeInvoice'
+   */
+  public getAllOrganizationCustomerInvoices = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+
+    const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
+
+    return res.json(customerInvoices.data);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/invoices/upcoming:
+   *    get:
+   *      operationId: getAllOrganizationCustomerInvoicesUpcoming
+   *      tags:
+   *        - organizations
+   *      summary: Get the Invoices of a Customer
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/StripeInvoice'
+   */
+  public getAllOrganizationCustomerInvoicesUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+
+    const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);
+
+    return res.json(upcomingCustomerInvoice);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/payment-methods:
+   *    get:
+   *      operationId: getAllOrganizationCustomerPaymentMethods
+   *      tags:
+   *        - organizations
+   *      summary: Get the Invoices of a Customer
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/StripePaymentMethod'
+   */
+  public getAllOrganizationCustomerPaymentMethods = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
+
+    const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organization.stripeCustomerId);
+
+    return res.json(customerPaymentMethods);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/payment-methods:
+   *    post:
+   *      operationId: postOneOrganizationCustomerPaymentMethod
+   *      tags:
+   *        - organizations
+   *      summary: Changes the default payment method for a customer. Business rule: a customer can only use one payment method.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *        - in: path
+   *          name: stripePaymentMethodId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A Stripe Payment Method ID
+   *          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneOrganizationCustomerPaymentMethodRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripePaymentMethod'
+   */
+  public postOneOrganizationCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { newStripePaymentMethodId } = req.body as PostOneOrganizationCustomerPaymentMethodRequestBody; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+
+    if (!newStripePaymentMethodId) {
+      throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
+    }
+
+    const organization = res.locals.organization;
+
+    // Verify if the customer exists in Stripe
+    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
+
+    if (!stripeCustomer) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
+    }
+
+    if (stripeCustomer.deleted) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted on billing service.');
+    }
+
+    const currentPaymentMethodId = stripeCustomer.invoice_settings.default_payment_method;
+    
+    // First, delete the current payment method
+    if (currentPaymentMethodId && typeof currentPaymentMethodId === 'string') {
+      await this.billingService.deleteOneCustomerPaymentMethod(currentPaymentMethodId)
+    }
+
+    // Attach the payment method to the customer as a default
+    // This payment method will be used for future charges
+    const attachPaymentMethodResponse = await this.billingService.attachDefaultPaymentMethodToCustomer(newStripePaymentMethodId, stripeCustomer.id);
+
+    // If we end up here, the payment method is changed.
+
+    return res.status(HttpStatus.Created).json(attachPaymentMethodResponse);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/payment-methods/:stripePaymentMethodId:
+   *    patch:
+   *      operationId: getAllOrganizationCustomerPaymentMethods
+   *      tags:
+   *        - organizations
+   *      summary: Get the Invoices of a Customer
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *        - in: path
+   *          name: stripePaymentMethodId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A Stripe Payment Method ID
+   *          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PatchOneCustomerPaymentMethodRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: An array of Stripe Subscriptions
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripePaymentMethod'
+   */
+  public patchOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripePaymentMethodId } = req.params;
+    const { billingDetailsName, cardExpireMonth, cardExpireYear } = req.body as PatchOneCustomerPaymentMethodRequestBody;
+
+    const validationSchema = joi.object().keys({
+      billingDetailsName: joi
+        .string()
+        .required(),
+      cardExpireMonth: joi
+        .number()
+        .integer()
+        .min(1) // januari
+        .max(12) // december
+        .required(),
+      cardExpireYear: joi
+        .number()
+        .integer()
+        .min(new Date().getFullYear()) // Card expire year can be no less than the current year
+        .max(new Date().getFullYear() + 10) // Card expire year can be a maximum of 10 years in the future
+        .required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
+    const organization = res.locals.organization;
+
+    // Find the current payment method to verify it's existence
+    const currentPaymentMethod = await this.billingService.findOnePaymentMethod(stripePaymentMethodId);
+
+    if (!currentPaymentMethod) {
+      throw new HttpError(HttpStatus.NotFound, 'Current payment method not found.');
+    }
+
+    // Check if the payment method belongs to the customer
+    if (currentPaymentMethod.customer !== organization.stripeCustomerId) {
+      throw new HttpError(HttpStatus.BadRequest, 'This payment method does not belong to the customer.');
+    }
+
+    // All good, we can update the payment method information
+
+    const updatedPaymentMethod = await this.billingService.updateOneCustomerPaymentMethod(stripePaymentMethodId, billingDetailsName, cardExpireMonth, cardExpireYear);
+
+    return res.json(updatedPaymentMethod);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId:
+   *    delete:
+   *      operationId: deleteOneOrganizationSubscription
+   *      tags:
+   *        - organizations
+   *      summary: Delete (cancel) a subscription using the Stripe subscription ID.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *        - in: path
+   *          name: stripeSubscriptionId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A Stripe Subscription ID
+   *          example: sub_1GCRSVLbygOvfi9ojuY8DFOq
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: The cancelled Stripe Subscription
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeSubscription'
+   */
+  public deleteOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripeSubscriptionId } = req.params;
+
+    const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
+
+    return res.json(cancelSubscriptionResult);
+  }
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/subscriptions:
+   *    post:
+   *      operationId: postOneOrganizationPublication
+   *      tags:
+   *        - organizations
+   *      summary: Buys a new subscription plan on behalf of the organization.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOneOrganizationSubscriptionRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Stripe Subscription object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeSubscription'
+   */
+  public postOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripePlanId, stripePaymentMethodId, customTrialEndDate } = req.body as PostOneOrganizationSubscriptionRequestBody; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
+
+    if (!stripePlanId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripePlanId is required.');
+    }
+
+    if (!stripePaymentMethodId) {
+      throw new HttpError(HttpStatus.BadRequest, 'stripePaymentMethodId is required.');
+    }
+
+    const organization = res.locals.organization;
+
+    // Verify if the customer exists in Stripe
+    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
+
+    if (!stripeCustomer || stripeCustomer.deleted) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
+    }
+
+    const isAlreadySubscribed = stripeCustomer.subscriptions && stripeCustomer.subscriptions.data.some(subscription => subscription.plan && subscription.plan.id === stripePlanId);
+
+    if (isAlreadySubscribed) {
+      throw new HttpError(HttpStatus.Conflict, 'You are already subscribed to this subscription plan.');
+    }
+
+    // Make sure the customer has a default payment method
+    if (!stripeCustomer.invoice_settings.default_payment_method) {
+      throw new HttpError(HttpStatus.NotFound, 'Customer has no default payment method.');
+    }
+
+    // Verify if the subscription plan exists
+    const stripePlan = await this.billingService.findOnePlan(stripePlanId);
+
+    if (!stripePlan) {
+      throw new HttpError(HttpStatus.NotFound, 'Subscription plan does not exist on billing service.');
+    }
+
+    // The PaymentMethod ID we receive here, has to be authenticated to be used for "off_session" payments.
+    // So we do not require authentication when we charge the user's card in the future.
+    // This authentication has to be done in the frontend using Stripe's confirmCardSetup method.
+    // Docs: https://stripe.com/docs/js/setup_intents/confirm_card_setup
+
+    // Attach the payment method to the customer as a default
+    // This payment method will be used for future charges
+    // const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
+
+    // Buy the subscription using the Stripe Customer ID, Stripe Plan ID and Stripe PaymentMethod ID
+    const subscriptionResult = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, customTrialEndDate);
+
+    // If we end up here, the subscription is bought.
+
+    return res.json(subscriptionResult);
+  };
+
+  /**
+   * @swagger
+   *
+   *  /organizations/:organizationId/customer/setup-intent:
+   *    get:
+   *      operationId: getOneOrganizationCustomerSetupIntent
+   *      tags:
+   *        - organizations
+   *      summary: Get's a Stripe Setup Intent.
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: A Stripe Setup Intent object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeSetupIntent'
+   */
+  public getOneOrganizationCustomerSetupIntent = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
+    
+    const setupIntent = await this.billingService.createOneCustomerSetupIntent(organization.stripeCustomerId);
+
+    return res.json(setupIntent);
+  }
+
+
+  public getAllOrganizationCustomerTaxIds = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const organization = res.locals.organization;
+    
+    const customerTaxIds = await this.billingService.findAllCustomerTaxIds(organization.stripeCustomerId);
+
+    return res.json(customerTaxIds);
+  }
+
+  public postOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripeTaxIdType, stripeTaxIdValue } = req.body;
+    const organization = res.locals.organization;
+    
+    const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
+
+    return res.status(HttpStatus.Created).json(customerTaxIds);
+  }
+
+  public deleteOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { stripeTaxId } = req.params;
+    const organization = res.locals.organization;
+    
+    const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(organization.stripeCustomerId, stripeTaxId);
+
+    return res.json(deletedCustomerTaxId);
+  }
+
+  /**
+   * Get the admin user of the organization.
+   */
+  public getOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+
+    const admin = await this.organizationService.findOneAdmin(organizationId);
+
+    if (!admin) {
+      throw new HttpError(HttpStatus.NotFound, 'Admin for this organization does not exist.');
+    }
+
+    return res.json(admin);
+  };
+
+  /**
+   * Get all users within the organization.
+   */
+  public getAllUsers = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { organizationId } = req.params;
+
+    const requestQuery = this.validatePagingParams(req.query);
+    const { page, perPage, skip, take } = this.getPagingParams(requestQuery);
+    const users = await this.organizationService.findAllUsers(organizationId, page, perPage, skip, take);
+
+    return res.json(users);
+  };                                                     
+
+  /**
+   * Changes the admin of this organization. The user must already exist.
+   * Only admins of an organization can do this.
+   */
+  public putOneAdmin = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    // const { organizationId } = req.params;
+    const { newAdminUserId } = req.body;
+    const userId = req.user!.id;
+    const organization = res.locals.organization;
+
+    if (userId === newAdminUserId) {
+      throw new HttpError(HttpStatus.BadRequest, 'This user is already an admin of this organization.');
+    }
+
+    const updatedOrganization = await this.organizationService.saveAdmin(organization, newAdminUserId);
+
+    return res.json(updatedOrganization);
   };
 
   /**
@@ -438,99 +1300,6 @@ export class OrganizationsController extends BaseController {
     return res.json(updatedOrganization);
   };
 
-  /**
-   * Deletes a publication from the database.
-   * IMPORTANT: Very destructive operation.
-   */
-  public deleteOnePublication = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { publicationId } = req.params;
-
-    const publication = await this.publicationService.findOneById(publicationId);
-
-    if (!publication) {
-      throw new HttpError(HttpStatus.NotFound, 'The publication does not exist.');
-    }
-
-    // TODO: delete publication articles
-    // TODO: delete publication audiofiles
-
-    await this.publicationService.remove(publication);
-
-    return res.status(HttpStatus.NoContent).send();
-  };
-
-  public patchOneCustomer = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const validationSchema = joi.object().keys({
-      email: joi.string().email({ minDomainSegments: 2 }).required(),
-      name: joi.string().max(50).required(),
-      address: joi.object().keys({
-        line1: joi.string().max(50).required(),
-        line2: joi.string().allow('').max(50).optional(),
-        city: joi.string().required().max(50),
-        postal_code: joi.string().max(10).required(),
-        state: joi.string().allow('').max(50).optional(),
-        country: joi.string().max(50).required()
-      }).required(),
-      // Tax ID is optional, it's not required for non-business customers
-      taxId: joi.object().keys({
-        value: joi.string().allow('').required().max(20), // Example: "NL002175463B65"
-      }).optional()
-    });
-
-    const { error } = validationSchema.validate(req.body);
-
-    if (error) {
-      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
-    }
-
-    const customerUpdateParams: Stripe.CustomerUpdateParams = {
-      email: req.body.email,
-      name: req.body.name,
-      address: {
-        line1: req.body.address.line1,
-        line2: req.body.address.line2,
-        city: req.body.address.city,
-        postal_code: req.body.address.postal_code,
-        state: req.body.address.state,
-        country: req.body.address.country,
-      }
-    }
-
-    const updatedCustomer = await this.organizationService.updateOneCustomer(organizationId, customerUpdateParams, req.body.taxId.value);
-
-    return res.json(updatedCustomer);
-  };
-
-  public getAllCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
-
-    if (!customerSubscriptions) {
-      return res.json([]);
-    }
-
-    return res.json(customerSubscriptions);
-  };
-
-  public getAllCustomerInvoices = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const customerInvoices = await this.organizationService.findAllCustomerInvoices(organizationId);
-
-    return res.json(customerInvoices.data);
-  };
-
-  public getOneCustomerInvoiceUpcoming = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
-
-    const upcomingCustomerInvoice = await this.organizationService.findOneCustomerInvoiceUpcoming(organizationId);
-
-    return res.json(upcomingCustomerInvoice);
-  };
-
   public getOneCustomerSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
@@ -545,63 +1314,6 @@ export class OrganizationsController extends BaseController {
     const customerSubscriptionItems = await this.organizationService.findAllCustomerSubscriptionItems(stripeSubscriptionId);
 
     return res.json(customerSubscriptionItems);
-  };
-
-  public getAllCustomerPaymentMethods = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const organization = res.locals.organization;
-
-    const customerPaymentMethods = await this.billingService.findAllCustomerPaymentMethods(organization.stripeCustomerId);
-
-    return res.json(customerPaymentMethods);
-  };
-
-  public patchOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripePaymentMethodId } = req.params;
-    const { billingDetailsName, cardExpireMonth, cardExpireYear } = req.body;
-
-    const validationSchema = joi.object().keys({
-      billingDetailsName: joi
-        .string()
-        .required(),
-      cardExpireMonth: joi
-        .number()
-        .integer()
-        .min(1) // januari
-        .max(12) // december
-        .required(),
-      cardExpireYear: joi
-        .number()
-        .integer()
-        .min(new Date().getFullYear()) // Card expire year can be no less than the current year
-        .max(new Date().getFullYear() + 10) // Card expire year can be a maximum of 10 years in the future
-        .required()
-    });
-
-    const { error } = validationSchema.validate(req.body);
-
-    if (error) {
-      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
-    }
-
-    const organization = res.locals.organization;
-
-    // Find the current payment method to verify it's existence
-    const currentPaymentMethod = await this.billingService.findOnePaymentMethod(stripePaymentMethodId);
-
-    if (!currentPaymentMethod) {
-      throw new HttpError(HttpStatus.NotFound, 'Current payment method not found.');
-    }
-
-    // Check if the payment method belongs to the customer
-    if (currentPaymentMethod.customer !== organization.stripeCustomerId) {
-      throw new HttpError(HttpStatus.BadRequest, 'This payment method does not belong to the customer.');
-    }
-
-    // All good, we can update the payment method information
-
-    const updatedPaymentMethod = await this.billingService.updateOneCustomerPaymentMethod(stripePaymentMethodId, billingDetailsName, cardExpireMonth, cardExpireYear);
-
-    return res.json(updatedPaymentMethod);
   };
 
   public getAllCustomerUsageRecordsSummaries = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
@@ -619,148 +1331,4 @@ export class OrganizationsController extends BaseController {
 
     return res.json(customerUsageRecords);
   };
-
-  /**
-   * Delete (cancel) a subscription using the Stripe subscription ID.
-   */
-  public deleteOneSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeSubscriptionId } = req.params;
-
-    const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
-
-    return res.json(cancelSubscriptionResult);
-  }
-
-  /**
-   * Buys a new subscription plan on behalf of the organization.
-   */
-  public buyNewSubscriptionPlan = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripePlanId, stripePaymentMethodId, customTrialEndDate } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
-
-    if (!stripePlanId) {
-      throw new HttpError(HttpStatus.BadRequest, 'stripePlanId is required.');
-    }
-
-    if (!stripePaymentMethodId) {
-      throw new HttpError(HttpStatus.BadRequest, 'stripePaymentMethodId is required.');
-    }
-
-    const organization = res.locals.organization;
-
-    // Verify if the customer exists in Stripe
-    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
-
-    if (!stripeCustomer || stripeCustomer.deleted) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
-    }
-
-    const isAlreadySubscribed = stripeCustomer.subscriptions && stripeCustomer.subscriptions.data.some(subscription => subscription.plan && subscription.plan.id === stripePlanId);
-
-    if (isAlreadySubscribed) {
-      throw new HttpError(HttpStatus.Conflict, 'You are already subscribed to this subscription plan.');
-    }
-
-    // Make sure the customer has a default payment method
-    if (!stripeCustomer.invoice_settings.default_payment_method) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer has no default payment method.');
-    }
-
-    // Verify if the subscription plan exists
-    const stripePlan = await this.billingService.findOnePlan(stripePlanId);
-
-    if (!stripePlan) {
-      throw new HttpError(HttpStatus.NotFound, 'Subscription plan does not exist on billing service.');
-    }
-
-    // The PaymentMethod ID we receive here, has to be authenticated to be used for "off_session" payments.
-    // So we do not require authentication when we charge the user's card in the future.
-    // This authentication has to be done in the frontend using Stripe's confirmCardSetup method.
-    // Docs: https://stripe.com/docs/js/setup_intents/confirm_card_setup
-
-    // Attach the payment method to the customer as a default
-    // This payment method will be used for future charges
-    // const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
-
-    // Buy the subscription using the Stripe Customer ID, Stripe Plan ID and Stripe PaymentMethod ID
-    const response = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, customTrialEndDate);
-
-    // If we end up here, the subscription is bought.
-
-    return res.json(response);
-  };
-
-  /**
-   * Changes the default payment method for a customer. 
-   * Business rule: a customer can only use one payment method.
-   */
-  public postOneCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { newStripePaymentMethodId } = req.body; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
-
-    if (!newStripePaymentMethodId) {
-      throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
-    }
-
-    const organization = res.locals.organization;
-
-    // Verify if the customer exists in Stripe
-    const stripeCustomer = await this.billingService.findOneCustomer(organization.stripeCustomerId);
-
-    if (!stripeCustomer) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer does not exist on billing service.');
-    }
-
-    if (stripeCustomer.deleted) {
-      throw new HttpError(HttpStatus.NotFound, 'Customer is already deleted on billing service.');
-    }
-
-    const currentPaymentMethodId = stripeCustomer.invoice_settings.default_payment_method;
-    
-    // First, delete the current payment method
-    if (currentPaymentMethodId && typeof currentPaymentMethodId === 'string') {
-      await this.billingService.deleteOneCustomerPaymentMethod(currentPaymentMethodId)
-    }
-
-    // Attach the payment method to the customer as a default
-    // This payment method will be used for future charges
-    const attachPaymentMethodResponse = await this.billingService.attachDefaultPaymentMethodToCustomer(newStripePaymentMethodId, stripeCustomer.id);
-
-    // If we end up here, the payment method is changed.
-
-    return res.status(HttpStatus.Created).json(attachPaymentMethodResponse);
-  };
-
-  public getOneCustomerSetupIntent = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const organization = res.locals.organization;
-    
-    const setupIntent = await this.billingService.createOneCustomerSetupIntent(organization.stripeCustomerId);
-
-    return res.json(setupIntent);
-  }
-
-  public getAllCustomerTaxIds = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const organization = res.locals.organization;
-    
-    const customerTaxIds = await this.billingService.findAllCustomerTaxIds(organization.stripeCustomerId);
-
-    return res.json(customerTaxIds);
-  }
-
-  public postOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeTaxIdType, stripeTaxIdValue } = req.body;
-    const organization = res.locals.organization;
-    
-    const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
-
-    return res.status(HttpStatus.Created).json(customerTaxIds);
-  }
-
-  public deleteOneCustomerTaxId = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeTaxId } = req.params;
-    const organization = res.locals.organization;
-    
-    const deletedCustomerTaxId = await this.billingService.deleteOneCustomerTaxId(organization.stripeCustomerId, stripeTaxId);
-
-    return res.json(deletedCustomerTaxId);
-  }
-  
 }

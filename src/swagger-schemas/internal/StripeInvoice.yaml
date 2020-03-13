@@ -1,0 +1,8 @@
+components:
+  schemas:
+    StripeInvoice:
+      description: A Stripe Invoice. You need to annotate this yourself. An ID is included to make sure the generate creates a type from this, which we can overwrite.
+      type: object
+      properties:
+        id: 
+          type: string

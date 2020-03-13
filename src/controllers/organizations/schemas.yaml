@@ -15,3 +15,111 @@ components:
           type: string
           example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
           description: The UUID of the Country.
+    
+    PostOneOrganizationPublicationRequestBody:
+      type: object
+      required:
+        - name
+        - url
+      properties:
+        name:
+          type: string
+          example: Playpost Blog
+          description: The name of the publication.
+        url:
+          type: string
+          example: https://www.nu.nl
+          description: A URL of the publication website.
+
+    PatchOneOrganizationCustomerRequestBody:
+      type: object
+      required:
+        - email
+        - name
+        - address
+      properties:
+        email:
+          type: string
+          example: finance@playpost.app
+          description: The e-mail address of the customer.
+        name:
+          type: string
+          example: Playpost
+          description: The name of the customer.
+        address:
+          type: object
+          required:
+            - line1
+            - city
+            - postal_code
+            - country
+          properties:
+            line1: 
+              type: string
+            line2:
+              type: string
+            city: 
+              type: string
+            postal_code:
+              type: string
+            state: 
+              type: string
+            country: 
+              type: string
+          description: An Stripe address object for the customer.
+        taxId:
+          type: object
+          properties:
+            value:
+              type: string
+    
+    PatchOneCustomerPaymentMethodRequestBody:
+      type: object
+      required:
+        - billingDetailsName
+        - cardExpireMonth
+        - cardExpireYear
+      properties:
+        billingDetailsName:
+          type: string
+          example: John Doe
+          description: The name on the Credit Card.
+        cardExpireMonth:
+          type: number
+          example: 1
+          description: The number of the expire month.
+        cardExpireYear:
+          type: number
+          example: 2020
+          description: The number of the expire year.
+    
+    PostOneOrganizationSubscriptionRequestBody:
+      type: object
+      required:
+        - stripePlanId
+        - stripePaymentMethodId
+      properties:
+        stripePlanId:
+          type: string
+          example: plan_GLVHSLbMkT1UX8
+          description: The Stripe Plan ID.
+        stripePaymentMethodId:
+          type: pm_1GCRSVLbygOvfi9ojuY8DFOq
+          example: 1
+          description: The Stripe Payment Method ID.
+        customTrialEndDate:
+          oneOf:
+            - type: number
+            - type: string
+          example: now
+          description: Unix Timestamp (number) or "now" (string)
+    
+    PostOneOrganizationCustomerPaymentMethodRequestBody:
+      type: object
+      required:
+        - newStripePaymentMethodId
+      properties:
+        newStripePaymentMethodId:
+          type: pm_1GCRSVLbygOvfi9ojuY8DFOq
+          example: 1
+          description: The new Stripe Payment Method ID.
