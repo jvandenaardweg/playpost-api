@@ -781,7 +781,7 @@ export class OrganizationsController extends BaseController {
    *      operationId: postOneOrganizationCustomerPaymentMethod
    *      tags:
    *        - organizations
-   *      summary: Changes the default payment method for a customer. Business rule: a customer can only use one payment method.
+   *      summary: Changes the default payment method for a customer, a customer can only use one payment method.
    *      security:
    *        - BearerAuth: []
    *        - ApiKeyAuth: []
