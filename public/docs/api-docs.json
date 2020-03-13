@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.23",
+    "version": "2.11.24",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -296,6 +296,9 @@
           },
           "taxId": {
             "type": "object",
+            "required": [
+              "value"
+            ],
             "properties": {
               "value": {
                 "type": "string"
