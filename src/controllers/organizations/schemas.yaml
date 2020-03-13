@@ -37,6 +37,7 @@ components:
         - email
         - name
         - address
+        - taxId
       properties:
         email:
           type: string
