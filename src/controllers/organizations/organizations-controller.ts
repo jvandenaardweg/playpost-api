@@ -1044,12 +1044,15 @@ export class OrganizationsController extends BaseController {
     const { newStripePlanId, stripeTaxRateId, customTrialEndDate } = req.body as PatchOneOrganizationSubscriptionRequestBody;
 
     const validationSchema = joi.object().keys({
-      newStripePlanId: joi
+      newStripePlanId: joi // The Stripe Plan to upgrade or downgrade to
         .string()
         .required(),
-        stripeSubscriptionId: joi
+      stripeSubscriptionId: joi // The current Stripe Subscription ID
         .string()
-        .required()
+        .required(),
+      customTrialEndDate: joi // A custom trial end date (number, "now" or undefined)
+        .any()
+        .optional()
     });
 
     const { error } = validationSchema.validate(req.body);

@@ -120,17 +120,7 @@ components:
             - type: string
           example: now
           description: Unix Timestamp (number) or "now" (string)
-    
-    PostOneOrganizationCustomerPaymentMethodRequestBody:
-      type: object
-      required:
-        - newStripePaymentMethodId
-      properties:
-        newStripePaymentMethodId:
-          type: string
-          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
-          description: The new Stripe Payment Method ID.
-    
+
     PatchOneOrganizationSubscriptionRequestBody:
       type: object
       required:
@@ -150,3 +140,15 @@ components:
             - type: string
           example: now
           description: Unix Timestamp (number) or "now" (string)
+    
+    PostOneOrganizationCustomerPaymentMethodRequestBody:
+      type: object
+      required:
+        - newStripePaymentMethodId
+      properties:
+        newStripePaymentMethodId:
+          type: string
+          example: pm_1GCRSVLbygOvfi9ojuY8DFOq
+          description: The new Stripe Payment Method ID.
+    
+    
