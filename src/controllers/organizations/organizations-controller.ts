@@ -1047,9 +1047,9 @@ export class OrganizationsController extends BaseController {
       newStripePlanId: joi // The Stripe Plan to upgrade or downgrade to
         .string()
         .required(),
-      stripeSubscriptionId: joi // The current Stripe Subscription ID
+      stripeTaxRateId: joi // The current Stripe Subscription ID
         .string()
-        .required(),
+        .optional(),
       customTrialEndDate: joi // A custom trial end date (number, "now" or undefined)
         .any()
         .optional()
