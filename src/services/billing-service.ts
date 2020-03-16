@@ -692,7 +692,12 @@ export class BillingService extends BaseService {
    * https://stripe.com/docs/billing/subscriptions/upgrading-downgrading
    */
   async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string): Promise<Stripe.Subscription> {
-    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId)
+    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId);
+    const currentSubscriptionPlanId = currentSubscription.items.data[0].plan.id;
+
+    if (newStripePlanId === currentSubscriptionPlanId) {
+      throw new Error('Cannot upgrade or downgrade this subscription, because the plan is the same.');
+    }
 
     const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
       cancel_at_period_end: false,
