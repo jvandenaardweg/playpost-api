@@ -130,3 +130,13 @@ components:
           type: string
           example: pm_1GCRSVLbygOvfi9ojuY8DFOq
           description: The new Stripe Payment Method ID.
+    
+    PatchOneOrganizationSubscriptionRequestBody:
+      type: object
+      required:
+        - newStripePlanId
+      properties:
+        newStripePlanId:
+          type: string
+          example: plan_GLVHSLbMkT1UX8
+          description: The new Stripe Plan ID to upgrade or downgrade to.

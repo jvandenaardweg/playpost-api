@@ -693,6 +693,11 @@ export class BillingService extends BaseService {
    */
   async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string): Promise<Stripe.Subscription> {
     const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId);
+
+    if (!currentSubscription) {
+      throw new Error('Customer has no subscription.');
+    }
+    
     const currentSubscriptionPlanId = currentSubscription.items.data[0].plan.id;
 
     if (newStripePlanId === currentSubscriptionPlanId) {
@@ -702,7 +707,7 @@ export class BillingService extends BaseService {
     const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
       cancel_at_period_end: false,
       items: [{
-        id: currentSubscription.items.data[0].id,
+        id: currentSubscription.items.data[0].id, // Stripe Subscription Item ID
         plan: newStripePlanId
       }]
     })

@@ -50,3 +50,7 @@ export interface PostOneOrganizationSubscriptionRequestBody {
 export interface PostOneOrganizationCustomerPaymentMethodRequestBody {
   newStripePaymentMethodId: string;
 }
+
+export interface PatchOneOrganizationSubscriptionRequestBody {
+  newStripePlanId: string;
+}

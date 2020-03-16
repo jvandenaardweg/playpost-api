@@ -342,4 +342,36 @@ describe('billing-service', () => {
 
     expect(salesTax).toMatchObject(salesTaxMock);
   })
+  
+  it('upgradeOrDowngradeSubscription should correctly upgrade a plan.', async () => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsUpdate = jest.spyOn(stripe.subscriptions, 'update').mockResolvedValue(subscriptionMock as any)
+
+    const updateSubscription = await billingService.upgradeOrDowngradeSubscription('sub_GjAafbGOy50oNW', 'plan_GrRr69GdC37XBb')
+
+    expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledTimes(1);
+    expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledWith('sub_GjAafbGOy50oNW', {
+      cancel_at_period_end: false,
+      items: [{
+        id: 'si_GjAaZXZqKBEJA8',
+        plan: 'plan_GrRr69GdC37XBb'
+      }]
+    });
+
+    expect(updateSubscription).toMatchObject(subscriptionMock);
+  })
+
+  it('upgradeOrDowngradeSubscription should correctly error when plan is the same.', async (done) => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsUpdate = jest.spyOn(stripe.subscriptions, 'update').mockResolvedValue(subscriptionMock as any)
+
+    try {
+      await billingService.upgradeOrDowngradeSubscription('sub_GjAafbGOy50oNW', 'plan_GjA6MM7vp1T0Tn')
+    } catch (err) {
+      expect(err.message).toBe('Cannot upgrade or downgrade this subscription, because the plan is the same.')
+    } finally {
+      expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledTimes(0);
+      done()
+    }
+  })
 })

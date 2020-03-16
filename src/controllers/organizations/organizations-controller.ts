@@ -12,7 +12,7 @@ import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
-import { OrganizationResponse, PostOneOrganizationRequestBody, PostOneOrganizationPublicationRequestBody, PatchOneOrganizationCustomerRequestBody, PatchOneCustomerPaymentMethodRequestBody, PostOneOrganizationSubscriptionRequestBody, PostOneOrganizationCustomerPaymentMethodRequestBody } from './types';
+import { OrganizationResponse, PostOneOrganizationRequestBody, PostOneOrganizationPublicationRequestBody, PatchOneOrganizationCustomerRequestBody, PatchOneCustomerPaymentMethodRequestBody, PostOneOrganizationSubscriptionRequestBody, PostOneOrganizationCustomerPaymentMethodRequestBody, PatchOneOrganizationSubscriptionRequestBody } from './types';
 import { Organization } from '../../database/entities/organization';
 import { getConnection } from 'typeorm';
 import * as uuid from 'uuid';
@@ -790,8 +790,16 @@ export class OrganizationsController extends BaseController {
   public postOneOrganizationCustomerPaymentMethod = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { newStripePaymentMethodId } = req.body as PostOneOrganizationCustomerPaymentMethodRequestBody; // The "stripePaymentMethodId" is created on the frontend using Stripe Elements
 
-    if (!newStripePaymentMethodId) {
-      throw new HttpError(HttpStatus.BadRequest, 'newStripePaymentMethodId is required.');
+    const validationSchema = joi.object().keys({
+      newStripePaymentMethodId: joi
+        .string()
+        .required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
     const organization = res.locals.organization;
@@ -966,6 +974,18 @@ export class OrganizationsController extends BaseController {
   public deleteOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
+    const validationSchema = joi.object().keys({
+      stripeSubscriptionId: joi
+        .string()
+        .required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
     const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
 
     return res.json(cancelSubscriptionResult);
@@ -999,6 +1019,11 @@ export class OrganizationsController extends BaseController {
    *          required: true
    *          description: A Stripe Subscription ID
    *          example: sub_1GCRSVLbygOvfi9ojuY8DFOq
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PatchOneOrganizationSubscriptionRequestBody'
    *      responses:
    *        400:
    *          $ref: '#/components/responses/BadRequestError'
@@ -1015,10 +1040,25 @@ export class OrganizationsController extends BaseController {
    *                $ref: '#/components/schemas/StripeSubscription'
    */
   public patchOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { newStripePlanId } = req.params;
-    const organization = res.locals.organization;
+    const { stripeSubscriptionId } = req.params;
+    const { newStripePlanId } = req.body as PatchOneOrganizationSubscriptionRequestBody;
 
-    const upgradeOrDowngradeSubscriptionResult = await this.billingService.upgradeOrDowngradeSubscription(organization.stripeCustomerId, newStripePlanId)
+    const validationSchema = joi.object().keys({
+      newStripePlanId: joi
+        .string()
+        .required(),
+        stripeSubscriptionId: joi
+        .string()
+        .required()
+    });
+
+    const { error } = validationSchema.validate(req.body);
+
+    if (error) {
+      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
+    }
+
+    const upgradeOrDowngradeSubscriptionResult = await this.billingService.upgradeOrDowngradeSubscription(stripeSubscriptionId, newStripePlanId)
 
     return res.json(upgradeOrDowngradeSubscriptionResult);
   }
