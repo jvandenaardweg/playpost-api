@@ -66,7 +66,7 @@ const config: ConnectionOptions = {
   type: 'postgres',
   url: process.env.DATABASE_URL,
   extra: {
-    ssl: process.env.NODE_ENV === 'production' ? true : false
+    ssl: process.env.API_ENVIRONMENT === 'production', // Only enable SSL on production environments
   },
   cache: {
     type: 'ioredis',

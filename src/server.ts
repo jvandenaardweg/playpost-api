@@ -57,6 +57,9 @@ export const setupServer = async () => {
   if (!process.env.NODE_ENV) {
     throw new Error('Required environment variable "NODE_ENV" not set.');
   }
+  if (!process.env.API_ENVIRONMENT) {
+    throw new Error('Required environment variable "API_ENVIRONMENT" not set.');
+  }
   if (!process.env.GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID) {
     throw new Error('Required environment variable "GOOGLE_CLOUD_CREDENTIALS_PROJECT_ID" not set.');
   }
@@ -175,7 +178,7 @@ export const setupServer = async () => {
       const hasNoOrigin = !origin; // Note: Our React Native app has no origin, we allow it
       const isOnExtensionWhitelist = origin && extensionsWhitelist.some(extensionOriginPart => origin.startsWith(extensionOriginPart));
       const isOnCorsWhitelist = origin && corsWhitelist.some(corsItemUrl => origin === corsItemUrl);
-      const isAllowedOnDevelopment = origin && process.env.NODE_ENV !== 'production' && corsDevelopmentWhitelist.some(corsItemUrl => origin === corsItemUrl);
+      const isAllowedOnDevelopment = origin && process.env.API_ENVIRONMENT !== 'production' && corsDevelopmentWhitelist.some(corsItemUrl => origin === corsItemUrl);
 
       if (hasNoOrigin || isOnExtensionWhitelist || isOnCorsWhitelist || isAllowedOnDevelopment) {
         callback(null, true)
@@ -236,7 +239,7 @@ export const setupServer = async () => {
 
       const cookieConfig = {
         expires,
-        secure: process.env.NODE_ENV === 'production', // Only use secure in production, as we have https there
+        secure: process.env.API_ENVIRONMENT === 'production', // Only use secure in production, as we have https there
         httpOnly: true
       }
 
@@ -532,7 +535,7 @@ export const setupServer = async () => {
       // We do not want to track al error types
       // General Bad Request status codes is not something we want to see
       if ([HttpStatus.BadRequest, HttpStatus.NotFound].includes(statusCode)) {
-        // Sentry error tracking is only enabled in NODE_ENV production
+        // Sentry error tracking is only enabled in API_ENVIRONMENT production
         Sentry.configureScope(scope => {
           if (req.user!) {
             scope.setUser({

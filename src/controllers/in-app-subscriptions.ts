@@ -12,7 +12,7 @@ import { UserInAppSubscriptionGoogle } from '../database/entities/user-in-app-su
 import { IGoogleSubscriptionReceipt } from '../typings';
 import { logger } from '../utils';
 
-const { NODE_ENV, GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY, GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL, APPLE_IAP_SHARED_SECRET } = process.env ;
+const { GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY, GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL, APPLE_IAP_SHARED_SECRET, API_ENVIRONMENT } = process.env ;
 
 inAppPurchase.config({
   applePassword: APPLE_IAP_SHARED_SECRET, // this comes from iTunes Connect (You need this to valiate subscriptions)
@@ -20,7 +20,7 @@ inAppPurchase.config({
     clientEmail: GOOGLE_IAP_SERVICE_ACCOUNT_CLIENT_EMAIL as string,
     privateKey: GOOGLE_IAP_SERVICE_ACCOUNT_PRIVATE_KEY as string
   },
-  test: NODE_ENV !== 'production', // Don't use sandbox validation on production
+  test: API_ENVIRONMENT !== 'production', // Don't use sandbox validation on production
   verbose: false // Output debug logs to stdout stream
 });
 

@@ -1,7 +1,7 @@
 // tslint:disable-next-line
 const { version } = require('../package.json');
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.API_ENVIRONMENT === 'production') {
   // tslint:disable-next-line
   require('newrelic');
 }
@@ -14,7 +14,7 @@ import { Sentry } from './sentry';
 import { setupServer } from './server';
 import { logger } from './utils';
 
-const WORKER_COUNT = !!process.env.HEROKU_APP_NAME ? 1 : process.env.NODE_ENV === 'production' ? os.cpus().length : 2;
+const WORKER_COUNT = process.env.API_ENVIRONMENT === 'test' ? 1 : process.env.API_ENVIRONMENT === 'production' ? os.cpus().length : 2;
 
 logger.info('App init: Setting up...');
 

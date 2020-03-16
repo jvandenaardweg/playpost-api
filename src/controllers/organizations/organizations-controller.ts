@@ -974,18 +974,6 @@ export class OrganizationsController extends BaseController {
   public deleteOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
-    const validationSchema = joi.object().keys({
-      stripeSubscriptionId: joi
-        .string()
-        .required()
-    });
-
-    const { error } = validationSchema.validate(req.body);
-
-    if (error) {
-      throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
-    }
-
     const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
 
     return res.json(cancelSubscriptionResult);
