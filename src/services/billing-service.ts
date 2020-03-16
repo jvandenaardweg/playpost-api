@@ -686,4 +686,22 @@ export class BillingService extends BaseService {
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
   }
+
+  /**
+   * Update a subscription
+   * https://stripe.com/docs/billing/subscriptions/upgrading-downgrading
+   */
+  async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string): Promise<Stripe.Subscription> {
+    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId)
+
+    const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
+      cancel_at_period_end: false,
+      items: [{
+        id: currentSubscription.items.data[0].id,
+        plan: newStripePlanId
+      }]
+    })
+
+    return updatedSubscription;
+  }
 }

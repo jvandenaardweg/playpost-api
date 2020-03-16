@@ -970,6 +970,58 @@ export class OrganizationsController extends BaseController {
 
     return res.json(cancelSubscriptionResult);
   }
+  
+  /**
+   * @swagger
+   *
+   *  /organizations/{organizationId}/customer/subscriptions/{stripeSubscriptionId}:
+   *    patch:
+   *      operationId: patchOneOrganizationSubscription
+   *      tags:
+   *        - organizations
+   *      summary: Upgrades or Downgrades an active Stripe Subscription
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: organizationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A UUID of the Organization
+   *          example: 4ba0fa30-ea6d-46b8-b31c-2e65fc328b11
+   *        - in: path
+   *          name: stripeSubscriptionId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: A Stripe Subscription ID
+   *          example: sub_1GCRSVLbygOvfi9ojuY8DFOq
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        200:
+   *          description: The new Stripe Subscription
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/StripeSubscription'
+   */
+  public patchOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
+    const { newStripePlanId } = req.params;
+    const organization = res.locals.organization;
+
+    const upgradeOrDowngradeSubscriptionResult = await this.billingService.upgradeOrDowngradeSubscription(organization.stripeCustomerId, newStripePlanId)
+
+    return res.json(upgradeOrDowngradeSubscriptionResult);
+  }
 
   /**
    * @swagger
