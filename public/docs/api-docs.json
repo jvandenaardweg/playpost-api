@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.35",
+    "version": "2.11.36",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -369,19 +369,6 @@
           }
         }
       },
-      "PostOneOrganizationCustomerPaymentMethodRequestBody": {
-        "type": "object",
-        "required": [
-          "newStripePaymentMethodId"
-        ],
-        "properties": {
-          "newStripePaymentMethodId": {
-            "type": "string",
-            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
-            "description": "The new Stripe Payment Method ID."
-          }
-        }
-      },
       "PatchOneOrganizationSubscriptionRequestBody": {
         "type": "object",
         "required": [
@@ -392,6 +379,36 @@
             "type": "string",
             "example": "plan_GLVHSLbMkT1UX8",
             "description": "The new Stripe Plan ID to upgrade or downgrade to."
+          },
+          "stripeTaxRateId": {
+            "type": "string",
+            "example": "txr_2GL2OtLbygOvfi9ox7vpowV2",
+            "description": "Optional Stripe Tax Rate ID."
+          },
+          "customTrialEndDate": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": "now",
+            "description": "Unix Timestamp (number) or \"now\" (string)"
+          }
+        }
+      },
+      "PostOneOrganizationCustomerPaymentMethodRequestBody": {
+        "type": "object",
+        "required": [
+          "newStripePaymentMethodId"
+        ],
+        "properties": {
+          "newStripePaymentMethodId": {
+            "type": "string",
+            "example": "pm_1GCRSVLbygOvfi9ojuY8DFOq",
+            "description": "The new Stripe Payment Method ID."
           }
         }
       },
