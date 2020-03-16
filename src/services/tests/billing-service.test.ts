@@ -355,7 +355,28 @@ describe('billing-service', () => {
       items: [{
         id: 'si_GjAaZXZqKBEJA8',
         plan: 'plan_GrRr69GdC37XBb'
-      }]
+      }],
+      expand: ['latest_invoice.payment_intent']
+    });
+
+    expect(updateSubscription).toMatchObject(subscriptionMock);
+  })
+  
+  it('upgradeOrDowngradeSubscription should correctly upgrade a plan with a TaxRate ID.', async () => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsUpdate = jest.spyOn(stripe.subscriptions, 'update').mockResolvedValue(subscriptionMock as any)
+
+    const updateSubscription = await billingService.upgradeOrDowngradeSubscription('sub_GjAafbGOy50oNW', 'plan_GrRr69GdC37XBb', 'txi_1GCW7oLbygOvfi9oJXiEx2mv')
+
+    expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledTimes(1);
+    expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledWith('sub_GjAafbGOy50oNW', {
+      cancel_at_period_end: false,
+      items: [{
+        id: 'si_GjAaZXZqKBEJA8',
+        plan: 'plan_GrRr69GdC37XBb',
+        tax_rates: ['txi_1GCW7oLbygOvfi9oJXiEx2mv']
+      }],
+      expand: ['latest_invoice.payment_intent']
     });
 
     expect(updateSubscription).toMatchObject(subscriptionMock);

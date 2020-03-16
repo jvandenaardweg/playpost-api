@@ -529,6 +529,37 @@ export class BillingService extends BaseService {
   }
 
   /**
+   * Update a subscription
+   * https://stripe.com/docs/billing/subscriptions/upgrading-downgrading
+   */
+  async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string, stripeTaxRateId?: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
+    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId);
+
+    if (!currentSubscription) {
+      throw new Error('Customer has no subscription.');
+    }
+    
+    const currentSubscriptionPlanId = currentSubscription.items.data[0].plan.id;
+
+    if (newStripePlanId === currentSubscriptionPlanId) {
+      throw new Error('Cannot upgrade or downgrade this subscription, because the plan is the same.');
+    }
+
+    const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
+      cancel_at_period_end: false,
+      items: [{
+        id: currentSubscription.items.data[0].id, // Stripe Subscription Item ID
+        plan: newStripePlanId,
+        ...(stripeTaxRateId) ? { tax_rates: [stripeTaxRateId] } : {},
+      }],
+      trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
+      expand: ['latest_invoice.payment_intent'],
+    })
+
+    return updatedSubscription;
+  }
+
+  /**
    * Allows to upgrade or downgrade a subscription.
    */
   async updateSubscriptionPlan(stripeCurrentSubscriptionId: string, stripeNewPlanId: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
@@ -649,33 +680,5 @@ export class BillingService extends BaseService {
   async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
-  }
-
-  /**
-   * Update a subscription
-   * https://stripe.com/docs/billing/subscriptions/upgrading-downgrading
-   */
-  async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string): Promise<Stripe.Subscription> {
-    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId);
-
-    if (!currentSubscription) {
-      throw new Error('Customer has no subscription.');
-    }
-    
-    const currentSubscriptionPlanId = currentSubscription.items.data[0].plan.id;
-
-    if (newStripePlanId === currentSubscriptionPlanId) {
-      throw new Error('Cannot upgrade or downgrade this subscription, because the plan is the same.');
-    }
-
-    const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
-      cancel_at_period_end: false,
-      items: [{
-        id: currentSubscription.items.data[0].id, // Stripe Subscription Item ID
-        plan: newStripePlanId
-      }]
-    })
-
-    return updatedSubscription;
   }
 }

@@ -140,3 +140,13 @@ components:
           type: string
           example: plan_GLVHSLbMkT1UX8
           description: The new Stripe Plan ID to upgrade or downgrade to.
+        stripeTaxRateId:
+          type: string
+          example: txr_2GL2OtLbygOvfi9ox7vpowV2
+          description: Optional Stripe Tax Rate ID.
+        customTrialEndDate:
+          oneOf:
+            - type: number
+            - type: string
+          example: now
+          description: Unix Timestamp (number) or "now" (string)

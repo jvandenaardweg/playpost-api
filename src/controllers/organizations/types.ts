@@ -47,10 +47,12 @@ export interface PostOneOrganizationSubscriptionRequestBody {
   customTrialEndDate?: number | 'now';
 }
 
-export interface PostOneOrganizationCustomerPaymentMethodRequestBody {
-  newStripePaymentMethodId: string;
-}
-
 export interface PatchOneOrganizationSubscriptionRequestBody {
   newStripePlanId: string;
+  stripeTaxRateId?: string;
+  customTrialEndDate?: number | 'now';
+}
+
+export interface PostOneOrganizationCustomerPaymentMethodRequestBody {
+  newStripePaymentMethodId: string;
 }

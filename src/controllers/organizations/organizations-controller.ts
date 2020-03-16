@@ -1041,7 +1041,7 @@ export class OrganizationsController extends BaseController {
    */
   public patchOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
-    const { newStripePlanId } = req.body as PatchOneOrganizationSubscriptionRequestBody;
+    const { newStripePlanId, stripeTaxRateId, customTrialEndDate } = req.body as PatchOneOrganizationSubscriptionRequestBody;
 
     const validationSchema = joi.object().keys({
       newStripePlanId: joi
@@ -1058,7 +1058,7 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
-    const upgradeOrDowngradeSubscriptionResult = await this.billingService.upgradeOrDowngradeSubscription(stripeSubscriptionId, newStripePlanId)
+    const upgradeOrDowngradeSubscriptionResult = await this.billingService.upgradeOrDowngradeSubscription(stripeSubscriptionId, newStripePlanId, stripeTaxRateId, customTrialEndDate)
 
     return res.json(upgradeOrDowngradeSubscriptionResult);
   }
