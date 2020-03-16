@@ -646,42 +646,6 @@ export class BillingService extends BaseService {
     return updateResult;
   }
 
-  async createUpdateSubscriptionSession(stripeCustomerId: string, stripeCurrentSubscriptionId: string): Promise<Stripe.Checkout.Session> {
-    const session = await stripe.checkout.sessions.create({
-      cancel_url: `${process.env.PUBLISHERS_BASE_URL}/checkout/cancel`,
-      success_url: `${process.env.PUBLISHERS_BASE_URL}/checkout/success`,
-      billing_address_collection: 'required',
-      mode: 'setup',
-      payment_method_types: ['card'],
-      setup_intent_data: {
-        metadata: {
-          customer_id: stripeCustomerId,
-          subscription_id: stripeCurrentSubscriptionId
-        }
-      }
-    })
-
-    return session;
-  }
-
-  async createNewSubscriptionSession(stripeCustomerId: string, stripePlanId: string): Promise<Stripe.Checkout.Session> {
-    const session = await stripe.checkout.sessions.create({
-      cancel_url: `${process.env.PUBLISHERS_BASE_URL}/checkout/cancel`,
-      success_url: `${process.env.PUBLISHERS_BASE_URL}/checkout/success`,
-      billing_address_collection: 'required',
-      customer: stripeCustomerId,
-      payment_method_types: ['card'],
-      subscription_data: {
-        items: [{
-          plan: stripePlanId
-        }],
-        trial_from_plan: true,
-      }
-    })
-
-    return session;
-  }
-
   async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
