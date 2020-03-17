@@ -78,6 +78,14 @@ interface SynthesizePreviewResponse {
   audio: string; // base64 string, which can be used in web players
 }
 
+interface UploadArticleAudioOptions {
+  articleId: string;
+  userId: string;
+  voiceId: string;
+  publicationId?: string;
+  uploadOptions: UploadOptions
+}
+
 export class SynthesizerService extends BaseService {
   private readonly synthesizerName: string;
   private readonly baseUrl: string;
@@ -131,17 +139,17 @@ export class SynthesizerService extends BaseService {
    * Synthesizer will synthesize the given `ssml` with the given voice, and will store the output in the
    * given `bucketName` and `bucketUploadDestination`.
    */
-  public uploadArticleAudio = async (articleId: string, userId: string, voiceId: string, options: UploadOptions): Promise<Audiofile> => {
+  public uploadArticleAudio = async (options: UploadArticleAudioOptions): Promise<Audiofile> => {
     // Manually generate a UUID.
     // So we can use this ID to upload a file to storage, before we insert it into the database.
     const audiofileId = uuid.v4();
 
-    const bucketUploadDestination = `articles/${articleId}/audiofiles/${audiofileId}.${options.outputFormat}`;
+    const bucketUploadDestination = `articles/${options.articleId}/audiofiles/${audiofileId}.${options.uploadOptions.outputFormat}`;
 
     const response: SynthesizeUploadResponse = await this.synthesize(
       'upload',
       {
-        ...options,
+        ...options.uploadOptions,
         bucketName: this.bucketName,
         bucketUploadDestination
       }
@@ -151,14 +159,15 @@ export class SynthesizerService extends BaseService {
     const newAudiofile = this.audiofileRepository.create({
       id: audiofileId,
       article: {
-        id: articleId
+        id: options.articleId
       },
       user: {
-        id: userId
+        id: options.userId
       },
       voice: {
-        id: voiceId
-      }
+        id: options.voiceId
+      },
+      ...(options.publicationId) ? { publication: { id: options.publicationId } } : {}
     });
 
     newAudiofile.url = response.publicFileUrl;

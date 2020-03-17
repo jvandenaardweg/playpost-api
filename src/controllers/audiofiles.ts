@@ -528,18 +528,18 @@ export const postOneAudiofile = async (req: Request, res: Response) => {
     // Create a synthesizer service based on the voice synthesizer (Google or AWS)
     const synthesizerService = new SynthesizerService(voice.synthesizer);
 
-    const newAudiofile = await synthesizerService.uploadArticleAudio(
+    const newAudiofile = await synthesizerService.uploadArticleAudio({
       articleId,
       userId,
-      voice.id,
-      {
+      voiceId: voice.id,
+      uploadOptions: {
         outputFormat: 'mp3', // Only allow mp3 synthesizing for our mobile app users
         ssml: article.ssml,
         voiceLanguageCode: voice.languageCode,
         voiceName: voice.name,
         voiceSsmlGender: voice.gender
       }
-    );
+    });
 
      // End synthesizing.
 
