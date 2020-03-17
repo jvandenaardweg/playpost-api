@@ -383,7 +383,7 @@ export class OrganizationsController extends BaseController {
   /**
    * @swagger
    *
-   *  /organizations/{organizationId}/customer:
+   *  /organizations/{organizationId}/publications:
    *    post:
    *      operationId: postOneOrganizationPublication
    *      tags:
