@@ -1349,32 +1349,8 @@ export class OrganizationsController extends BaseController {
   public getOneCustomerSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
-    const customerSubscription = await this.organizationService.findOneCustomerSubscription(stripeSubscriptionId);
+    const customerSubscription = await this.billingService.findOneCustomerSubscription(stripeSubscriptionId);
 
     return res.json(customerSubscription);
-  };
-
-  public getAllCustomerSubscriptionItems = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeSubscriptionId } = req.params;
-
-    const customerSubscriptionItems = await this.organizationService.findAllCustomerSubscriptionItems(stripeSubscriptionId);
-
-    return res.json(customerSubscriptionItems);
-  };
-
-  public getAllCustomerUsageRecordsSummaries = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeSubscriptionItemId } = req.params;
-
-    const customerUsageRecordsSummaries = await this.organizationService.findAllCustomerSubscriptionItemsUsageRecordsSummaries(stripeSubscriptionItemId);
-
-    return res.json(customerUsageRecordsSummaries);
-  };
-
-  public getAllCustomerUsageRecords = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { stripeSubscriptionItemId } = req.params;
-
-    const customerUsageRecords = await this.usageRecordService.findAllBySubscriptionItemId(stripeSubscriptionItemId, 1, 99999, 0, 99999)
-
-    return res.json(customerUsageRecords);
   };
 }

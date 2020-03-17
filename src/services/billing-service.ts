@@ -435,14 +435,6 @@ export class BillingService extends BaseService {
     return customer;
   }
 
-  async findOneCustomerSubscriptions(stripeCustomerId: string): Promise<Stripe.Subscription[]> {
-    const subscriptions = await stripe.subscriptions.list({
-      customer: stripeCustomerId
-    });
-
-    return subscriptions.data;
-  }
-
   async findAllCustomerPaymentMethods(stripeCustomerId: string): Promise<Stripe.PaymentMethod[]> {
     const paymentMethods = await this.stripe.paymentMethods.list({
       customer: stripeCustomerId,
@@ -680,6 +672,23 @@ export class BillingService extends BaseService {
   async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
+  }
+
+  /**
+   * Find all the subscriptions of the organization customer.
+   *
+   * @param organizationId
+   */
+  async findOneCustomerSubscriptions(stripeCustomerId: string): Promise<Stripe.Subscription[]> {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      // Also get the complete product, customer and latest invoice object's
+      // So we do not need to do seperate calls to Stripe to get these required details we want to present to our users
+      expand: ['data.plan.product', 'data.customer', 'data.latest_invoice'],
+      status: 'all'
+    });
+
+    return subscriptions.data;
   }
 
   async createUsageRecord(stripeSubscriptionItemId: string, params: Stripe.UsageRecordCreateParams): Promise<Stripe.UsageRecord> {

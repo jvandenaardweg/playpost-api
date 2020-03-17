@@ -114,7 +114,9 @@ describe('billing-service', () => {
     
     expect(spyStripeSubscriptionsList).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsList).toHaveBeenCalledWith({
-      customer: 'cus_GLBNvU7Y4CEL02'
+      customer: 'cus_GLBNvU7Y4CEL02',
+      expand: ['data.plan.product', 'data.customer', 'data.latest_invoice'],
+      status: 'all'
     });
 
     expect(customerSubscriptions).toMatchObject(subscriptionsMock);

@@ -493,9 +493,6 @@ export const setupServer = async () => {
   app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getOneCustomerSubscription);
   app.delete('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.deleteOneOrganizationSubscription);
   app.patch('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-admin'])], organizationsController.patchOneOrganizationSubscription);
-  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerSubscriptionItems);
-  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records-summaries', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerUsageRecordsSummaries);
-  app.get('/v1/organizations/:organizationId/customer/subscriptions/:stripeSubscriptionId/subscription-items/:stripeSubscriptionItemId/usage-records', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllCustomerUsageRecords);
 
   // Payment Methods
   app.get('/v1/organizations/:organizationId/customer/payment-methods', [IS_PROTECTED_JWT, organizationsController.permissions(['organization-user'])], organizationsController.getAllOrganizationCustomerPaymentMethods);
