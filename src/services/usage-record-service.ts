@@ -6,6 +6,17 @@ import { UsageRecord } from '../database/entities/usage-record';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
 
+interface CreateUsageRecordOptions {
+  articleId: string;
+  audiofileId: string;
+  userId: string;
+  quantity: number;
+  isMetered: boolean;
+  stripeSubscriptionItemId: string;
+  organizationId?: string;
+  publicationId?: string;
+}
+
 export class UsageRecordService extends BaseService {
   usageRecordRepository: Repository<UsageRecord>;
 
@@ -48,18 +59,7 @@ export class UsageRecordService extends BaseService {
    * @param isMetered 
    * @param stripeSubscriptionItemId 
    */
-  async createUsageRecord(
-    options: {
-      articleId: string,
-      audiofileId: string,
-      userId: string,
-      quantity: number,
-      isMetered: boolean,
-      stripeSubscriptionItemId: string,
-      organizationId?: string,
-      publicationId?: string,
-    }
-  ): Promise<InsertResult> {
+  async createUsageRecord(options: CreateUsageRecordOptions): Promise<InsertResult> {
     const timestamp = new Date().getTime();
 
     const stripePayload: Stripe.UsageRecordCreateParams = {

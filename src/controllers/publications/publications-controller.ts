@@ -13,7 +13,7 @@ import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
 import { VoiceService } from '../../services/voice-service';
 import { BaseController } from '../index';
-import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest } from './types';
+import { PublicationResponse, AudioPreview, DeleteOnePublicationArticleRequest, PostOnePublicationAudiofileRequest, PostOnePublicationPreviewSSMLRequest, PatchOnePublicationArticleRequest, PostOnePublicationArticleRequest, GetAllPublicationArticlesRequest, GetOnePublicationRequest, GetAllPublicationsRequest, GetOnePublicationArticleRequest, PostOnePublicationImportArticleRequest, PostOnePublicationAudiofileRequestBody } from './types';
 import { FindManyOptions } from 'typeorm';
 import { LanguageService } from '../../services/language-service';
 import { getPossibleListeningTimeInSeconds } from '../../utils/reading-time';
@@ -565,19 +565,65 @@ export class PublicationsController extends BaseController {
     return res.status(HttpStatus.NoContent).send();
   }
 
+  /**
+   * @swagger
+   *
+   *  /publications/{publicationId}/articles/{articleId}/audiofiles:
+   *    post:
+   *      operationId: postOnePublicationAudiofile
+   *      tags:
+   *        - publications
+   *      summary: Creates an Article
+   *      security:
+   *        - BearerAuth: []
+   *        - ApiKeyAuth: []
+   *          ApiSecretAuth: []
+   *      parameters:
+   *        - in: path
+   *          name: publicationId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Publication.
+   *        - in: path
+   *          name: articleId
+   *          schema:
+   *            type: string
+   *          required: true
+   *          description: The UUID of a Article.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              $ref: '#/components/schemas/PostOnePublicationAudiofileRequestBody'
+   *      responses:
+   *        400:
+   *          $ref: '#/components/responses/BadRequestError'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          $ref: '#/components/responses/NotFoundError'
+   *        409:
+   *          $ref: '#/components/responses/ConflictError'
+   *        201:
+   *          description: A complete Article object
+   *          content:
+   *            'application/json':
+   *              schema:
+   *                type: object
+   *                $ref: '#/components/schemas/Article'
+   */
   public postOnePublicationAudiofile = async (req: PostOnePublicationAudiofileRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
-    const { voiceId, organizationId } = req.body;
+    const { voiceId, organizationId } = req.body as PostOnePublicationAudiofileRequestBody;
     const userId = req.user!.id;
 
     const validationSchema = joi.object().keys({
-      publicationId: joi.string().uuid().required(),
-      articleId: joi.string().uuid().required(),
       voiceId: joi.string().uuid().required(),
       organizationId: joi.string().uuid().required()
     });
 
-    const validationResult = validationSchema.validate({ ...req.body, ...req.params });
+    const validationResult = validationSchema.validate(req.body);
 
     if (validationResult.error) {
       const firstError = validationResult.error.details[0];
@@ -605,8 +651,9 @@ export class PublicationsController extends BaseController {
 
     // Get the subscriptions of the organization customer
     const subscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
+    const hasActiveSubscription = subscriptions.some(subscription => subscription.status === 'active' || subscription.status === 'trialing')
 
-    if (!subscriptions || !subscriptions.length) {
+    if (!hasActiveSubscription) {
       throw new HttpError(HttpStatus.PaymentRequired, 'You have no active subscription. This action requires an active subscription.');
     }
 
