@@ -683,11 +683,25 @@ export class OrganizationsController extends BaseController {
       this.organizationService.findOneCustomerInvoiceUpcoming(organizationId)
     ]);
 
+    const invoices: Stripe.Invoice[] = [];
+
+    // Add upcoming invoice to the top
+    if (customerUpcomingInvoice) {
+      invoices.push(customerUpcomingInvoice)
+    }
+
+    // Add the rest later
+    if (customerInvoices) {
+      invoices.push(...customerInvoices.data)
+    }
+
+    
+
     // Merge the upcoming invoice in the other invoices
-    const invoices: Stripe.Invoice[] = [
-      ...(customerUpcomingInvoice) ? customerUpcomingInvoice : [] as any,
-      ...(customerInvoices) ? customerInvoices.data : [] as any
-    ]
+    // const invoices: Stripe.Invoice[] = [
+    //   ...(customerUpcomingInvoice) ? [customerUpcomingInvoice] : [] as any,
+    //   ...(customerInvoices) ? [customerInvoices.data] : [] as any
+    // ]
 
     return res.json(invoices);
   };
