@@ -676,11 +676,11 @@ export class OrganizationsController extends BaseController {
    *                  $ref: '#/components/schemas/StripeInvoice'
    */
   public getAllOrganizationCustomerInvoices = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
+    const stripeCustomerId = res.locals.organization.stripeCustomerId;
 
     const [customerInvoices, customerUpcomingInvoice] = await Promise.all([
-      this.organizationService.findAllCustomerInvoices(organizationId),
-      this.organizationService.findOneCustomerInvoiceUpcoming(organizationId)
+      this.billingService.findAllInvoices(stripeCustomerId),
+      this.billingService.findOneInvoiceUpcoming(stripeCustomerId)
     ]);
 
     const invoices: Stripe.Invoice[] = [];
@@ -694,14 +694,6 @@ export class OrganizationsController extends BaseController {
     if (customerInvoices) {
       invoices.push(...customerInvoices.data)
     }
-
-    
-
-    // Merge the upcoming invoice in the other invoices
-    // const invoices: Stripe.Invoice[] = [
-    //   ...(customerUpcomingInvoice) ? [customerUpcomingInvoice] : [] as any,
-    //   ...(customerInvoices) ? [customerInvoices.data] : [] as any
-    // ]
 
     return res.json(invoices);
   };

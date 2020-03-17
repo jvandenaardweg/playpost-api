@@ -700,4 +700,41 @@ export class BillingService extends BaseService {
 
     return subscriptions;
   }
+
+  /**
+   * Find all customer invoices of the organization.
+   *
+   * @param organizationId
+   */
+  async findAllInvoices(stripeCustomerId: string): Promise<Stripe.ApiList<Stripe.Invoice>> {
+    const invoices = await stripe.invoices.list({
+      customer: stripeCustomerId,
+      limit: 24 // 2 years when subscription is a monthly plan
+    })
+
+    return invoices;
+  }
+
+  /**
+   * Find all upcoming invoices for the customer.
+   *
+   * @param organizationId
+   */
+  async findOneInvoiceUpcoming(stripeCustomerId: string): Promise<Stripe.Invoice | undefined> {
+    try {
+      const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
+        customer: stripeCustomerId
+      })
+
+      return invoicesUpcoming;
+    } catch (err) {
+      // If there is no upcoming invoice, just return undefined
+      if (err.raw.code === 'invoice_upcoming_none') {
+        return undefined;
+      }
+
+      // Else, just throw the api error we get from Stripe
+      throw err;
+    }
+  }
 }
