@@ -72,7 +72,6 @@ export interface PostOnePublicationAudiofileRequest extends Request {
 
 export interface PostOnePublicationAudiofileRequestBody {
   voiceId: string;
-  organizationId: string;
 }
 
 export interface PostOnePublicationPreviewSSMLRequest extends Request {

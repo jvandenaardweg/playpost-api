@@ -47,7 +47,7 @@ export class PublicationService extends BaseService {
    */
   public findOneById = async (publicationId: string) => {
     return this.publicationRepository.findOne(publicationId, {
-      relations: ['users']
+      relations: ['users', 'organization']
     });
   }
 

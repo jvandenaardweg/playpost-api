@@ -615,7 +615,7 @@ export class PublicationsController extends BaseController {
    */
   public postOnePublicationAudiofile = async (req: PostOnePublicationAudiofileRequest, res: PublicationResponse): Promise<PublicationResponse> => {
     const { publicationId, articleId } = req.params;
-    const { voiceId, organizationId } = req.body as PostOnePublicationAudiofileRequestBody;
+    const { voiceId } = req.body as PostOnePublicationAudiofileRequestBody;
     const userId = req.user!.id;
 
     const validationSchema = joi.object().keys({
@@ -628,6 +628,12 @@ export class PublicationsController extends BaseController {
     if (validationResult.error) {
       const firstError = validationResult.error.details[0];
       throw new HttpError(HttpStatus.BadRequest, firstError.message, validationResult.error.details);
+    }
+
+    const organizationId = res.locals.publication.organization?.id;
+
+    if (!organizationId) {
+      throw new HttpError(HttpStatus.InternalServerError, 'Could not determine organization ID.');
     }
 
     // Get the organization to verify if this publication is part of that organization
