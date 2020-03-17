@@ -18,6 +18,7 @@ import { FindManyOptions } from 'typeorm';
 import { LanguageService } from '../../services/language-service';
 import { getPossibleListeningTimeInSeconds } from '../../utils/reading-time';
 import { trimTextAtWords, getTextFromSSML, getHTMLFromSSML, getNormalizedUrl, validateIfUrlIsAllowed } from '../../utils/string';
+import { BillingService } from '../../services/billing-service';
 
 export class PublicationsController extends BaseController {
   private readonly publicationService: PublicationService;
@@ -27,6 +28,7 @@ export class PublicationsController extends BaseController {
   private readonly usageRecordService: UsageRecordService;
   private readonly organizationService: OrganizationService;
   private readonly languageService: LanguageService;
+  private readonly billingService: BillingService;
 
   constructor() {
     super();
@@ -38,6 +40,7 @@ export class PublicationsController extends BaseController {
     this.usageRecordService = new UsageRecordService();
     this.organizationService = new OrganizationService();
     this.languageService = new LanguageService();
+    this.billingService = new BillingService();
   }
 
   /**
@@ -655,7 +658,7 @@ export class PublicationsController extends BaseController {
     // When we end up here, the publication exists, and the given organizationId has access to that publication
 
     // Get the subscriptions of the organization customer
-    const subscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
+    const subscriptions = await this.billingService.findOneCustomerSubscriptions(organizationId);
     const hasActiveSubscription = subscriptions.some(subscription => subscription.status === 'active' || subscription.status === 'trialing')
 
     if (!hasActiveSubscription) {

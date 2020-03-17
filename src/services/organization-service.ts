@@ -1,7 +1,6 @@
 import Stripe from 'stripe';
 import { getConnection, getRepository, Repository } from 'typeorm';
 
-import { stripe } from '../billing';
 import { Organization } from '../database/entities/organization';
 import { Publication } from '../database/entities/publication';
 import { User } from '../database/entities/user';

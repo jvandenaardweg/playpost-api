@@ -8,7 +8,6 @@ import * as AWSSes from '../../mailers/aws-ses';
 import { BillingService } from '../../services/billing-service';
 import { OrganizationService } from '../../services/organization-service';
 import { PublicationService } from '../../services/publication-service';
-import { UsageRecordService } from '../../services/usage-record-service';
 import { UserService } from '../../services/user-service';
 import { PermissionRoles } from '../../typings';
 import { BaseController } from '../index';
@@ -20,7 +19,6 @@ import { CountryService } from '../../services/country-service';
 
 export class OrganizationsController extends BaseController {
   private organizationService: OrganizationService;
-  private usageRecordService: UsageRecordService;
   private billingService: BillingService;
   private usersService: UserService;
   private publicationService: PublicationService;
@@ -29,7 +27,6 @@ export class OrganizationsController extends BaseController {
   constructor() {
     super()
     this.organizationService = new OrganizationService();
-    this.usageRecordService = new UsageRecordService();
     this.billingService = new BillingService();
     this.usersService = new UserService()
     this.publicationService = new PublicationService()
@@ -629,7 +626,7 @@ export class OrganizationsController extends BaseController {
   public getAllOrganizationCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
-    const customerSubscriptions = await this.organizationService.findAllCustomerSubscriptions(organizationId);
+    const customerSubscriptions = await this.billingService.findOneCustomerSubscriptions(organizationId);
 
     if (!customerSubscriptions) {
       return res.json([]);
