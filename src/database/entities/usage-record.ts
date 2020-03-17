@@ -39,7 +39,7 @@ export class UsageRecord {
   isMetered: boolean; // true if it need it requires payment, false if it's free (for example, short snippet previews)
 
   @Column('timestamp', { nullable: false })
-  timestamp: number; // Characters
+  timestamp: Date;
 
   @Index()
   @Column({ nullable: true })

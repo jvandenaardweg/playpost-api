@@ -1,10 +1,9 @@
-import Stripe from 'stripe';
 import { getRepository, InsertResult, Repository } from 'typeorm';
 
-import { stripe } from '../billing';
 import { UsageRecord } from '../database/entities/usage-record';
 import { CollectionResponse } from '../typings';
 import { BaseService } from './index';
+import { BillingService } from './billing-service';
 
 interface CreateUsageRecordOptions {
   articleId: string;
@@ -18,12 +17,14 @@ interface CreateUsageRecordOptions {
 }
 
 export class UsageRecordService extends BaseService {
-  usageRecordRepository: Repository<UsageRecord>;
+  readonly usageRecordRepository: Repository<UsageRecord>;
+  readonly billingService: BillingService;
 
   constructor () {
     super();
 
     this.usageRecordRepository = getRepository(UsageRecord);
+    this.billingService = new BillingService();
   }
 
   async findAllBySubscriptionItemId(stripeSubscriptionItemId: string, page: number, perPage: number, skip: number, take: number): Promise<CollectionResponse<UsageRecord[]>> {
@@ -60,21 +61,20 @@ export class UsageRecordService extends BaseService {
    * @param stripeSubscriptionItemId 
    */
   async createUsageRecord(options: CreateUsageRecordOptions): Promise<InsertResult> {
-    const timestamp = new Date().getTime();
-
-    const stripePayload: Stripe.UsageRecordCreateParams = {
-      quantity: options.quantity,
-      timestamp,
-      action: 'increment'
-    }
+    const currentDate = new Date();
+    const timestampStripe = Math.floor(currentDate.getTime() / 1000);
 
     let stripeUsageRecordId: string | undefined;
 
     // We track all usage, but allow to be "unmetered"
     // If no isMetered option is given, fallback to metered
     if (options.isMetered || options.isMetered === undefined) {
-      // TODO: retry on fail
-      const createdStripeUsageRecord = await stripe.subscriptionItems.createUsageRecord(options.stripeSubscriptionItemId, stripePayload)
+      const createdStripeUsageRecord = await this.billingService.createUsageRecord(options.stripeSubscriptionItemId, {
+        quantity: options.quantity,
+        timestamp: timestampStripe,
+        action: 'increment'
+      })
+
       stripeUsageRecordId = createdStripeUsageRecord.id;
     }
 
@@ -98,7 +98,7 @@ export class UsageRecordService extends BaseService {
       isMetered: options.isMetered,
       stripeSubscriptionItemId: options.stripeSubscriptionItemId,
       stripeUsageRecordId,
-      timestamp
+      timestamp: currentDate
     });
 
     return this.usageRecordRepository.insert(newUsageRecord);

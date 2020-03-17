@@ -681,4 +681,10 @@ export class BillingService extends BaseService {
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
   }
+
+  async createUsageRecord(stripeSubscriptionItemId: string, params: Stripe.UsageRecordCreateParams): Promise<Stripe.UsageRecord> {
+    const createdStripeUsageRecord = await stripe.subscriptionItems.createUsageRecord(stripeSubscriptionItemId, params);
+
+    return createdStripeUsageRecord;
+  }
 }

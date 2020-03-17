@@ -13,6 +13,7 @@ import { taxIdMock } from '../../../tests/__mocks/billing/tax-id';
 import { taxIdsMock } from '../../../tests/__mocks/billing/tax-ids';
 import { deletedTaxIdMock } from '../../../tests/__mocks/billing/deleted-tax-id';
 import { salesTaxMock } from '../../../tests/__mocks/billing/sales-tax';
+import { usageRecordMock } from '../../../tests/__mocks/billing/usage-record';
 import { stripe } from '../../billing';
 import SalesTax from 'sales-tax';
 
@@ -394,5 +395,23 @@ describe('billing-service', () => {
       expect(spyStripeSubscriptionsUpdate).toHaveBeenCalledTimes(0);
       done()
     }
+  })
+  
+  it('createUsageRecord should correctly create a Usage Record.', async () => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsItemsCreateUsageRecord = jest.spyOn(stripe.subscriptionItems, 'createUsageRecord').mockResolvedValue(usageRecordMock as any)
+
+    const usageRecord = await billingService.createUsageRecord('si_GvWPqFNt1M8ymS', {
+      quantity: 1803,
+      timestamp: 1584458062,
+    })
+
+    expect(spyStripeSubscriptionsItemsCreateUsageRecord).toHaveBeenCalledTimes(1);
+    expect(spyStripeSubscriptionsItemsCreateUsageRecord).toHaveBeenCalledWith('si_GvWPqFNt1M8ymS', {
+      quantity: 1803,
+      timestamp: 1584458062,
+    });
+
+    expect(usageRecord).toMatchObject(usageRecordMock);
   })
 })
