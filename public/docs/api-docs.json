@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.36",
+    "version": "2.11.37",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -2801,58 +2801,6 @@
             "$ref": "#/components/responses/NotFoundError"
           }
         }
-      }
-    },
-    "/organizations/{organizationId}/customer": {
-      "get": {
-        "operationId": "getOneOrganizationCustomer",
-        "tags": [
-          "organizations"
-        ],
-        "summary": "Get the Stripe Customer of an Organization",
-        "security": [
-          {
-            "BearerAuth": []
-          },
-          {
-            "ApiKeyAuth": [],
-            "ApiSecretAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "organizationId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "A UUID of the Organization",
-            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A Stripe Customer object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "$ref": "#/components/schemas/StripeCustomer"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequestError"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
       },
       "post": {
         "operationId": "postOneOrganizationPublication",
@@ -2898,6 +2846,58 @@
                 "schema": {
                   "type": "object",
                   "$ref": "#/components/schemas/Publication"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/organizations/{organizationId}/customer": {
+      "get": {
+        "operationId": "getOneOrganizationCustomer",
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get the Stripe Customer of an Organization",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "ApiKeyAuth": [],
+            "ApiSecretAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A UUID of the Organization",
+            "example": "4ba0fa30-ea6d-46b8-b31c-2e65fc328b11"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A Stripe Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StripeCustomer"
                 }
               }
             }
