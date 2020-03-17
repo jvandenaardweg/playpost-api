@@ -979,7 +979,7 @@ export class OrganizationsController extends BaseController {
   public deleteOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
-    const cancelSubscriptionResult = await this.organizationService.cancelSubscription(stripeSubscriptionId);
+    const cancelSubscriptionResult = await this.billingService.cancelSubscription(stripeSubscriptionId);
 
     return res.json(cancelSubscriptionResult);
   }

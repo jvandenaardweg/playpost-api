@@ -687,4 +687,17 @@ export class BillingService extends BaseService {
 
     return createdStripeUsageRecord;
   }
+
+  /**
+   * Cancels a customer's subscription immediately. The customer will not be charged again for the subscription.
+   *
+   * Pending invoices will be charged at the end of the period.
+   *
+   * @param stripeSubscriptionId
+   */
+  async cancelSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
+    const subscriptions = await stripe.subscriptions.del(stripeSubscriptionId)
+
+    return subscriptions;
+  }
 }
