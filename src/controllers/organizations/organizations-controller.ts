@@ -683,19 +683,10 @@ export class OrganizationsController extends BaseController {
       this.organizationService.findOneCustomerInvoiceUpcoming(organizationId)
     ]);
 
-    if (!customerInvoices) {
-      return res.json([])
-    }
-
-    // If there is no upcoming invoice, just return the normal invoices
-    if (!customerUpcomingInvoice) {
-      return res.json(customerInvoices)
-    }
-
     // Merge the upcoming invoice in the other invoices
     const invoices: Stripe.Invoice[] = [
-      customerUpcomingInvoice,
-      ...customerInvoices.data,
+      ...(customerUpcomingInvoice) ? customerUpcomingInvoice : [] as any,
+      ...(customerInvoices) ? customerInvoices.data : [] as any
     ]
 
     return res.json(invoices);
