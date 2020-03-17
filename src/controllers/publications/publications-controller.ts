@@ -658,7 +658,7 @@ export class PublicationsController extends BaseController {
     // When we end up here, the publication exists, and the given organizationId has access to that publication
 
     // Get the subscriptions of the organization customer
-    const subscriptions = await this.billingService.findOneCustomerSubscriptions(organizationId);
+    const subscriptions = await this.billingService.findAllCustomerSubscriptions(organizationId);
     const hasActiveSubscription = subscriptions.some(subscription => subscription.status === 'active' || subscription.status === 'trialing')
 
     if (!hasActiveSubscription) {

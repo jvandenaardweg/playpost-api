@@ -104,13 +104,13 @@ describe('billing-service', () => {
     expect(customer).toMatchObject(customerMock);
   })
 
-  it('findOneCustomerSubscriptions should return a Stripe Subscriptions array for the given customer.', async () => {
+  it('findAllCustomerSubscriptions should return a Stripe Subscriptions array for the given customer.', async () => {
     const billingService = new BillingService();
     const spyStripeSubscriptionsList = jest.spyOn(stripe.subscriptions, 'list').mockResolvedValue({
       data: subscriptionsMock
     } as any)
 
-    const customerSubscriptions = await billingService.findOneCustomerSubscriptions('cus_GLBNvU7Y4CEL02')
+    const customerSubscriptions = await billingService.findAllCustomerSubscriptions('cus_GLBNvU7Y4CEL02')
     
     expect(spyStripeSubscriptionsList).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsList).toHaveBeenCalledWith({
@@ -198,36 +198,11 @@ describe('billing-service', () => {
     expect(paymentMethod).toMatchObject(paymentMethodMock);
   })
 
-  it('findOneCustomerSubscriptionStatus should return a Stripe Subscription status value for a Stripe Customer.', async () => {
-    const billingService = new BillingService();
-    const spyStripeSubscriptionsList = jest.spyOn(stripe.subscriptions, 'list').mockResolvedValue({
-      data: subscriptionsMock
-     } as any)
-
-    const customerSubscriptionStatus = await billingService.findOneCustomerSubscriptionStatus('cus_GLBNvU7Y4CEL02')
-    
-    expect(spyStripeSubscriptionsList).toHaveBeenCalledTimes(1);
-    expect(spyStripeSubscriptionsList).toHaveBeenCalledWith({
-      customer: 'cus_GLBNvU7Y4CEL02'
-    });
-
-    expect(customerSubscriptionStatus).toBe('active');
-
-    // Test when there are no subscriptions
-    jest.spyOn(stripe.subscriptions, 'list').mockResolvedValue({
-      data: []
-     } as any)
-
-     const customerSubscriptionStatus2 = await billingService.findOneCustomerSubscriptionStatus('cus_GLBNvU7Y4CEL02')
-
-     expect(customerSubscriptionStatus2).toBe(null);
-  })
-
-  it('buyNewSubscriptionPlan should create a new Stripe Subscription for the Customer.', async () => {
+  it('createOneSubscription should create a new Stripe Subscription for the Customer.', async () => {
     const billingService = new BillingService();
     const spyStripeSubscriptionsCreate = jest.spyOn(stripe.subscriptions, 'create').mockResolvedValue(subscriptionMock as any)
 
-    const createdSubscription = await billingService.buyNewSubscriptionPlan('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn')
+    const createdSubscription = await billingService.createOneSubscription('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn')
     
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
@@ -244,11 +219,11 @@ describe('billing-service', () => {
     expect(createdSubscription).toMatchObject(subscriptionMock);
   })
 
-  it('buyNewSubscriptionPlan should create a new Stripe Subscription for the Customer when using a TaxRate ID.', async () => {
+  it('createOneSubscription should create a new Stripe Subscription for the Customer when using a TaxRate ID.', async () => {
     const billingService = new BillingService();
     const spyStripeSubscriptionsCreate = jest.spyOn(stripe.subscriptions, 'create').mockResolvedValue(subscriptionMock as any)
 
-    const createdSubscription = await billingService.buyNewSubscriptionPlan('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn', 'txr_2GL2OtLbygOvfi9ox7vpowV2')
+    const createdSubscription = await billingService.createOneSubscription('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn', 'txr_2GL2OtLbygOvfi9ox7vpowV2')
     
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
@@ -285,7 +260,10 @@ describe('billing-service', () => {
     const billingService = new BillingService();
     const spyStripeCustomersCreateTaxId = jest.spyOn(stripe.customers, 'createTaxId').mockResolvedValue(taxIdMock as any)
 
-    const createdTaxId = await billingService.createOneCustomerTaxId('cus_GLBNvU7Y4CEL02', 'eu_vat', 'NL001175463B65')
+    const createdTaxId = await billingService.createOneCustomerTaxId('cus_GLBNvU7Y4CEL02', {
+      type: 'eu_vat', 
+      value: 'NL001175463B65'
+    })
     
     expect(spyStripeCustomersCreateTaxId).toHaveBeenCalledTimes(1);
     expect(spyStripeCustomersCreateTaxId).toHaveBeenCalledWith('cus_GLBNvU7Y4CEL02', {
@@ -403,7 +381,7 @@ describe('billing-service', () => {
     const billingService = new BillingService();
     const spyStripeSubscriptionsItemsCreateUsageRecord = jest.spyOn(stripe.subscriptionItems, 'createUsageRecord').mockResolvedValue(usageRecordMock as any)
 
-    const usageRecord = await billingService.createUsageRecord('si_GvWPqFNt1M8ymS', {
+    const usageRecord = await billingService.createOneUsageRecord('si_GvWPqFNt1M8ymS', {
       quantity: 1803,
       timestamp: 1584458062,
     })

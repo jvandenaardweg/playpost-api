@@ -69,7 +69,7 @@ export class UsageRecordService extends BaseService {
     // We track all usage, but allow to be "unmetered"
     // If no isMetered option is given, fallback to metered
     if (options.isMetered || options.isMetered === undefined) {
-      const createdStripeUsageRecord = await this.billingService.createUsageRecord(options.stripeSubscriptionItemId, {
+      const createdStripeUsageRecord = await this.billingService.createOneUsageRecord(options.stripeSubscriptionItemId, {
         quantity: options.quantity,
         timestamp: timestampStripe,
         action: 'increment'

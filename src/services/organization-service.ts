@@ -259,7 +259,7 @@ export class OrganizationService extends BaseService {
     })
 
     // Get the customer's current tax id's
-    const currentTaxIds = await this.billingService.listCustomerTaxIds(organization.stripeCustomerId)
+    const currentTaxIds = await this.billingService.findAllCustomerTaxIds(organization.stripeCustomerId)
     
     // Get the correct Stripe TaxId type based on the user's Country Code
     const countryCode = customerUpdateFields.address?.country?.toUpperCase();
@@ -277,20 +277,20 @@ export class OrganizationService extends BaseService {
     if (currentTaxIds.length && !taxIdExists) {
       for (const taxId of currentTaxIds) {
         logger.info(`Deleting current tax ID: "${taxId.id}" for customer ID: "${organization.stripeCustomerId}"`);
-        await this.billingService.deleteCustomerTaxId(organization.stripeCustomerId, taxId.id)
+        await this.billingService.deleteOneCustomerTaxId(organization.stripeCustomerId, taxId.id)
       }
     }
 
     // Only create a new tax ID when it does not exist and the user has send a "value" and "type"
     if (!taxIdExists && normalizedTaxIdValue && taxIdType) {
       logger.info(`Creating new Tax ID for customer ID: "${organization.stripeCustomerId}"`, taxIdType, normalizedTaxIdValue);
-      await this.billingService.createCustomerTaxId(organization.stripeCustomerId, {
+      await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, {
         type: taxIdType,
         value: normalizedTaxIdValue
       })
     }
 
-    const updatedStripeCustomer = await this.billingService.updateCustomer(organization.stripeCustomerId, updateOneCustomerFields);
+    const updatedStripeCustomer = await this.billingService.updateOneCustomer(organization.stripeCustomerId, updateOneCustomerFields);
 
     return updatedStripeCustomer;
   }

@@ -215,7 +215,7 @@ export class OrganizationsController extends BaseController {
     await queryRunner.manager.save(organizationToCreate);
 
     // First, create a Customer
-    const createdCustomer = await this.billingService.createCustomer({
+    const createdCustomer = await this.billingService.createOneCustomer({
       organizationId: organizationToCreate.id,
       organizationName: organizationToCreate.name,
       countryCode: country.code.toUpperCase(),
@@ -626,7 +626,7 @@ export class OrganizationsController extends BaseController {
   public getAllOrganizationCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { organizationId } = req.params;
 
-    const customerSubscriptions = await this.billingService.findOneCustomerSubscriptions(organizationId);
+    const customerSubscriptions = await this.billingService.findAllCustomerSubscriptions(organizationId);
 
     if (!customerSubscriptions) {
       return res.json([]);
@@ -676,8 +676,8 @@ export class OrganizationsController extends BaseController {
     const stripeCustomerId = res.locals.organization.stripeCustomerId;
 
     const [customerInvoices, customerUpcomingInvoice] = await Promise.all([
-      this.billingService.findAllInvoices(stripeCustomerId),
-      this.billingService.findOneInvoiceUpcoming(stripeCustomerId)
+      this.billingService.findAllCustomerInvoices(stripeCustomerId),
+      this.billingService.findOneCustomerInvoiceUpcoming(stripeCustomerId)
     ]);
 
     const invoices: Stripe.Invoice[] = [];
@@ -968,7 +968,7 @@ export class OrganizationsController extends BaseController {
   public deleteOneOrganizationSubscription = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const { stripeSubscriptionId } = req.params;
 
-    const cancelSubscriptionResult = await this.billingService.cancelSubscription(stripeSubscriptionId);
+    const cancelSubscriptionResult = await this.billingService.cancelOneSubscription(stripeSubscriptionId);
 
     return res.json(cancelSubscriptionResult);
   }
@@ -1137,7 +1137,7 @@ export class OrganizationsController extends BaseController {
     // const paymentMethod = await this.billingService.attachDefaultPaymentMethodToCustomer(stripePaymentMethodId, stripeCustomer.id);
 
     // Buy the subscription using the Stripe Customer ID, Stripe Plan ID and Stripe PaymentMethod ID
-    const subscriptionResult = await this.billingService.buyNewSubscriptionPlan(stripeCustomer.id, stripePlanId, stripeTaxRateId, customTrialEndDate);
+    const subscriptionResult = await this.billingService.createOneSubscription(stripeCustomer.id, stripePlanId, stripeTaxRateId, customTrialEndDate);
 
     // If we end up here, the subscription is bought.
 
@@ -1201,7 +1201,10 @@ export class OrganizationsController extends BaseController {
     const { stripeTaxIdType, stripeTaxIdValue } = req.body;
     const organization = res.locals.organization;
     
-    const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, stripeTaxIdType, stripeTaxIdValue);
+    const customerTaxIds = await this.billingService.createOneCustomerTaxId(organization.stripeCustomerId, {
+      type: stripeTaxIdType,
+      value: stripeTaxIdValue
+    });
 
     return res.status(HttpStatus.Created).json(customerTaxIds);
   }
