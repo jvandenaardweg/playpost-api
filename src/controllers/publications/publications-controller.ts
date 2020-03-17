@@ -619,8 +619,7 @@ export class PublicationsController extends BaseController {
     const userId = req.user!.id;
 
     const validationSchema = joi.object().keys({
-      voiceId: joi.string().uuid().required(),
-      organizationId: joi.string().uuid().required()
+      voiceId: joi.string().uuid().required()
     });
 
     const validationResult = validationSchema.validate(req.body);
@@ -670,7 +669,8 @@ export class PublicationsController extends BaseController {
       throw new HttpError(HttpStatus.PaymentRequired, 'A subscription item id does not exist.');
     }
 
-    const article = await this.articleService.findOneById(articleId, {
+    // Get the full article, including the SSML
+    const article = await this.articleService.findOneByIdFull(articleId, {
       where: {
         publication: {
           id: publicationId
@@ -696,12 +696,18 @@ export class PublicationsController extends BaseController {
 
     const synthesizerService = new SynthesizerService(voice.synthesizer);
 
-    const newAudiofile = await synthesizerService.uploadArticleAudio(article.id, userId, voice.id, {
-      outputFormat: 'mp3',
-      ssml: article.ssml,
-      voiceLanguageCode: voice.languageCode,
-      voiceName: voice.name,
-      voiceSsmlGender: voice.gender
+    const newAudiofile = await synthesizerService.uploadArticleAudio({
+      userId,
+      publicationId,
+      articleId: article.id,
+      voiceId: voice.id,
+      uploadOptions: {
+        outputFormat: 'mp3',
+        ssml: article.ssml,
+        voiceLanguageCode: voice.languageCode,
+        voiceName: voice.name,
+        voiceSsmlGender: voice.gender
+      }
     })
 
     const createdAudiofile = await this.audiofileService.save(newAudiofile);
@@ -718,6 +724,12 @@ export class PublicationsController extends BaseController {
       quantity: article.ssml.length,
       isMetered: true // Sends metered usage to Stripe
     })
+
+    const updatedArticle = new Article()
+    updatedArticle.status = ArticleStatus.FINISHED 
+
+    // Mark article as published
+    await this.articleService.update(articleId, updatedArticle);
 
     return res.status(HttpStatus.Created).json(createdAudiofile)
   }
