@@ -2,7 +2,7 @@
   "info": {
     "title": "Playpost API",
     "description": "This is the documentation of the Playpost API",
-    "version": "2.11.38",
+    "version": "2.11.39",
     "termsOfService": "https://playpost.app/terms",
     "contact": {
       "name": "API Support",
@@ -618,19 +618,13 @@
       "PostOnePublicationAudiofileRequestBody": {
         "type": "object",
         "required": [
-          "voiceId",
-          "organizationId"
+          "voiceId"
         ],
         "properties": {
           "voiceId": {
             "type": "string",
             "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
             "description": "The UUID of the Voice to be used."
-          },
-          "organizationId": {
-            "type": "string",
-            "example": "e7e4c3f7-d681-4bb9-957a-a1cbe046cab0",
-            "description": "The UUID of the Organization to be used."
           }
         }
       },
