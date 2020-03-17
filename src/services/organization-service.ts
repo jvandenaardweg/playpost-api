@@ -367,7 +367,8 @@ export class OrganizationService extends BaseService {
     }
 
     const invoices = await stripe.invoices.list({
-      customer: organization.stripeCustomerId
+      customer: organization.stripeCustomerId,
+      limit: 24 // 2 years when subscription is a monthly plan
     })
 
     return invoices;
