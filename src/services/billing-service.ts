@@ -482,7 +482,7 @@ export class BillingService extends BaseService {
    * @param stripePlanId 
    */
   async createOneSubscription(stripeCustomerId: string, stripePlanId: string, stripeTaxRateId?: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
-    const subscription = await stripe.subscriptions.create({
+    const subscription = await this.stripe.subscriptions.create({
       customer: stripeCustomerId,
       items: [
         {
@@ -503,7 +503,7 @@ export class BillingService extends BaseService {
    * https://stripe.com/docs/billing/subscriptions/upgrading-downgrading
    */
   async upgradeOrDowngradeSubscription(currentStripeSubscriptionId: string, newStripePlanId: string, stripeTaxRateId?: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
-    const currentSubscription = await stripe.subscriptions.retrieve(currentStripeSubscriptionId);
+    const currentSubscription = await this.stripe.subscriptions.retrieve(currentStripeSubscriptionId);
 
     if (!currentSubscription) {
       throw new Error('Customer has no subscription.');
@@ -515,7 +515,7 @@ export class BillingService extends BaseService {
       throw new Error('Cannot upgrade or downgrade this subscription, because the plan is the same.');
     }
 
-    const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
+    const updatedSubscription = await this.stripe.subscriptions.update(currentSubscription.id, {
       cancel_at_period_end: false,
       items: [{
         id: currentSubscription.items.data[0].id, // Stripe Subscription Item ID
@@ -539,13 +539,13 @@ export class BillingService extends BaseService {
    */
   async attachDefaultPaymentMethodToCustomer(stripePaymentMethodId: string, stripeCustomerId: string): Promise<Stripe.PaymentMethod> {
     // Attach the Payment Method to the Customer
-    const paymentMethod = await stripe.paymentMethods.attach(stripePaymentMethodId, {
+    const paymentMethod = await this.stripe.paymentMethods.attach(stripePaymentMethodId, {
       customer: stripeCustomerId,
     });
 
     // Set as the default Payment Method for the Customer
     // This is a required step, so the subscription uses the payment method on the Customer object, instead of the Payment Method on the subscription object
-    await stripe.customers.update(stripeCustomerId, {
+    await this.stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: stripePaymentMethodId,
       }
@@ -555,19 +555,19 @@ export class BillingService extends BaseService {
   }
 
   async createOneCustomerTaxId(stripeCustomerId: string, params: Stripe.TaxIdCreateParams): Promise<Stripe.TaxId> {
-    const createdTaxId = await stripe.customers.createTaxId(stripeCustomerId, params)
+    const createdTaxId = await this.stripe.customers.createTaxId(stripeCustomerId, params)
 
     return createdTaxId;
   }
 
   async deleteOneCustomerTaxId(stripeCustomerId: string, stripeTaxId: string): Promise<Stripe.DeletedTaxId> {
-    const deletedTaxId = await stripe.customers.deleteTaxId(stripeCustomerId, stripeTaxId);
+    const deletedTaxId = await this.stripe.customers.deleteTaxId(stripeCustomerId, stripeTaxId);
 
     return deletedTaxId;
   }
 
   async findAllCustomerTaxIds(stripeCustomerId: string): Promise<Stripe.TaxId[]> {
-    const taxIds = await stripe.customers.listTaxIds(stripeCustomerId);
+    const taxIds = await this.stripe.customers.listTaxIds(stripeCustomerId);
 
     return taxIds.data;
   }
@@ -587,7 +587,7 @@ export class BillingService extends BaseService {
   }
 
   async createOneCustomer(options: CreateStripeCustomerOptions): Promise<Stripe.Customer> {
-    const createdCustomer = await stripe.customers.create({
+    const createdCustomer = await this.stripe.customers.create({
       name: options.organizationName,
       address: {
         country: options.countryCode,
@@ -606,13 +606,13 @@ export class BillingService extends BaseService {
   }
 
   async updateOneCustomer(stripeCustomerId: string, params?: Stripe.CustomerUpdateParams | undefined) {
-    const updateResult = await stripe.customers.update(stripeCustomerId, params);
+    const updateResult = await this.stripe.customers.update(stripeCustomerId, params);
 
     return updateResult;
   }
 
   async findOneCustomerSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
-    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
     return subscription;
   }
 
@@ -622,7 +622,7 @@ export class BillingService extends BaseService {
    * @param organizationId
    */
   async findAllCustomerSubscriptions(stripeCustomerId: string): Promise<Stripe.Subscription[]> {
-    const subscriptions = await stripe.subscriptions.list({
+    const subscriptions = await this.stripe.subscriptions.list({
       customer: stripeCustomerId,
       // Also get the complete product, customer and latest invoice object's
       // So we do not need to do seperate calls to Stripe to get these required details we want to present to our users
@@ -634,7 +634,7 @@ export class BillingService extends BaseService {
   }
 
   async createOneUsageRecord(stripeSubscriptionItemId: string, params: Stripe.UsageRecordCreateParams): Promise<Stripe.UsageRecord> {
-    const createdStripeUsageRecord = await stripe.subscriptionItems.createUsageRecord(stripeSubscriptionItemId, params);
+    const createdStripeUsageRecord = await this.stripe.subscriptionItems.createUsageRecord(stripeSubscriptionItemId, params);
 
     return createdStripeUsageRecord;
   }
@@ -647,7 +647,7 @@ export class BillingService extends BaseService {
    * @param stripeSubscriptionId
    */
   async cancelOneSubscription(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
-    const subscriptions = await stripe.subscriptions.del(stripeSubscriptionId)
+    const subscriptions = await this.stripe.subscriptions.del(stripeSubscriptionId)
 
     return subscriptions;
   }
@@ -658,7 +658,7 @@ export class BillingService extends BaseService {
    * @param organizationId
    */
   async findAllCustomerInvoices(stripeCustomerId: string): Promise<Stripe.ApiList<Stripe.Invoice>> {
-    const invoices = await stripe.invoices.list({
+    const invoices = await this.stripe.invoices.list({
       customer: stripeCustomerId,
       limit: 24 // 2 years when subscription is a monthly plan
     })
@@ -673,7 +673,7 @@ export class BillingService extends BaseService {
    */
   async findOneCustomerInvoiceUpcoming(stripeCustomerId: string): Promise<Stripe.Invoice | undefined> {
     try {
-      const invoicesUpcoming = await stripe.invoices.retrieveUpcoming({
+      const invoicesUpcoming = await this.stripe.invoices.retrieveUpcoming({
         customer: stripeCustomerId
       })
 
