@@ -624,9 +624,9 @@ export class OrganizationsController extends BaseController {
    *                  $ref: '#/components/schemas/StripeSubscription'
    */
   public getAllOrganizationCustomerSubscriptions = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
-    const { organizationId } = req.params;
+    const stripeCustomerId = res.locals.organization.stripeCustomerId;
 
-    const customerSubscriptions = await this.billingService.findAllCustomerSubscriptions(organizationId);
+    const customerSubscriptions = await this.billingService.findAllCustomerSubscriptions(stripeCustomerId);
 
     if (!customerSubscriptions) {
       return res.json([]);
