@@ -724,7 +724,7 @@ export class PublicationsController extends BaseController {
       organizationId,
       publicationId,
       userId,
-      quantity: article.ssml.length,
+      quantity: getTextFromSSML(article.ssml).length,
       isMetered: true // Sends metered usage to Stripe
     })
 
