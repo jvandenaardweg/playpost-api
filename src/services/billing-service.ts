@@ -484,13 +484,16 @@ export class BillingService extends BaseService {
   async createOneSubscription(stripeCustomerId: string, stripePlanId: string, stripeTaxRateId?: string, customTrialEndDate?: number | 'now'): Promise<Stripe.Subscription> {
     const subscription = await this.stripe.subscriptions.create({
       customer: stripeCustomerId,
+      trial_from_plan: customTrialEndDate ? false : true, // If we have a custom trial end date, do not use the trial from plan we've set up in Stripe
+      collection_method: 'charge_automatically', // default
+      off_session: true, // Indicates if a customer is on or off-session while an invoice payment is attempted.
       items: [
         {
           plan: stripePlanId,
           ...(stripeTaxRateId) ? { tax_rates: [stripeTaxRateId] } : {},
         }
       ], 
-      trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
+      ...(customTrialEndDate) ? { trial_end: customTrialEndDate } : {}, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
       expand: ['latest_invoice.payment_intent'],
       // default_payment_method: stripePaymentMethodId, // Important: do not use this, so Stripe will use the payment method on the Customer object. Which is what we prefer.
     });
@@ -522,9 +525,15 @@ export class BillingService extends BaseService {
         plan: newStripePlanId,
         ...(stripeTaxRateId) ? { tax_rates: [stripeTaxRateId] } : {},
       }],
-      trial_end: customTrialEndDate, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
+      ...(customTrialEndDate) ? { trial_end: customTrialEndDate } : {}, // Use a custom trial end date to allow to skip the trial, useful when developing. Should not need this in production.
       expand: ['latest_invoice.payment_intent'],
     })
+
+    return updatedSubscription;
+  }
+
+  async updateSubscription(currentStripeSubscriptionId: string, params?: Stripe.SubscriptionUpdateParams | undefined): Promise<Stripe.Subscription> {
+    const updatedSubscription = await this.stripe.subscriptions.update(currentStripeSubscriptionId, params)
 
     return updatedSubscription;
   }
@@ -548,7 +557,7 @@ export class BillingService extends BaseService {
     await this.stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: stripePaymentMethodId,
-      }
+      },
     })
 
     return paymentMethod

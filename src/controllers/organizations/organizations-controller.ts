@@ -178,19 +178,27 @@ export class OrganizationsController extends BaseController {
       throw new HttpError(HttpStatus.BadRequest, error.details[0].message, error.details[0])
     }
 
+    // Get the current user, we need it to connect the Organization to the current User
     const user = await this.usersService.findOneById(userId);
 
     if (!user) {
       throw new HttpError(HttpStatus.NotFound, 'User could not be found.');
     }
 
+    // Get the Country, we need to country code for Stripe
     const country = await this.countryService.findOneById(countryId)
 
     if (!country) {
       throw new HttpError(HttpStatus.NotFound, 'The given country could not be found.');
     }
 
-    // TODO: check if user already has organization, do not allow it to create one if he already has one
+    const currentOrganizations = await this.organizationService.findAllByUserId(userId)
+
+    if (currentOrganizations.length) {
+      throw new HttpError(HttpStatus.Forbidden, 'Cannot create a new Organization, because you are already part of an Organization.')
+    }
+
+    // All good, we can start creating the Organization
 
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
@@ -218,7 +226,7 @@ export class OrganizationsController extends BaseController {
     const createdCustomer = await this.billingService.createOneCustomer({
       organizationId: organizationToCreate.id,
       organizationName: organizationToCreate.name,
-      countryCode: country.code.toUpperCase(),
+      countryCode: country.code.toUpperCase(), // Set the country code, so we can implement correct taxation
       email: user.email,
       userId: user.id,
     })
@@ -235,6 +243,18 @@ export class OrganizationsController extends BaseController {
     await queryRunner.commitTransaction();
 
     await queryRunner.release();
+
+    // Organization and Customer is created
+
+    // Create a subscription, so the user starts a trial right away
+    const subscription = await this.billingService.createOneSubscription(createdCustomer.id, process.env.STRIPE_TRIAL_PLAN_ID as string)
+
+    // Make sure to cancel the subscription automatically on trial end
+    // We will remove the "cancel_at" when we receive a correct Payment Method
+    // This allows us to give a self expiring trial to our user, without the need of a Payment Method
+    await this.billingService.updateSubscription(subscription.id, {
+      cancel_at: subscription.trial_end
+    })
 
     return res.json(createdOrganization);
   };
@@ -820,6 +840,17 @@ export class OrganizationsController extends BaseController {
     // This payment method will be used for future charges
     const attachPaymentMethodResponse = await this.billingService.attachDefaultPaymentMethodToCustomer(newStripePaymentMethodId, stripeCustomer.id);
 
+    const subscription = stripeCustomer.subscriptions?.data[0];
+    const subscriptionId = stripeCustomer.subscriptions?.data[0].id;
+
+    // If the user is still on a subscription trial, remove the "cancel_at" date, because we now received a valid payment method
+    if (subscription && subscription.status === 'trialing' && subscriptionId) {
+      await this.billingService.updateSubscription(subscriptionId, {
+        cancel_at: null,
+
+      })
+    }
+
     // If we end up here, the payment method is changed.
 
     return res.status(HttpStatus.Created).json(attachPaymentMethodResponse);
@@ -1187,7 +1218,6 @@ export class OrganizationsController extends BaseController {
 
     return res.json(setupIntent);
   }
-
 
   public getAllOrganizationCustomerTaxIds = async (req: Request, res: OrganizationResponse): Promise<OrganizationResponse> => {
     const organization = res.locals.organization;

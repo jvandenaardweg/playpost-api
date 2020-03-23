@@ -207,12 +207,14 @@ describe('billing-service', () => {
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
       customer: 'cus_GLBNvU7Y4CEL02',
+      collection_method: 'charge_automatically',
       items: [
         {
           plan: 'plan_GjA6MM7vp1T0Tn',
         }
       ], 
-      trial_end: undefined,
+      off_session: true,
+      trial_from_plan: true,
       expand: ['latest_invoice.payment_intent'],
     });
 
@@ -228,13 +230,40 @@ describe('billing-service', () => {
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
     expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
       customer: 'cus_GLBNvU7Y4CEL02',
+      collection_method: 'charge_automatically',
       items: [
         {
           plan: 'plan_GjA6MM7vp1T0Tn',
           tax_rates: ['txr_2GL2OtLbygOvfi9ox7vpowV2']
         }
       ], 
-      trial_end: undefined,
+      off_session: true,
+      trial_from_plan: true,
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    expect(createdSubscription).toMatchObject(subscriptionMock);
+  })
+
+  it('createOneSubscription should create a new Stripe Subscription for the Customer with a custom trial end date.', async () => {
+    const billingService = new BillingService();
+    const spyStripeSubscriptionsCreate = jest.spyOn(stripe.subscriptions, 'create').mockResolvedValue(subscriptionMock as any)
+
+    const createdSubscription = await billingService.createOneSubscription('cus_GLBNvU7Y4CEL02', 'plan_GjA6MM7vp1T0Tn', 'txr_2GL2OtLbygOvfi9ox7vpowV2', 'now')
+    
+    expect(spyStripeSubscriptionsCreate).toHaveBeenCalledTimes(1);
+    expect(spyStripeSubscriptionsCreate).toHaveBeenCalledWith({
+      customer: 'cus_GLBNvU7Y4CEL02',
+      collection_method: 'charge_automatically',
+      items: [
+        {
+          plan: 'plan_GjA6MM7vp1T0Tn',
+          tax_rates: ['txr_2GL2OtLbygOvfi9ox7vpowV2']
+        }
+      ], 
+      off_session: true,
+      trial_from_plan: false,
+      trial_end: 'now',
       expand: ['latest_invoice.payment_intent'],
     });
 

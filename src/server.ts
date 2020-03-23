@@ -120,6 +120,9 @@ export const setupServer = async () => {
   if (!process.env.SYNTHESIZER_ACCESS_TOKEN) {
     throw new Error('Required environment variable "SYNTHESIZER_ACCESS_TOKEN" not set.');
   }
+  if (!process.env.STRIPE_TRIAL_PLAN_ID) {
+    throw new Error('Required environment variable "STRIPE_TRIAL_PLAN_ID" not set.');
+  }
 
   const PORT = process.env.PORT || 3000;
 
