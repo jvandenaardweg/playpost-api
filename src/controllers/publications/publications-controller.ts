@@ -635,24 +635,7 @@ export class PublicationsController extends BaseController {
     const organizationId = res.locals.publication.organization?.id;
 
     if (!organizationId) {
-      throw new HttpError(HttpStatus.InternalServerError, 'Could not determine organization ID.');
-    }
-
-    // Get the organization to verify if this publication is part of that organization
-    // We need the organizationId to record usage
-    const organization = await this.organizationService.findOneById(organizationId);
-
-    if (!organization) {
-      throw new HttpError(HttpStatus.NotFound, 'Organization not found.');
-    }
-
-    if (!organization.publications) {
-      throw new HttpError(HttpStatus.NotFound, 'Publication not found.');
-    }
-
-    // Make sure the publication is part of the organization
-    if (!organization.publications.find(publication => publication.id !== publicationId)) {
-      throw new HttpError(HttpStatus.NotFound, 'Publication is not part of the given organization.');
+      throw new HttpError(HttpStatus.InternalServerError, 'Publication is not a member of this Organization.');
     }
 
     // When we end up here, the publication exists, and the given organizationId has access to that publication
