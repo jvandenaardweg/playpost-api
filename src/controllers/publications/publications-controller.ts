@@ -7,7 +7,6 @@ import { HttpError, HttpStatus } from '../../http-error';
 import { Sentry } from '../../sentry';
 import { ArticleService } from '../../services/article-service';
 import { AudiofileService } from '../../services/audiofile-service';
-import { OrganizationService } from '../../services/organization-service';
 import { PublicationService } from '../../services/publication-service';
 import { SynthesizerService } from '../../services/synthesizer-service';
 import { UsageRecordService } from '../../services/usage-record-service';
@@ -26,7 +25,6 @@ export class PublicationsController extends BaseController {
   private readonly voiceService: VoiceService;
   private readonly audiofileService: AudiofileService;
   private readonly usageRecordService: UsageRecordService;
-  private readonly organizationService: OrganizationService;
   private readonly languageService: LanguageService;
   private readonly billingService: BillingService;
 
@@ -38,7 +36,6 @@ export class PublicationsController extends BaseController {
     this.voiceService = new VoiceService();
     this.audiofileService = new AudiofileService();
     this.usageRecordService = new UsageRecordService();
-    this.organizationService = new OrganizationService();
     this.languageService = new LanguageService();
     this.billingService = new BillingService();
   }
