@@ -111,7 +111,7 @@
     "locale-code": "^2.0.2",
     "md5": "^2.2.1",
     "newrelic": "^6.4.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "normalize-url": "^5.0.0",
     "passport": "^0.4.1",
     "passport-custom": "^1.1.1",
